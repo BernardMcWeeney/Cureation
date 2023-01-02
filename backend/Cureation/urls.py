@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.template.defaulttags import url
 from rest_framework_simplejwt.views import (TokenObtainPairView, TokenRefreshView)
 from django.contrib import admin
 from django.urls import path, include
@@ -20,16 +21,24 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import routers
 from cureation_platform import views
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail import urls as wagtail_urls
+from wagtail.documents import urls as wagtaildocs_urls
+from .api import api_router
 
+# Django Router
 router = routers.DefaultRouter()
-# router.register(r'products', views.ProductViewSet)
 router.register(r'api_users', views.APIUserViewSet)
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('',include(router.urls)),
+    path(r'api/v2/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
+    path('api/wag/v2/', api_router.urls),
+    path('cms/', include(wagtailadmin_urls)),
+    path('documents/', include(wagtaildocs_urls)),
+    path('pages/', include(wagtail_urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

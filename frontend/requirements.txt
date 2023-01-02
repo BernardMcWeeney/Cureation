@@ -1,3 +1,0 @@
-express
-express-generator
-nodemon

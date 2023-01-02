@@ -38,6 +38,23 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+
+
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'wagtail',
+    'wagtail.api.v2',
+
+    'modelcluster',
+    'taggit',
     "corsheaders",
     "cureation_platform",
 
@@ -48,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "wagtail.contrib.redirects.middleware.RedirectMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -114,11 +132,20 @@ USE_I18N = True
 
 USE_TZ = True
 
+WAGTAIL_SITE_NAME = 'Cureation Platform'
+WAGTAILADMIN_BASE_URL = [
+    'localhost:8000'
+    'http://127.0.0.1:8000'
+    ]
+
+# Don't add a trailing slash to Wagtail-served URLs
+WAGTAIL_APPEND_SLASH = True
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = 'static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
@@ -143,7 +170,7 @@ REST_FRAMEWORK = {
 
     ],
 }
-
+# frontend
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # node on port 3000
     "http://127.0.0.1:3000"  # node on port 3000
