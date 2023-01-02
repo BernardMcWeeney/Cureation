@@ -5,6 +5,6 @@ from django.db import models
 
 from django.contrib.auth.models import AbstractUser
 
-class APIUser(AbstractUser):
-    pass
 
+class APIUser(AbstractUser):
+    user_image = models.FileField(upload_to='images/user_images/', default='images/user_images/defaultUser.jpg')
