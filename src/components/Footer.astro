@@ -6,7 +6,8 @@ const footerLinks = getFooterLinks();
 ---
 
 <footer class="relative border-t border-white">
-  <div class="absolute inset-0 backdrop-blur-lg bg-black/30 -z-10"></div>
+  <!-- Fully opaque pitch-black overlay -->
+  <div class="absolute inset-0 bg-black -z-10"></div>
   
   <div class="responsive-container py-16">
     <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
@@ -21,8 +22,7 @@ const footerLinks = getFooterLinks();
             />
           </div>
           <h3 
-            class="m-0 font-display text-5xl text-primary group-hover:text-primary/80 
-                   transition-colors duration-300"
+            class="m-0 font-display text-5xl text-primary group-hover:text-primary/80 transition-colors duration-300"
           >
             {siteConfig.logo.text}
           </h3>
@@ -40,8 +40,7 @@ const footerLinks = getFooterLinks();
               href={siteConfig.social.twitter} 
               target="_blank" 
               rel="noopener noreferrer"
-              class="p-3 rounded-full border border-white/20 backdrop-blur-md bg-black/20 
-                     hover:bg-primary/20 hover:border-primary/30 transition-all duration-300"
+              class="p-3 rounded-full border border-white/20 backdrop-blur-md bg-black/20 hover:bg-primary/20 hover:border-primary/30 transition-all duration-300"
               aria-label="Twitter"
             >
               <svg 
@@ -76,8 +75,7 @@ const footerLinks = getFooterLinks();
                 <li>
                   <a 
                     href={link.path} 
-                    class="text-white hover:text-primary transition-colors duration-300 
-                           flex items-center gap-2"
+                    class="text-white hover:text-primary transition-colors duration-300 flex items-center gap-2"
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
                   >
@@ -99,8 +97,7 @@ const footerLinks = getFooterLinks();
                 <li>
                   <a 
                     href={link.path} 
-                    class="text-white hover:text-primary transition-colors duration-300 
-                           flex items-center gap-2"
+                    class="text-white hover:text-primary transition-colors duration-300 flex items-center gap-2"
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
                   >
@@ -119,8 +116,7 @@ const footerLinks = getFooterLinks();
             </h4>
             <a 
               href={`mailto:${siteConfig.contact.email}`} 
-              class="text-white hover:text-primary transition-colors duration-300 
-                     flex items-center gap-2 mb-6"
+              class="text-white hover:text-primary transition-colors duration-300 flex items-center gap-2 mb-6"
             >
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
