@@ -1,0 +1,66 @@
+---
+interface Track {
+  number: number;
+  title: string;
+  duration: string;
+}
+
+interface Props {
+  tracks: Track[];
+}
+
+const { tracks } = Astro.props;
+---
+
+<div class="overflow-x-auto">
+  <table class="w-full">
+    <thead>
+      <tr class="border-b border-white/10">
+        <th class="py-3 px-4 text-left text-sm text-white/60 font-normal">#</th>
+        <th class="py-3 px-4 text-left text-sm text-white/60 font-normal">Title</th>
+        <th class="py-3 px-4 text-right text-sm text-white/60 font-normal">Duration</th>
+        <th class="py-3 px-4 text-right text-sm text-white/60 font-normal">Listen</th>
+      </tr>
+    </thead>
+    <tbody>
+      {tracks.map((track, index) => (
+        <tr class={`hover:bg-white/5 transition-colors duration-200 ${index % 2 === 0 ? 'bg-black/10' : ''}`}>
+          <td class="py-3 px-4 text-white/80">{track.number}</td>
+          <td class="py-3 px-4 text-white font-medium">{track.title}</td>
+          <td class="py-3 px-4 text-right text-white/80">{track.duration}</td>
+          <td class="py-3 px-4 text-right">
+            <button class="p-2 rounded-full hover:bg-primary/20 transition-colors duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="sr-only">Play {track.title}</span>
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-4 flex justify-between text-white/60 text-sm">
+  <div>{tracks.length} tracks</div>
+  <div>
+    {(() => {
+      // Calculate total duration
+      let totalSeconds = 0;
+      tracks.forEach(track => {
+        const [minutes, seconds] = track.duration.split(':').map(Number);
+        totalSeconds += minutes * 60 + seconds;
+      });
+      
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
+      return hours > 0 
+        ? `Total Duration: ${hours}h ${minutes}m ${seconds}s`
+        : `Total Duration: ${minutes}m ${seconds}s`;
+    })()}
+  </div>
+</div>

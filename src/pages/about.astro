@@ -1,0 +1,102 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { ViewTransitions } from 'astro:transitions';
+import SiteConfig from '../config/site.config.js';
+
+// Sidebar configuration
+const sidebarItems = [
+  { title: 'About Cureation', path: '/about' },
+  { title: 'Contributors', path: '/about/contributors' },
+  { title: 'Contact', path: '/about/contact' },
+  { title: 'Privacy Policy', path: '/about/privacy' }
+];
+
+// Placeholder data - in production, this would come from your CMS
+const foundedDate = "October 2023";
+---
+
+<MainLayout 
+  title="About Cureation" 
+  description="Learn more about Cureation, a fan-built tribute to The Cure - created by fans for fans."
+  showSidebar={true}
+  sidebarActiveItem="About Cureation"
+  sidebarItems={sidebarItems}
+>
+  <section>
+    <div class="mb-12">
+      <h1 class="font-display text-5xl md:text-6xl text-white mb-4" transition:animate="slide">About Cureation</h1>
+      <p class="text-white/80 max-w-3xl" transition:animate="fade">
+        A modern tribute to The Cure, built by fans for fans.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8">
+      <div>
+        <div class="bg-black/30 backdrop-blur-md p-6 md:p-8 rounded-xl border border-white/10 shadow-xl transition-all duration-300 hover:shadow-2xl hover:bg-black/40">
+          <h2 class="font-display text-3xl text-primary mb-6">Our Mission</h2>
+          
+          <p class="text-white/90 mb-6">
+            Cureation is a community-driven archive and celebration of The Cure's legacy, music, and cultural impact. Built with passion by fans, for fans, our goal is to create the definitive resource for everything related to one of music's most influential and enduring bands.
+          </p>
+          
+          <p class="text-white/90 mb-6">
+            We've designed Cureation to be beautiful, intuitive, and comprehensive - a digital space where the atmosphere and emotion of The Cure's music is reflected in every aspect of the experience. Through our discography, lyrics archives, setlist database, and curated content, we aim to honor the band's rich history while fostering a vibrant community of dedicated fans.
+          </p>
+          
+          <p class="text-white/90 mb-6">
+            This project is constantly evolving, with plans for enhanced features, deeper archives, and more ways for fans to contribute and connect. We welcome contributions, suggestions, and feedback as we continue to build this tribute to a band that has touched countless lives across generations.
+          </p>
+        </div>
+        <div class="mt-12 mb-12 p-6 bg-black/40 backdrop-blur-md rounded-xl border border-white/10">
+            <h2 class="font-display text-3xl text-primary mb-6">Important Note</h2>
+            <p class="text-white/80">
+              Cureation is an unofficial fan project not affiliated with The Cure or their representatives. All media (lyrics, album art, setlists) remain the property of their respective owners. This site exists solely to celebrate and document the band's remarkable artistic journey.
+            </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Custom sidebar widgets using the slot system -->
+  <div slot="sidebar">
+    <!-- Logo widget -->
+    <div class="backdrop-blur-md bg-black/30 p-6 rounded-xl border border-white/10 flex flex-col items-center text-center transition-all duration-300 hover:bg-black/40 mb-6">
+      <div class="font-display text-3xl text-white mb-2">Cureation</div>
+      <div class="w-16 h-1 bg-primary mb-4"></div>
+      <p class="text-white/70 text-sm">A digital monument to musical legacy</p>
+    </div>
+    
+    <!-- Founded date widget -->
+    <div class="backdrop-blur-md bg-black/30 p-6 rounded-xl border border-white/10 transition-all duration-300 hover:bg-black/40 mb-6">
+      <h3 class="font-display text-xl text-white mb-3">Founded</h3>
+      <div class="flex items-center justify-between">
+        <span class="text-white/80">{foundedDate}</span>
+        <span class="text-primary">♦</span>
+      </div>
+    </div>
+    
+    <!-- Contact widget -->
+    <div class="backdrop-blur-md bg-black/30 p-6 rounded-xl border border-white/10 transition-all duration-300 hover:bg-black/40">
+      <h3 class="font-display text-xl text-white mb-3">Get Involved</h3>
+      <p class="text-white/70 text-sm mb-4">Want to contribute or have questions?</p>
+      <a href="mailto:hello@cureation.net" class="inline-block w-full text-center bg-black/40 backdrop-blur-md py-2 px-4 rounded-lg border border-white/20 text-white hover:bg-black/60 transition-all duration-300">Contact Us</a>
+    </div>
+  </div>
+</MainLayout>
+
+<style>
+  /* Add custom animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  section {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  
+  /* Add a subtle glow effect to primary elements */
+  :global(.text-primary) {
+    text-shadow: 0 0 15px var(--primary-color-glow, rgba(255, 255, 255, 0.15));
+  }
+</style>

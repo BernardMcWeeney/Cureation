@@ -1,0 +1,272 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import TrackList from "../../components/TrackList.astro";
+
+// Sidebar configuration
+const sidebarItems = [
+  { title: "Studio Albums", path: "/discography" },
+  { title: "Live Albums", path: "/discography/live" },
+  { title: "Compilations", path: "/discography/compilations" },
+  { title: "Singles", path: "/discography/singles" },
+  { title: "B-sides", path: "/discography/b-sides" }
+];
+
+export async function getStaticPaths() {
+  // Define album data within getStaticPaths to ensure it's available during route generation
+  const albums = [
+    {
+      slug: "disintegration",
+      title: "Disintegration",
+      year: "1989",
+      coverImage: "/images/albums/disintegration.jpg",
+      releaseDate: "May 2, 1989",
+      recordLabel: "Fiction Records",
+      producer: "Robert Smith, David M. Allen",
+      description: "Disintegration is the eighth studio album by The Cure, released on May 2, 1989. The album marks a return to the band's gothic rock style and is considered by many critics to be their best work.",
+      background: "After the success of Kiss Me, Kiss Me, Kiss Me, The Cure's Robert Smith felt pressure to follow up with a broader album but instead chose a darker, introspective tone.",
+      reception: "Initially met with mixed reviews, it has since been hailed as The Cure's masterpiece.",
+      tracks: [
+        { number: 1, title: "Plainsong", duration: "5:12" },
+        { number: 2, title: "Pictures of You", duration: "7:28" },
+        { number: 3, title: "Closedown", duration: "4:16" },
+        { number: 4, title: "Lovesong", duration: "3:29" },
+        { number: 5, title: "Last Dance", duration: "4:42" },
+        { number: 6, title: "Lullaby", duration: "4:08" },
+        { number: 7, title: "Fascination Street", duration: "5:16" },
+        { number: 8, title: "Prayers for Rain", duration: "6:05" },
+        { number: 9, title: "The Same Deep Water as You", duration: "9:19" },
+        { number: 10, title: "Disintegration", duration: "8:18" },
+        { number: 11, title: "Homesick", duration: "7:06" },
+        { number: 12, title: "Untitled", duration: "6:30" }
+      ],
+      singles: [
+        { title: "Lullaby", releaseDate: "April 10, 1989", chartPosition: "#5 UK" },
+        { title: "Lovesong", releaseDate: "August 21, 1989", chartPosition: "#2 US, #18 UK" },
+        { title: "Pictures of You", releaseDate: "March 19, 1990", chartPosition: "#24 UK" },
+        { title: "Fascination Street", releaseDate: "April 18, 1989", chartPosition: "#1 US Modern Rock" }
+      ]
+    },
+    {
+      slug: "pornography",
+      title: "Pornography",
+      year: "1982",
+      coverImage: "/images/albums/pornography.jpg",
+      releaseDate: "May 4, 1982",
+      recordLabel: "Fiction Records",
+      producer: "Phil Thornalley, The Cure",
+      description: "Pornography is the fourth studio album by The Cure, released on May 4, 1982. It marks the climax of the band's dark, intense style.",
+      background: "Recorded in a tense, drug-fueled environment, it was the last album with the trio lineup before Gallup left.",
+      reception: "Now considered a landmark of gothic rock, despite initial mixed reviews.",
+      tracks: [
+        { number: 1, title: "One Hundred Years", duration: "6:40" },
+        { number: 2, title: "A Short Term Effect", duration: "4:22" },
+        { number: 3, title: "The Hanging Garden", duration: "4:33" },
+        { number: 4, title: "Siamese Twins", duration: "5:29" },
+        { number: 5, title: "The Figurehead", duration: "6:15" },
+        { number: 6, title: "A Strange Day", duration: "5:04" },
+        { number: 7, title: "Cold", duration: "4:26" },
+        { number: 8, title: "Pornography", duration: "6:27" }
+      ],
+      singles: [
+        { title: "The Hanging Garden", releaseDate: "July 8, 1982", chartPosition: "#34 UK" }
+      ]
+    }
+  ];
+
+  return albums.map((album) => ({
+    params: { slug: album.slug },
+    props: { album }
+  }));
+}
+
+const { album } = Astro.props;
+---
+
+<MainLayout 
+  title={album.title}
+  description={`Learn about The Cure's album ${album.title}, released in ${album.year}.`}
+  ogImage={album.coverImage}
+  showSidebar={true}
+  sidebarActiveItem="Studio Albums"
+  sidebarItems={sidebarItems}
+  pageClass={`theme-${album.slug}`}
+>
+  <div data-theme={album.slug}>
+    <!-- Album Hero Section -->
+    <section class="relative">
+      <div class="flex flex-col lg:flex-row gap-8 mb-12">
+        <!-- Album Cover -->
+        <div class="lg:w-2/5">
+          <div class="glass-card overflow-hidden rounded-xl border border-white/20 backdrop-blur-lg bg-black/30">
+            <img 
+              src={album.coverImage} 
+              alt={`${album.title} album cover`} 
+              class="w-full aspect-square object-cover"
+            />
+          </div>
+        </div>
+        
+        <!-- Album Info -->
+        <div class="lg:w-3/5">
+          <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30 h-full">
+            <h1 class="font-display text-5xl md:text-6xl text-white mb-2">{album.title}</h1>
+            <p class="text-2xl text-primary mb-6">{album.year}</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div>
+                <h3 class="text-white/60 text-sm">Release Date</h3>
+                <p class="text-white">{album.releaseDate}</p>
+              </div>
+              <div>
+                <h3 class="text-white/60 text-sm">Record Label</h3>
+                <p class="text-white">{album.recordLabel}</p>
+              </div>
+              <div>
+                <h3 class="text-white/60 text-sm">Producer</h3>
+                <p class="text-white">{album.producer}</p>
+              </div>
+            </div>
+            
+            <div class="mb-6">
+              <h3 class="text-white/60 text-sm mb-2">Description</h3>
+              <p class="text-white">{album.description}</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 mt-6">
+              <a href="#background" class="px-4 py-2 rounded-lg backdrop-blur-md bg-primary/20 border border-primary/30 text-white hover:bg-primary/30 transition-colors duration-300">Background</a>
+              <a href="#tracks" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Tracklist</a>
+              <a href="#singles" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Singles</a>
+              <a href="#reception" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Critical Reception</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Background Section -->
+    <section id="background" class="mb-16">
+      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
+        <h2 class="font-display text-3xl text-primary mb-4">Background & Recording</h2>
+        <div class="prose prose-invert max-w-none">
+          <p class="text-white">{album.background}</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Tracklist Section -->
+    <section id="tracks" class="mb-16">
+      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
+        <h2 class="font-display text-3xl text-primary mb-6">Tracklist</h2>
+        <div class="overflow-hidden">
+          <TrackList tracks={album.tracks} />
+        </div>
+      </div>
+    </section>
+    
+    <!-- Singles Section -->
+    <section id="singles" class="mb-16">
+      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
+        <h2 class="font-display text-3xl text-primary mb-6">Singles</h2>
+        <ul class="space-y-4">
+          {album.singles.map(single => (
+            <li class="p-4 rounded-lg backdrop-blur-md bg-black/20 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-xl text-white font-medium">{single.title}</h3>
+                <p class="text-white/70 text-sm">Released: {single.releaseDate}</p>
+              </div>
+              <div class="bg-primary/20 px-3 py-1 rounded-full text-sm text-white">
+                {single.chartPosition}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+    
+    <!-- Reception Section -->
+    <section id="reception" class="mb-16">
+      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
+        <h2 class="font-display text-3xl text-primary mb-4">Critical Reception</h2>
+        <div class="prose prose-invert max-w-none">
+          <p class="text-white">{album.reception}</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Related Albums -->
+    <section class="mb-16">
+      <h2 class="font-display text-3xl text-primary mb-6">You Might Also Like</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {album.slug === "disintegration" ? (
+          <>
+            <a href="/discography/pornography" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
+              <img src="/images/albums/pornography.jpg" alt="Pornography album cover" class="w-16 h-16 rounded-lg" />
+              <div>
+                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Pornography</h3>
+                <p class="text-white/70 text-sm">1982</p>
+              </div>
+            </a>
+            <a href="/discography/wish" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
+              <img src="/images/albums/wish.jpg" alt="Wish album cover" class="w-16 h-16 rounded-lg" />
+              <div>
+                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Wish</h3>
+                <p class="text-white/70 text-sm">1992</p>
+              </div>
+            </a>
+            <a href="/discography/kiss-me" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
+              <img src="/images/albums/kiss-me.jpg" alt="Kiss Me, Kiss Me, Kiss Me album cover" class="w-16 h-16 rounded-lg" />
+              <div>
+                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Kiss Me, Kiss Me, Kiss Me</h3>
+                <p class="text-white/70 text-sm">1987</p>
+              </div>
+            </a>
+          </>
+        ) : (
+          <>
+            <a href="/discography/faith" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
+              <img src="/images/albums/faith.jpg" alt="Faith album cover" class="w-16 h-16 rounded-lg" />
+              <div>
+                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Faith</h3>
+                <p class="text-white/70 text-sm">1981</p>
+              </div>
+            </a>
+            <a href="/discography/seventeen-seconds" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
+              <img src="/images/albums/seventeen-seconds.jpg" alt="Seventeen Seconds album cover" class="w-16 h-16 rounded-lg" />
+              <div>
+                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Seventeen Seconds</h3>
+                <p class="text-white/70 text-sm">1980</p>
+              </div>
+            </a>
+            <a href="/discography/disintegration" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
+              <img src="/images/albums/disintegration.jpg" alt="Disintegration album cover" class="w-16 h-16 rounded-lg" />
+              <div>
+                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Disintegration</h3>
+                <p class="text-white/70 text-sm">1989</p>
+              </div>
+            </a>
+          </>
+        )}
+      </div>
+    </section>
+  </div>
+</MainLayout>
+
+<style>
+  /* Create a theme-specific subtle glow for the page */
+  .theme-disintegration .glass-card {
+    box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.05);
+  }
+  
+  .theme-pornography .glass-card {
+    box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.05);
+  }
+  
+  /* Hover lift effect */
+  .hover-lift {
+    transition: transform 0.3s var(--ease-out);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+</style>

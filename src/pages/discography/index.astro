@@ -1,0 +1,194 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import AlbumCard from '../../components/AlbumCard.astro';
+import { ViewTransitions } from 'astro:transitions';
+
+// Sidebar configuration
+const sidebarItems = [
+  { title: 'Studio Albums', path: '/discography' },
+  { title: 'Live Albums', path: '/discography/live' },
+  { title: 'Compilations', path: '/discography/compilations' },
+  { title: 'Singles', path: '/discography/singles' },
+  { title: 'B-sides', path: '/discography/b-sides' }
+];
+
+// Example album data - in production, this would come from your CMS
+const albums = [
+  {
+    id: 'three-imaginary-boys',
+    title: 'Three Imaginary Boys',
+    year: '1979',
+    coverImage: '/images/albums/three-imaginary-boys.jpg',
+    slug: 'three-imaginary-boys',
+    featured: false
+  },
+  {
+    id: 'seventeen-seconds',
+    title: 'Seventeen Seconds',
+    year: '1980',
+    coverImage: '/images/albums/seventeen-seconds.jpg',
+    slug: 'seventeen-seconds',
+    featured: false
+  },
+  {
+    id: 'faith',
+    title: 'Faith',
+    year: '1981',
+    coverImage: '/images/albums/faith.jpg',
+    slug: 'faith',
+    featured: false
+  },
+  {
+    id: 'pornography',
+    title: 'Pornography',
+    year: '1982',
+    coverImage: '/images/albums/pornography.jpg',
+    slug: 'pornography',
+    featured: false
+  },
+  {
+    id: 'the-top',
+    title: 'The Top',
+    year: '1984',
+    coverImage: '/images/albums/the-top.jpg',
+    slug: 'the-top',
+    featured: false
+  },
+  {
+    id: 'the-head-on-the-door',
+    title: 'The Head on the Door',
+    year: '1985',
+    coverImage: '/images/albums/the-head-on-the-door.jpg',
+    slug: 'the-head-on-the-door',
+    featured: false
+  },
+  {
+    id: 'kiss-me',
+    title: 'Kiss Me, Kiss Me, Kiss Me',
+    year: '1987',
+    coverImage: '/images/albums/kiss-me.jpg',
+    slug: 'kiss-me',
+    featured: false
+  },
+  {
+    id: 'disintegration',
+    title: 'Disintegration',
+    year: '1989',
+    coverImage: '/images/albums/disintegration.jpg',
+    slug: 'disintegration',
+    featured: false
+  },
+  {
+    id: 'wish',
+    title: 'Wish',
+    year: '1992',
+    coverImage: '/images/albums/wish.jpg',
+    slug: 'wish',
+    featured: false
+  },
+  {
+    id: 'wild-mood-swings',
+    title: 'Wild Mood Swings',
+    year: '1996',
+    coverImage: '/images/albums/wild-mood-swings.jpg',
+    slug: 'wild-mood-swings',
+    featured: false
+  },
+  {
+    id: 'bloodflowers',
+    title: 'Bloodflowers',
+    year: '2000',
+    coverImage: '/images/albums/bloodflowers.jpg',
+    slug: 'bloodflowers',
+    featured: false
+  },
+  {
+    id: 'the-cure',
+    title: 'The Cure',
+    year: '2004',
+    coverImage: '/images/albums/the-cure.jpg',
+    slug: 'the-cure',
+    featured: false
+  },
+  {
+    id: '4-13-dream',
+    title: '4:13 Dream',
+    year: '2008',
+    coverImage: '/images/albums/4-13-dream.jpg',
+    slug: '4-13-dream',
+    featured: false
+  }
+];
+
+const featuredAlbums = albums.filter(album => album.featured);
+const regularAlbums = albums.filter(album => !album.featured);
+---
+
+<MainLayout 
+  title="Discography" 
+  description="Explore the complete discography of The Cure, from their debut album to their most recent releases."
+  showSidebar={true}
+  sidebarActiveItem="Studio Albums"
+  sidebarItems={sidebarItems}
+>
+  <section class="mb-12">
+    <div class="mb-12">
+      <h1 class="font-display text-5xl md:text-6xl text-white mb-4" transition:animate="slide">The Cure Discography</h1>
+      <p class="text-white/80 max-w-3xl" transition:animate="fade">
+        Explore the complete studio album collection of The Cure, spanning over four decades of musical innovation
+        and artistic evolution. Click on any album to discover more details, tracklists, and stories behind the music.
+      </p>
+    </div>
+    
+    {featuredAlbums.length > 0 && (
+      <div class="mb-12">
+        <h2 class="font-display text-3xl text-primary mb-6" transition:animate="slide">Essential Albums</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {featuredAlbums.map(album => (
+            <AlbumCard
+              title={album.title}
+              coverImage={album.coverImage}
+              year={album.year}
+              slug={album.slug}
+              featured={true}
+            />
+          ))}
+        </div>
+      </div>
+    )}
+    
+    <div>
+      <h2 class="font-display text-4xl text-primary mb-6" transition:animate="slide">Studio Albums</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+        {regularAlbums.map((album, index) => (
+          <AlbumCard
+            title={album.title}
+            coverImage={album.coverImage}
+            year={album.year}
+            slug={album.slug}
+            transition:name={`album-${album.id}`}
+            style={`--index: ${index + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+</MainLayout>
+
+<style>
+  /* Album grid animations */
+  .grid {
+    --stagger-delay: 75ms;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  :global(.grid > a) {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+    animation-delay: calc(var(--stagger-delay) * var(--index, 1));
+  }
+</style>

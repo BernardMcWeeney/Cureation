@@ -1,0 +1,172 @@
+---
+import siteConfig, { getFooterLinks } from '../config/site.config';
+
+const currentYear = new Date().getFullYear();
+const footerLinks = getFooterLinks();
+---
+
+<footer class="relative border-t border-white">
+  <div class="absolute inset-0 backdrop-blur-lg bg-black/30 -z-10"></div>
+  
+  <div class="responsive-container py-16">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+      <!-- Brand Section -->
+      <div class="md:col-span-4 lg:col-span-5">
+        <a href="/" class="flex items-center gap-3 mb-6 group">
+          <div class="w-10 h-10 bg-primary/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              class="w-6 h-6 rounded-full object-contain" 
+            />
+          </div>
+          <h3 
+            class="m-0 font-display text-5xl text-primary group-hover:text-primary/80 
+                   transition-colors duration-300"
+          >
+            {siteConfig.logo.text}
+          </h3>
+        </a>
+        
+        <div class="mb-6 max-w-md">
+          <p class="text-white">
+            {siteConfig.description}
+          </p>
+        </div>
+        
+        <div class="flex gap-4">
+          {siteConfig.social.twitter && (
+            <a 
+              href={siteConfig.social.twitter} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="p-3 rounded-full border border-white/20 backdrop-blur-md bg-black/20 
+                     hover:bg-primary/20 hover:border-primary/30 transition-all duration-300"
+              aria-label="Twitter"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                class="lucide lucide-twitter"
+              >
+                <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+              </svg>
+            </a>
+          )}
+        </div>
+      </div>
+      
+      <!-- Navigation Links -->
+      <div class="md:col-span-8 lg:col-span-7">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <!-- Explore Links -->
+          <div>
+            <h4 class="font-display text-3xl mb-4 text-primary">
+              Explore
+            </h4>
+            <ul class="space-y-3">
+              {footerLinks.explore.map(link => (
+                <li>
+                  <a 
+                    href={link.path} 
+                    class="text-white hover:text-primary transition-colors duration-300 
+                           flex items-center gap-2"
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                  >
+                    <span class="size-1.5 rounded-full bg-primary"></span>
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <!-- Community Links -->
+          <div>
+            <h4 class="font-display text-3xl mb-4 text-primary">
+              Community
+            </h4>
+            <ul class="space-y-3">
+              {footerLinks.community.map(link => (
+                <li>
+                  <a 
+                    href={link.path} 
+                    class="text-white hover:text-primary transition-colors duration-300 
+                           flex items-center gap-2"
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                  >
+                    <span class="size-1.5 rounded-full bg-primary"></span>
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <!-- Contact Section -->
+          <div>
+            <h4 class="font-display text-3xl mb-4 text-primary">
+              Contact
+            </h4>
+            <a 
+              href={`mailto:${siteConfig.contact.email}`} 
+              class="text-white hover:text-primary transition-colors duration-300 
+                     flex items-center gap-2 mb-6"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                class="lucide lucide-mail"
+              >
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              {siteConfig.contact.email}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom Section -->
+    <div class="mt-16 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="text-sm text-white/80">
+        © {currentYear} {siteConfig.name}. All rights reserved.
+      </p>
+      
+      <p class="text-xs text-white/70 text-center max-w-lg">
+        Cureation is a fan project not affiliated with The Cure or their representatives. 
+        All media remain property of their respective owners.
+      </p>
+      
+      <div class="flex gap-6">
+        {footerLinks.legal.map(link => (
+          <a 
+            href={link.path} 
+            class="text-xs text-white/80 hover:text-primary transition-colors duration-300"
+            target={link.external ? "_blank" : undefined}
+            rel={link.external ? "noopener noreferrer" : undefined}
+          >
+            {link.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</footer>

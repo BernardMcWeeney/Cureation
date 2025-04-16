@@ -1,0 +1,58 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Theme Switcher Example">
+  <div class="max-w-4xl mx-auto my-8">
+    <h1 class="text-4xl font-bold mb-6 text-primary">Theme Switcher Demo</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-primary">Primary Color</h2>
+          <p>This card demonstrates the primary color of the current theme.</p>
+          <div class="mt-4">
+            <button class="btn btn-primary">Primary Button</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-secondary">Secondary Color</h2>
+          <p>This card demonstrates the secondary color of the current theme.</p>
+          <div class="mt-4">
+            <button class="btn btn-secondary">Secondary Button</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="alert alert-info mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span>Try changing the theme using the dropdown in the header!</span>
+    </div>
+    
+    <div class="prose max-w-none">
+      <h2>About This Theme Switcher</h2>
+      <p>
+        This theme switcher uses Tailwind CSS v4's new CSS variables approach combined with
+        DaisyUI components. The themes are inspired by The Cure's album artwork.
+      </p>
+      <p>
+        The theme selector in the header allows you to switch between different color schemes,
+        and your selection is saved to localStorage so it persists between visits.
+      </p>
+      
+      <h3>Components Included</h3>
+      <ul>
+        <li>Header with theme dropdown</li>
+        <li>Layout wrapper</li>
+        <li>Theme CSS definitions</li>
+        <li>Example page showcasing the theme</li>
+      </ul>
+    </div>
+  </div>
+</Layout>

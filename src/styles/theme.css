@@ -1,0 +1,127 @@
+/* Album-specific theme definitions using Tailwind CSS v4's CSS variables approach */
+
+/* Three Imaginary Boys (1979) */
+[data-theme="three-imaginary-boys"] {
+    --color-primary: oklch(0.22 0.30 318);
+    --color-primary-content: oklch(0.49 0.48 336);
+    --color-secondary: oklch(0.34 0.25 336);
+    --color-accent: oklch(0.25 0.07 282);
+    --color-primary-rgb: 176, 34, 139; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Seventeen Seconds (1980) */
+  [data-theme="seventeen-seconds"] {
+    --color-primary: oklch(0.34 0.12 342);
+    --color-primary-content: oklch(0.78 0.14 25);
+    --color-secondary: oklch(0.60 0.10 3);
+    --color-accent: oklch(0.59 0.02 294);
+    --color-primary-rgb: 106, 68, 86; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Faith (1981) */
+  [data-theme="faith"] {
+    --color-primary: oklch(0.54 0.02 60);
+    --color-primary-content: oklch(0.18 0.05 60);
+    --color-secondary: oklch(0.84 0.02 300);
+    --color-accent: oklch(0.38 0.04 0);
+    --color-primary-rgb: 130, 134, 133; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Pornography (1982) */
+  [data-theme="pornography"] {
+    --color-primary: oklch(0.46 0.50 17);
+    --color-primary-content: oklch(0.87 0.41 38);
+    --color-secondary: oklch(0.72 0.63 26);
+    --color-accent: oklch(0.27 0.24 20);
+    --color-primary-rgb: 234, 85, 20; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* The Top (1984) */
+  [data-theme="the-top"] {
+    --color-primary: oklch(0.69 0.57 39);
+    --color-primary-content: oklch(0.93 0.35 49);
+    --color-secondary: oklch(0.26 0.24 24);
+    --color-accent: oklch(0.89 0.30 60);
+    --color-primary-rgb: 248, 163, 27; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* The Head on the Door (1985) */
+  [data-theme="the-head-on-the-door"] {
+    --color-primary: oklch(0.44 0.31 7);
+    --color-primary-content: oklch(0.18 0.19 0);
+    --color-secondary: oklch(0.73 0.38 14);
+    --color-accent: oklch(0.50 0.07 0);
+    --color-primary-rgb: 183, 83, 46; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Kiss Me, Kiss Me, Kiss Me (1987) */
+  [data-theme="kiss-me"] {
+    --color-primary: oklch(0.16 0.03 0);
+    --color-primary-content: oklch(0.70 0.12 330);
+    --color-secondary: oklch(0.52 0.11 338);
+    --color-accent: oklch(0.33 0.07 0);
+    --color-primary-rgb: 38, 33, 35; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Disintegration (1989) */
+  [data-theme="disintegration"] {
+    --color-primary: oklch(0.27 0.07 18);
+    --color-primary-content: oklch(0.71 0.07 27);
+    --color-secondary: oklch(0.84 0.04 48);
+    --color-accent: oklch(0.51 0.04 33);
+    --color-primary-rgb: 71, 56, 53; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Wish (1992) */
+  [data-theme="wish"] {
+    --color-primary: oklch(0.56 0.25 248);
+    --color-primary-content: oklch(0.28 0.22 0);
+    --color-secondary: oklch(0.87 0.32 2);
+    --color-accent: oklch(0.75 0.17 248);
+    --color-primary-rgb: 101, 119, 201; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Wild Mood Swings (1996) */
+  [data-theme="wild-mood-swings"] {
+    --color-primary: oklch(0.90 0.40 80);
+    --color-primary-content: oklch(0.37 0.02 220);
+    --color-secondary: oklch(0.18 0.05 10);
+    --color-accent: oklch(0.73 0.50 70);
+    --color-primary-rgb: 252, 223, 3; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Bloodflowers (2000) */
+  [data-theme="bloodflowers"] {
+    --color-primary: oklch(0.72 0.17 360);
+    --color-primary-content: oklch(0.85 0.01 250);
+    --color-secondary: oklch(0.30 0.07 350);
+    --color-accent: oklch(0.49 0.11 20);
+    --color-primary-rgb: 213, 138, 138; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* The Cure (2004) */
+  [data-theme="the-cure"] {
+    --color-primary: oklch(0.52 0.10 0);
+    --color-primary-content: oklch(0.27 0.05 260);
+    --color-secondary: oklch(0.91 0.08 350);
+    --color-accent: oklch(0.35 0.12 240);
+    --color-primary-rgb: 141, 104, 104; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* 4:13 Dream (2008) */
+  [data-theme="4:13-dream"] {
+    --color-primary: oklch(0.72 0.45 95);
+    --color-primary-content: oklch(0.34 0.38 355);
+    --color-secondary: oklch(0.94 0.05 80);
+    --color-accent: oklch(0.88 0.17 230);
+    --color-primary-rgb: 123, 213, 85; /* Approximate RGB equivalent for shadow effects */
+  }
+  
+  /* Fallback theme (Disintegration) */
+  :root:not([data-theme]) {
+    --color-primary: oklch(0.4 0.1 250);
+    --color-primary-content: oklch(0.85 0.02 240);
+    --color-secondary: oklch(0.15 0.05 250);
+    --color-accent: oklch(0.5 0.15 250);
+    --color-primary-rgb: 86, 104, 194; /* Approximate RGB equivalent for shadow effects */
+  }

@@ -1,0 +1,94 @@
+---
+// Navigation tiles - main content
+const navigationTiles = [
+  { title: 'News', path: '/news', icon: 'newspaper' },
+  { title: 'Discography', path: '/discography', icon: 'music' },
+  { title: 'Setlists', path: '/setlists', icon: 'list-music' },
+  { title: 'Lyrics', path: '/lyrics', icon: 'text' }
+];
+
+// Helper function to get icon component based on name
+const getIconElement = (iconName) => {
+  switch (iconName) {
+    case 'music':
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>';
+    case 'list-music':
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3M3 6h4M3 10h4M3 14h4"/></svg>';
+    case 'text':
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18 9l-7 7M18 9v6M18 9h6"/></svg>';
+    case 'newspaper':
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>';
+    default:
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>';
+  }
+};
+---
+
+<!-- Hero section with full-screen background image -->
+<section class="relative min-h-screen flex items-center justify-center">
+  <!-- Background image - fully visible through glass elements -->
+  <img 
+    src="/images/hero-background.jpg" 
+    alt="The Cure live performance" 
+    class="absolute inset-0 w-full h-full object-cover object-center z-0"
+  />
+  
+  <!-- Subtle gradient overlay for text contrast -->
+  <div class="absolute inset-0 bg-gradient-to-b from-black/30 to-black/10 z-10"></div>
+  
+  <!-- Content -->
+  <div class="relative z-20 w-full flex flex-col items-center justify-between min-h-screen">
+    <!-- Welcome section - centered vertically with text directly on hero image -->
+    <div class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <h1 class="font-display text-8xl md:text-9xl lg:text-10xl text-white text-shadow-lg mb-8">
+          Welcome to Cureation
+        </h1>
+      </div>
+    </div>
+    
+    <!-- Navigation tiles - bottom section -->
+    <div class="w-full px-4 pb-16">
+      <div class="max-w-5xl mx-auto">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {navigationTiles.map(tile => (
+            <a 
+              href={tile.path} 
+              class="p-3 flex flex-row items-center gap-3 text-center rounded-xl border border-white/20 backdrop-blur-md bg-themed transition-all duration-300 group"
+            >
+              <div class="text-white group-hover:text-primary transition-colors duration-300" set:html={getIconElement(tile.icon)} />
+              <span class="text-base text-white font-medium group-hover:text-white transition-colors duration-300">
+                {tile.title}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Text shadow for the hero heading */
+  .text-shadow-lg {
+    text-shadow: 
+      0 4px 8px rgba(0, 0, 0, 0.75),
+      0 0 30px rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Theme-colored background using color-mix for navigation tiles */
+  .bg-themed {
+    background-color: color-mix(in oklab, var(--color-primary) 15%, transparent);
+    transition: background-color 0.3s ease;
+  }
+  
+  .bg-themed:hover {
+    background-color: color-mix(in oklab, var(--color-primary) 25%, transparent);
+  }
+  
+  /* Text size utility for very large headings */
+  .text-10xl {
+    font-size: 9rem;
+    line-height: 1;
+  }
+</style>
