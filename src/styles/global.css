@@ -45,7 +45,7 @@
   html {
     font-family: var(--font-main);
     scroll-behavior: smooth;
-    background-color: #050505;
+    background-color: #000000;
     color-scheme: dark;
     @apply text-white;
   }
@@ -63,25 +63,17 @@
   }
   
   /* Larger heading sizes */
-  h1 {
-    @apply text-6xl md:text-7xl lg:text-8xl;
-  }
-  
-  h2 {
-    @apply text-5xl md:text-6xl;
-  }
-  
-  h3 {
-    @apply text-4xl md:text-5xl;
-  }
-  
-  h4 {
-    @apply text-3xl;
-  }
+  h1 { @apply text-7xl md:text-8xl lg:text-9xl; }
+  h2 { @apply text-6xl md:text-7xl; }
+  h3 { @apply text-5xl md:text-6xl; }
+  h4 { @apply text-4xl; }
+  h5 { @apply text-3xl; }
+  h6 { @apply text-2xl; }
   
   /* Theme transition */
   html, html * {
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease,
+                transform 0.3s ease, box-shadow 0.3s ease;
   }
   
   /* Default link styling */
@@ -92,13 +84,15 @@
 
 /* Custom utilities */
 @layer utilities {
-  /* Glass effects */
+  /* Glass effects (now truly transparent) */
   .glass-button {
-    @apply backdrop-blur-md bg-black/20 border border-white/20 hover:border-white/30 hover:bg-black/30 transition-all duration-300;
+    @apply backdrop-blur-md bg-transparent border border-white/20
+           hover:border-white/30 transition-all duration-300;
   }
   
   .glass-card {
-    @apply backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl shadow-lg;
+    @apply backdrop-blur-lg bg-transparent border border-white/20
+           rounded-xl shadow-lg;
   }
   
   /* Dynamic theme-based colors */  
@@ -136,7 +130,7 @@
   
   /* Text size utility extension */
   .text-10xl {
-    font-size: 9rem;
+    font-size: 10rem;
     line-height: 1;
   }
   
@@ -144,17 +138,15 @@
   .hover-lift {
     transition: transform 0.3s var(--ease-out);
   }
-  
   .hover-lift:hover {
     transform: translateY(-4px);
   }
   
-  /* Theme-colored background using color-mix for different elements */
+  /* Theme-colored background using color-mix */
   .bg-themed {
     background-color: color-mix(in oklab, var(--color-primary) 15%, transparent);
     transition: background-color 0.3s ease;
   }
-  
   .bg-themed:hover {
     background-color: color-mix(in oklab, var(--color-primary) 25%, transparent);
   }
@@ -173,11 +165,12 @@
     --pc: var(--color-primary-content);
     --s: var(--color-secondary);
     --a: var(--color-accent);
+    --color-base-100: #000000;
     
     /* Base colors for components */
-    --b1: oklch(0.98 0.005 240);
-    --b2: oklch(0.95 0.005 240);
-    --b3: oklch(0.9 0.005 240);
+    --b1: #000000;
+    --b2: #000000;
+    --b3: #000000;
     --bc: oklch(0.2 0.005 240);
 
     /* Additional DaisyUI variables */

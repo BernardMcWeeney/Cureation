@@ -16,82 +16,101 @@ interface Props {
   pageClass?: string;
 }
 
-const { 
-  title, 
-  description, 
+const {
+  title,
+  description,
   ogImage,
   showSidebar = false,
   sidebarActiveItem = '',
   sidebarItems = [],
-  pageClass = ''
+  pageClass = '',
 } = Astro.props;
 
-// Generate full URLs for social sharing
 const siteUrl = import.meta.env.SITE || siteConfig.url;
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background-color: #000; color-scheme: dark;">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Updated favicon link -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="canonical" href={canonicalURL} />
   <meta name="generator" content={Astro.generator} />
-  
+
   <!-- Primary Meta Tags -->
-  <title>{title ? `${title} | ${siteConfig.name}` : `${siteConfig.name} - ${siteConfig.description}`}</title>
-  <meta name="title" content={title ? `${title} | ${siteConfig.name}` : `${siteConfig.name} - ${siteConfig.description}`} />
+  <title>
+    {title
+      ? `${title} | ${siteConfig.name}`
+      : `${siteConfig.name} - ${siteConfig.description}`}
+  </title>
+  <meta
+    name="title"
+    content={
+      title
+        ? `${title} | ${siteConfig.name}`
+        : `${siteConfig.name} - ${siteConfig.description}`
+    }
+  />
   <meta name="description" content={description || siteConfig.description} />
-  
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalURL} />
-  <meta property="og:title" content={title ? `${title} | ${siteConfig.name}` : `${siteConfig.name} - ${siteConfig.description}`} />
+  <meta
+    property="og:title"
+    content={
+      title
+        ? `${title} | ${siteConfig.name}`
+        : `${siteConfig.name} - ${siteConfig.description}`
+    }
+  />
   <meta property="og:description" content={description || siteConfig.description} />
   <meta property="og:image" content={socialImageURL} />
-  
+
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content={siteConfig.meta.twitterHandle} />
-  <meta name="twitter:title" content={title ? `${title} | ${siteConfig.name}` : `${siteConfig.name} - ${siteConfig.description}`} />
+  <meta
+    name="twitter:title"
+    content={
+      title
+        ? `${title} | ${siteConfig.name}`
+        : `${siteConfig.name} - ${siteConfig.description}`
+    }
+  />
   <meta name="twitter:description" content={description || siteConfig.description} />
   <meta name="twitter:image" content={socialImageURL} />
-  
-  <!-- Preload critical assets -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
-  <!-- Early theme initialization to prevent flash -->
+
+  <!-- Preconnect & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Dark‑mode flash prevention -->
   <script is:inline>
     const savedTheme = localStorage.getItem('theme') || 'disintegration';
     document.documentElement.setAttribute('data-theme', savedTheme);
   </script>
-  
-  <!-- Enable view transitions for smoother page navigation -->
+
+  <!-- View transitions -->
   <ViewTransitions />
-  
-  <!-- Add theme color meta tag -->
-  <meta name="theme-color" content="#1e293b">
-  
-  <!-- Custom slot for additional head elements -->
+
+  <!-- Browser theme color -->
+  <meta name="theme-color" content="#000000" />
+
+  <!-- Custom head slot -->
   <slot name="head" />
 </head>
-<body class={`min-h-screen flex flex-col bg-gradient-to-b from-black to-gray-800 ${pageClass}`}>
-  <!-- Gradient overlay for depth -->
-  <div class="fixed inset-0 bg-gradient-to-b from-base-300/20 to-base-300/5 pointer-events-none -z-50"></div>
-  
-  <!-- Main layout structure -->
+<body class={`min-h-screen flex flex-col bg-black ${pageClass}`}>
   <Header />
   <div class="h-6"></div>
-  
+
   <main class="flex-grow pt-20">
     <div class="responsive-container">
       <div class="flex flex-col md:flex-row gap-8">
-        <div class={showSidebar ? "md:w-3/4 lg:w-4/5" : "w-full"}>
+        <div class={showSidebar ? 'md:w-3/4 lg:w-4/5' : 'w-full'}>
           <slot />
         </div>
         {showSidebar && (
@@ -102,32 +121,24 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
       </div>
     </div>
   </main>
-  
+
   <Footer />
-  
-  <!-- Optional slot for page-specific scripts -->
+
+  <!-- Page‑specific scripts slot -->
   <slot name="after-footer" />
-  
+
   <script>
-    // Smooth scroll functionality
     function setupSmoothScroll() {
-      document.addEventListener('click', e => {
+      document.addEventListener('click', (e) => {
         const target = e.target.closest('a');
         if (target && target.getAttribute('href')?.startsWith('#')) {
           e.preventDefault();
-          const elementId = target.getAttribute('href').substring(1);
-          const element = document.getElementById(elementId);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-          }
+          const id = target.getAttribute('href').slice(1);
+          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
         }
       });
     }
-    
-    // Setup smooth scroll
     setupSmoothScroll();
-    
-    // Re-setup after page transitions
     document.addEventListener('astro:page-load', setupSmoothScroll);
   </script>
 </body>

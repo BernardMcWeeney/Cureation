@@ -91,13 +91,14 @@ const { album } = Astro.props;
   sidebarItems={sidebarItems}
   pageClass={`theme-${album.slug}`}
 >
-  <div data-theme={album.slug}>
+  <!-- ✔️ enforce pure black here so your glass-card blur never shows grey -->
+  <div data-theme={album.slug} class="bg-black">
     <!-- Album Hero Section -->
     <section class="relative">
       <div class="flex flex-col lg:flex-row gap-8 mb-12">
         <!-- Album Cover -->
         <div class="lg:w-2/5">
-          <div class="glass-card overflow-hidden rounded-xl border border-white/20 backdrop-blur-lg bg-black/30">
+          <div class="glass-card overflow-hidden rounded-xl border border-white/20">
             <img 
               src={album.coverImage} 
               alt={`${album.title} album cover`} 
@@ -108,7 +109,7 @@ const { album } = Astro.props;
         
         <!-- Album Info -->
         <div class="lg:w-3/5">
-          <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30 h-full">
+          <div class="glass-card rounded-xl p-6 border border-white/20 h-full">
             <h1 class="font-display text-5xl md:text-6xl text-white mb-2">{album.title}</h1>
             <p class="text-2xl text-primary mb-6">{album.year}</p>
             

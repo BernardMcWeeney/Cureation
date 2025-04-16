@@ -1,5 +1,4 @@
 ---
-// Album Card Component - for discography page
 interface Props {
   title: string;
   coverImage: string;
@@ -23,13 +22,12 @@ const { title, coverImage, year, slug, featured = false } = Astro.props;
         alt={`Cover art for ${title}`} 
         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
-      
-      <!-- Gradient overlay -->
+      <!-- Gradient overlay (image only) -->
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
     </div>
     
-    <!-- Content section -->
-    <div class="p-4 backdrop-blur-sm bg-black/30 rounded-b-xl">
+    <!-- Content section (now transparent) -->
+    <div class="p-4 backdrop-blur-sm bg-transparent rounded-b-xl">
       <h3 class="font-display text-3xl text-white mb-1">{title}</h3>
       <p class="text-white/70 text-sm">{year}</p>
       
