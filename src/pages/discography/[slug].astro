@@ -91,175 +91,180 @@ const { album } = Astro.props;
   sidebarItems={sidebarItems}
   pageClass={`theme-${album.slug}`}
 >
-  <!-- ✔️ enforce pure black here so your glass-card blur never shows grey -->
-  <div data-theme={album.slug} class="bg-black">
-    <!-- Album Hero Section -->
-    <section class="relative">
-      <div class="flex flex-col lg:flex-row gap-8 mb-12">
-        <!-- Album Cover -->
-        <div class="lg:w-2/5">
-          <div class="glass-card overflow-hidden rounded-xl border border-white/20">
-            <img 
-              src={album.coverImage} 
-              alt={`${album.title} album cover`} 
-              class="w-full aspect-square object-cover"
-            />
-          </div>
+<!-- Album artwork background layer -->
+<div class="artwork-background">
+  <div class="bg-overlay bg-black opacity-70"></div>
+  <div class="album-artwork" style={`background-image: url(${album.coverImage})`}></div>
+</div>
+<!-- ✔️ enforce pure black here so your glass-card blur never shows grey -->
+<div data-theme={album.slug} class="bg-transparent">
+  <!-- Album Hero Section -->
+  <section class="relative">
+    <div class="flex flex-col lg:flex-row gap-8 mb-12">
+      <!-- Album Cover -->
+      <div class="lg:w-2/5">
+        <div class="glass-card overflow-hidden rounded-xl border border-white/20">
+          <img 
+            src={album.coverImage} 
+            alt={`${album.title} album cover`} 
+            class="w-full aspect-square object-cover"
+          />
         </div>
-        
-        <!-- Album Info -->
-        <div class="lg:w-3/5">
-          <div class="glass-card rounded-xl p-6 border border-white/20 h-full">
-            <h1 class="font-display text-5xl md:text-6xl text-white mb-2">{album.title}</h1>
-            <p class="text-2xl text-primary mb-6">{album.year}</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <h3 class="text-white/60 text-sm">Release Date</h3>
-                <p class="text-white">{album.releaseDate}</p>
-              </div>
-              <div>
-                <h3 class="text-white/60 text-sm">Record Label</h3>
-                <p class="text-white">{album.recordLabel}</p>
-              </div>
-              <div>
-                <h3 class="text-white/60 text-sm">Producer</h3>
-                <p class="text-white">{album.producer}</p>
-              </div>
+      </div>
+      
+      <!-- Album Info -->
+      <div class="lg:w-3/5">
+        <div class="glass-card rounded-xl p-6 border border-white/20 h-full backdrop-blur-lg bg-black/10">
+          <h1 class="font-brand text-5xl md:text-6xl text-white mb-2">{album.title}</h1>
+          <p class="text-2xl text-primary mb-6">{album.year}</p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <h3 class="text-white/60 text-sm">Release Date</h3>
+              <p class="text-white">{album.releaseDate}</p>
             </div>
-            
-            <div class="mb-6">
-              <h3 class="text-white/60 text-sm mb-2">Description</h3>
-              <p class="text-white">{album.description}</p>
+            <div>
+              <h3 class="text-white/60 text-sm">Record Label</h3>
+              <p class="text-white">{album.recordLabel}</p>
             </div>
-            
-            <div class="flex flex-wrap gap-3 mt-6">
-              <a href="#background" class="px-4 py-2 rounded-lg backdrop-blur-md bg-primary/20 border border-primary/30 text-white hover:bg-primary/30 transition-colors duration-300">Background</a>
-              <a href="#tracks" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Tracklist</a>
-              <a href="#singles" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Singles</a>
-              <a href="#reception" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Critical Reception</a>
+            <div>
+              <h3 class="text-white/60 text-sm">Producer</h3>
+              <p class="text-white">{album.producer}</p>
             </div>
           </div>
+          
+          <div class="mb-6">
+            <h3 class="text-white/60 text-sm mb-2">Description</h3>
+            <p class="text-white">{album.description}</p>
+          </div>
+          
+          <div class="flex flex-wrap gap-3 mt-6">
+            <a href="#background" class="px-4 py-2 rounded-lg backdrop-blur-md bg-primary/20 border border-primary/30 text-white hover:bg-primary/30 transition-colors duration-300">Background</a>
+            <a href="#tracks" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Tracklist</a>
+            <a href="#singles" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Singles</a>
+            <a href="#reception" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Critical Reception</a>
+          </div>
         </div>
       </div>
-    </section>
-    
-    <!-- Background Section -->
-    <section id="background" class="mb-16">
-      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
-        <h2 class="font-display text-3xl text-primary mb-4">Background & Recording</h2>
-        <div class="prose prose-invert max-w-none">
-          <p class="text-white">{album.background}</p>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Tracklist Section -->
-    <section id="tracks" class="mb-16">
-      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
-        <h2 class="font-display text-3xl text-primary mb-6">Tracklist</h2>
-        <div class="overflow-hidden">
-          <TrackList tracks={album.tracks} />
-        </div>
-      </div>
-    </section>
-    
-    <!-- Singles Section -->
-    <section id="singles" class="mb-16">
-      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
-        <h2 class="font-display text-3xl text-primary mb-6">Singles</h2>
-        <ul class="space-y-4">
-          {album.singles.map(single => (
-            <li class="p-4 rounded-lg backdrop-blur-md bg-black/20 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div>
-                <h3 class="text-xl text-white font-medium">{single.title}</h3>
-                <p class="text-white/70 text-sm">Released: {single.releaseDate}</p>
-              </div>
-              <div class="bg-primary/20 px-3 py-1 rounded-full text-sm text-white">
-                {single.chartPosition}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-    
-    <!-- Reception Section -->
-    <section id="reception" class="mb-16">
-      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/30">
-        <h2 class="font-display text-3xl text-primary mb-4">Critical Reception</h2>
-        <div class="prose prose-invert max-w-none">
-          <p class="text-white">{album.reception}</p>
-        </div>
-      </div>
-    </section>
-    
-    <!-- Related Albums -->
-    <section class="mb-16">
-      <h2 class="font-display text-3xl text-primary mb-6">You Might Also Like</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {album.slug === "disintegration" ? (
-          <>
-            <a href="/discography/pornography" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
-              <img src="/images/albums/pornography.jpg" alt="Pornography album cover" class="w-16 h-16 rounded-lg" />
-              <div>
-                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Pornography</h3>
-                <p class="text-white/70 text-sm">1982</p>
-              </div>
-            </a>
-            <a href="/discography/wish" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
-              <img src="/images/albums/wish.jpg" alt="Wish album cover" class="w-16 h-16 rounded-lg" />
-              <div>
-                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Wish</h3>
-                <p class="text-white/70 text-sm">1992</p>
-              </div>
-            </a>
-            <a href="/discography/kiss-me" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
-              <img src="/images/albums/kiss-me.jpg" alt="Kiss Me, Kiss Me, Kiss Me album cover" class="w-16 h-16 rounded-lg" />
-              <div>
-                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Kiss Me, Kiss Me, Kiss Me</h3>
-                <p class="text-white/70 text-sm">1987</p>
-              </div>
-            </a>
-          </>
-        ) : (
-          <>
-            <a href="/discography/faith" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
-              <img src="/images/albums/faith.jpg" alt="Faith album cover" class="w-16 h-16 rounded-lg" />
-              <div>
-                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Faith</h3>
-                <p class="text-white/70 text-sm">1981</p>
-              </div>
-            </a>
-            <a href="/discography/seventeen-seconds" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
-              <img src="/images/albums/seventeen-seconds.jpg" alt="Seventeen Seconds album cover" class="w-16 h-16 rounded-lg" />
-              <div>
-                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Seventeen Seconds</h3>
-                <p class="text-white/70 text-sm">1980</p>
-              </div>
-            </a>
-            <a href="/discography/disintegration" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/30 flex gap-4 hover-lift group">
-              <img src="/images/albums/disintegration.jpg" alt="Disintegration album cover" class="w-16 h-16 rounded-lg" />
-              <div>
-                <h3 class="text-white group-hover:text-primary transition-colors duration-300">Disintegration</h3>
-                <p class="text-white/70 text-sm">1989</p>
-              </div>
-            </a>
-          </>
-        )}
-      </div>
-    </section>
-  </div>
-</MainLayout>
-
-<style>
-  /* Create a theme-specific subtle glow for the page */
-  .theme-disintegration .glass-card {
-    box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.05);
-  }
+    </div>
+  </section>
   
-  .theme-pornography .glass-card {
-    box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.05);
+  <!-- Background Section -->
+  <section id="background" class="mb-16">
+    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
+      <h2 class="font-heading text-3xl text-primary mb-4">Background & Recording</h2>
+      <div class="prose prose-invert max-w-none">
+        <p class="text-white">{album.background}</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Tracklist Section -->
+  <section id="tracks" class="mb-16">
+    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
+      <h2 class="font-heading text-3xl text-primary mb-6">Tracklist</h2>
+      <div class="overflow-hidden">
+        <TrackList tracks={album.tracks} />
+      </div>
+    </div>
+  </section>
+  
+  <!-- Singles Section -->
+  <section id="singles" class="mb-16">
+    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
+      <h2 class="font-heading text-3xl text-primary mb-6">Singles</h2>
+      <ul class="space-y-4">
+        {album.singles.map(single => (
+          <li class="p-4 rounded-lg backdrop-blur-md bg-black/10 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-xl text-white font-medium">{single.title}</h3>
+              <p class="text-white/70 text-sm">Released: {single.releaseDate}</p>
+            </div>
+            <div class="bg-primary/20 px-3 py-1 rounded-full text-sm text-white">
+              {single.chartPosition}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  
+  <!-- Reception Section -->
+  <section id="reception" class="mb-16">
+    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
+      <h2 class="font-heading text-3xl text-primary mb-4">Critical Reception</h2>
+      <div class="prose prose-invert max-w-none">
+        <p class="text-white">{album.reception}</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Related Albums -->
+  <section class="mb-16">
+    <h2 class="font-heading text-3xl text-primary mb-6">You Might Also Like</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {album.slug === "disintegration" ? (
+        <>
+          <a href="/discography/pornography" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
+            <img src="/images/albums/pornography.jpg" alt="Pornography album cover" class="w-16 h-16 rounded-lg" />
+            <div>
+              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Pornography</h3>
+              <p class="text-white/70 text-sm">1982</p>
+            </div>
+          </a>
+          <a href="/discography/wish" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
+            <img src="/images/albums/wish.jpg" alt="Wish album cover" class="w-16 h-16 rounded-lg" />
+            <div>
+              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Wish</h3>
+              <p class="text-white/70 text-sm">1992</p>
+            </div>
+          </a>
+          <a href="/discography/kiss-me" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
+            <img src="/images/albums/kiss-me.jpg" alt="Kiss Me, Kiss Me, Kiss Me album cover" class="w-16 h-16 rounded-lg" />
+            <div>
+              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Kiss Me, Kiss Me, Kiss Me</h3>
+              <p class="text-white/70 text-sm">1987</p>
+            </div>
+          </a>
+        </>
+      ) : (
+        <>
+          <a href="/discography/faith" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
+            <img src="/images/albums/faith.jpg" alt="Faith album cover" class="w-16 h-16 rounded-lg" />
+            <div>
+              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Faith</h3>
+              <p class="text-white/70 text-sm">1981</p>
+            </div>
+          </a>
+          <a href="/discography/seventeen-seconds" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
+            <img src="/images/albums/seventeen-seconds.jpg" alt="Seventeen Seconds album cover" class="w-16 h-16 rounded-lg" />
+            <div>
+              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Seventeen Seconds</h3>
+              <p class="text-white/70 text-sm">1980</p>
+            </div>
+          </a>
+          <a href="/discography/disintegration" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
+            <img src="/images/albums/disintegration.jpg" alt="Disintegration album cover" class="w-16 h-16 rounded-lg" />
+            <div>
+              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Disintegration</h3>
+              <p class="text-white/70 text-sm">1989</p>
+            </div>
+          </a>
+        </>
+      )}
+    </div>
+  </section>
+</div>
+
+<style>  
+  /* Ensure the artwork background shows through all containers */
+  .artwork-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
   }
   
   /* Hover lift effect */

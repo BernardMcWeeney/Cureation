@@ -113,20 +113,28 @@ const currentPath = Astro.url.pathname;
     document.documentElement.setAttribute('data-theme', savedTheme);
     
     // Set up event listeners for all theme buttons
-    const themeButtons = document.querySelectorAll('.theme-item');
-    themeButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const theme = button.getAttribute('data-theme-value');
-        if (theme) {
-          document.documentElement.setAttribute('data-theme', theme);
-          localStorage.setItem('theme', theme);
-        }
+    const setupThemeButtons = () => {
+      const themeButtons = document.querySelectorAll('.theme-item');
+      themeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const theme = button.getAttribute('data-theme-value');
+          if (theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+          }
+        });
       });
-    });
+    };
+    
+    setupThemeButtons();
   });
   
   // Re-initialize after Astro page transitions
   document.addEventListener('astro:page-load', function() {
+    // Apply current theme after navigation
+    const savedTheme = localStorage.getItem('theme') || 'disintegration';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
     // Set up event listeners for all theme buttons after page transition
     const themeButtons = document.querySelectorAll('.theme-item');
     themeButtons.forEach(button => {

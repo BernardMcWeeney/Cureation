@@ -1,5 +1,6 @@
 /* Import fonts */
 @import url("https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap");
 
 /* Import Tailwind CSS core */
 @import "tailwindcss";
@@ -18,6 +19,7 @@
   /* Font settings */
   --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Tangerine', cursive;
+  --font-heading: 'Cinzel', serif;
   
   /* Animation settings */
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
@@ -56,19 +58,25 @@
     flex-direction: column;
   }
   
-  /* Apply cursive font to headings */
-  h1, h2, h3, h4, h5, h6 {
+  /* Apply cursive font to brand elements */
+  .font-brand {
     font-family: var(--font-display);
     line-height: 1.1;
   }
   
+  /* Apply Cinzel font to headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    line-height: 1.1;
+  }
+  
   /* Larger heading sizes */
-  h1 { @apply text-7xl md:text-8xl lg:text-9xl; }
-  h2 { @apply text-6xl md:text-7xl; }
-  h3 { @apply text-5xl md:text-6xl; }
-  h4 { @apply text-4xl; }
-  h5 { @apply text-3xl; }
-  h6 { @apply text-2xl; }
+  h1 { @apply text-5xl md:text-6xl; }
+  h2 { @apply text-4xl md:text-5xl; }
+  h3 { @apply text-3xl md:text-4xl; }
+  h4 { @apply text-2xl; }
+  h5 { @apply text-xl; }
+  h6 { @apply text-lg; }
   
   /* Theme transition */
   html, html * {
@@ -80,18 +88,53 @@
   a {
     @apply transition-colors duration-300;
   }
+  
+  /* Album artwork background styles */
+  .artwork-background {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -10;
+    overflow: hidden;
+  }
+  
+  .bg-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 100%);
+    z-index: -5;
+  }
+  
+  .album-artwork {
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    bottom: -50px;
+    left: -50px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(24px) saturate(1.5);
+    z-index: -10;
+    opacity: 0.4;
+    transform: scale(1.1);
+  }
 }
 
 /* Custom utilities */
 @layer utilities {
   /* Glass effects (now truly transparent) */
   .glass-button {
-    @apply backdrop-blur-md bg-transparent border border-white/20
+    @apply backdrop-blur-md bg-black/10 border border-white/20
            hover:border-white/30 transition-all duration-300;
   }
   
   .glass-card {
-    @apply backdrop-blur-lg bg-transparent border border-white/20
+    @apply backdrop-blur-lg bg-black/20 border border-white/20
            rounded-xl shadow-lg;
   }
   
@@ -165,7 +208,7 @@
     --pc: var(--color-primary-content);
     --s: var(--color-secondary);
     --a: var(--color-accent);
-    --color-base-100: #000000;
+    --color-base-100: transparent;
     
     /* Base colors for components */
     --b1: #000000;
