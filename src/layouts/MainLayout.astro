@@ -1,4 +1,6 @@
 ---
+// src/layouts/MainLayout.astro
+
 import { ViewTransitions } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -33,70 +35,90 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
 
 <!DOCTYPE html>
 <html lang="en" style="color-scheme: dark;">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="/favicon.png" />
-  <link rel="canonical" href={canonicalURL} />
-  <title>
-    {title ? `${title} | ${siteConfig.name}` : siteConfig.name}
-  </title>
-  <meta name="description" content={description || siteConfig.description} />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.png" />
+    <link rel="canonical" href={canonicalURL} />
+    <title>
+      {title ? `${title} | ${siteConfig.name}` : siteConfig.name}
+    </title>
+    <meta
+      name="description"
+      content={description || siteConfig.description}
+    />
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content={canonicalURL} />
-  <meta property="og:title" content={title || siteConfig.name} />
-  <meta property="og:description" content={description || siteConfig.description} />
-  <meta property="og:image" content={socialImageURL} />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta
+      property="og:title"
+      content={title || siteConfig.name}
+    />
+    <meta
+      property="og:description"
+      content={description || siteConfig.description}
+    />
+    <meta property="og:image" content={socialImageURL} />
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content={socialImageURL} />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={socialImageURL} />
 
-  <!-- Fonts & Transitions -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <script is:inline>
-    const savedTheme = localStorage.getItem('theme') || 'disintegration';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  </script>
-  <ViewTransitions />
-  <slot name="head" />
-</head>
-<body class="min-h-screen flex flex-col">
-  {/* Background image with layered overlay for better readability */}
-  <div class="fixed inset-0 z-[-2]">
-    <div 
-      class="absolute inset-0 bg-cover bg-center bg-no-repeat" 
-      style={ogImage ? `background-image: url(${ogImage})` : ''}
-    ></div>
-    {/* Gradient overlay provides better text contrast */}
-    <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/10"></div>
-  </div>
-  
-  <Header />
-  <div class="h-6"></div>
-  <main class="flex-grow pt-20">
-    <div class="responsive-container flex flex-col md:flex-row gap-8">
-      <div class={showSidebar ? 'md:w-3/4 lg:w-4/5' : 'w-full'}>
-        <slot />
-      </div>
-      {showSidebar && (
-        <aside class="md:w-1/4 lg:w-1/5">
-          <Sidebar activeItem={sidebarActiveItem} items={sidebarItems} />
-        </aside>
-      )}
+    <!-- Fonts & Transitions -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <script is:inline>
+      const savedTheme = localStorage.getItem('theme') || 'disintegration';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+    <ViewTransitions />
+    <slot name="head" />
+  </head>
+
+  <!-- ←––– HERE: We interpolated `pageClass` onto the body element. –––→ -->
+  <body class={`min-h-screen flex flex-col ${pageClass}`}>
+    <!-- Background image with layered overlay for better readability -->
+    <div class="fixed inset-0 z-[-2]">
+      <div
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={ogImage ? `background-image: url(${ogImage})` : ''}
+      ></div>
+      <!-- Gradient overlay provides better text contrast -->
+      <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/10"></div>
     </div>
-  </main>
-  <Footer />
-  <slot name="after-footer" />
-  <script>
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', e => {
-        e.preventDefault();
-        document.getElementById(anchor.getAttribute('href').slice(1))?.scrollIntoView({ behavior: 'smooth' });
-      });
-    });
-  </script>
-</body>
+
+    <Header />
+    <div class="h-6"></div>
+    <main class="flex-grow pt-20">
+      <div class="responsive-container flex flex-col md:flex-row gap-8">
+        <div class={showSidebar ? 'md:w-3/4 lg:w-4/5' : 'w-full'}>
+          <slot />
+        </div>
+        {showSidebar && (
+          <aside class="md:w-1/4 lg:w-1/5">
+            <Sidebar
+              activeItem={sidebarActiveItem}
+              items={sidebarItems}
+            />
+          </aside>
+        )}
+      </div>
+    </main>
+    <Footer />
+    <slot name="after-footer" />
+    <script>
+      document
+        .querySelectorAll('a[href^="#"]')
+        .forEach((anchor) => {
+          anchor.addEventListener('click', (e) => {
+            e.preventDefault();
+            document
+              .getElementById(
+                anchor.getAttribute('href').slice(1)
+              )
+              ?.scrollIntoView({ behavior: 'smooth' });
+          });
+        });
+    </script>
+  </body>
 </html>

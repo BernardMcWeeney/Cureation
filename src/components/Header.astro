@@ -1,10 +1,11 @@
 ---
+// src/components/Header.astro
+
 import siteConfig, { getNavigation } from '../config/site.config';
 
 // Navigation items from config
 const navItems = getNavigation();
-
-// Get current path for active links
+// Current path for active links
 const currentPath = Astro.url.pathname;
 ---
 
@@ -12,32 +13,29 @@ const currentPath = Astro.url.pathname;
   <div class="responsive-container">
     <div class="flex items-center justify-between h-16 md:h-20">
       <!-- Logo -->
-      <div>
-        <a href="/" class="flex items-center gap-3 group">
-          <!-- Updated logo container with the new logo.png -->
-          <div class="w-10 h-10 bg-primary/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
-            <img src="/logo.png" alt="Logo" class="w-6 h-6 rounded-full object-contain" />
-          </div>
-          <span class="font-display text-5xl text-primary group-hover:text-primary/80 transition-all duration-300">
-            {siteConfig.logo.text}
-          </span>
-        </a>
-      </div>
-      
-      <!-- Desktop Navigation -->
-      <nav class="hidden md:flex items-center">
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 bg-primary/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" class="w-6 h-6 rounded-full object-contain" />
+        </div>
+        <span class="font-display text-5xl text-primary group-hover:text-primary/80 transition-colors duration-300">
+          {siteConfig.logo.text}
+        </span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex">
         <ul class="flex items-center gap-6">
           {navItems.map(item => (
             <li>
-              <a 
-                href={item.path} 
-                class={`px-4 py-2 relative rounded-lg transition-all duration-300
+              <a
+                href={item.path}
+                class={`px-4 py-2 relative rounded-lg transition-colors duration-300
                   ${currentPath === item.path 
-                    ? "text-primary font-medium" 
-                    : "text-white hover:text-primary"}
+                    ? 'text-primary font-medium' 
+                    : 'text-white hover:text-primary'}
                 `}
               >
-                <span>{item.name}</span>
+                {item.name}
                 {currentPath === item.path && (
                   <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"></span>
                 )}
@@ -46,105 +44,188 @@ const currentPath = Astro.url.pathname;
           ))}
         </ul>
       </nav>
-      
-      <!-- Right Side Controls -->
+
+      <!-- Controls -->
       <div class="flex items-center gap-4">
-        <!-- Search Button -->
-        <button class="w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:text-primary hover:border-white/40 transition-all duration-300">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <!-- Search -->
+        <button
+          id="search-button"
+          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:border-white/40 transition-[background-color,border-color] duration-300"
+          aria-label="Open search"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <span class="sr-only">Search</span>
         </button>
-        
-        <!-- Theme Selector -->
-        <div class="dropdown dropdown-end">
-          <button 
-            id="theme-menu-button"
-            tabindex="0" 
-            class="w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:text-primary hover:border-white/40 transition-all duration-300"
-            aria-label="Switch album theme"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-            </svg>
-          </button>
-          
-          <div 
-            tabindex="0" 
-            class="dropdown-content z-[1] w-56 p-3 rounded-xl mt-2 backdrop-blur-xl bg-black/85 border border-white/15 shadow-xl"
-          >
-            <div class="text-sm text-white/90 px-2 py-1 font-medium">Album Themes</div>
-            {siteConfig.availableThemes.map(theme => (
-              <button 
-                data-theme-value={theme.id}
-                class="theme-item w-full text-left flex items-center justify-between hover:bg-white/10 rounded-lg p-2 my-1 text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all duration-300"
-              >
-                <span>{theme.name}</span>
-                <span class="text-xs text-white/70">{theme.year}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        <!-- Mobile Menu Toggle -->
-        <div class="md:hidden">
-          <button 
-            id="mobile-menu-toggle" 
-            class="w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:text-primary hover:border-white/40 transition-all duration-300"
-            aria-label="Open main menu"
-            aria-expanded="false"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+
+        <!-- Theme -->
+        <button
+          id="theme-menu-button"
+          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:border-white/40 transition-[background-color,border-color] duration-300"
+          aria-label="Switch album theme"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 
+                 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 
+                 7.343l1.657-1.657a2 2 0 012.828 0l2.829 
+                 2.829a2 2 0 010 2.828l-8.486 
+                 8.485M7 17h.01"
+            />
+          </svg>
+        </button>
+
+        <!-- Mobile Toggle -->
+        <button
+          id="mobile-menu-toggle"
+          class="text-primary md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:border-white/40 transition-[background-color,border-color] duration-300"
+          aria-label="Open main menu"
+          aria-expanded="false"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 </header>
 
+<!-- Search Overlay -->
+<div
+  id="search-overlay"
+  class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+  role="dialog" aria-modal="true"
+>
+  <div class="relative w-full max-w-md">
+    <button
+      id="close-search"
+      class="absolute top-2 right-2 text-white hover:text-white/80"
+      aria-label="Close search"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <input
+      id="search-input"
+      type="search"
+      placeholder="Search..."
+      class="w-full p-3 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:ring-2 focus:ring-primary"
+    />
+  </div>
+</div>
+
+<!-- Mobile Nav -->
+<nav
+  id="mobile-menu"
+  class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-30 p-6 md:hidden"
+>
+  <ul class="flex flex-col gap-4">
+    {navItems.map(item => (
+      <li>
+        <a
+          href={item.path}
+          class={`block px-4 py-2 rounded-lg transition-colors duration-300
+            ${currentPath === item.path
+              ? 'text-primary font-medium'
+              : 'text-white hover:text-primary'}
+          `}
+        >
+          {item.name}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<!-- Theme Overlay -->
+<div
+  id="theme-overlay"
+  class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-60 flex items-center justify-center p-6 pt-20" ← changed
+  role="dialog" aria-modal="true"
+>
+  <div class="relative w-full max-w-sm">
+    <button
+      id="close-theme"
+      class="absolute top-2 right-2 text-white hover:text-white/80"
+      aria-label="Close theme switcher"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <div class="text-lg text-white mb-4">Album Themes</div>
+    <div class="flex flex-col gap-2">
+      {siteConfig.availableThemes.map(theme => (
+        <button
+          data-theme-value={theme.id}
+          class="theme-item w-full text-left flex items-center justify-between hover:bg-white/10 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <span>{theme.name}</span>
+          <span class="text-xs text-white/70">{theme.year}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
+
 <script>
-  // Theme switcher functionality
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize theme from localStorage or default from site config
-    const savedTheme = localStorage.getItem('theme') || 'disintegration';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    
-    // Set up event listeners for all theme buttons
-    const setupThemeButtons = () => {
-      const themeButtons = document.querySelectorAll('.theme-item');
-      themeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          const theme = button.getAttribute('data-theme-value');
-          if (theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-          }
-        });
-      });
+  function bindControls() {
+    // ── Search Overlay Toggle ─────────────────────────
+    const searchBtn   = document.getElementById('search-button');
+    const closeSearch = document.getElementById('close-search');
+    const overlay     = document.getElementById('search-overlay');
+
+    searchBtn.onclick = () => {
+      overlay.classList.toggle('hidden');
+      if (!overlay.classList.contains('hidden')) {
+        document.getElementById('search-input').focus();
+      }
     };
-    
-    setupThemeButtons();
-  });
-  
-  // Re-initialize after Astro page transitions
-  document.addEventListener('astro:page-load', function() {
-    // Apply current theme after navigation
-    const savedTheme = localStorage.getItem('theme') || 'disintegration';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    
-    // Set up event listeners for all theme buttons after page transition
-    const themeButtons = document.querySelectorAll('.theme-item');
-    themeButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const theme = button.getAttribute('data-theme-value');
-        if (theme) {
-          document.documentElement.setAttribute('data-theme', theme);
-          localStorage.setItem('theme', theme);
-        }
-      });
+    closeSearch.onclick = () => overlay.classList.add('hidden');
+    overlay.onclick    = e => e.target === overlay && overlay.classList.add('hidden');
+    document.onkeydown = e => e.key === 'Escape' && overlay.classList.add('hidden');
+
+    // ── Mobile Nav Toggle ────────────────────────────
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu   = document.getElementById('mobile-menu');
+
+    mobileToggle.onclick = () => {
+      const isOpen = mobileToggle.getAttribute('aria-expanded') === 'true';
+      mobileToggle.setAttribute('aria-expanded', String(!isOpen));
+      mobileMenu.classList.toggle('hidden');
+    };
+
+    // ── Theme Overlay Toggle & Switch ───────────────
+    const themeBtn     = document.getElementById('theme-menu-button');
+    const themeClose   = document.getElementById('close-theme');
+    const themeOverlay = document.getElementById('theme-overlay');
+
+    themeBtn.onclick    = () => themeOverlay.classList.toggle('hidden');
+    themeClose.onclick  = () => themeOverlay.classList.add('hidden');
+    themeOverlay.onclick= e => e.target === themeOverlay && themeOverlay.classList.add('hidden');
+
+    // ── Theme Switcher Functionality ───────────────
+    const applyTheme = theme => {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+    };
+    // initial application
+    applyTheme(localStorage.getItem('theme') || 'disintegration');
+
+    document.querySelectorAll('.theme-item').forEach(btn => {
+      btn.onclick = () => applyTheme(btn.getAttribute('data-theme-value'));
     });
-  });
+  }
+
+  // bind on initial load
+  document.addEventListener('DOMContentLoaded', bindControls);
+  // re-bind after Astro client navigation
+  document.addEventListener('astro:page-load', bindControls);
 </script>

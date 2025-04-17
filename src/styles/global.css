@@ -187,11 +187,11 @@
   
   /* Theme-colored background using color-mix */
   .bg-themed {
-    background-color: color-mix(in oklab, var(--color-primary) 15%, transparent);
+    background-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
     transition: background-color 0.3s ease;
   }
   .bg-themed:hover {
-    background-color: color-mix(in oklab, var(--color-primary) 25%, transparent);
+    background-color: color-mix(in oklab, var(--color-primary) 30%, transparent);
   }
   
   /* Noise background */

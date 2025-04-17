@@ -172,7 +172,6 @@ export const siteConfig: SiteConfig = {
   defaultTheme: "disintegration",
   enableThemeSwitcher: true,
   availableThemes: [
-    { id: "disintegration", name: "Disintegration", year: 1989 },
     { id: "three-imaginary-boys", name: "Three Imaginary Boys", year: 1979 },
     { id: "seventeen-seconds", name: "Seventeen Seconds", year: 1980 },
     { id: "faith", name: "Faith", year: 1981 },
@@ -180,6 +179,7 @@ export const siteConfig: SiteConfig = {
     { id: "the-top", name: "The Top", year: 1984 },
     { id: "the-head-on-the-door", name: "The Head on the Door", year: 1985 },
     { id: "kiss-me", name: "Kiss Me, Kiss Me, Kiss Me", year: 1987 },
+    { id: "disintegration", name: "Disintegration", year: 1989 },
     { id: "wish", name: "Wish", year: 1992 },
     { id: "wild-mood-swings", name: "Wild Mood Swings", year: 1996 },
     { id: "bloodflowers", name: "Bloodflowers", year: 2000 },
