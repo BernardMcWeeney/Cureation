@@ -1,6 +1,7 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import TrackList from "../../components/TrackList.astro";
+import { ViewTransitions } from 'astro:transitions';
 
 // Sidebar configuration
 const sidebarItems = [
@@ -12,74 +13,82 @@ const sidebarItems = [
 ];
 
 export async function getStaticPaths() {
-  // Define album data within getStaticPaths to ensure it's available during route generation
-  const albums = [
-    {
-      slug: "disintegration",
-      title: "Disintegration",
-      year: "1989",
-      coverImage: "/images/albums/disintegration.jpg",
-      releaseDate: "May 2, 1989",
-      recordLabel: "Fiction Records",
-      producer: "Robert Smith, David M. Allen",
-      description: "Disintegration is the eighth studio album by The Cure, released on May 2, 1989. The album marks a return to the band's gothic rock style and is considered by many critics to be their best work.",
-      background: "After the success of Kiss Me, Kiss Me, Kiss Me, The Cure's Robert Smith felt pressure to follow up with a broader album but instead chose a darker, introspective tone.",
-      reception: "Initially met with mixed reviews, it has since been hailed as The Cure's masterpiece.",
-      tracks: [
-        { number: 1, title: "Plainsong", duration: "5:12" },
-        { number: 2, title: "Pictures of You", duration: "7:28" },
-        { number: 3, title: "Closedown", duration: "4:16" },
-        { number: 4, title: "Lovesong", duration: "3:29" },
-        { number: 5, title: "Last Dance", duration: "4:42" },
-        { number: 6, title: "Lullaby", duration: "4:08" },
-        { number: 7, title: "Fascination Street", duration: "5:16" },
-        { number: 8, title: "Prayers for Rain", duration: "6:05" },
-        { number: 9, title: "The Same Deep Water as You", duration: "9:19" },
-        { number: 10, title: "Disintegration", duration: "8:18" },
-        { number: 11, title: "Homesick", duration: "7:06" },
-        { number: 12, title: "Untitled", duration: "6:30" }
-      ],
-      singles: [
-        { title: "Lullaby", releaseDate: "April 10, 1989", chartPosition: "#5 UK" },
-        { title: "Lovesong", releaseDate: "August 21, 1989", chartPosition: "#2 US, #18 UK" },
-        { title: "Pictures of You", releaseDate: "March 19, 1990", chartPosition: "#24 UK" },
-        { title: "Fascination Street", releaseDate: "April 18, 1989", chartPosition: "#1 US Modern Rock" }
-      ]
-    },
-    {
-      slug: "pornography",
-      title: "Pornography",
-      year: "1982",
-      coverImage: "/images/albums/pornography.jpg",
-      releaseDate: "May 4, 1982",
-      recordLabel: "Fiction Records",
-      producer: "Phil Thornalley, The Cure",
-      description: "Pornography is the fourth studio album by The Cure, released on May 4, 1982. It marks the climax of the band's dark, intense style.",
-      background: "Recorded in a tense, drug-fueled environment, it was the last album with the trio lineup before Gallup left.",
-      reception: "Now considered a landmark of gothic rock, despite initial mixed reviews.",
-      tracks: [
-        { number: 1, title: "One Hundred Years", duration: "6:40" },
-        { number: 2, title: "A Short Term Effect", duration: "4:22" },
-        { number: 3, title: "The Hanging Garden", duration: "4:33" },
-        { number: 4, title: "Siamese Twins", duration: "5:29" },
-        { number: 5, title: "The Figurehead", duration: "6:15" },
-        { number: 6, title: "A Strange Day", duration: "5:04" },
-        { number: 7, title: "Cold", duration: "4:26" },
-        { number: 8, title: "Pornography", duration: "6:27" }
-      ],
-      singles: [
-        { title: "The Hanging Garden", releaseDate: "July 8, 1982", chartPosition: "#34 UK" }
-      ]
-    }
-  ];
+  // Fetch album data from the CMS
+  const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
+  const albumsData = await albumsResponse.json();
+  
+  // Fetch songs data
+  const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+  const songsData = await songsResponse.json();
+  
+  // Fetch singles data
+  const singlesResponse = await fetch('https://dash.cureation.net/items/singles');
+  const singlesData = await singlesResponse.json();
 
-  return albums.map((album) => ({
-    params: { slug: album.slug },
-    props: { album }
+  // Process and map the albums data
+  const paths = await Promise.all(albumsData.data.map(async (album) => {
+    // Create slug from title if not provided
+    const slug = album.slug || album.title
+      .toLowerCase()
+      .replace(/[^\w\s]/gi, '')
+      .replace(/\s+/g, '-');
+    
+    // Format album data
+    const formattedAlbum = {
+      id: album.id.toString(),
+      title: album.title,
+      slug: slug,
+      year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
+      coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
+      releaseDate: album.release_date ? new Date(album.release_date).toLocaleDateString('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric'
+      }) : 'Unknown',
+      recordLabel: album.label || 'Fiction',
+      producer: album.producer || 'Unknown',
+      description: album.description || 'No description available.',
+      background: album.background_text || 'No background information available.',
+      reception: album.critical_reception || 'No critical reception information available.',
+      featured: album.featured || false
+    };
+    
+    // Get songs for this album
+    const albumSongs = songsData.data.filter(song => song.album === album.id).map(song => ({
+      number: song.track_number,
+      title: song.title,
+      duration: song.duration,
+      listen_link: song.listen_link
+    }));
+    formattedAlbum.tracks = albumSongs;
+    
+    // Get singles for this album
+    const albumSingles = singlesData.data.filter(single => single.album === album.id).map(single => {
+      return {
+        title: single.title,
+        releaseDate: single.release_date ? new Date(single.release_date).toLocaleDateString('en-US', {
+          month: 'long', day: 'numeric', year: 'numeric'
+        }) : 'Unknown',
+        chartPositions: single.chart_position || []
+      };
+    });
+    formattedAlbum.singles = albumSingles;
+    
+    return formattedAlbum;
   }));
+  
+  // Get related albums for each album
+  return paths.map(album => {
+    const relatedAlbums = paths
+      .filter(otherAlbum => otherAlbum.slug !== album.slug)
+      .slice(0, 3);
+      
+    return {
+      params: { slug: album.slug },
+      props: { album, relatedAlbums }
+    };
+  });
 }
 
-const { album } = Astro.props;
+const { album, relatedAlbums } = Astro.props;
 ---
 
 <MainLayout 
@@ -91,12 +100,14 @@ const { album } = Astro.props;
   sidebarItems={sidebarItems}
   pageClass={`theme-${album.slug}`}
 >
+<ViewTransitions />
+
 <!-- Album artwork background layer -->
 <div class="artwork-background">
   <div class="bg-overlay bg-black opacity-70"></div>
   <div class="album-artwork" style={`background-image: url(${album.coverImage})`}></div>
 </div>
-<!-- ✔️ enforce pure black here so your glass-card blur never shows grey -->
+<!-- Enforce pure black here so your glass-card blur never shows grey -->
 <div data-theme={album.slug} class="bg-transparent">
   <!-- Album Hero Section -->
   <section class="relative">
@@ -108,6 +119,7 @@ const { album } = Astro.props;
             src={album.coverImage} 
             alt={`${album.title} album cover`} 
             class="w-full aspect-square object-cover"
+            transition:name={`album-${album.id}`}
           />
         </div>
       </div>
@@ -169,25 +181,37 @@ const { album } = Astro.props;
     </div>
   </section>
   
-  <!-- Singles Section -->
-  <section id="singles" class="mb-16">
-    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
-      <h2 class="font-heading text-3xl text-primary mb-6">Singles</h2>
-      <ul class="space-y-4">
-        {album.singles.map(single => (
-          <li class="p-4 rounded-lg backdrop-blur-md bg-black/10 border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div>
-              <h3 class="text-xl text-white font-medium">{single.title}</h3>
-              <p class="text-white/70 text-sm">Released: {single.releaseDate}</p>
-            </div>
-            <div class="bg-primary/20 px-3 py-1 rounded-full text-sm text-white">
-              {single.chartPosition}
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
+  <!-- Singles Section with Individual Chart Position Bubbles -->
+  {album.singles && album.singles.length > 0 && (
+    <section id="singles" class="mb-16">
+      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
+        <h2 class="font-heading text-3xl text-primary mb-6">Singles</h2>
+        <ul class="space-y-6">
+          {album.singles.map(single => (
+            <li class="p-4 rounded-lg backdrop-blur-md bg-black/10 border border-white/10">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                <div>
+                  <h3 class="text-xl text-white font-medium">{single.title}</h3>
+                  <p class="text-white/70 text-sm">Released: {single.releaseDate}</p>
+                </div>
+              </div>
+              
+              {single.chartPositions && single.chartPositions.length > 0 && (
+                <div class="flex flex-wrap gap-2 mt-3">
+                  {single.chartPositions.map(chart => (
+                    <div class="bg-primary/20 px-3 py-1 rounded-full text-sm text-white flex items-center">
+                      <span class="font-medium mr-1">#{chart.chart_position}</span>
+                      <span class="text-white/80">{chart.country}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
   
   <!-- Reception Section -->
   <section id="reception" class="mb-16">
@@ -199,59 +223,27 @@ const { album } = Astro.props;
     </div>
   </section>
   
-  <!-- Related Albums -->
+  <!-- Related Albums - Redesigned with overlay titles -->
   <section class="mb-16">
     <h2 class="font-heading text-3xl text-primary mb-6">You Might Also Like</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {album.slug === "disintegration" ? (
-        <>
-          <a href="/discography/pornography" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
-            <img src="/images/albums/pornography.jpg" alt="Pornography album cover" class="w-16 h-16 rounded-lg" />
-            <div>
-              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Pornography</h3>
-              <p class="text-white/70 text-sm">1982</p>
-            </div>
-          </a>
-          <a href="/discography/wish" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
-            <img src="/images/albums/wish.jpg" alt="Wish album cover" class="w-16 h-16 rounded-lg" />
-            <div>
-              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Wish</h3>
-              <p class="text-white/70 text-sm">1992</p>
-            </div>
-          </a>
-          <a href="/discography/kiss-me" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
-            <img src="/images/albums/kiss-me.jpg" alt="Kiss Me, Kiss Me, Kiss Me album cover" class="w-16 h-16 rounded-lg" />
-            <div>
-              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Kiss Me, Kiss Me, Kiss Me</h3>
-              <p class="text-white/70 text-sm">1987</p>
-            </div>
-          </a>
-        </>
-      ) : (
-        <>
-          <a href="/discography/faith" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
-            <img src="/images/albums/faith.jpg" alt="Faith album cover" class="w-16 h-16 rounded-lg" />
-            <div>
-              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Faith</h3>
-              <p class="text-white/70 text-sm">1981</p>
-            </div>
-          </a>
-          <a href="/discography/seventeen-seconds" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
-            <img src="/images/albums/seventeen-seconds.jpg" alt="Seventeen Seconds album cover" class="w-16 h-16 rounded-lg" />
-            <div>
-              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Seventeen Seconds</h3>
-              <p class="text-white/70 text-sm">1980</p>
-            </div>
-          </a>
-          <a href="/discography/disintegration" class="glass-card p-4 rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 flex gap-4 hover-lift group">
-            <img src="/images/albums/disintegration.jpg" alt="Disintegration album cover" class="w-16 h-16 rounded-lg" />
-            <div>
-              <h3 class="text-white group-hover:text-primary transition-colors duration-300">Disintegration</h3>
-              <p class="text-white/70 text-sm">1989</p>
-            </div>
-          </a>
-        </>
-      )}
+      {relatedAlbums.map(relatedAlbum => (
+        <a 
+          href={`/discography/${relatedAlbum.slug}`} 
+          class="glass-card overflow-hidden rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 hover-lift group relative aspect-square"
+        >
+          <img 
+            src={relatedAlbum.coverImage} 
+            alt={`${relatedAlbum.title} album cover`} 
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            transition:name={`album-${relatedAlbum.id}`}
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4">
+            <h3 class="text-white font-medium text-lg line-clamp-2 group-hover:text-primary transition-colors duration-300">{relatedAlbum.title}</h3>
+            <p class="text-white/70 text-sm">{relatedAlbum.year}</p>
+          </div>
+        </a>
+      ))}
     </div>
   </section>
 </div>
@@ -265,6 +257,20 @@ const { album } = Astro.props;
     width: 100%;
     height: 100%;
     z-index: -1;
+  }
+  
+  /* Album artwork background */
+  .album-artwork {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+    filter: blur(20px);
   }
   
   /* Hover lift effect */

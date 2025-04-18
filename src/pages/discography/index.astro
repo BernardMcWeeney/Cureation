@@ -26,15 +26,15 @@ const albums = albumData.data.map(album => ({
   coverImage: album.cover_art
     ? `https://dash.cureation.net/assets/${album.cover_art}`
     : '/images/placeholder-album.jpg',
-  slug: album.title
+  slug: album.slug || album.title
     .toLowerCase()
     .replace(/[^\w\s]/gi, '')
     .replace(/\s+/g, '-'),
   featured: album.featured || false
 }));
 
-const featuredAlbums = albums.filter(album => album.featured);
-const regularAlbums = albums.filter(album => !album.featured);
+const featuredAlbums = albums.filter(album => album.featured) || [];
+const regularAlbums = albums.filter(album => !album.featured) || [];
 ---
 
 <MainLayout
@@ -45,6 +45,8 @@ const regularAlbums = albums.filter(album => !album.featured);
   sidebarItems={sidebarItems}
   pageClass="bg-black"
 >
+  <ViewTransitions />
+  
   <section class="mb-12">
     <div class="mb-12">
       <h1 class="font-display text-5xl md:text-6xl text-white mb-4" transition:animate="slide">
@@ -67,6 +69,7 @@ const regularAlbums = albums.filter(album => !album.featured);
               year={album.year}
               slug={album.slug}
               featured={true}
+              id={album.id}
             />
           ))}
         </div>
@@ -82,7 +85,7 @@ const regularAlbums = albums.filter(album => !album.featured);
             coverImage={album.coverImage}
             year={album.year}
             slug={album.slug}
-            transition:name={`album-${album.id}`}
+            id={album.id}
             style={`--index: ${index + 1}`}
           />
         ))}
