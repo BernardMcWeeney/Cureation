@@ -1,0 +1,83 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import SiteConfig from '../../config/site.config.js';
+
+const sidebarItems = [
+  { title: 'About Cureation', path: '/about' },
+  { title: 'Contributors', path: '/about/contributors' },
+  { title: 'Contact', path: '/about/contact' },
+  { title: 'Privacy Policy', path: '/about/privacy' },
+  { title: 'Disclaimer', path: '/about/disclaimer' }
+];
+---
+
+<MainLayout 
+  title="Disclaimer"
+  description="Important legal and ethical disclaimers regarding Cureation's content, copyright, and fair use policy."
+  showSidebar={true}
+  sidebarActiveItem="Disclaimer"
+  sidebarItems={sidebarItems}
+>
+  <section class="pb-24">
+    <div class="mb-12">
+      <h1 class="font-display text-5xl md:text-6xl text-white mb-6">Disclaimer</h1>
+      <p class="text-white/80 max-w-3xl">
+        Cureation is an independent, non-commercial project created to honor the legacy of The Cure. This page outlines the legal, ethical, and editorial boundaries of the site.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8">
+      <div class="bg-black/30 backdrop-blur-md p-6 md:p-8 rounded-xl border border-white/10 shadow-xl">
+        
+        <h2 class="font-display text-4xl text-primary mb-4 mt-2">Unofficial and Independent</h2>
+        <p class="text-white/90 mb-4">
+          Cureation is not affiliated with The Cure, their management, record labels, or any other official entity. It is an independent fan-led initiative created for educational, cultural, and archival purposes only.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Copyright & Intellectual Property</h2>
+        <p class="text-white/90 mb-4">
+          All copyrighted material on this website—including but not limited to lyrics, logos, photographs, album artwork, audio clips, and other media—remains the intellectual property of their respective copyright owners.
+        </p>
+        <p class="text-white/90 mb-4">
+          No copyright infringement is intended. Cureation does not claim ownership over any third-party material. Rights holders are credited where possible and will be respected in all takedown or attribution requests.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Fair Use & Public Domain</h2>
+        <p class="text-white/90 mb-4">
+          This site may display copyrighted content under the doctrine of <strong>Fair Use</strong> as defined in Section 107 of the U.S. Copyright Act. This includes use for the purposes of commentary, education, research, criticism, and historical documentation.
+        </p>
+        <p class="text-white/90 mb-4">
+          In addition, where applicable, materials that are believed to be in the <strong>public domain</strong> have been included. If you believe something has been used inappropriately, please contact us directly.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">No Revenue or Monetization</h2>
+        <p class="text-white/90 mb-4">
+          Cureation is entirely non-commercial. No advertising, affiliate links, merchandise, subscription services, or paid content appear on this site. It is a free and public archive built out of passion and dedication by fans.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Accuracy & Editorial Standards</h2>
+        <p class="text-white/90 mb-4">
+          We strive for accuracy and completeness in the information presented across Cureation, including lyrics, discography entries, timelines, and setlists. However, as this is a community-driven archive, some content may be subject to correction or revision.
+        </p>
+        <p class="text-white/90 mb-4">
+          If you spot an error or inaccuracy, we welcome your input and will correct it as soon as possible.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">External Links & Third-Party Content</h2>
+        <p class="text-white/90 mb-4">
+          Cureation may contain links to third-party websites, such as interviews, fan sites, or social media posts. These links are provided for reference and do not imply endorsement. We are not responsible for the content or practices of any external websites.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">User Responsibility</h2>
+        <p class="text-white/90 mb-4">
+          By using this site, you acknowledge that you are doing so for personal and non-commercial purposes. You agree not to redistribute or reuse copyrighted content from Cureation without permission from the original rights holder.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Takedown Requests</h2>
+        <p class="text-white/90 mb-4">
+          If you are a copyright holder and wish to request the removal of any material, please contact us at <a href="mailto:data@cureation.net" class="text-primary underline">data@cureation.net</a>. We respect all valid takedown requests and aim to respond within 48 hours.
+        </p>
+      </div>
+    </div>
+  </section>
+</MainLayout>

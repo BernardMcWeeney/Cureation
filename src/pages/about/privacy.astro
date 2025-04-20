@@ -1,0 +1,92 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import SiteConfig from '../../config/site.config.js';
+
+const sidebarItems = [
+  { title: 'About Cureation', path: '/about' },
+  { title: 'Contributors', path: '/about/contributors' },
+  { title: 'Terms', path: '/about/terms' },
+  { title: 'Privacy Policy', path: '/about/privacy' },
+  { title: 'Disclaimer', path: '/about/disclaimer' }
+];
+---
+
+<MainLayout 
+  title="Privacy Policy"
+  description="Cureation's approach to data privacy, cookie usage, and user rights."
+  showSidebar={true}
+  sidebarActiveItem="Privacy Policy"
+  sidebarItems={sidebarItems}
+>
+  <section class="pb-24">
+    <div class="mb-12">
+      <h1 class="font-display text-5xl md:text-6xl text-white mb-6">Privacy Policy</h1>
+      <p class="text-white/80 max-w-3xl">
+        At Cureation, we are committed to protecting your privacy. This policy outlines what personal data we may collect, how we use it, and your rights under data protection law.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8">
+      <div class="bg-black/30 backdrop-blur-md p-6 md:p-8 rounded-xl border border-white/10 shadow-xl">
+        
+        <h2 class="font-display text-4xl text-primary mb-4 mt-2">Who We Are</h2>
+        <p class="text-white/90 mb-4">
+          Cureation is a fan-led, non-commercial archive celebrating the music and legacy of The Cure. We do not operate as a business, and we do not monetize user data or behavior.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">What Data We Collect</h2>
+        <p class="text-white/90 mb-4">
+          Cureation does not actively collect personal data. However, some limited data may be processed automatically via standard website logs and analytics tools (such as IP address, browser type, and page visit duration) to ensure the site functions correctly and securely.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Cookies</h2>
+        <p class="text-white/90 mb-4">
+          We may use minimal cookies for basic functionality or anonymous analytics. We do not use cookies for advertising, tracking across websites, or user profiling.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Analytics</h2>
+        <p class="text-white/90 mb-4">
+          If analytics tools are used (e.g. Plausible, Fathom, or privacy-focused alternatives), they are configured to avoid storing personal identifiers or tracking individual users across sessions.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Embedded Content</h2>
+        <p class="text-white/90 mb-4">
+          Some pages may include embedded content (e.g., YouTube videos, Spotify embeds, social media posts). These services may collect data about you, use cookies, or track your interaction with the embedded content. Cureation has no control over third-party service policies.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Email Communication</h2>
+        <p class="text-white/90 mb-4">
+          If you contact us via email, we will use your information solely to respond to your inquiry. Your email address will not be shared, stored long-term, or used for any marketing purposes.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Your Rights</h2>
+        <p class="text-white/90 mb-4">
+          Under the General Data Protection Regulation (GDPR) and similar frameworks, you have the right to:
+        </p>
+        <ul class="list-disc pl-6 text-white/90 mb-4">
+          <li>Access any personal data we may hold about you</li>
+          <li>Request correction or deletion of your data</li>
+          <li>Withdraw consent (if given)</li>
+          <li>Lodge a complaint with a supervisory authority</li>
+        </ul>
+        <p class="text-white/90 mb-4">
+          To exercise these rights, contact us at <a href="mailto:data@cureation.net" class="text-primary underline">data@cureation.net</a>.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Data Security</h2>
+        <p class="text-white/90 mb-4">
+          We take reasonable steps to protect this site and any data stored or transmitted. However, please be aware that no method of internet transmission is 100% secure.
+        </p>
+
+        <h2 class="font-display text-4xl text-primary mb-4 mt-10">Changes to This Policy</h2>
+        <p class="text-white/90 mb-4">
+          This privacy policy may be updated periodically. If changes are made, we will post the revised version on this page with an updated effective date.
+        </p>
+
+        <p class="text-white/70 text-sm mt-12">
+          Last updated: April 2025
+        </p>
+      </div>
+    </div>
+  </section>
+</MainLayout>

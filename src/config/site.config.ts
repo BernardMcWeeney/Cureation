@@ -95,7 +95,7 @@ export const siteConfig: SiteConfig = {
   // Branding
   logo: {
     text: "Cureation",
-    image: "/images/logo.svg",
+    image: "logo.png",
   },
 
   // Social media and contact
@@ -155,8 +155,9 @@ export const siteConfig: SiteConfig = {
         },
       ],
       legal: [
-        { name: "Privacy Policy", path: "/privacy" },
-        { name: "Terms of Use", path: "/terms" },
+        { name: "Disclaimer", path: "/about/disclaimer" },
+        { name: "Privacy Policy", path: "/about/privacy" },
+        { name: "Terms of Use", path: "/about/terms" },
       ],
     },
   },

@@ -68,8 +68,7 @@ const currentPath = Astro.url.pathname;
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 
-                 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 
+              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 
                  7.343l1.657-1.657a2 2 0 012.828 0l2.829 
                  2.829a2 2 0 010 2.828l-8.486 
                  8.485M7 17h.01"
@@ -111,12 +110,19 @@ const currentPath = Astro.url.pathname;
           d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
-    <input
-      id="search-input"
-      type="search"
-      placeholder="Search..."
-      class="w-full p-3 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:ring-2 focus:ring-primary"
-    />
+    
+    <!-- Fixed form element with proper method and action -->
+    <form id="search-form" action="/lyrics/search" method="get">
+      <input
+        id="search-input"
+        name="q"
+        type="search"
+        placeholder="Search..."
+        class="w-full p-3 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:ring-2 focus:ring-primary"
+      />
+      <!-- Add a submit button for accessibility -->
+      <button type="submit" class="sr-only">Search</button>
+    </form>
   </div>
 </div>
 
@@ -146,7 +152,7 @@ const currentPath = Astro.url.pathname;
 <!-- Theme Overlay -->
 <div
   id="theme-overlay"
-  class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-60 flex items-center justify-center p-6 pt-20" ← changed
+  class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-6 pt-20"
   role="dialog" aria-modal="true"
 >
   <div class="relative w-full max-w-sm">
@@ -181,16 +187,37 @@ const currentPath = Astro.url.pathname;
     const searchBtn   = document.getElementById('search-button');
     const closeSearch = document.getElementById('close-search');
     const overlay     = document.getElementById('search-overlay');
+    const searchInput = document.getElementById('search-input');
+    const searchForm  = document.getElementById('search-form');
 
     searchBtn.onclick = () => {
       overlay.classList.toggle('hidden');
       if (!overlay.classList.contains('hidden')) {
-        document.getElementById('search-input').focus();
+        searchInput.focus();
       }
     };
+    
     closeSearch.onclick = () => overlay.classList.add('hidden');
-    overlay.onclick    = e => e.target === overlay && overlay.classList.add('hidden');
-    document.onkeydown = e => e.key === 'Escape' && overlay.classList.add('hidden');
+    overlay.onclick    = e => {
+      if (e.target === overlay) {
+        overlay.classList.add('hidden');
+      }
+    };
+    
+    // Handle form submission
+    searchForm.addEventListener('submit', (e) => {
+      const query = searchInput.value.trim();
+      if (!query) {
+        e.preventDefault(); // Prevent empty submissions
+      }
+    });
+    
+    // Handle escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
+        overlay.classList.add('hidden');
+      }
+    });
 
     // ── Mobile Nav Toggle ────────────────────────────
     const mobileToggle = document.getElementById('mobile-menu-toggle');
@@ -209,7 +236,11 @@ const currentPath = Astro.url.pathname;
 
     themeBtn.onclick    = () => themeOverlay.classList.toggle('hidden');
     themeClose.onclick  = () => themeOverlay.classList.add('hidden');
-    themeOverlay.onclick= e => e.target === themeOverlay && themeOverlay.classList.add('hidden');
+    themeOverlay.onclick= e => {
+      if (e.target === themeOverlay) {
+        themeOverlay.classList.add('hidden');
+      }
+    };
 
     // ── Theme Switcher Functionality ───────────────
     const applyTheme = theme => {
