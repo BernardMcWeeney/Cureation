@@ -11,6 +11,13 @@ interface Props {
 }
 
 const { tracks } = Astro.props;
+
+// Function to create slug from song title
+const createSlug = (title) => {
+  return title.toLowerCase()
+    .replace(/[^\w\s]/gi, '')
+    .replace(/\s+/g, '-');
+};
 ---
 
 <div class="overflow-x-auto">
@@ -27,7 +34,14 @@ const { tracks } = Astro.props;
       {tracks.map((track, index) => (
         <tr class={`hover:bg-white/5 transition-colors duration-200 ${index % 2 === 0 ? 'bg-black/10' : ''}`}>
           <td class="py-3 px-4 text-white/80">{track.number}</td>
-          <td class="py-3 px-4 text-white font-medium">{track.title}</td>
+          <td class="py-3 px-4">
+            <a 
+              href={`/lyrics/${createSlug(track.title)}`} 
+              class="text-white font-medium hover:text-primary transition-colors duration-200"
+            >
+              {track.title}
+            </a>
+          </td>
           <td class="py-3 px-4 text-right text-white/80">{track.duration}</td>
           <td class="py-3 px-4 text-right">
             {track.listen_link ? (

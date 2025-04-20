@@ -1,0 +1,145 @@
+---
+// src/pages/lyrics/album.astro
+import MainLayout from '../../layouts/MainLayout.astro';
+import { ViewTransitions } from 'astro:transitions';
+
+// Sidebar configuration
+const sidebarItems = [
+  { title: 'All Songs', path: '/lyrics' },
+  { title: 'By Album', path: '/lyrics/album' },
+  { title: 'Popular Songs', path: '/lyrics/popular' },
+  { title: 'Search', path: '/lyrics/search' }
+];
+
+// Fetch albums data
+const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
+const albumsData = await albumsResponse.json();
+const albums = albumsData.data.map(album => ({
+  id: album.id,
+  title: album.title,
+  slug: album.slug || album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-'),
+  coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
+  year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
+  songIds: album.songs || []
+})).sort((a, b) => (b.year || '0') - (a.year || '0')); // Sort by year descending
+
+// Fetch all songs
+const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+const songsData = await songsResponse.json();
+const songsMap = songsData.data.reduce((acc, song) => {
+  acc[song.id] = {
+    id: song.id,
+    title: song.title,
+    duration: song.duration,
+    trackNumber: song.track_number,
+    hasLyrics: !!song.lyrics,
+    slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')
+  };
+  return acc;
+}, {});
+
+// Add songs to each album
+albums.forEach(album => {
+  album.songs = album.songIds
+    .map(id => songsMap[id])
+    .filter(song => song) // Remove undefined/null entries
+    .sort((a, b) => a.trackNumber - b.trackNumber); // Sort by track number
+});
+---
+
+<MainLayout
+  title="Lyrics by Album"
+  description="Browse The Cure's lyrics organized by album - explore their musical journey through the decades."
+  showSidebar={true}
+  sidebarActiveItem="By Album"
+  sidebarItems={sidebarItems}
+  pageClass="bg-black"
+>
+  <ViewTransitions />
+  
+  <!-- Hero Section -->
+  <section class="mb-12">
+    <div class="glass-card rounded-xl overflow-hidden border border-white/20">
+      <div class="p-6 md:p-8">
+        <h1 class="font-display text-5xl md:text-6xl text-white mb-4">Browse Lyrics by Album</h1>
+        <p class="text-white/80 max-w-3xl">
+          Explore The Cure's discography and dive into the lyrics of your favorite albums. Each album contains the full collection of songs with links to their complete lyrics.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Albums Grid -->
+  <section>
+    <div class="space-y-12">
+      {albums.map(album => (
+        <div class="mb-12">
+          <div class="glass-card rounded-xl overflow-hidden border border-white/20 mb-6">
+            <div class="flex flex-col md:flex-row">
+              <!-- Album Cover -->
+              <a href={`/discography/${album.slug}`} class="md:w-1/4 relative aspect-square md:aspect-auto">
+                <img 
+                  src={album.coverImage} 
+                  alt={`Album cover for ${album.title}`} 
+                  class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/80"></div>
+              </a>
+              
+              <!-- Album Info -->
+              <div class="p-6 md:w-3/4 relative backdrop-blur-lg bg-black/20">
+                <a 
+                  href={`/discography/${album.slug}`}
+                  class="font-display text-3xl text-white hover:text-primary transition-colors duration-300 mb-2 inline-block"
+                >
+                  {album.title}
+                </a>
+                <p class="text-primary text-lg mb-4">{album.year}</p>
+                
+                <div class="mt-4">
+                  <p class="text-white/80">{album.songs?.length || 0} tracks</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Album Tracks with Lyrics Status -->
+          <div class="pl-0 md:pl-8 space-y-2">
+            {album.songs?.map(song => (
+              <a 
+                href={`/lyrics/${song.slug}`}
+                class="glass-card rounded-lg p-4 border border-white/20 hover:border-white/30 backdrop-blur-md bg-black/20 hover:bg-black/30 transition-all duration-300 hover-lift flex items-center justify-between gap-4"
+              >
+                <div class="flex items-center gap-4">
+                  <span class="text-white/60 text-sm w-8">{song.trackNumber}</span>
+                  <span class="text-white font-medium">{song.title}</span>
+                  {song.hasLyrics && (
+                    <span class="px-2 py-1 text-xs rounded-full bg-primary/20 text-primary">Lyrics</span>
+                  )}
+                </div>
+                <div class="flex items-center gap-4">
+                  <span class="text-white/60 text-sm">{song.duration}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</MainLayout>
+
+<style>
+  /* Lift effect on hover */
+  .hover-lift {
+    transition: transform 0.3s var(--ease-out);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+</style>

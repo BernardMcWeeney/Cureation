@@ -1,0 +1,50 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+---
+<MainLayout title="Search Lyrics" showSidebar={false} pageClass="bg-black p-8">
+  <h1 class="text-3xl text-white mb-4">Search The Cure Lyrics</h1>
+
+  <!-- Bare‑bones input -->
+  <input
+    id="search-input"
+    type="text"
+    placeholder="Type to search…"
+    class="w-full max-w-xl px-3 py-2 mb-6 rounded border border-gray-400 focus:outline-none focus:ring focus:border-blue-300"
+  />
+
+  <!-- Results go here -->
+  <ul id="results" class="text-white space-y-2"></ul>
+
+  <script type="module" client:load>
+    // Simple demo data — replace with your fetch logic
+    const items = [
+      { title: 'Just Like Heaven', album: 'Kiss Me, Kiss Me, Kiss Me', lyrics: 'Show me, show me, show me...' },
+      { title: 'Friday I’m in Love', album: 'Wish', lyrics: 'I don’t care if Monday’s blue...' },
+      // …
+    ];
+
+    const input = document.getElementById('search-input');
+    const results = document.getElementById('results');
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      results.innerHTML = '';
+
+      if (q.length < 1) return;
+
+      const matched = items.filter(item =>
+        item.title.toLowerCase().includes(q) ||
+        item.album.toLowerCase().includes(q) ||
+        item.lyrics.toLowerCase().includes(q)
+      );
+
+      if (matched.length === 0) {
+        results.innerHTML = `<li>No matches</li>`;
+      } else {
+        results.innerHTML = matched
+          .map(item => `<li>${item.title} — <em>${item.album}</em></li>`)
+          .join('');
+      }
+    });
+  </script>
+</MainLayout>
