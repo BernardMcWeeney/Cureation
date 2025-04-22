@@ -1,5 +1,3 @@
-// site.config.ts
-
 // =============================================================================
 // Type Definitions
 // =============================================================================
@@ -24,19 +22,21 @@ export interface NavigationConfig {
   };
 }
 
+export interface ContactEntry {
+  label: string;
+  email: string;
+}
+
 export interface SiteConfig {
-  // Basic site information
   name: string;
   description: string;
   url: string;
 
-  // Branding details
   logo: {
     text: string;
     image: string;
   };
 
-  // Social and contact information
   social: {
     twitter: string | null;
     instagram: string | null;
@@ -44,18 +44,19 @@ export interface SiteConfig {
     discord: string | null;
     github: string | null;
   };
+
   contact: {
-    email: string;
+    general: ContactEntry;
+    data: ContactEntry;
+    press: ContactEntry;
   };
 
-  // Meta and SEO settings
   meta: {
     ogImage: string;
     twitterHandle: string;
     favicon: string;
   };
 
-  // API endpoints (e.g. for Directus CMS)
   api: {
     baseUrl: string;
     endpoints: {
@@ -66,17 +67,14 @@ export interface SiteConfig {
     };
   };
 
-  // Navigation configuration
   navigation: NavigationConfig;
 
-  // Featured content settings
   featured: {
     album: string;
     setlistCount: number;
     blogCount: number;
   };
-  
-  // Theme settings
+
   defaultTheme: string;
   enableThemeSwitcher: boolean;
   availableThemes: Theme[];
@@ -86,19 +84,15 @@ export interface SiteConfig {
 // Site Configuration Object
 // =============================================================================
 export const siteConfig: SiteConfig = {
-  // Basic site info
   name: "Cureation",
-  description:
-    "A fan-built archive celebrating the music, history, and legacy of The Cure",
+  description: "A fan-built archive celebrating the music, history, and legacy of The Cure",
   url: "https://cureation.net",
 
-  // Branding
   logo: {
     text: "Cureation",
     image: "logo.png",
   },
 
-  // Social media and contact
   social: {
     twitter: "https://twitter.com/cureationx",
     instagram: null,
@@ -106,18 +100,19 @@ export const siteConfig: SiteConfig = {
     discord: null,
     github: null,
   },
+
   contact: {
-    email: "hello@cureation.net",
+    general: { label: "General", email: "hello@cureation.net" },
+    data: { label: "Data", email: "data@cureation.net" },
+    press: { label: "Press", email: "press@cureation.net" }
   },
 
-  // Meta settings for SEO and social sharing
   meta: {
     ogImage: "/images/og-image.jpg",
     twitterHandle: "@cureationx",
     favicon: "/favicon.svg",
   },
 
-  // API endpoints
   api: {
     baseUrl: "https://dash.cureation.net/items",
     endpoints: {
@@ -128,7 +123,6 @@ export const siteConfig: SiteConfig = {
     },
   },
 
-  // Navigation configuration
   navigation: {
     main: [
       { name: "Home", path: "/" },
@@ -162,14 +156,12 @@ export const siteConfig: SiteConfig = {
     },
   },
 
-  // Featured content
   featured: {
     album: "disintegration",
     setlistCount: 3,
     blogCount: 2,
   },
-  
-  // Theme settings
+
   defaultTheme: "disintegration",
   enableThemeSwitcher: true,
   availableThemes: [
@@ -188,7 +180,6 @@ export const siteConfig: SiteConfig = {
     { id: "4:13-dream", name: "4:13 Dream", year: 2008 }
   ]
 };
-
 
 /**
  * Retrieves the main navigation items from the configuration.

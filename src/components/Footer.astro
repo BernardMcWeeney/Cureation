@@ -11,18 +11,14 @@ const footerLinks = getFooterLinks();
       <!-- Brand Section -->
       <div class="md:col-span-4 lg:col-span-5">
         <a href="/" class="flex items-center gap-3 mb-6 group">
-          <div
-            class="w-10 h-10 bg-primary/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center"
-          >
+          <div class="w-10 h-10 bg-primary/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
             <img
               src="/logo.png"
               alt="Logo"
               class="w-6 h-6 rounded-full object-contain"
             />
           </div>
-          <h3
-            class="m-0 font-display text-5xl text-primary group-hover:text-primary/80 transition-colors duration-300"
-          >
+          <h3 class="m-0 font-display text-5xl text-primary group-hover:text-primary/80 transition-colors duration-300">
             {siteConfig.logo.text}
           </h3>
         </a>
@@ -59,7 +55,7 @@ const footerLinks = getFooterLinks();
         </div>
       </div>
 
-      <!-- Navigation Links -->
+      <!-- Navigation and Contact Links -->
       <div class="md:col-span-8 lg:col-span-7">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
           <!-- Explore Links -->
@@ -102,39 +98,29 @@ const footerLinks = getFooterLinks();
             </ul>
           </div>
 
-          <!-- Contact Section -->
+          <!-- Contact Links -->
           <div>
             <h4 class="font-display text-3xl mb-4 text-primary">Contact</h4>
-            <a
-              href={`mailto:${siteConfig.contact.email}`}
-              class="text-white hover:text-primary transition-colors duration-300 flex items-center gap-2 mb-6"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-mail"
-              >
-                <rect width="20" height="16" x="2" y="4" rx="2" />
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-              </svg>
-              {siteConfig.contact.email}
-            </a>
+            <ul class="space-y-3">
+              {Object.values(siteConfig.contact).map((item) => (
+                <li>
+                  <a
+                    href={`mailto:${item.email}`}
+                    class="text-white hover:text-primary transition-colors duration-300 flex items-center gap-2"
+                  >
+                    <span class="size-1.5 rounded-full bg-primary"></span>
+                    {item.label}: {item.email}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Bottom Section -->
-    <div
-      class="mt-16 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-4"
-    >
+    <div class="mt-16 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-4">
       <p class="text-sm text-white/80">
         © {currentYear} {siteConfig.name}. All rights reserved.
       </p>
