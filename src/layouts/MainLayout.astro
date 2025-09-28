@@ -84,12 +84,12 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
         style={ogImage ? `background-image: url(${ogImage})` : ''}
       ></div>
       <!-- Gradient overlay provides better text contrast -->
-      <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/10"></div>
+      <div class="absolute inset-0 bg-linear-to-b from-black/10 via-black/5 to-black/10"></div>
     </div>
 
     <Header />
     <div class="h-6"></div>
-    <main class="flex-grow pt-20">
+    <main class="grow pt-20">
       <div class="responsive-container flex flex-col md:flex-row gap-8">
         <div class={showSidebar ? 'md:w-3/4 lg:w-4/5' : 'w-full'}>
           <slot />

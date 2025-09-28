@@ -267,7 +267,7 @@ const { album, relatedAlbums } = Astro.props;
             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             transition:name={`album-${relatedAlbum.id}`}
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4">
+          <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4">
             <h3 class="text-white font-medium text-lg line-clamp-2 group-hover:text-primary transition-colors duration-300">{relatedAlbum.title}</h3>
             <p class="text-white/70 text-sm">{relatedAlbum.year}</p>
           </div>

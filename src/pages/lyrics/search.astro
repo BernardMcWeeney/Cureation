@@ -130,7 +130,7 @@ console.log(`Search query: "${query}", Found ${searchResults.length} results`);
                 {searchResults.map(song => (
                   <a href={`/lyrics/${song.slug}`} class="glass-card rounded-lg p-4 border border-white/20 hover:border-white/30 backdrop-blur-md bg-black/20 hover:bg-black/30 transition-all duration-300 hover-lift">
                     <div class="flex items-center gap-3">
-                      <div class="w-12 h-12 flex-shrink-0">
+                      <div class="w-12 h-12 shrink-0">
                         <img 
                           src={song.albumCover} 
                           alt={`Album art for ${song.albumTitle}`}
