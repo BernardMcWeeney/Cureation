@@ -1,6 +1,4 @@
 ---
-// src/pages/discography/index.astro
-
 import MainLayout from '../../layouts/MainLayout.astro';
 import AlbumCard from '../../components/AlbumCard.astro';
 import { ViewTransitions } from 'astro:transitions';
@@ -26,10 +24,10 @@ const albums = albumData.data.map(album => ({
   coverImage: album.cover_art
     ? `https://dash.cureation.net/assets/${album.cover_art}`
     : '/images/placeholder-album.jpg',
-  slug: album.slug || album.title
+  slug: album.slug || (album.title ? album.title
     .toLowerCase()
     .replace(/[^\w\s]/gi, '')
-    .replace(/\s+/g, '-'),
+    .replace(/\s+/g, '-') : 'unknown-album'),
   featured: album.featured || false
 }));
 

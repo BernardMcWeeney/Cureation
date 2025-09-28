@@ -16,8 +16,8 @@ const albumsResponse = await fetch('https://dash.cureation.net/items/discography
 const albumsData = await albumsResponse.json();
 const albums = albumsData.data.reduce((acc, album) => {
   acc[album.id] = {
-    title: album.title,
-    slug: album.slug || album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-'),
+    title: album.title || 'Unknown Album',
+    slug: album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : 'unknown-album'),
     cover_art: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
     year: album.release_date ? new Date(album.release_date).getFullYear().toString() : ''
   };
@@ -28,20 +28,22 @@ const albums = albumsData.data.reduce((acc, album) => {
 const songsResponse = await fetch('https://dash.cureation.net/items/songs');
 const songsData = await songsResponse.json();
 
-// Format the songs data with album information
-const songs = songsData.data.map(song => ({
-  id: song.id,
-  title: song.title,
-  albumId: song.album,
-  albumTitle: albums[song.album]?.title || 'Unknown Album',
-  albumSlug: albums[song.album]?.slug || 'unknown',
-  albumCover: albums[song.album]?.cover_art || '/images/placeholder-album.jpg',
-  year: albums[song.album]?.year || '',
-  duration: song.duration,
-  hasLyrics: !!song.lyrics,
-  lyrics: song.lyrics || '',
-  slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')
-}));
+// Format the songs data with album information - filter out songs without titles
+const songs = songsData.data
+  .filter(song => song.title) // Only include songs that have titles
+  .map(song => ({
+    id: song.id,
+    title: song.title,
+    albumId: song.album,
+    albumTitle: albums[song.album]?.title || 'Unknown Album',
+    albumSlug: albums[song.album]?.slug || 'unknown',
+    albumCover: albums[song.album]?.cover_art || '/images/placeholder-album.jpg',
+    year: albums[song.album]?.year || '',
+    duration: song.duration || '0:00',
+    hasLyrics: !!song.lyrics,
+    lyrics: song.lyrics || '',
+    slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')
+  }));
 
 // Get a random "Lyric of the Day" from songs with lyrics
 const songsWithLyrics = songs.filter(song => song.hasLyrics);

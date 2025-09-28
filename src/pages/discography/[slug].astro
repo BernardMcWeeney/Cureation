@@ -13,79 +13,108 @@ const sidebarItems = [
 ];
 
 export async function getStaticPaths() {
-  // Fetch album data from the CMS
-  const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
-  const albumsData = await albumsResponse.json();
-  
-  // Fetch songs data
-  const songsResponse = await fetch('https://dash.cureation.net/items/songs');
-  const songsData = await songsResponse.json();
-  
-  // Fetch singles data
-  const singlesResponse = await fetch('https://dash.cureation.net/items/singles');
-  const singlesData = await singlesResponse.json();
+  try {
+    // Fetch album data from the CMS
+    const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
+    const albumsData = await albumsResponse.json();
+    
+    // Log the raw data to see what we're working with
+    console.log('Albums data length:', albumsData.data?.length);
+    console.log('First few albums:', albumsData.data?.slice(0, 3).map(a => ({ id: a.id, title: a.title, slug: a.slug })));
+    
+    // Fetch songs data
+    const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+    const songsData = await songsResponse.json();
+    
+    // Fetch singles data
+    const singlesResponse = await fetch('https://dash.cureation.net/items/singles');
+    const singlesData = await singlesResponse.json();
 
-  // Process and map the albums data
-  const paths = await Promise.all(albumsData.data.map(async (album) => {
-    // Create slug from title if not provided
-    const slug = album.slug || album.title
-      .toLowerCase()
-      .replace(/[^\w\s]/gi, '')
-      .replace(/\s+/g, '-');
-    
-    // Format album data
-    const formattedAlbum = {
-      id: album.id.toString(),
-      title: album.title,
-      slug: slug,
-      year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
-      coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
-      releaseDate: album.release_date ? new Date(album.release_date).toLocaleDateString('en-US', {
-        month: 'long', day: 'numeric', year: 'numeric'
-      }) : 'Unknown',
-      recordLabel: album.label || 'Fiction',
-      producer: album.producer || 'Unknown',
-      description: album.description || 'No description available.',
-      background: album.background_text || 'No background information available.',
-      reception: album.critical_reception || 'No critical reception information available.',
-      featured: album.featured || false
-    };
-    
-    // Get songs for this album
-    const albumSongs = songsData.data.filter(song => song.album === album.id).map(song => ({
-      number: song.track_number,
-      title: song.title,
-      duration: song.duration,
-      listen_link: song.listen_link
-    }));
-    formattedAlbum.tracks = albumSongs;
-    
-    // Get singles for this album
-    const albumSingles = singlesData.data.filter(single => single.album === album.id).map(single => {
-      return {
-        title: single.title,
-        releaseDate: single.release_date ? new Date(single.release_date).toLocaleDateString('en-US', {
+    // Process and map the albums data
+    const paths = await Promise.all(albumsData.data.map(async (album) => {
+      // Create slug from title if not provided - add null checks
+      let slug;
+      if (album.slug) {
+        slug = album.slug;
+      } else if (album.title) {
+        slug = album.title
+          .toLowerCase()
+          .replace(/[^\w\s]/gi, '')
+          .replace(/\s+/g, '-');
+      } else {
+        console.warn('Album without title or slug:', album);
+        slug = `album-${album.id}`;
+      }
+      
+      // Log each album's slug generation
+      console.log(`Album "${album.title}" -> slug: "${slug}"`);
+      
+      // Format album data
+      const formattedAlbum = {
+        id: album.id.toString(),
+        title: album.title || 'Unknown Album',
+        slug: slug,
+        year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
+        coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
+        releaseDate: album.release_date ? new Date(album.release_date).toLocaleDateString('en-US', {
           month: 'long', day: 'numeric', year: 'numeric'
         }) : 'Unknown',
-        chartPositions: single.chart_position || []
+        recordLabel: album.label || 'Fiction',
+        producer: album.producer || 'Unknown',
+        description: album.description || 'No description available.',
+        background: album.background_text || 'No background information available.',
+        reception: album.critical_reception || 'No critical reception information available.',
+        featured: album.featured || false
+      };
+      
+      // Get songs for this album - add null checks
+      const albumSongs = songsData.data
+        .filter(song => song.album === album.id && song.title) // Filter out songs without titles
+        .map(song => ({
+          number: song.track_number,
+          title: song.title || 'Unknown Track',
+          duration: song.duration || '0:00',
+          listen_link: song.listen_link
+        }));
+      formattedAlbum.tracks = albumSongs;
+      
+      // Get singles for this album
+      const albumSingles = singlesData.data.filter(single => single.album === album.id).map(single => {
+        return {
+          title: single.title || 'Unknown Single',
+          releaseDate: single.release_date ? new Date(single.release_date).toLocaleDateString('en-US', {
+            month: 'long', day: 'numeric', year: 'numeric'
+          }) : 'Unknown',
+          chartPositions: single.chart_position || []
+        };
+      });
+      formattedAlbum.singles = albumSingles;
+      
+      return formattedAlbum;
+    }));
+    
+    // Log all generated slugs
+    console.log('All generated album slugs:', paths.map(p => p.slug));
+    
+    // Get related albums for each album
+    const finalPaths = paths.map(album => {
+      const relatedAlbums = paths
+        .filter(otherAlbum => otherAlbum.slug !== album.slug)
+        .slice(0, 3);
+        
+      return {
+        params: { slug: album.slug },
+        props: { album, relatedAlbums }
       };
     });
-    formattedAlbum.singles = albumSingles;
     
-    return formattedAlbum;
-  }));
-  
-  // Get related albums for each album
-  return paths.map(album => {
-    const relatedAlbums = paths
-      .filter(otherAlbum => otherAlbum.slug !== album.slug)
-      .slice(0, 3);
-      
-    return {
-      params: { slug: album.slug },
-      props: { album, relatedAlbums }
-    };
-  });
+    console.log('Final static paths:', finalPaths.map(p => p.params.slug));
+    
+    return finalPaths;
+  } catch (error) {
+    console.error('Error in getStaticPaths:', error);
+    return [];
+  }
 }
 
 const { album, relatedAlbums } = Astro.props;

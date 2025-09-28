@@ -16,8 +16,8 @@ const albumsResponse = await fetch('https://dash.cureation.net/items/discography
 const albumsData = await albumsResponse.json();
 const albums = albumsData.data.map(album => ({
   id: album.id,
-  title: album.title,
-  slug: album.slug || album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-'),
+  title: album.title || 'Unknown Album',
+  slug: album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : 'unknown-album'),
   coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
   year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
   songIds: album.songs || []
@@ -26,17 +26,19 @@ const albums = albumsData.data.map(album => ({
 // Fetch all songs
 const songsResponse = await fetch('https://dash.cureation.net/items/songs');
 const songsData = await songsResponse.json();
-const songsMap = songsData.data.reduce((acc, song) => {
-  acc[song.id] = {
-    id: song.id,
-    title: song.title,
-    duration: song.duration,
-    trackNumber: song.track_number,
-    hasLyrics: !!song.lyrics,
-    slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')
-  };
-  return acc;
-}, {});
+const songsMap = songsData.data
+  .filter(song => song.title) // Only include songs with titles
+  .reduce((acc, song) => {
+    acc[song.id] = {
+      id: song.id,
+      title: song.title,
+      duration: song.duration || '0:00',
+      trackNumber: song.track_number,
+      hasLyrics: !!song.lyrics,
+      slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')
+    };
+    return acc;
+  }, {});
 
 // Add songs to each album
 albums.forEach(album => {

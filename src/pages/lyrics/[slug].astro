@@ -18,8 +18,8 @@ export async function getStaticPaths() {
   const albums = albumsData.data.reduce((acc, album) => {
     acc[album.id] = {
       id: album.id,
-      title: album.title,
-      slug: album.slug || album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-'),
+      title: album.title || 'Unknown Album',
+      slug: album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : 'unknown-album'),
       cover_art: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
       year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
       producer: album.producer || 'Unknown'
@@ -31,50 +31,52 @@ export async function getStaticPaths() {
   const songsResponse = await fetch('https://dash.cureation.net/items/songs');
   const songsData = await songsResponse.json();
 
-  // Create paths for songs with formatted data
-  return songsData.data.map(song => {
-    const slug = song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
-    const album = albums[song.album] || {};
-    
-    // Format lyrics if they exist
-    let formattedLyrics = null;
-    if (song.lyrics) {
-      // Convert line breaks to HTML and handle verse structure
-      formattedLyrics = song.lyrics
-        .split('\n\n')
-        .map(verse => ({
-          type: verse.match(/^\[(.*?)\]/) ? 'section' : 'verse',
-          content: verse
-        }));
-    }
-    
-    // Format listen links
-    const listenLinks = song.listen_links || [];
-    
-    return {
-      params: { slug },
-      props: {
-        song: {
-          id: song.id,
-          title: song.title,
-          trackNumber: song.track_number,
-          duration: song.duration,
-          lyrics: formattedLyrics,
-          listenLinks: listenLinks,
-          credits: song.credits,
-          hasLyrics: !!song.lyrics
-        },
-        album: {
-          id: album.id || 0,
-          title: album.title || 'Unknown Album',
-          slug: album.slug || 'unknown',
-          coverImage: album.cover_art || '/images/placeholder-album.jpg',
-          year: album.year || '',
-          producer: album.producer || 'Unknown'
-        }
+  // Create paths for songs with formatted data - filter out songs without titles
+  return songsData.data
+    .filter(song => song.title) // Only include songs with titles
+    .map(song => {
+      const slug = song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+      const album = albums[song.album] || {};
+      
+      // Format lyrics if they exist
+      let formattedLyrics = null;
+      if (song.lyrics) {
+        // Convert line breaks to HTML and handle verse structure
+        formattedLyrics = song.lyrics
+          .split('\n\n')
+          .map(verse => ({
+            type: verse.match(/^\[(.*?)\]/) ? 'section' : 'verse',
+            content: verse
+          }));
       }
-    };
-  });
+      
+      // Format listen links
+      const listenLinks = song.listen_links || [];
+      
+      return {
+        params: { slug },
+        props: {
+          song: {
+            id: song.id,
+            title: song.title,
+            trackNumber: song.track_number,
+            duration: song.duration || '0:00',
+            lyrics: formattedLyrics,
+            listenLinks: listenLinks,
+            credits: song.credits,
+            hasLyrics: !!song.lyrics
+          },
+          album: {
+            id: album.id || 0,
+            title: album.title || 'Unknown Album',
+            slug: album.slug || 'unknown',
+            coverImage: album.cover_art || '/images/placeholder-album.jpg',
+            year: album.year || '',
+            producer: album.producer || 'Unknown'
+          }
+        }
+      };
+    });
 }
 
 const { song, album } = Astro.props;
