@@ -107,22 +107,6 @@ export async function getStaticPaths() {
 
 const { song, album, prevTrack, nextTrack } = Astro.props as any;
 
-// Get platform icons for streaming links
-const getPlatformIcon = (platform: string) => {
-  const lowerPlatform = platform?.toLowerCase() || '';
-  if (lowerPlatform.includes('youtube')) return 'youtube';
-  if (lowerPlatform.includes('spotify')) return 'spotify';
-  if (lowerPlatform.includes('apple')) return 'apple';
-  return 'link';
-};
-
-const platformIcons = {
-  youtube: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>',
-  spotify: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>',
-  apple: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zm3.472-3.922c.832-1.091 1.413-2.597 1.259-4.117-1.234.052-2.715.819-3.597 1.83-.791.896-1.488 2.297-1.3 3.675 1.375.104 2.786-.717 3.638-1.388z"/></svg>',
-  link: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
-};
-
 // ============================================
 // MOCK DATA - Replace with Directus fields
 // ============================================
@@ -164,9 +148,45 @@ const trivia = song.trivia || [
   "The outro of the song extends for nearly a minute in the album version."
 ];
 
+// Lyric Meanings (from Directus: song.lyric_meanings)
+// Mock data - each meaning corresponds to specific lines in the lyrics
+const lyricMeanings = song.lyric_meanings || (() => {
+  // Generate mock meanings from the actual lyrics if they exist
+  if (!song.rawLyrics) return [];
+
+  const lines = song.rawLyrics.split('\n').filter((l: string) => l.trim() && !l.match(/^\[.*?\]$/));
+  const meanings: Array<{lineIndex: number; line: string; meaning: string; contributor: string}> = [];
+
+  // Add meanings for select lines (every 3rd meaningful line for demo)
+  lines.forEach((line: string, idx: number) => {
+    if (idx % 3 === 0 && line.trim().length > 10) {
+      meanings.push({
+        lineIndex: idx,
+        line: line.trim(),
+        meaning: getMockMeaning(line.trim(), idx),
+        contributor: "Community"
+      });
+    }
+  });
+
+  return meanings;
+})();
+
+// Helper function to generate contextual mock meanings
+function getMockMeaning(_line: string, idx: number): string {
+  const mockMeanings = [
+    `This line establishes the emotional tone of the song. Robert Smith often uses imagery like this to convey a sense of longing and melancholy that became synonymous with The Cure's sound.`,
+    `A deeply personal reflection that fans have interpreted as Smith's meditation on memory and the passage of time. The imagery evokes a dreamlike state between waking and sleeping.`,
+    `This phrase captures the essence of gothic romanticism that defined The Cure's aesthetic. The juxtaposition of beauty and sadness creates the bittersweet atmosphere the band is known for.`,
+    `Smith has mentioned in interviews that lines like this were inspired by his experiences growing up in Crawley, England, where grey skies and suburban melancholy shaped his worldview.`,
+    `The repetition here serves to emphasize the cyclical nature of the emotions being expressed. It's a technique Smith uses throughout his songwriting to create a hypnotic, trance-like effect.`,
+    `Fans have debated whether this line refers to a specific person or a more abstract concept of loss. The ambiguity is intentional, allowing listeners to project their own experiences onto the lyrics.`,
+  ];
+  return mockMeanings[idx % mockMeanings.length];
+}
+
 // Word count for lyrics
 const wordCount = song.rawLyrics ? song.rawLyrics.split(/\s+/).filter((w: string) => w.length > 0).length : 0;
-const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string) => l.trim().length > 0).length : 0;
 ---
 
 <MainLayout
@@ -179,7 +199,7 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
 >
 
 <!-- Full-Screen Hero -->
-<section class="song-hero">
+<section class="album-hero">
   <div class="hero-artwork">
     <img src={album.coverImage} alt="" class="hero-artwork-img" />
     <div class="hero-overlay"></div>
@@ -187,45 +207,26 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
 
   <div class="hero-content">
     <div class="hero-layout">
-      <a href={`/discography/${album.slug}`} class="cover-wrapper group">
+      <div class="cover-wrapper">
         <div class="cover-glow"></div>
-        <img src={album.coverImage} alt={`${album.title} album cover`} class="cover-image" />
-        <div class="cover-hover">
-          <span>View Album</span>
-        </div>
-      </a>
+        <img src={album.coverImage} alt={`${album.title} album cover`} class="cover-image" transition:name={`song-${song.id}`} />
+      </div>
 
-      <div class="song-info">
-        <div class="song-breadcrumb">
-          <a href="/lyrics" class="breadcrumb-link">Lyrics</a>
-          <span class="breadcrumb-sep">/</span>
-          <a href={`/discography/${album.slug}`} class="breadcrumb-link">{album.title}</a>
-          <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Track {song.trackNumber}</span>
-        </div>
+      <div class="album-info">
+        <p class="album-meta">Track {song.trackNumber} · {album.title} · {album.year}</p>
+        <h1 class="album-title">{song.title}</h1>
+        <p class="album-artist">The Cure</p>
 
-        <h1 class="song-title">{song.title}</h1>
-        <p class="song-artist">The Cure · {album.title} ({album.year})</p>
-
-        <div class="song-stats">
-          <div class="stat">
-            <span class="stat-value">{song.trackNumber}</span>
-            <span class="stat-label">Track</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">{song.duration}</span>
-            <span class="stat-label">Duration</span>
-          </div>
+        <div class="album-stats">
+          <span>{song.duration}</span>
+          <span class="stat-dot"></span>
           {song.hasLyrics && (
-            <div class="stat">
-              <span class="stat-value">{wordCount}</span>
-              <span class="stat-label">Words</span>
-            </div>
+            <>
+              <span>{wordCount} words</span>
+              <span class="stat-dot"></span>
+            </>
           )}
-          <div class="stat">
-            <span class="stat-value">{liveHistory.timesPlayed}+</span>
-            <span class="stat-label">Live Plays</span>
-          </div>
+          <span>{liveHistory.timesPlayed}+ live plays</span>
         </div>
 
         <div class="hero-actions">
@@ -235,36 +236,14 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
               Read Lyrics
             </a>
           )}
-          {song.listenLinks && song.listenLinks.length > 0 && (
-            <a href={song.listenLinks[0].Link} target="_blank" rel="noopener noreferrer" class="btn-secondary">
-              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              Listen Now
-            </a>
-          )}
+          <a href={`/discography/${album.slug}`} class="btn-secondary">Learn More</a>
         </div>
-
-        <!-- Listen Links -->
-        {song.listenLinks && song.listenLinks.length > 0 && (
-          <div class="listen-platforms">
-            {song.listenLinks.map((link: any) => (
-              <a
-                href={link.Link}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="platform-link"
-                title={`Listen on ${link.Platform}`}
-              >
-                <Fragment set:html={platformIcons[getPlatformIcon(link.Platform)]} />
-              </a>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   </div>
 
   <div class="scroll-indicator">
-    <span>{song.hasLyrics ? 'Scroll to read lyrics' : 'Scroll to explore'}</span>
+    <span>Scroll to explore</span>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
   </div>
 </section>
@@ -273,83 +252,186 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
 {song.hasLyrics ? (
   <section id="lyrics" class="content-section lyrics-section" data-pagefind-body>
     <div class="section-container">
-      <div class="lyrics-layout">
-        <div class="lyrics-main">
-          <div class="section-header-row">
-            <div class="section-icon-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            </div>
-            <h2 class="section-heading">Lyrics</h2>
+      <!-- Section Header with Tabs -->
+      <div class="lyrics-header">
+        <div class="section-header-row">
+          <div class="section-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-
-          <div class="lyrics-container" data-pagefind-meta={`album:${album.title}`}>
-            {song.lyrics.map((part: any) => (
-              <div class={`lyric-block ${part.type === 'section' ? 'section-header' : 'verse'}`}>
-                {part.content.split('\n').map((line: string) => {
-                  const isHeader = line.match(/^\[.*?\]$/);
-                  return isHeader ? (
-                    <p class="lyric-section-title">{line.replace(/[\[\]]/g, '')}</p>
-                  ) : (
-                    <p class="lyric-line">{line || '\u00A0'}</p>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-
-          <!-- Lyrics Actions -->
-          <div class="lyrics-actions">
-            <button
-              onclick="navigator.clipboard.writeText(window.location.href); this.querySelector('span').textContent = 'Copied!'; setTimeout(() => this.querySelector('span').textContent = 'Copy Link', 2000);"
-              class="action-btn"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              <span>Copy Link</span>
-            </button>
-          </div>
+          <h2 class="section-heading">Lyrics</h2>
         </div>
 
-        <!-- Lyrics Sidebar -->
-        <aside class="lyrics-sidebar">
-          <div class="sidebar-card">
-            <h3>Song Info</h3>
-            <dl class="info-list">
-              <div class="info-item">
-                <dt>Album</dt>
-                <dd><a href={`/discography/${album.slug}`}>{album.title}</a></dd>
-              </div>
-              <div class="info-item">
-                <dt>Track</dt>
-                <dd>{song.trackNumber} of {album.tracks?.length || '?'}</dd>
-              </div>
-              <div class="info-item">
-                <dt>Duration</dt>
-                <dd>{song.duration}</dd>
-              </div>
-              <div class="info-item">
-                <dt>Released</dt>
-                <dd>{album.year}</dd>
-              </div>
-              {writingCredits.writers && (
-                <div class="info-item">
-                  <dt>Written by</dt>
-                  <dd>{writingCredits.writers.join(', ')}</dd>
+        <!-- Tab Toggle -->
+        <div class="lyrics-tabs" role="tablist">
+          <button
+            class="lyrics-tab active"
+            role="tab"
+            aria-selected="true"
+            data-tab="lyrics"
+            id="tab-lyrics"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Lyrics
+          </button>
+          <button
+            class="lyrics-tab"
+            role="tab"
+            aria-selected="false"
+            data-tab="meanings"
+            id="tab-meanings"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Lyrics with Meanings
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Plain Lyrics -->
+      <div class="tab-content active" id="panel-lyrics" role="tabpanel" aria-labelledby="tab-lyrics">
+        <div class="lyrics-layout">
+          <div class="lyrics-main">
+            <div class="lyrics-container" data-pagefind-meta={`album:${album.title}`}>
+              {song.lyrics.map((part: any) => (
+                <div class={`lyric-block ${part.type === 'section' ? 'section-header' : 'verse'}`}>
+                  {part.content.split('\n').map((line: string) => {
+                    const isHeader = line.match(/^\[.*?\]$/);
+                    return isHeader ? (
+                      <p class="lyric-section-title">{line.replace(/[\[\]]/g, '')}</p>
+                    ) : (
+                      <p class="lyric-line">{line || '\u00A0'}</p>
+                    );
+                  })}
                 </div>
-              )}
-            </dl>
+              ))}
+            </div>
+
+            <!-- Lyrics Actions -->
+            <div class="lyrics-actions">
+              <button
+                onclick="navigator.clipboard.writeText(window.location.href); this.querySelector('span').textContent = 'Copied!'; setTimeout(() => this.querySelector('span').textContent = 'Copy Link', 2000);"
+                class="action-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>Copy Link</span>
+              </button>
+            </div>
           </div>
 
-          {songStory.themes && songStory.themes.length > 0 && (
+          <!-- Lyrics Sidebar -->
+          <aside class="lyrics-sidebar">
             <div class="sidebar-card">
-              <h3>Themes</h3>
-              <div class="themes-list">
-                {songStory.themes.map((theme: string) => (
-                  <span class="theme-tag">{theme}</span>
-                ))}
+              <h3>Song Info</h3>
+              <dl class="info-list">
+                <div class="info-item">
+                  <dt>Album</dt>
+                  <dd><a href={`/discography/${album.slug}`}>{album.title}</a></dd>
+                </div>
+                <div class="info-item">
+                  <dt>Track</dt>
+                  <dd>{song.trackNumber} of {album.tracks?.length || '?'}</dd>
+                </div>
+                <div class="info-item">
+                  <dt>Duration</dt>
+                  <dd>{song.duration}</dd>
+                </div>
+                <div class="info-item">
+                  <dt>Released</dt>
+                  <dd>{album.year}</dd>
+                </div>
+                {writingCredits.writers && (
+                  <div class="info-item">
+                    <dt>Written by</dt>
+                    <dd>{writingCredits.writers.join(', ')}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+
+            {songStory.themes && songStory.themes.length > 0 && (
+              <div class="sidebar-card">
+                <h3>Themes</h3>
+                <div class="themes-list">
+                  {songStory.themes.map((theme: string) => (
+                    <span class="theme-tag">{theme}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
+      </div>
+
+      <!-- Tab Content: Lyrics with Meanings -->
+      <div class="tab-content" id="panel-meanings" role="tabpanel" aria-labelledby="tab-meanings">
+        <div class="meanings-layout">
+          <!-- Interactive Lyrics Column -->
+          <div class="meanings-lyrics">
+            <div class="meanings-lyrics-container">
+              {(() => {
+                let globalLineIndex = 0;
+                return song.lyrics.map((part: any) => (
+                  <div class={`lyric-block ${part.type === 'section' ? 'section-header' : 'verse'}`}>
+                    {part.content.split('\n').map((line: string) => {
+                      const isHeader = line.match(/^\[.*?\]$/);
+                      if (isHeader) {
+                        return <p class="lyric-section-title">{line.replace(/[\[\]]/g, '')}</p>;
+                      }
+                      const currentIndex = globalLineIndex++;
+                      const hasMeaning = lyricMeanings.some((m: any) => m.line === line.trim());
+                      return (
+                        <p
+                          class={`lyric-line-interactive ${hasMeaning ? 'has-meaning' : ''}`}
+                          data-line-index={currentIndex}
+                          data-line={line.trim()}
+                        >
+                          <span class="line-number">{currentIndex + 1}</span>
+                          <span class="line-text">{line || '\u00A0'}</span>
+                          {hasMeaning && (
+                            <span class="meaning-indicator">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </span>
+                          )}
+                        </p>
+                      );
+                    })}
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+
+          <!-- Floating Meaning Panel -->
+          <aside class="meaning-panel">
+            <div class="meaning-panel-content" id="meaning-panel-content">
+              <div class="meaning-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <p>Click on a highlighted lyric line to see its meaning and interpretation.</p>
+                <span class="meaning-hint">{lyricMeanings.length} annotations available</span>
+              </div>
+
+              <div class="meaning-active" id="meaning-active" style="display: none;">
+                <div class="meaning-header">
+                  <span class="meaning-line-number" id="meaning-line-num"></span>
+                  <span class="meaning-badge">Interpretation</span>
+                </div>
+                <blockquote class="meaning-lyric" id="meaning-lyric"></blockquote>
+                <p class="meaning-text" id="meaning-text"></p>
+                <div class="meaning-footer">
+                  <span class="meaning-contributor" id="meaning-contributor"></span>
+                </div>
               </div>
             </div>
-          )}
-        </aside>
+
+            <!-- Meanings Data for JavaScript -->
+            <script is:inline type="application/json" id="meanings-data">
+              {JSON.stringify(lyricMeanings)}
+            </script>
+          </aside>
+        </div>
       </div>
     </div>
   </section>
@@ -606,7 +688,7 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
      ======================================== */
 
   /* Hero Section */
-  .song-hero {
+  .album-hero {
     position: relative;
     min-height: 100vh;
     display: flex;
@@ -618,7 +700,7 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
   }
 
   @media (min-width: 1024px) {
-    .song-hero { margin: -5rem -2rem 0; padding: 6rem 2rem 4rem; }
+    .album-hero { margin: -5rem -2rem 0; padding: 6rem 2rem 4rem; }
   }
 
   .hero-artwork {
@@ -631,15 +713,15 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: blur(50px) saturate(1.3);
-    transform: scale(1.15);
-    opacity: 0.5;
+    filter: blur(40px) saturate(1.2);
+    transform: scale(1.1);
+    opacity: 0.6;
   }
 
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.95) 100%),
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.95) 100%),
                 linear-gradient(to right, rgba(0,0,0,0.3), transparent, rgba(0,0,0,0.3));
   }
 
@@ -647,155 +729,93 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1200px;
   }
 
   .hero-layout {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 2.5rem;
     text-align: center;
   }
 
   @media (min-width: 768px) {
-    .hero-layout { flex-direction: row; text-align: left; gap: 3rem; }
+    .hero-layout { flex-direction: row; text-align: left; gap: 4rem; }
   }
 
   .cover-wrapper {
     position: relative;
     flex-shrink: 0;
-    width: 220px;
+    width: 280px;
     max-width: 100%;
-    cursor: pointer;
   }
 
-  @media (min-width: 768px) { .cover-wrapper { width: 260px; } }
-  @media (min-width: 1024px) { .cover-wrapper { width: 300px; } }
+  @media (min-width: 768px) { .cover-wrapper { width: 320px; } }
+  @media (min-width: 1024px) { .cover-wrapper { width: 380px; } }
 
   .cover-glow {
     position: absolute;
-    inset: -15px;
-    background: rgba(var(--color-primary-rgb), 0.25);
-    border-radius: 1.5rem;
-    filter: blur(35px);
-    opacity: 0.7;
+    inset: -20px;
+    background: rgba(var(--color-primary-rgb), 0.3);
+    border-radius: 2rem;
+    filter: blur(40px);
+    opacity: 0.6;
     z-index: -1;
-    transition: opacity 0.3s ease;
   }
-
-  .cover-wrapper:hover .cover-glow { opacity: 1; }
 
   .cover-image {
     width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
     border-radius: 0.75rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 
-  .cover-wrapper:hover .cover-image { transform: scale(1.02); }
+  .album-info { flex: 1; min-width: 0; }
 
-  .cover-hover {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 0.75rem;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .cover-wrapper:hover .cover-hover { opacity: 1; }
-
-  .cover-hover span {
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 9999px;
-    color: white;
+  .album-meta {
     font-size: 0.875rem;
-    font-weight: 500;
-  }
-
-  .song-info { flex: 1; min-width: 0; }
-
-  .song-breadcrumb {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.6);
     margin-bottom: 1rem;
   }
 
-  @media (min-width: 768px) { .song-breadcrumb { justify-content: flex-start; } }
-
-  .breadcrumb-link {
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .breadcrumb-link:hover { color: var(--color-primary); }
-
-  .breadcrumb-sep { color: rgba(255, 255, 255, 0.3); }
-
-  .breadcrumb-current { color: rgba(255, 255, 255, 0.8); }
-
-  .song-title {
+  .album-title {
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 7vw, 5rem);
-    line-height: 1.1;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 1;
     color: white;
     margin-bottom: 0.5rem;
     text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
   }
 
-  .song-artist {
+  .album-artist {
     font-family: var(--font-heading);
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     color: var(--color-primary);
     margin-bottom: 1.5rem;
   }
 
-  .song-stats {
+  .album-stats {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    padding: 1rem 1.5rem;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  @media (min-width: 768px) { .song-stats { justify-content: flex-start; display: inline-flex; } }
-
-  .stat {
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 2rem;
   }
 
-  @media (min-width: 768px) { .stat { align-items: flex-start; } }
+  @media (min-width: 768px) { .album-stats { justify-content: flex-start; } }
 
-  .stat-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.5);
+  .stat-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
   }
 
   .hero-actions {
@@ -803,7 +823,6 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
     flex-wrap: wrap;
     gap: 1rem;
     justify-content: center;
-    margin-bottom: 1.5rem;
   }
 
   @media (min-width: 768px) { .hero-actions { justify-content: flex-start; } }
@@ -812,7 +831,7 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.875rem 1.5rem;
+    padding: 0.875rem 1.75rem;
     border-radius: 9999px;
     font-weight: 600;
     font-size: 0.9rem;
@@ -841,35 +860,7 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
     border-color: rgba(255, 255, 255, 0.3);
   }
 
-  .btn-icon { width: 1.125rem; height: 1.125rem; }
-
-  .listen-platforms {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: center;
-  }
-
-  @media (min-width: 768px) { .listen-platforms { justify-content: flex-start; } }
-
-  .platform-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.7);
-    transition: all 0.3s ease;
-  }
-
-  .platform-link:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-  }
+  .btn-icon { width: 1.25rem; height: 1.25rem; }
 
   .scroll-indicator {
     position: absolute;
@@ -1487,4 +1478,395 @@ const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string)
     height: 100%;
     object-fit: cover;
   }
+
+  /* ========================================
+     LYRICS TABS & MEANINGS STYLES
+     ======================================== */
+
+  /* Lyrics Header with Tabs */
+  .lyrics-header {
+    margin-bottom: 2rem;
+  }
+
+  .lyrics-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 0.375rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: fit-content;
+  }
+
+  .lyrics-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .lyrics-tab svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .lyrics-tab:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .lyrics-tab.active {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
+  }
+
+  /* Tab Content */
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Meanings Layout - Two Column */
+  .meanings-layout {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .meanings-layout {
+      grid-template-columns: 1fr 380px;
+      gap: 3rem;
+    }
+  }
+
+  /* Meanings Lyrics Column */
+  .meanings-lyrics {
+    min-width: 0;
+  }
+
+  .meanings-lyrics-container {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .meanings-lyrics-container { padding: 2.5rem; }
+  }
+
+  /* Interactive Lyric Lines */
+  .lyric-line-interactive {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0 -0.75rem;
+    border-radius: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+
+  .lyric-line-interactive.has-meaning {
+    cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+
+  .lyric-line-interactive.has-meaning:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border-left-color: var(--color-primary);
+    color: white;
+  }
+
+  .lyric-line-interactive.has-meaning.active {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    border-left-color: var(--color-primary);
+    color: white;
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.15);
+  }
+
+  .line-number {
+    flex-shrink: 0;
+    width: 2rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: right;
+    padding-top: 0.15rem;
+    font-family: monospace;
+  }
+
+  .line-text {
+    flex: 1;
+  }
+
+  .meaning-indicator {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-primary);
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+
+  .meaning-indicator svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .lyric-line-interactive.has-meaning:hover .meaning-indicator,
+  .lyric-line-interactive.has-meaning.active .meaning-indicator {
+    opacity: 1;
+  }
+
+  /* Meaning Panel (Sticky Sidebar) */
+  .meaning-panel {
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+  }
+
+  .meaning-panel-content {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .meaning-placeholder {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .meaning-placeholder svg {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 1rem;
+    opacity: 0.4;
+  }
+
+  .meaning-placeholder p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .meaning-hint {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-radius: 9999px;
+    color: var(--color-primary);
+  }
+
+  /* Active Meaning Display */
+  .meaning-active {
+    animation: meaningFadeIn 0.3s ease;
+  }
+
+  @keyframes meaningFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .meaning-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .meaning-line-number {
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .meaning-badge {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.15);
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+  }
+
+  .meaning-lyric {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: white;
+    line-height: 1.6;
+    padding: 1rem 1.25rem;
+    margin: 0 0 1.25rem;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border-left: 3px solid var(--color-primary);
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+
+  .meaning-text {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+  }
+
+  .meaning-footer {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .meaning-contributor {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .meaning-contributor::before {
+    content: "Contributed by ";
+  }
+
+  /* Mobile Adjustments */
+  @media (max-width: 767px) {
+    .meaning-panel {
+      position: relative;
+      top: 0;
+      margin-top: 2rem;
+    }
+
+    .lyrics-tabs {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .lyrics-tab {
+      flex: 1;
+      justify-content: center;
+      padding: 0.625rem 1rem;
+      font-size: 0.85rem;
+    }
+  }
 </style>
+
+<script>
+  // Initialize lyrics interactivity
+  function initLyricsFeature() {
+    // Tab switching
+    const tabs = document.querySelectorAll('.lyrics-tab');
+    const panels = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetId = tab.getAttribute('data-tab');
+
+        // Update tabs
+        tabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+
+        // Update panels
+        panels.forEach(panel => {
+          panel.classList.remove('active');
+        });
+        const targetPanel = document.getElementById(`panel-${targetId}`);
+        if (targetPanel) {
+          targetPanel.classList.add('active');
+        }
+      });
+    });
+
+    // Meanings interactivity
+    const meaningsDataEl = document.getElementById('meanings-data');
+    if (!meaningsDataEl) return;
+
+    let meanings = [];
+    try {
+      meanings = JSON.parse(meaningsDataEl.textContent || '[]');
+    } catch (e) {
+      console.error('Failed to parse meanings data:', e);
+      return;
+    }
+
+    const interactiveLines = document.querySelectorAll('.lyric-line-interactive.has-meaning');
+    const meaningPlaceholder = document.querySelector('.meaning-placeholder');
+    const meaningActive = document.getElementById('meaning-active');
+    const meaningLineNum = document.getElementById('meaning-line-num');
+    const meaningLyric = document.getElementById('meaning-lyric');
+    const meaningText = document.getElementById('meaning-text');
+    const meaningContributor = document.getElementById('meaning-contributor');
+
+    let currentActiveLine = null;
+
+    interactiveLines.forEach(line => {
+      line.addEventListener('click', () => {
+        const lineText = line.getAttribute('data-line');
+        const lineIndex = line.getAttribute('data-line-index');
+
+        // Find matching meaning
+        const meaning = meanings.find(m => m.line === lineText);
+        if (!meaning) return;
+
+        // Update active state
+        if (currentActiveLine) {
+          currentActiveLine.classList.remove('active');
+        }
+        line.classList.add('active');
+        currentActiveLine = line;
+
+        // Update meaning panel
+        if (meaningPlaceholder) meaningPlaceholder.style.display = 'none';
+        if (meaningActive) meaningActive.style.display = 'block';
+
+        if (meaningLineNum) meaningLineNum.textContent = `Line ${parseInt(lineIndex) + 1}`;
+        if (meaningLyric) meaningLyric.textContent = meaning.line;
+        if (meaningText) meaningText.textContent = meaning.meaning;
+        if (meaningContributor) meaningContributor.textContent = meaning.contributor || 'Community';
+
+        // Scroll the meaning panel into view on mobile
+        if (window.innerWidth < 768 && meaningActive) {
+          meaningActive.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+  }
+
+  // Bind on page load and Astro transitions
+  document.addEventListener('DOMContentLoaded', initLyricsFeature);
+  document.addEventListener('astro:page-load', initLyricsFeature);
+</script>
