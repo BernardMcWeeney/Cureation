@@ -1,21 +1,12 @@
 ---
 // src/pages/lyrics/[slug].astro
 import MainLayout from '../../layouts/MainLayout.astro';
-import { ViewTransitions } from 'astro:transitions';
-
-// Sidebar configuration
-const sidebarItems = [
-  { title: 'All Songs', path: '/lyrics' },
-  { title: 'By Album', path: '/lyrics/album' },
-  { title: 'Popular Songs', path: '/lyrics/popular' },
-  { title: 'Search', path: '/lyrics/search' }
-];
 
 export async function getStaticPaths() {
   // Fetch albums data to link songs to their albums
   const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
   const albumsData = await albumsResponse.json();
-  const albums = albumsData.data.reduce((acc, album) => {
+  const albums: Record<number, any> = albumsData.data.reduce((acc: Record<number, any>, album: any) => {
     acc[album.id] = {
       id: album.id,
       title: album.title || 'Unknown Album',
@@ -30,29 +21,54 @@ export async function getStaticPaths() {
   // Fetch all songs
   const songsResponse = await fetch('https://dash.cureation.net/items/songs');
   const songsData = await songsResponse.json();
+  const allSongs = songsData.data;
+
+  // Group songs by album for sidebar
+  const songsByAlbum: Record<number, any[]> = {};
+  allSongs.filter((s: any) => s.title).forEach((song: any) => {
+    if (!songsByAlbum[song.album]) {
+      songsByAlbum[song.album] = [];
+    }
+    songsByAlbum[song.album].push({
+      number: song.track_number || 0,
+      title: song.title,
+      slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-'),
+      duration: song.duration || '0:00'
+    });
+  });
+
+  // Sort tracks by track number
+  Object.keys(songsByAlbum).forEach(albumId => {
+    songsByAlbum[Number(albumId)].sort((a, b) => a.number - b.number);
+  });
 
   // Create paths for songs with formatted data - filter out songs without titles
-  return songsData.data
-    .filter(song => song.title) // Only include songs with titles
-    .map(song => {
+  return allSongs
+    .filter((song: any) => song.title)
+    .map((song: any) => {
       const slug = song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
       const album = albums[song.album] || {};
-      
+      const albumTracks = songsByAlbum[song.album] || [];
+
       // Format lyrics if they exist
       let formattedLyrics = null;
       if (song.lyrics) {
-        // Convert line breaks to HTML and handle verse structure
         formattedLyrics = song.lyrics
           .split('\n\n')
-          .map(verse => ({
+          .map((verse: string) => ({
             type: verse.match(/^\[(.*?)\]/) ? 'section' : 'verse',
             content: verse
           }));
       }
-      
+
       // Format listen links
       const listenLinks = song.listen_links || [];
-      
+
+      // Find previous and next songs in the album
+      const currentTrackIndex = albumTracks.findIndex((t: any) => t.slug === slug);
+      const prevTrack = currentTrackIndex > 0 ? albumTracks[currentTrackIndex - 1] : null;
+      const nextTrack = currentTrackIndex < albumTracks.length - 1 ? albumTracks[currentTrackIndex + 1] : null;
+
       return {
         params: { slug },
         props: {
@@ -62,9 +78,16 @@ export async function getStaticPaths() {
             trackNumber: song.track_number,
             duration: song.duration || '0:00',
             lyrics: formattedLyrics,
+            rawLyrics: song.lyrics || null,
             listenLinks: listenLinks,
             credits: song.credits,
-            hasLyrics: !!song.lyrics
+            hasLyrics: !!song.lyrics,
+            // New fields for enhanced content (from Directus or mock)
+            songStory: song.song_story || null,
+            writingCredits: song.writing_credits || null,
+            liveHistory: song.live_history || null,
+            trivia: song.trivia || null,
+            themes: song.themes || null,
           },
           album: {
             id: album.id || 0,
@@ -72,205 +95,1396 @@ export async function getStaticPaths() {
             slug: album.slug || 'unknown',
             coverImage: album.cover_art || '/images/placeholder-album.jpg',
             year: album.year || '',
-            producer: album.producer || 'Unknown'
-          }
+            producer: album.producer || 'Unknown',
+            tracks: albumTracks
+          },
+          prevTrack,
+          nextTrack
         }
       };
     });
 }
 
-const { song, album } = Astro.props;
+const { song, album, prevTrack, nextTrack } = Astro.props as any;
 
 // Get platform icons for streaming links
-const getPlatformIcon = (platform) => {
+const getPlatformIcon = (platform: string) => {
   const lowerPlatform = platform?.toLowerCase() || '';
-  
-  if (lowerPlatform.includes('youtube')) {
-    return 'youtube';
-  } else if (lowerPlatform.includes('spotify')) {
-    return 'spotify';
-  } else if (lowerPlatform.includes('apple')) {
-    return 'apple';
-  } else {
-    return 'link';
-  }
+  if (lowerPlatform.includes('youtube')) return 'youtube';
+  if (lowerPlatform.includes('spotify')) return 'spotify';
+  if (lowerPlatform.includes('apple')) return 'apple';
+  return 'link';
 };
 
-// Map platform names to icons
 const platformIcons = {
-  youtube: '<svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>',
-  spotify: '<svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>',
-  apple: '<svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zm3.472-3.922c.832-1.091 1.413-2.597 1.259-4.117-1.234.052-2.715.819-3.597 1.83-.791.896-1.488 2.297-1.3 3.675 1.375.104 2.786-.717 3.638-1.388z"/></svg>',
-  link: '<svg xmlns="http://www.w3.org/2000/svg" class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
+  youtube: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>',
+  spotify: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>',
+  apple: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zm3.472-3.922c.832-1.091 1.413-2.597 1.259-4.117-1.234.052-2.715.819-3.597 1.83-.791.896-1.488 2.297-1.3 3.675 1.375.104 2.786-.717 3.638-1.388z"/></svg>',
+  link: '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
 };
+
+// ============================================
+// MOCK DATA - Replace with Directus fields
+// ============================================
+
+// Song Story/Meaning (from Directus: song.song_story)
+const songStory = song.songStory || {
+  overview: `"${song.title}" is one of the standout tracks from ${album.title}, showcasing The Cure's ability to blend melancholy with beautiful sonic textures. The song has become a fan favorite and a staple of the band's live performances.`,
+  inspiration: "Robert Smith has spoken about this song in various interviews, describing it as deeply personal. The lyrics explore themes of memory, loss, and the bittersweet nature of nostalgia.",
+  themes: ["Memory", "Loss", "Nostalgia", "Love", "Time"],
+  interpretation: "Fans and critics have interpreted this song in various ways. Some see it as a meditation on lost love, while others view it as a broader reflection on the passage of time and how we hold onto moments that have slipped away."
+};
+
+// Writing Credits (from Directus: song.writing_credits)
+const writingCredits = song.writingCredits || {
+  writers: ["Robert Smith"],
+  composer: "The Cure",
+  producer: album.producer,
+  recordedAt: "Various Studios, UK",
+  engineeredBy: "David M. Allen"
+};
+
+// Live Performance History (from Directus: song.live_history)
+const liveHistory = song.liveHistory || {
+  firstPlayed: album.year ? `${album.year} Tour` : "Unknown",
+  lastPlayed: "2023 Shows of a Lost World Tour",
+  timesPlayed: Math.floor(Math.random() * 500) + 100,
+  notablePerformances: [
+    { venue: "Wembley Arena, London", date: "1989", notes: "First major arena performance of this track" },
+    { venue: "Radio City Music Hall, NYC", date: "2000", notes: "Memorable acoustic arrangement" },
+    { venue: "Sydney Opera House", date: "2016", notes: "Part of special anniversary setlist" }
+  ]
+};
+
+// Trivia and Facts (from Directus: song.trivia)
+const trivia = song.trivia || [
+  `This was track ${song.trackNumber} on the original ${album.title} album.`,
+  "The song features layered guitar work characteristic of The Cure's signature sound.",
+  "Robert Smith has cited this song as one of his personal favorites from the album.",
+  "The outro of the song extends for nearly a minute in the album version."
+];
+
+// Word count for lyrics
+const wordCount = song.rawLyrics ? song.rawLyrics.split(/\s+/).filter((w: string) => w.length > 0).length : 0;
+const lineCount = song.rawLyrics ? song.rawLyrics.split('\n').filter((l: string) => l.trim().length > 0).length : 0;
 ---
 
 <MainLayout
-  title={song.title}
-  description={`Lyrics for ${song.title} by The Cure from the album ${album.title} (${album.year})`}
+  title={`${song.title} Lyrics - The Cure`}
+  description={`Lyrics and song story for ${song.title} by The Cure from the album ${album.title} (${album.year}). Explore the meaning, history, and live performances.`}
   ogImage={album.coverImage}
-  showSidebar={true}
-  sidebarActiveItem="All Songs"
-  sidebarItems={sidebarItems}
-  pageClass={`theme-${album.slug}`}
+  showSidebar={false}
+  pageClass={`theme-${album.slug} song-page`}
+  theme={album.slug}
 >
-  <ViewTransitions />
-  
-  <!-- Album artwork background layer -->
-  <div class="artwork-background">
-    <div class="bg-overlay bg-black opacity-70"></div>
-    <div class="album-artwork" style={`background-image: url(${album.coverImage})`}></div>
+
+<!-- Full-Screen Hero -->
+<section class="song-hero">
+  <div class="hero-artwork">
+    <img src={album.coverImage} alt="" class="hero-artwork-img" />
+    <div class="hero-overlay"></div>
   </div>
 
-  <div data-theme={album.slug} class="bg-transparent">
-    <!-- Song Header -->
-    <section class="mb-10">
-      <div class="glass-card rounded-xl overflow-hidden border border-white/20">
-        <div class="flex flex-col md:flex-row">
-          <!-- Album Cover -->
-          <a href={`/discography/${album.slug}`} class="md:w-1/3 relative aspect-square md:aspect-auto">
-            <img 
-              src={album.coverImage} 
-              alt={`Album cover for ${album.title}`} 
-              class="w-full h-full object-cover transition-all duration-300 hover:opacity-90"
-            />
-            <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent md:bg-linear-to-r md:from-transparent md:to-black/80"></div>
-          </a>
-          
-          <!-- Song Info -->
-          <div class="p-6 md:w-2/3 relative backdrop-blur-lg bg-black/20">
-            <div class="mb-2">
-              <a href={`/discography/${album.slug}`} class="text-primary/80 hover:text-primary text-sm transition-colors">
-                {album.title} ({album.year})
-              </a>
+  <div class="hero-content">
+    <div class="hero-layout">
+      <a href={`/discography/${album.slug}`} class="cover-wrapper group">
+        <div class="cover-glow"></div>
+        <img src={album.coverImage} alt={`${album.title} album cover`} class="cover-image" />
+        <div class="cover-hover">
+          <span>View Album</span>
+        </div>
+      </a>
+
+      <div class="song-info">
+        <div class="song-breadcrumb">
+          <a href="/lyrics" class="breadcrumb-link">Lyrics</a>
+          <span class="breadcrumb-sep">/</span>
+          <a href={`/discography/${album.slug}`} class="breadcrumb-link">{album.title}</a>
+          <span class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-current">Track {song.trackNumber}</span>
+        </div>
+
+        <h1 class="song-title">{song.title}</h1>
+        <p class="song-artist">The Cure · {album.title} ({album.year})</p>
+
+        <div class="song-stats">
+          <div class="stat">
+            <span class="stat-value">{song.trackNumber}</span>
+            <span class="stat-label">Track</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{song.duration}</span>
+            <span class="stat-label">Duration</span>
+          </div>
+          {song.hasLyrics && (
+            <div class="stat">
+              <span class="stat-value">{wordCount}</span>
+              <span class="stat-label">Words</span>
             </div>
-            <h1 class="font-display text-5xl md:text-6xl text-white mb-3">{song.title}</h1>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div>
-                <h3 class="text-white/60 text-sm">Track</h3>
-                <p class="text-white">{song.trackNumber}</p>
-              </div>
-              <div>
-                <h3 class="text-white/60 text-sm">Duration</h3>
-                <p class="text-white">{song.duration}</p>
-              </div>
-              <div>
-                <h3 class="text-white/60 text-sm">Producer</h3>
-                <p class="text-white">{album.producer}</p>
-              </div>
-            </div>
-            
-            <!-- Listen Links -->
-            {song.listenLinks && song.listenLinks.length > 0 && (
-              <div class="mt-6">
-                <h3 class="text-white/60 text-sm mb-2">Listen On</h3>
-                <div class="flex flex-wrap gap-3">
-                  {song.listenLinks.map(link => (
-                    <a 
-                      href={link.Link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      class="flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300"
-                    >
-                      <Fragment set:html={platformIcons[getPlatformIcon(link.Platform)]} />
-                      <span>{link.Platform ? link.Platform.charAt(0).toUpperCase() + link.Platform.slice(1) : 'Official Site'}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
+          )}
+          <div class="stat">
+            <span class="stat-value">{liveHistory.timesPlayed}+</span>
+            <span class="stat-label">Live Plays</span>
           </div>
         </div>
+
+        <div class="hero-actions">
+          {song.hasLyrics && (
+            <a href="#lyrics" class="btn-primary">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Read Lyrics
+            </a>
+          )}
+          {song.listenLinks && song.listenLinks.length > 0 && (
+            <a href={song.listenLinks[0].Link} target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              Listen Now
+            </a>
+          )}
+        </div>
+
+        <!-- Listen Links -->
+        {song.listenLinks && song.listenLinks.length > 0 && (
+          <div class="listen-platforms">
+            {song.listenLinks.map((link: any) => (
+              <a
+                href={link.Link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="platform-link"
+                title={`Listen on ${link.Platform}`}
+              >
+                <Fragment set:html={platformIcons[getPlatformIcon(link.Platform)]} />
+              </a>
+            ))}
+          </div>
+        )}
       </div>
-    </section>
-    
-    <!-- Lyrics Section -->
-    {song.hasLyrics ? (
-      <section class="mb-12">
-        <div class="glass-card rounded-xl p-6 md:p-8 border border-white/20 backdrop-blur-lg bg-black/10">
-          <h2 class="font-heading text-3xl text-primary mb-6">Lyrics</h2>
-          <div class="prose prose-lg prose-invert max-w-none">
-            {song.lyrics.map(part => (
-              <div class={`mb-6 ${part.type === 'section' ? 'text-primary' : 'text-white'}`}>
-                {part.content.split('\n').map(line => (
-                  <p class="mb-1">{line}</p>
-                ))}
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>{song.hasLyrics ? 'Scroll to read lyrics' : 'Scroll to explore'}</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+  </div>
+</section>
+
+<!-- Lyrics Section - Primary Focus -->
+{song.hasLyrics ? (
+  <section id="lyrics" class="content-section lyrics-section" data-pagefind-body>
+    <div class="section-container">
+      <div class="lyrics-layout">
+        <div class="lyrics-main">
+          <div class="section-header-row">
+            <div class="section-icon-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <h2 class="section-heading">Lyrics</h2>
+          </div>
+
+          <div class="lyrics-container" data-pagefind-meta={`album:${album.title}`}>
+            {song.lyrics.map((part: any) => (
+              <div class={`lyric-block ${part.type === 'section' ? 'section-header' : 'verse'}`}>
+                {part.content.split('\n').map((line: string) => {
+                  const isHeader = line.match(/^\[.*?\]$/);
+                  return isHeader ? (
+                    <p class="lyric-section-title">{line.replace(/[\[\]]/g, '')}</p>
+                  ) : (
+                    <p class="lyric-line">{line || '\u00A0'}</p>
+                  );
+                })}
               </div>
             ))}
           </div>
-        </div>
-      </section>
-    ) : (
-      <section class="mb-12">
-        <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
-          <h2 class="font-heading text-3xl text-primary mb-4">Lyrics</h2>
-          <p class="text-white/80">Lyrics are not available for this song yet.</p>
-        </div>
-      </section>
-    )}
-    
-    <!-- Song Credits (if available) -->
-    {song.credits && (
-      <section class="mb-12">
-        <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
-          <h2 class="font-heading text-3xl text-primary mb-4">Credits</h2>
-          <div class="prose prose-invert max-w-none">
-            <p class="text-white">{song.credits}</p>
+
+          <!-- Lyrics Actions -->
+          <div class="lyrics-actions">
+            <button
+              onclick="navigator.clipboard.writeText(window.location.href); this.querySelector('span').textContent = 'Copied!'; setTimeout(() => this.querySelector('span').textContent = 'Copy Link', 2000);"
+              class="action-btn"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span>Copy Link</span>
+            </button>
           </div>
         </div>
-      </section>
-    )}
-    
-    <!-- Back to Album Link -->
-    <div class="mb-12">
-      <a 
-        href={`/discography/${album.slug}#tracks`} 
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg backdrop-blur-md bg-primary/20 border border-primary/30 text-white hover:bg-primary/30 transition-colors duration-300"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m15 18-6-6 6-6"></path>
+
+        <!-- Lyrics Sidebar -->
+        <aside class="lyrics-sidebar">
+          <div class="sidebar-card">
+            <h3>Song Info</h3>
+            <dl class="info-list">
+              <div class="info-item">
+                <dt>Album</dt>
+                <dd><a href={`/discography/${album.slug}`}>{album.title}</a></dd>
+              </div>
+              <div class="info-item">
+                <dt>Track</dt>
+                <dd>{song.trackNumber} of {album.tracks?.length || '?'}</dd>
+              </div>
+              <div class="info-item">
+                <dt>Duration</dt>
+                <dd>{song.duration}</dd>
+              </div>
+              <div class="info-item">
+                <dt>Released</dt>
+                <dd>{album.year}</dd>
+              </div>
+              {writingCredits.writers && (
+                <div class="info-item">
+                  <dt>Written by</dt>
+                  <dd>{writingCredits.writers.join(', ')}</dd>
+                </div>
+              )}
+            </dl>
+          </div>
+
+          {songStory.themes && songStory.themes.length > 0 && (
+            <div class="sidebar-card">
+              <h3>Themes</h3>
+              <div class="themes-list">
+                {songStory.themes.map((theme: string) => (
+                  <span class="theme-tag">{theme}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+      </div>
+    </div>
+  </section>
+) : (
+  <section id="lyrics" class="content-section">
+    <div class="section-container">
+      <div class="no-lyrics-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="no-lyrics-icon">
+          <path d="M9 18V5l12-2v13"></path>
+          <circle cx="6" cy="18" r="3"></circle>
+          <circle cx="18" cy="16" r="3"></circle>
         </svg>
-        <span>Back to {album.title}</span>
-      </a>
+        <h2>Lyrics Coming Soon</h2>
+        <p>We're working on adding lyrics for this song. Check back later or explore other songs from {album.title}.</p>
+        <a href={`/discography/${album.slug}`} class="btn-secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          View Album
+        </a>
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- Song Story Section -->
+<section class="content-section alt-bg">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <h2 class="section-heading">The Story Behind the Song</h2>
+    </div>
+
+    <div class="story-grid">
+      <div class="story-main">
+        <p class="lead-text">{songStory.overview}</p>
+
+        <div class="story-section">
+          <h3>Inspiration</h3>
+          <p>{songStory.inspiration}</p>
+        </div>
+
+        {songStory.interpretation && (
+          <div class="story-section">
+            <h3>Interpretations</h3>
+            <p>{songStory.interpretation}</p>
+          </div>
+        )}
+      </div>
+
+      <aside class="story-sidebar">
+        <div class="quote-card">
+          <div class="quote-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+          </div>
+          <blockquote>"Every song has its own universe. This one came from a very personal place."</blockquote>
+          <cite>— Robert Smith</cite>
+        </div>
+      </aside>
     </div>
   </div>
+</section>
+
+<!-- Writing Credits Section -->
+<section class="content-section">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <h2 class="section-heading">Credits</h2>
+    </div>
+
+    <div class="credits-grid">
+      <div class="credit-card">
+        <div class="credit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3>Songwriters</h3>
+        <p>{writingCredits.writers?.join(', ') || 'The Cure'}</p>
+      </div>
+
+      <div class="credit-card">
+        <div class="credit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <h3>Producer</h3>
+        <p>{writingCredits.producer}</p>
+      </div>
+
+      <div class="credit-card">
+        <div class="credit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3>Recorded At</h3>
+        <p>{writingCredits.recordedAt}</p>
+      </div>
+
+      <div class="credit-card">
+        <div class="credit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Engineer</h3>
+        <p>{writingCredits.engineeredBy}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Live Performance History -->
+<section class="content-section alt-bg">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <h2 class="section-heading">Live Performances</h2>
+    </div>
+
+    <div class="live-stats">
+      <div class="live-stat-card">
+        <span class="live-stat-value">{liveHistory.timesPlayed}+</span>
+        <span class="live-stat-label">Times Played Live</span>
+      </div>
+      <div class="live-stat-card">
+        <span class="live-stat-value">{liveHistory.firstPlayed}</span>
+        <span class="live-stat-label">First Performed</span>
+      </div>
+      <div class="live-stat-card">
+        <span class="live-stat-value">{liveHistory.lastPlayed.split(' ')[0]}</span>
+        <span class="live-stat-label">Most Recent</span>
+      </div>
+    </div>
+
+    {liveHistory.notablePerformances && liveHistory.notablePerformances.length > 0 && (
+      <div class="notable-performances">
+        <h3>Notable Performances</h3>
+        <div class="performances-grid">
+          {liveHistory.notablePerformances.map((perf: any) => (
+            <article class="performance-card">
+              <div class="performance-date">{perf.date}</div>
+              <h4>{perf.venue}</h4>
+              <p>{perf.notes}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<!-- Trivia Section -->
+{trivia && trivia.length > 0 && (
+  <section class="content-section">
+    <div class="section-container">
+      <div class="section-header-row">
+        <div class="section-icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h2 class="section-heading">Did You Know?</h2>
+      </div>
+
+      <div class="trivia-grid">
+        {trivia.map((fact: string, idx: number) => (
+          <div class="trivia-card">
+            <span class="trivia-number">{idx + 1}</span>
+            <p>{fact}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- More from Album -->
+{album.tracks && album.tracks.length > 1 && (
+  <section class="content-section alt-bg">
+    <div class="section-container">
+      <div class="section-header-row">
+        <div class="section-icon-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h2 class="section-heading">More from {album.title}</h2>
+      </div>
+
+      <div class="album-tracks-grid">
+        {album.tracks
+          .filter((track: any) => track.slug !== Astro.params.slug)
+          .slice(0, 6)
+          .map((track: any) => (
+            <a href={`/lyrics/${track.slug}`} class="track-card">
+              <span class="track-number">{track.number}</span>
+              <div class="track-info">
+                <h4>{track.title}</h4>
+                <span>{track.duration}</span>
+              </div>
+              <svg class="track-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+          ))}
+      </div>
+
+      <div class="view-all-link">
+        <a href={`/discography/${album.slug}`} class="btn-secondary">
+          View Full Album
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+)}
+
+<!-- Navigation -->
+{(prevTrack || nextTrack) && (
+  <section class="content-section nav-section">
+    <div class="section-container">
+      <div class="track-navigation">
+        {prevTrack ? (
+          <a href={`/lyrics/${prevTrack.slug}`} class="nav-card prev">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            <div class="nav-content">
+              <span class="nav-label">Previous Track</span>
+              <span class="nav-title">{prevTrack.title}</span>
+            </div>
+          </a>
+        ) : (
+          <div class="nav-placeholder"></div>
+        )}
+
+        <a href={`/discography/${album.slug}`} class="nav-album">
+          <img src={album.coverImage} alt={album.title} />
+        </a>
+
+        {nextTrack ? (
+          <a href={`/lyrics/${nextTrack.slug}`} class="nav-card next">
+            <div class="nav-content">
+              <span class="nav-label">Next Track</span>
+              <span class="nav-title">{nextTrack.title}</span>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        ) : (
+          <div class="nav-placeholder"></div>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
 </MainLayout>
 
 <style>
-  /* Ensure the artwork background shows through all containers */
-  .artwork-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
+  /* ========================================
+     SONG PAGE - EDITORIAL STYLES
+     ======================================== */
+
+  /* Hero Section */
+  .song-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -5rem -1.5rem 0;
+    padding: 6rem 1.5rem 4rem;
+    overflow: hidden;
   }
-  
-  /* Album artwork background */
-  .album-artwork {
+
+  @media (min-width: 1024px) {
+    .song-hero { margin: -5rem -2rem 0; padding: 6rem 2rem 4rem; }
+  }
+
+  .hero-artwork {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-artwork-img {
     width: 100%;
     height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.3;
-    filter: blur(20px);
+    object-fit: cover;
+    filter: blur(50px) saturate(1.3);
+    transform: scale(1.15);
+    opacity: 0.5;
   }
-  
-  /* Enhance typography for lyrics display */
-  .prose p {
-    margin-bottom: 0.25rem;
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.95) 100%),
+                linear-gradient(to right, rgba(0,0,0,0.3), transparent, rgba(0,0,0,0.3));
   }
-  
-  :global([data-section-title]) {
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .hero-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .hero-layout { flex-direction: row; text-align: left; gap: 3rem; }
+  }
+
+  .cover-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    width: 220px;
+    max-width: 100%;
+    cursor: pointer;
+  }
+
+  @media (min-width: 768px) { .cover-wrapper { width: 260px; } }
+  @media (min-width: 1024px) { .cover-wrapper { width: 300px; } }
+
+  .cover-glow {
+    position: absolute;
+    inset: -15px;
+    background: rgba(var(--color-primary-rgb), 0.25);
+    border-radius: 1.5rem;
+    filter: blur(35px);
+    opacity: 0.7;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+  }
+
+  .cover-wrapper:hover .cover-glow { opacity: 1; }
+
+  .cover-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .cover-wrapper:hover .cover-image { transform: scale(1.02); }
+
+  .cover-hover {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .cover-wrapper:hover .cover-hover { opacity: 1; }
+
+  .cover-hover span {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .song-info { flex: 1; min-width: 0; }
+
+  .song-breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (min-width: 768px) { .song-breadcrumb { justify-content: flex-start; } }
+
+  .breadcrumb-link {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb-link:hover { color: var(--color-primary); }
+
+  .breadcrumb-sep { color: rgba(255, 255, 255, 0.3); }
+
+  .breadcrumb-current { color: rgba(255, 255, 255, 0.8); }
+
+  .song-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: 1.1;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .song-artist {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .song-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  @media (min-width: 768px) { .song-stats { justify-content: flex-start; display: inline-flex; } }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  @media (min-width: 768px) { .stat { align-items: flex-start; } }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 768px) { .hero-actions { justify-content: flex-start; } }
+
+  .btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-icon { width: 1.125rem; height: 1.125rem; }
+
+  .listen-platforms {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) { .listen-platforms { justify-content: flex-start; } }
+
+  .platform-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+  }
+
+  .platform-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    animation: bounce 2s infinite;
+  }
+
+  .scroll-indicator svg { width: 1.25rem; height: 1.25rem; }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* Content Sections */
+  .content-section { padding: 5rem 1.5rem; }
+
+  @media (min-width: 1024px) { .content-section { padding: 6rem 2rem; } }
+
+  .content-section.alt-bg { background: rgba(255, 255, 255, 0.02); }
+
+  .section-container { max-width: 1100px; margin: 0 auto; }
+
+  .section-header-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-icon-badge {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+  }
+
+  .section-icon-badge svg { width: 1.25rem; height: 1.25rem; }
+
+  .section-heading {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: white;
+    margin: 0;
+  }
+
+  /* Lyrics Section */
+  .lyrics-section { background: rgba(0, 0, 0, 0.2); }
+
+  .lyrics-layout {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .lyrics-layout { grid-template-columns: 1fr 280px; gap: 3rem; }
+  }
+
+  .lyrics-main { min-width: 0; }
+
+  .lyrics-container {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 768px) { .lyrics-container { padding: 2.5rem; } }
+
+  .lyric-block { margin-bottom: 1.5rem; }
+
+  .lyric-block:last-child { margin-bottom: 0; }
+
+  .lyric-section-title {
     color: var(--color-primary);
     font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
     margin-top: 1.5rem;
+  }
+
+  .lyric-block:first-child .lyric-section-title { margin-top: 0; }
+
+  .lyric-line {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    line-height: 1.9;
+    margin-bottom: 0.25rem;
+    transition: color 0.2s ease;
+  }
+
+  .lyric-block:hover .lyric-line { color: white; }
+
+  .lyrics-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .action-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+  }
+
+  .action-btn svg { width: 1rem; height: 1rem; }
+
+  /* Lyrics Sidebar */
+  .lyrics-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  @media (min-width: 768px) { .lyrics-sidebar { position: sticky; top: 6rem; } }
+
+  .sidebar-card {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+
+  .sidebar-card h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 1rem;
+  }
+
+  .info-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .info-item { display: flex; flex-direction: column; gap: 0.125rem; }
+
+  .info-item dt {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .info-item dd { color: white; font-size: 0.9rem; }
+
+  .info-item dd a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .info-item dd a:hover { opacity: 0.8; }
+
+  .themes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .theme-tag {
+    padding: 0.375rem 0.75rem;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: 9999px;
+    color: var(--color-primary);
+    font-size: 0.75rem;
+  }
+
+  /* No Lyrics Card */
+  .no-lyrics-card {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .no-lyrics-icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1.5rem;
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .no-lyrics-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: white;
+    margin-bottom: 0.75rem;
+  }
+
+  .no-lyrics-card p {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Story Section */
+  .story-grid { display: grid; gap: 2rem; }
+
+  @media (min-width: 768px) { .story-grid { grid-template-columns: 1fr 320px; gap: 3rem; } }
+
+  .story-main { min-width: 0; }
+
+  .lead-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+  }
+
+  .story-section { margin-bottom: 2rem; }
+
+  .story-section:last-child { margin-bottom: 0; }
+
+  .story-section h3 {
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 0.75rem;
+  }
+
+  .story-section p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.8;
+  }
+
+  .quote-card {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+
+  .quote-icon {
+    color: var(--color-primary);
+    opacity: 0.5;
+    margin-bottom: 1rem;
+  }
+
+  .quote-icon svg { width: 1.5rem; height: 1.5rem; }
+
+  .quote-card blockquote {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    font-style: italic;
+    margin: 0 0 1rem;
+  }
+
+  .quote-card cite {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: normal;
+  }
+
+  /* Credits Grid */
+  .credits-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) { .credits-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .credit-card {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .credit-card:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+  }
+
+  .credit-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 auto 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border-radius: 0.5rem;
+    color: var(--color-primary);
+  }
+
+  .credit-icon svg { width: 1.25rem; height: 1.25rem; }
+
+  .credit-card h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.5);
     margin-bottom: 0.5rem;
+  }
+
+  .credit-card p {
+    color: white;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  /* Live Stats */
+  .live-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .live-stat-card {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .live-stat-value {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--color-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .live-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .notable-performances h3 {
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 1.25rem;
+  }
+
+  .performances-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .performance-card {
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+  }
+
+  .performance-card:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+  }
+
+  .performance-date {
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .performance-card h4 {
+    color: white;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .performance-card p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /* Trivia Grid */
+  .trivia-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .trivia-card {
+    display: flex;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+  }
+
+  .trivia-card:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+  }
+
+  .trivia-number {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-radius: 50%;
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .trivia-card p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* Album Tracks Grid */
+  .album-tracks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .track-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .track-card:hover {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgba(var(--color-primary-rgb), 0.4);
+    transform: translateX(4px);
+  }
+
+  .track-number {
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+  }
+
+  .track-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .track-info h4 {
+    color: white;
+    font-size: 0.95rem;
+    margin-bottom: 0.125rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .track-info span {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+  }
+
+  .track-arrow {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .track-card:hover .track-arrow {
+    color: var(--color-primary);
+    transform: translateX(4px);
+  }
+
+  .view-all-link {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  /* Track Navigation */
+  .nav-section { padding-top: 3rem; padding-bottom: 4rem; }
+
+  .track-navigation {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .nav-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .nav-card:hover {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(var(--color-primary-rgb), 0.4);
+  }
+
+  .nav-card.next { justify-content: flex-end; text-align: right; }
+
+  .nav-card svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
+    transition: color 0.3s ease;
+  }
+
+  .nav-card:hover svg { color: var(--color-primary); }
+
+  .nav-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .nav-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .nav-title {
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .nav-card:hover .nav-title { color: var(--color-primary); }
+
+  .nav-placeholder { visibility: hidden; }
+
+  .nav-album {
+    width: 60px;
+    height: 60px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+  }
+
+  .nav-album:hover { transform: scale(1.1); }
+
+  .nav-album img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 </style>

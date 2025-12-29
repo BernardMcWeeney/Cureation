@@ -1,0 +1,424 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import SetlistSongItem from "../../components/SetlistSongItem.astro";
+
+// Types
+interface SetlistSong {
+  song_id: number;
+  position: number;
+  set_type: 'main' | 'encore' | 'encore2' | 'acoustic';
+  notes?: string;
+  is_cover?: boolean;
+}
+
+interface DirectusSetlist {
+  id: number | string;
+  event_date: string;
+  venue: string;
+  city: string;
+  country: string;
+  state_province?: string;
+  tour_name?: string;
+  tour_leg?: string;
+  slug?: string;
+  notes?: string;
+  featured?: boolean;
+  cover_image?: string;
+  songs?: SetlistSong[];
+}
+
+interface DirectusSong {
+  id: number;
+  title: string;
+  album?: number;
+  duration?: string;
+}
+
+// Helper functions
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+function generateSlug(venue: string, city: string, date: string): string {
+  const dateSlug = date.split('T')[0];
+  return `${venue}-${city}-${dateSlug}`
+    .toLowerCase()
+    .replace(/[^\w\s-]/gi, '')
+    .replace(/\s+/g, '-');
+}
+
+function createSongSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s]/gi, '')
+    .replace(/\s+/g, '-');
+}
+
+export async function getStaticPaths() {
+  try {
+    // Fetch setlist data from the CMS
+    const setlistsResponse = await fetch('https://dash.cureation.net/items/setlists?filter[status][_eq]=published');
+    const setlistsData = await setlistsResponse.json();
+
+    if (!setlistsData.data || !Array.isArray(setlistsData.data)) {
+      console.log('No setlists data found');
+      return [];
+    }
+
+    // Fetch songs data for linking
+    const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+    const songsData = await songsResponse.json();
+    const songsMap = new Map<number, DirectusSong>();
+    if (songsData.data) {
+      songsData.data.forEach((song: DirectusSong) => {
+        songsMap.set(song.id, song);
+      });
+    }
+
+    // Process setlists
+    const allSetlists = setlistsData.data.map((setlist: DirectusSetlist) => {
+      const eventDate = setlist.event_date || '';
+      const slug = setlist.slug || generateSlug(setlist.venue || '', setlist.city || '', eventDate);
+
+      return {
+        id: setlist.id.toString(),
+        date: eventDate,
+        formattedDate: eventDate ? formatDate(eventDate) : 'Date TBA',
+        year: eventDate ? new Date(eventDate).getFullYear() : 0,
+        venue: setlist.venue || 'Unknown Venue',
+        city: setlist.city || 'Unknown City',
+        country: setlist.country || '',
+        stateProvince: setlist.state_province,
+        tourName: setlist.tour_name,
+        tourLeg: setlist.tour_leg,
+        slug,
+        notes: setlist.notes,
+        featured: setlist.featured || false,
+        coverImage: setlist.cover_image
+          ? `https://dash.cureation.net/assets/${setlist.cover_image}`
+          : undefined,
+        songs: (setlist.songs || []).map((song: SetlistSong) => {
+          const songData = songsMap.get(song.song_id);
+          return {
+            position: song.position,
+            title: songData?.title || `Song #${song.song_id}`,
+            songSlug: songData?.title ? createSongSlug(songData.title) : undefined,
+            setType: song.set_type || 'main',
+            notes: song.notes,
+            isCover: song.is_cover || false,
+            duration: songData?.duration
+          };
+        }).sort((a: { position: number }, b: { position: number }) => a.position - b.position)
+      };
+    }).sort((a: { date: string }, b: { date: string }) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    // Generate paths with prev/next navigation
+    return allSetlists.map((setlist: typeof allSetlists[0], index: number) => {
+      const prevSetlist = index < allSetlists.length - 1 ? allSetlists[index + 1] : null;
+      const nextSetlist = index > 0 ? allSetlists[index - 1] : null;
+
+      // Find related shows (same tour or nearby dates)
+      const relatedShows = allSetlists
+        .filter((s: typeof setlist) => s.slug !== setlist.slug)
+        .filter((s: typeof setlist) =>
+          s.tourName === setlist.tourName ||
+          Math.abs(new Date(s.date).getTime() - new Date(setlist.date).getTime()) < 30 * 24 * 60 * 60 * 1000
+        )
+        .slice(0, 3);
+
+      return {
+        params: { slug: setlist.slug },
+        props: { setlist, prevSetlist, nextSetlist, relatedShows }
+      };
+    });
+  } catch (error) {
+    console.error('Error in getStaticPaths for setlists:', error);
+    return [];
+  }
+}
+
+const { setlist, prevSetlist, nextSetlist, relatedShows } = Astro.props;
+
+// Group songs by set type
+const mainSet = setlist.songs.filter((s: { setType: string }) => s.setType === 'main');
+const encoreSet = setlist.songs.filter((s: { setType: string }) => s.setType === 'encore');
+const encore2Set = setlist.songs.filter((s: { setType: string }) => s.setType === 'encore2');
+const acousticSet = setlist.songs.filter((s: { setType: string }) => s.setType === 'acoustic');
+
+const location = setlist.stateProvince
+  ? `${setlist.city}, ${setlist.stateProvince}, ${setlist.country}`
+  : `${setlist.city}, ${setlist.country}`;
+---
+
+<MainLayout
+  title={`${setlist.venue} - ${setlist.formattedDate}`}
+  description={`The Cure setlist from ${setlist.venue} in ${location} on ${setlist.formattedDate}.`}
+  ogImage={setlist.coverImage}
+  showSidebar={false}
+  pageClass="bg-black"
+>
+
+  <!-- Background image layer -->
+  {setlist.coverImage && (
+    <div class="fixed inset-0 z-[-1]">
+      <div class="absolute inset-0 bg-black opacity-70"></div>
+      <div
+        class="absolute inset-0 bg-cover bg-center opacity-30 blur-xl"
+        style={`background-image: url(${setlist.coverImage})`}
+      ></div>
+    </div>
+  )}
+
+  <!-- Breadcrumb -->
+  <nav class="mb-8" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-white/60">
+      <li><a href="/setlists" class="hover:text-primary transition-colors">Setlists</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-white">{setlist.venue}</li>
+    </ol>
+  </nav>
+
+  <!-- Event Header -->
+  <section class="mb-12">
+    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <!-- Tour badge -->
+        {setlist.tourName && (
+          <div class="inline-flex items-center gap-2 mb-4">
+            <span class="badge bg-primary/20 text-primary border-primary/40">{setlist.tourName}</span>
+            {setlist.tourLeg && (
+              <span class="text-white/50 text-sm">{setlist.tourLeg}</span>
+            )}
+          </div>
+        )}
+
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
+          {setlist.venue}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-4 text-white/70 mb-6">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>{location}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+              <line x1="16" x2="16" y1="2" y2="6"></line>
+              <line x1="8" x2="8" y1="2" y2="6"></line>
+              <line x1="3" x2="21" y1="10" y2="10"></line>
+            </svg>
+            <time datetime={setlist.date}>{setlist.formattedDate}</time>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex flex-wrap gap-6 pt-6 border-t border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-display text-primary">{setlist.songs.length}</span>
+            <span class="text-white/50 text-sm">Songs</span>
+          </div>
+          {encoreSet.length > 0 && (
+            <div class="flex items-center gap-2">
+              <span class="text-2xl font-display text-primary">{encoreSet.length + encore2Set.length}</span>
+              <span class="text-white/50 text-sm">Encore Songs</span>
+            </div>
+          )}
+        </div>
+
+        {setlist.notes && (
+          <div class="mt-6 pt-6 border-t border-white/10">
+            <p class="text-white/70">{setlist.notes}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Setlist -->
+  <section class="mb-12">
+    <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/20">
+      <h2 class="font-heading text-2xl text-primary mb-6">Setlist</h2>
+
+      <!-- Main Set -->
+      {mainSet.length > 0 && (
+        <div class="mb-8">
+          <h3 class="text-white/60 text-sm uppercase tracking-wider mb-4">Main Set</h3>
+          <ol class="space-y-1" aria-label="Main set songs">
+            {mainSet.map((song: { position: number; title: string; songSlug?: string; setType: 'main' | 'encore' | 'encore2' | 'acoustic'; notes?: string; isCover?: boolean; duration?: string }) => (
+              <SetlistSongItem
+                position={song.position}
+                title={song.title}
+                songSlug={song.songSlug}
+                setType={song.setType}
+                notes={song.notes}
+                isCover={song.isCover}
+                duration={song.duration}
+              />
+            ))}
+          </ol>
+        </div>
+      )}
+
+      <!-- Acoustic Set -->
+      {acousticSet.length > 0 && (
+        <div class="mb-8">
+          <h3 class="text-white/60 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span>Acoustic Set</span>
+            <span class="px-2 py-0.5 text-xs rounded bg-green-500/20 text-green-400">{acousticSet.length} songs</span>
+          </h3>
+          <ol class="space-y-1" aria-label="Acoustic set songs">
+            {acousticSet.map((song: { position: number; title: string; songSlug?: string; setType: 'main' | 'encore' | 'encore2' | 'acoustic'; notes?: string; isCover?: boolean; duration?: string }) => (
+              <SetlistSongItem
+                position={song.position}
+                title={song.title}
+                songSlug={song.songSlug}
+                setType={song.setType}
+                notes={song.notes}
+                isCover={song.isCover}
+                duration={song.duration}
+              />
+            ))}
+          </ol>
+        </div>
+      )}
+
+      <!-- Encore -->
+      {encoreSet.length > 0 && (
+        <div class="mb-8">
+          <h3 class="text-white/60 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span>Encore</span>
+            <span class="px-2 py-0.5 text-xs rounded bg-primary/20 text-primary">{encoreSet.length} songs</span>
+          </h3>
+          <ol class="space-y-1" aria-label="Encore songs">
+            {encoreSet.map((song: { position: number; title: string; songSlug?: string; setType: 'main' | 'encore' | 'encore2' | 'acoustic'; notes?: string; isCover?: boolean; duration?: string }) => (
+              <SetlistSongItem
+                position={song.position}
+                title={song.title}
+                songSlug={song.songSlug}
+                setType={song.setType}
+                notes={song.notes}
+                isCover={song.isCover}
+                duration={song.duration}
+              />
+            ))}
+          </ol>
+        </div>
+      )}
+
+      <!-- Encore 2 -->
+      {encore2Set.length > 0 && (
+        <div>
+          <h3 class="text-white/60 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span>Second Encore</span>
+            <span class="px-2 py-0.5 text-xs rounded bg-accent/20 text-accent">{encore2Set.length} songs</span>
+          </h3>
+          <ol class="space-y-1" aria-label="Second encore songs">
+            {encore2Set.map((song: { position: number; title: string; songSlug?: string; setType: 'main' | 'encore' | 'encore2' | 'acoustic'; notes?: string; isCover?: boolean; duration?: string }) => (
+              <SetlistSongItem
+                position={song.position}
+                title={song.title}
+                songSlug={song.songSlug}
+                setType={song.setType}
+                notes={song.notes}
+                isCover={song.isCover}
+                duration={song.duration}
+              />
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {setlist.songs.length === 0 && (
+        <p class="text-white/60 text-center py-8">
+          Setlist details coming soon.
+        </p>
+      )}
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section class="mb-12">
+    <div class="flex flex-col sm:flex-row gap-4">
+      {prevSetlist && (
+        <a
+          href={`/setlists/${prevSetlist.slug}`}
+          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-primary/40 transition-colors group"
+        >
+          <span class="text-white/50 text-sm">Previous Show</span>
+          <div class="flex items-center gap-2 mt-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m15 18-6-6 6-6"></path>
+            </svg>
+            <span class="text-white group-hover:text-primary transition-colors truncate">{prevSetlist.venue}</span>
+          </div>
+          <span class="text-white/40 text-xs">{prevSetlist.formattedDate}</span>
+        </a>
+      )}
+      {nextSetlist && (
+        <a
+          href={`/setlists/${nextSetlist.slug}`}
+          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-primary/40 transition-colors group text-right"
+        >
+          <span class="text-white/50 text-sm">Next Show</span>
+          <div class="flex items-center justify-end gap-2 mt-1">
+            <span class="text-white group-hover:text-primary transition-colors truncate">{nextSetlist.venue}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </div>
+          <span class="text-white/40 text-xs">{nextSetlist.formattedDate}</span>
+        </a>
+      )}
+    </div>
+  </section>
+
+  <!-- Related Shows -->
+  {relatedShows && relatedShows.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">Related Shows</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {relatedShows.map((show: { slug: string; venue: string; city: string; country: string; formattedDate: string; tourName?: string }) => (
+          <a
+            href={`/setlists/${show.slug}`}
+            class="glass-card rounded-xl p-4 border border-white/20 hover:border-primary/40 transition-colors group"
+          >
+            <h3 class="text-white group-hover:text-primary transition-colors truncate">{show.venue}</h3>
+            <p class="text-white/60 text-sm">{show.city}, {show.country}</p>
+            <p class="text-white/40 text-xs mt-1">{show.formattedDate}</p>
+            {show.tourName && (
+              <span class="inline-block mt-2 px-2 py-0.5 text-xs rounded bg-primary/10 text-primary/80">
+                {show.tourName}
+              </span>
+            )}
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Back to all setlists -->
+  <div class="text-center">
+    <a
+      href="/setlists"
+      class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      Back to All Setlists
+    </a>
+  </div>
+</MainLayout>

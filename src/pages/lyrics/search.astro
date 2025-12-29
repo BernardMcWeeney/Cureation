@@ -1,176 +1,91 @@
 ---
 // src/pages/lyrics/search.astro
 import MainLayout from '../../layouts/MainLayout.astro';
+import LyricsSidebar from '../../components/sidebar/LyricsSidebar.astro';
+import SearchWidget from '../../components/Search.astro';
 import { ViewTransitions } from 'astro:transitions';
+import { fetchAlbums, getAssetUrl, generateSlug } from '../../lib/directus';
 
-// Sidebar configuration
-const sidebarItems = [
-  { title: 'All Songs', path: '/lyrics' },
-  { title: 'By Album', path: '/lyrics/album' },
-  { title: 'Popular Songs', path: '/lyrics/popular' },
-  { title: 'Search', path: '/lyrics/search' }
-];
-
-// Get search query from URL parameters
+// Get search query from URL (for display purposes)
 const query = Astro.url.searchParams.get('q') || '';
 
-// Mock data for our example - you can replace this with actual API calls
-// This ensures we'll have at least one result for "lovesong" for testing
-const mockSongs = [
-  {
-    id: 1,
-    title: "Lovesong",
-    albumTitle: "Disintegration",
-    albumSlug: "disintegration",
-    albumCover: "/images/albums/disintegration.jpg", // Update with your actual path
-    year: "1989",
-    lyrics: "However far away, I will always love you...",
-    slug: "lovesong"
-  },
-  {
-    id: 2,
-    title: "Just Like Heaven",
-    albumTitle: "Kiss Me, Kiss Me, Kiss Me",
-    albumSlug: "kiss-me-kiss-me-kiss-me",
-    albumCover: "/images/albums/kiss-me-kiss-me-kiss-me.jpg", // Update with your actual path
-    year: "1987",
-    lyrics: "Show me, show me, show me how you do that trick...",
-    slug: "just-like-heaven"
-  },
-  {
-    id: 3,
-    title: "Friday I'm in Love",
-    albumTitle: "Wish",
-    albumSlug: "wish",
-    albumCover: "/images/albums/wish.jpg", // Update with your actual path
-    year: "1992",
-    lyrics: "I don't care if Monday's blue, Tuesday's grey and Wednesday too...",
-    slug: "friday-im-in-love"
-  }
-];
-
-// Function to search songs
-const searchSongs = (searchQuery) => {
-  if (!searchQuery) return [];
-  
-  // In a real app, you would fetch this data from your API
-  try {
-    // Convert search query to lowercase for case-insensitive matching
-    const searchTerms = searchQuery.toLowerCase();
-    
-    // Filter songs based on search query
-    const results = mockSongs.filter(song => 
-      song.title.toLowerCase().includes(searchTerms) ||
-      song.albumTitle.toLowerCase().includes(searchTerms) ||
-      (song.lyrics && song.lyrics.toLowerCase().includes(searchTerms))
-    );
-    
-    return results;
-  } catch (error) {
-    console.error('Error searching songs:', error);
-    return [];
-  }
-};
-
-// Perform search
-const searchResults = query ? searchSongs(query) : [];
-
-// Log for debugging
-console.log(`Search query: "${query}", Found ${searchResults.length} results`);
+// Fetch albums for sidebar
+const rawAlbums = await fetchAlbums();
+const albums = rawAlbums.map((album) => ({
+  title: album.title || 'Unknown Album',
+  slug: album.slug || generateSlug(album.title || 'unknown'),
+  coverImage: getAssetUrl(album.cover_art),
+  year: album.release_date ? new Date(album.release_date).getFullYear().toString() : ''
+})).sort((a, b) => parseInt(b.year) - parseInt(a.year));
 ---
 
 <MainLayout
-  title={query ? `Search Results: ${query}` : "Search Lyrics"}
+  title={query ? `Search: ${query}` : 'Search Lyrics'}
   description="Search through The Cure's lyrics and discography"
   showSidebar={true}
-  sidebarActiveItem="Search"
-  sidebarItems={sidebarItems}
+  customSidebar={true}
   pageClass="bg-black"
 >
+<LyricsSidebar
+  slot="sidebar"
+  activeFilter="Search"
+  albums={albums}
+/>
   <ViewTransitions />
-  
+
   <section class="mb-12">
     <div class="glass-card rounded-xl overflow-hidden border border-white/20">
       <div class="p-6 md:p-8">
         <h1 class="font-display text-4xl md:text-5xl text-white mb-4">
-          {query ? `Search Results: "${query}"` : "Search Lyrics"}
+          Search
         </h1>
-        
-        <!-- Search form -->
-        <form action="/lyrics/search" method="get" class="relative max-w-lg mb-8">
-          <input 
-            type="text" 
-            name="q"
-            value={query}
-            placeholder="Search for lyrics or songs..." 
-            class="w-full py-3 px-4 pl-10 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
-          />
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/60 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <button 
-            type="submit" 
-            class="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded-lg backdrop-blur-md bg-primary/20 border border-primary/30 text-white hover:bg-primary/30 transition-colors duration-300"
-          >
-            Search
-          </button>
-        </form>
-        
-        <!-- Search Results -->
-        {query && (
-          <div class="mt-8">
-            <p class="text-white/80 mb-4">
-              {searchResults.length === 0 
-                ? `No results found for "${query}". Try different keywords.` 
-                : `Found ${searchResults.length} result${searchResults.length === 1 ? '' : 's'} for "${query}"`}
-            </p>
-            
-            {searchResults.length > 0 && (
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                {searchResults.map(song => (
-                  <a href={`/lyrics/${song.slug}`} class="glass-card rounded-lg p-4 border border-white/20 hover:border-white/30 backdrop-blur-md bg-black/20 hover:bg-black/30 transition-all duration-300 hover-lift">
-                    <div class="flex items-center gap-3">
-                      <div class="w-12 h-12 shrink-0">
-                        <img 
-                          src={song.albumCover} 
-                          alt={`Album art for ${song.albumTitle}`}
-                          class="w-full h-full object-cover rounded-md"
-                          loading="lazy"
-                          onerror="this.src='/images/placeholder-album.jpg'"
-                        />
-                      </div>
-                      <div>
-                        <h4 class="text-white font-medium">{song.title}</h4>
-                        <p class="text-white/60 text-sm">{song.albumTitle} {song.year ? `(${song.year})` : ''}</p>
-                      </div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        
-        {!query && (
-          <div class="mt-8">
-            <p class="text-white/80">
-              Enter keywords above to search through The Cure's lyrics and discography.
-              You can search by song title, album name, or lyrics content.
-            </p>
-          </div>
-        )}
+        <p class="text-white/70 mb-8 max-w-2xl">
+          Search through The Cure's complete catalog - find songs, albums, and lyrics.
+        </p>
+
+        <!-- Pagefind Search -->
+        <SearchWidget placeholder="Search lyrics, songs, albums..." showFilters={true} />
       </div>
     </div>
   </section>
-</MainLayout>
 
-<style>
-  /* Lift effect on hover */
-  .hover-lift {
-    transition: transform 0.3s var(--ease-out);
-  }
-  
-  .hover-lift:hover {
-    transform: translateY(-4px);
-  }
-</style>
+  <!-- Quick Links -->
+  <section>
+    <h2 class="font-heading text-2xl text-primary mb-4">Browse by Category</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a
+        href="/lyrics"
+        class="glass-card p-6 rounded-xl border border-white/20 hover:border-white/30 transition-all duration-300 group"
+      >
+        <h3 class="text-white font-medium text-lg group-hover:text-primary transition-colors">
+          All Songs
+        </h3>
+        <p class="text-white/60 text-sm mt-2">
+          Browse all songs by decade
+        </p>
+      </a>
+      <a
+        href="/lyrics/album"
+        class="glass-card p-6 rounded-xl border border-white/20 hover:border-white/30 transition-all duration-300 group"
+      >
+        <h3 class="text-white font-medium text-lg group-hover:text-primary transition-colors">
+          By Album
+        </h3>
+        <p class="text-white/60 text-sm mt-2">
+          Explore songs organized by album
+        </p>
+      </a>
+      <a
+        href="/discography"
+        class="glass-card p-6 rounded-xl border border-white/20 hover:border-white/30 transition-all duration-300 group"
+      >
+        <h3 class="text-white font-medium text-lg group-hover:text-primary transition-colors">
+          Discography
+        </h3>
+        <p class="text-white/60 text-sm mt-2">
+          View all albums and releases
+        </p>
+      </a>
+    </div>
+  </section>
+</MainLayout>

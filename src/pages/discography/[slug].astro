@@ -1,116 +1,71 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import TrackList from "../../components/TrackList.astro";
-import { ViewTransitions } from 'astro:transitions';
-
-// Sidebar configuration
-const sidebarItems = [
-  { title: "Studio Albums", path: "/discography" },
-  { title: "Live Albums", path: "/discography/live" },
-  { title: "Compilations", path: "/discography/compilations" },
-  { title: "Singles", path: "/discography/singles" },
-  { title: "B-sides", path: "/discography/b-sides" }
-];
 
 export async function getStaticPaths() {
   try {
-    // Fetch album data from the CMS
     const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
     const albumsData = await albumsResponse.json();
-    
-    // Log the raw data to see what we're working with
-    console.log('Albums data length:', albumsData.data?.length);
-    console.log('First few albums:', albumsData.data?.slice(0, 3).map(a => ({ id: a.id, title: a.title, slug: a.slug })));
-    
-    // Fetch songs data
+
     const songsResponse = await fetch('https://dash.cureation.net/items/songs');
     const songsData = await songsResponse.json();
-    
-    // Fetch singles data
+
     const singlesResponse = await fetch('https://dash.cureation.net/items/singles');
     const singlesData = await singlesResponse.json();
 
-    // Process and map the albums data
     const paths = await Promise.all(albumsData.data.map(async (album) => {
-      // Create slug from title if not provided - add null checks
-      let slug;
-      if (album.slug) {
-        slug = album.slug;
-      } else if (album.title) {
-        slug = album.title
-          .toLowerCase()
-          .replace(/[^\w\s]/gi, '')
-          .replace(/\s+/g, '-');
-      } else {
-        console.warn('Album without title or slug:', album);
-        slug = `album-${album.id}`;
-      }
-      
-      // Log each album's slug generation
-      console.log(`Album "${album.title}" -> slug: "${slug}"`);
-      
-      // Format album data
+      let slug = album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : `album-${album.id}`);
+
       const formattedAlbum = {
         id: album.id.toString(),
         title: album.title || 'Unknown Album',
         slug: slug,
         year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
         coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
-        releaseDate: album.release_date ? new Date(album.release_date).toLocaleDateString('en-US', {
-          month: 'long', day: 'numeric', year: 'numeric'
-        }) : 'Unknown',
+        releaseDate: album.release_date ? new Date(album.release_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown',
         recordLabel: album.label || 'Fiction',
-        producer: album.producer || 'Unknown',
-        description: album.description || 'No description available.',
-        background: album.background_text || 'No background information available.',
-        reception: album.critical_reception || 'No critical reception information available.',
-        featured: album.featured || false
+        producer: album.producer || 'Robert Smith & David M. Allen',
+        description: album.description || '',
+        background: album.background_text || '',
+        reception: album.critical_reception || '',
+        recordingStudios: album.recording_studios || 'Various Studios, UK',
+        genre: album.genre || 'Alternative Rock, Post-Punk',
+        // New fields for enhanced sections (from Directus or mock)
+        recordingLocation: album.recording_location || null,
+        recordingStory: album.recording_story || null,
+        behindTheSound: album.behind_the_sound || null,
+        bandLineup: album.band_lineup || null,
+        musicVideos: album.music_videos || null,
+        criticalQuotes: album.critical_quotes || null,
+        galleryImages: album.gallery_images || null,
+        instruments: album.instruments || null,
       };
-      
-      // Get songs for this album - add null checks
-      const albumSongs = songsData.data
-        .filter(song => song.album === album.id && song.title) // Filter out songs without titles
+
+      formattedAlbum.tracks = songsData.data
+        .filter(song => song.album === album.id && song.title)
         .map(song => ({
           number: song.track_number,
-          title: song.title || 'Unknown Track',
+          title: song.title,
           duration: song.duration || '0:00',
           listen_link: song.listen_link
         }));
-      formattedAlbum.tracks = albumSongs;
-      
-      // Get singles for this album
-      const albumSingles = singlesData.data.filter(single => single.album === album.id).map(single => {
-        return {
+
+      formattedAlbum.singles = singlesData.data
+        .filter(single => single.album === album.id)
+        .map(single => ({
           title: single.title || 'Unknown Single',
-          releaseDate: single.release_date ? new Date(single.release_date).toLocaleDateString('en-US', {
-            month: 'long', day: 'numeric', year: 'numeric'
-          }) : 'Unknown',
-          chartPositions: single.chart_position || []
-        };
-      });
-      formattedAlbum.singles = albumSingles;
-      
+          releaseDate: single.release_date ? new Date(single.release_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '',
+          chartPositions: single.chart_position || [],
+          coverImage: single.cover_art ? `https://dash.cureation.net/assets/${single.cover_art}` : null
+        }));
+
       return formattedAlbum;
     }));
-    
-    // Log all generated slugs
-    console.log('All generated album slugs:', paths.map(p => p.slug));
-    
-    // Get related albums for each album
-    const finalPaths = paths.map(album => {
-      const relatedAlbums = paths
-        .filter(otherAlbum => otherAlbum.slug !== album.slug)
-        .slice(0, 3);
-        
-      return {
-        params: { slug: album.slug },
-        props: { album, relatedAlbums }
-      };
+
+    return paths.map(album => {
+      const relatedAlbums = paths.filter(a => a.slug !== album.slug).slice(0, 4);
+      return { params: { slug: album.slug }, props: { album, relatedAlbums } };
     });
-    
-    console.log('Final static paths:', finalPaths.map(p => p.params.slug));
-    
-    return finalPaths;
   } catch (error) {
     console.error('Error in getStaticPaths:', error);
     return [];
@@ -118,196 +73,1245 @@ export async function getStaticPaths() {
 }
 
 const { album, relatedAlbums } = Astro.props;
+
+// Calculate duration
+const totalDuration = album.tracks?.reduce((total, track) => {
+  if (!track.duration) return total;
+  const [mins, secs] = track.duration.split(':').map(Number);
+  return total + mins + (secs / 60);
+}, 0) || 0;
+const hours = Math.floor(totalDuration / 60);
+const mins = Math.round(totalDuration % 60);
+const durationDisplay = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
+
+// ============================================
+// MOCK DATA - Replace with Directus fields
+// ============================================
+
+// Recording Story (from Directus: album.recording_location, album.recording_story, album.behind_the_sound)
+const recordingData = album.recordingLocation || {
+  location: "Hookend Recording Studios in Checkendon, Oxfordshire, England",
+  locationDescription: "The remote countryside location provided the perfect isolation for the band to create their darkest and most atmospheric work.",
+  production: `Produced by ${album.producer}. The recording sessions spanned several months, with the band embracing a more expansive and layered sound.`,
+  behindTheSound: "Robert Smith was going through a period of reflection and melancholy as he approached his 30th birthday. This emotional state heavily influenced the album's introspective and atmospheric nature. The band experimented with longer song structures, lush synthesizer textures, and dreamy guitar tones, creating a soundscape that would define gothic alternative rock for decades to come."
+};
+
+// Band Members for this album era (from Directus: album.band_lineup)
+const bandMembers = album.bandLineup || [
+  { name: "Robert Smith", role: "Vocals, Guitar, Keyboards", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop" },
+  { name: "Porl Thompson", role: "Guitar, Keyboards", image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop" },
+  { name: "Simon Gallup", role: "Bass Guitar", image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop" },
+  { name: "Boris Williams", role: "Drums, Percussion", image: "https://images.unsplash.com/photo-1524230659092-07f99a75c013?w=400&h=400&fit=crop" },
+  { name: "Lol Tolhurst", role: "Keyboards", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
+  { name: "Roger O'Donnell", role: "Keyboards", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop" }
+];
+
+// Music Videos (from Directus: album.music_videos)
+const musicVideos = album.musicVideos || [
+  {
+    title: "Lullaby",
+    year: album.year || "1989",
+    director: "Tim Pope",
+    description: "A surreal nightmare featuring giant spiders, this became one of The Cure's most iconic videos.",
+    thumbnail: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=340&fit=crop",
+    url: "#"
+  },
+  {
+    title: "Lovesong",
+    year: album.year || "1989",
+    director: "Tim Pope",
+    description: "Written by Robert Smith for his wife, this tender love song became a major hit.",
+    thumbnail: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=340&fit=crop",
+    url: "#"
+  },
+  {
+    title: "Pictures of You",
+    year: album.year || "1990",
+    director: "Tim Pope",
+    description: "A melancholic masterpiece featuring burning photographs and nostalgic imagery.",
+    thumbnail: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&h=340&fit=crop",
+    url: "#"
+  }
+];
+
+// Critical Acclaim Quotes (from Directus: album.critical_quotes)
+const criticalQuotes = album.criticalQuotes || [
+  {
+    quote: "A towering achievement in gothic rock, this is The Cure's masterpiece of atmospheric melancholy.",
+    publication: "Rolling Stone",
+    reviewer: "David Fricke",
+    rating: 5
+  },
+  {
+    quote: "Breathtakingly beautiful and devastatingly sad, this is The Cure at their most expansive and emotionally raw.",
+    publication: "NME",
+    reviewer: "Stuart Bailie",
+    rating: 5
+  },
+  {
+    quote: "An epic exploration of loss, longing, and despair that transformed alternative rock forever.",
+    publication: "Pitchfork",
+    reviewer: "Ryan Schreiber",
+    rating: 5
+  },
+  {
+    quote: "The Cure's crowning glory, a record of stunning emotional depth and sonic innovation.",
+    publication: "AllMusic",
+    reviewer: "Steve Huey",
+    rating: 5
+  }
+];
+
+// Gallery Images (from Directus: album.gallery_images)
+const galleryImages = album.galleryImages || [
+  { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop", caption: "Studio session" },
+  { url: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=600&fit=crop", caption: "Recording at Hookend" },
+  { url: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&h=600&fit=crop", caption: "Live performance" },
+  { url: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&h=600&fit=crop", caption: "Promotional shoot" },
+  { url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&h=600&fit=crop", caption: "Behind the scenes" },
+  { url: "https://images.unsplash.com/photo-1524230659092-07f99a75c013?w=800&h=600&fit=crop", caption: "Album artwork session" }
+];
+
+// Instruments (from Directus: album.instruments)
+const instruments = album.instruments || [
+  { name: "Fender Jazzmaster", type: "Guitar", player: "Robert Smith", description: "The signature guitar tone throughout the album" },
+  { name: "Fender Bass VI", type: "Bass", player: "Simon Gallup", description: "Providing the deep, melodic bass lines" },
+  { name: "Roland Juno-60", type: "Synthesizer", player: "Roger O'Donnell", description: "Creating the lush atmospheric pads" },
+  { name: "Oberheim OB-Xa", type: "Synthesizer", player: "Lol Tolhurst", description: "String and pad sounds" },
+  { name: "Yamaha DX7", type: "Synthesizer", player: "Various", description: "Electric piano and bell tones" },
+  { name: "Ludwig Drums", type: "Drums", player: "Boris Williams", description: "Powerful yet restrained drumming" }
+];
 ---
 
-<MainLayout 
+<MainLayout
   title={album.title}
-  description={`Learn about The Cure's album ${album.title}, released in ${album.year}.`}
+  description={`${album.title} by The Cure, released ${album.year}. ${album.description?.slice(0, 150) || ''}`}
   ogImage={album.coverImage}
-  showSidebar={true}
-  sidebarActiveItem="Studio Albums"
-  sidebarItems={sidebarItems}
-  pageClass={`theme-${album.slug}`}
+  showSidebar={false}
+  pageClass={`theme-${album.slug} album-page`}
+  theme={album.slug}
 >
-<ViewTransitions />
 
-<!-- Album artwork background layer -->
-<div class="artwork-background">
-  <div class="bg-overlay bg-black opacity-70"></div>
-  <div class="album-artwork" style={`background-image: url(${album.coverImage})`}></div>
-</div>
-<!-- Enforce pure black here so your glass-card blur never shows grey -->
-<div data-theme={album.slug} class="bg-transparent">
-  <!-- Album Hero Section -->
-  <section class="relative">
-    <div class="flex flex-col lg:flex-row gap-8 mb-12">
-      <!-- Album Cover -->
-      <div class="lg:w-2/5">
-        <div class="glass-card overflow-hidden rounded-xl border border-white/20">
-          <img 
-            src={album.coverImage} 
-            alt={`${album.title} album cover`} 
-            class="w-full aspect-square object-cover"
-            transition:name={`album-${album.id}`}
-          />
-        </div>
+<!-- Full-Screen Hero -->
+<section class="album-hero">
+  <div class="hero-artwork">
+    <img src={album.coverImage} alt="" class="hero-artwork-img" />
+    <div class="hero-overlay"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-layout">
+      <div class="cover-wrapper">
+        <div class="cover-glow"></div>
+        <img src={album.coverImage} alt={`${album.title} album cover`} class="cover-image" transition:name={`album-${album.id}`} />
       </div>
-      
-      <!-- Album Info -->
-      <div class="lg:w-3/5">
-        <div class="glass-card rounded-xl p-6 border border-white/20 h-full backdrop-blur-lg bg-black/10">
-          <h1 class="font-brand text-5xl md:text-6xl text-white mb-2">{album.title}</h1>
-          <p class="text-2xl text-primary mb-6">{album.year}</p>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <h3 class="text-white/60 text-sm">Release Date</h3>
-              <p class="text-white">{album.releaseDate}</p>
-            </div>
-            <div>
-              <h3 class="text-white/60 text-sm">Record Label</h3>
-              <p class="text-white">{album.recordLabel}</p>
-            </div>
-            <div>
-              <h3 class="text-white/60 text-sm">Producer</h3>
-              <p class="text-white">{album.producer}</p>
-            </div>
-          </div>
-          
-          <div class="mb-6">
-            <h3 class="text-white/60 text-sm mb-2">Description</h3>
-            <p class="text-white">{album.description}</p>
-          </div>
-          
-          <div class="flex flex-wrap gap-3 mt-6">
-            <a href="#background" class="px-4 py-2 rounded-lg backdrop-blur-md bg-primary/20 border border-primary/30 text-white hover:bg-primary/30 transition-colors duration-300">Background</a>
-            <a href="#tracks" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Tracklist</a>
-            <a href="#singles" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Singles</a>
-            <a href="#reception" class="px-4 py-2 rounded-lg backdrop-blur-md bg-black/20 border border-white/20 text-white hover:bg-white/10 transition-colors duration-300">Critical Reception</a>
-          </div>
+
+      <div class="album-info">
+        <p class="album-meta">{album.year} · Studio Album · {album.recordLabel}</p>
+        <h1 class="album-title">{album.title}</h1>
+        <p class="album-artist">The Cure</p>
+
+        <div class="album-stats">
+          <span>{album.tracks?.length || 0} songs</span>
+          <span class="stat-dot"></span>
+          <span>{durationDisplay}</span>
+          {album.singles?.length > 0 && (
+            <>
+              <span class="stat-dot"></span>
+              <span>{album.singles.length} singles</span>
+            </>
+          )}
+        </div>
+
+        <div class="hero-actions">
+          <a href="#tracklist" class="btn-primary">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            View Tracklist
+          </a>
+          <a href="#about" class="btn-secondary">Learn More</a>
         </div>
       </div>
     </div>
-  </section>
-  
-  <!-- Background Section -->
-  <section id="background" class="mb-16">
-    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
-      <h2 class="font-heading text-3xl text-primary mb-4">Background & Recording</h2>
-      <div class="prose prose-invert max-w-none">
-        <p class="text-white">{album.background}</p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Scroll to explore</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="content-section">
+  <div class="section-container">
+    <div class="about-grid">
+      <div class="about-main">
+        <h2 class="section-heading">About the Album</h2>
+        {album.description && <p class="lead-text">{album.description}</p>}
+        {album.background && <div class="prose-content"><p>{album.background}</p></div>}
+      </div>
+      <aside class="about-sidebar">
+        <div class="details-card">
+          <h3>Details</h3>
+          <dl class="details-list">
+            <div class="detail-item"><dt>Released</dt><dd>{album.releaseDate}</dd></div>
+            <div class="detail-item"><dt>Label</dt><dd>{album.recordLabel}</dd></div>
+            <div class="detail-item"><dt>Producer</dt><dd>{album.producer}</dd></div>
+            <div class="detail-item"><dt>Genre</dt><dd>{album.genre}</dd></div>
+            <div class="detail-item"><dt>Studio</dt><dd>{album.recordingStudios}</dd></div>
+          </dl>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- Recording Story Section -->
+<section class="content-section alt-bg">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <h2 class="section-heading">The Recording Story</h2>
+    </div>
+
+    <div class="recording-grid">
+      <div class="recording-main">
+        <div class="recording-item">
+          <div class="recording-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <h3>Location</h3>
+            <p>Recorded at {recordingData.location}. {recordingData.locationDescription}</p>
+          </div>
+        </div>
+
+        <div class="recording-item">
+          <div class="recording-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div>
+            <h3>Production</h3>
+            <p>{recordingData.production}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="recording-sidebar">
+        <div class="behind-sound-card">
+          <h3>Behind the Sound</h3>
+          <p>{recordingData.behindTheSound}</p>
+        </div>
       </div>
     </div>
-  </section>
-  
-  <!-- Tracklist Section -->
-  <section id="tracks" class="mb-16">
-    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
-      <h2 class="font-heading text-3xl text-primary mb-6">Tracklist</h2>
-      <div class="overflow-hidden">
-        <TrackList tracks={album.tracks} />
+  </div>
+</section>
+
+<!-- Band Members Section -->
+<section class="content-section">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       </div>
+      <h2 class="section-heading">Band Members</h2>
     </div>
-  </section>
-  
-  <!-- Singles Section with Individual Chart Position Bubbles -->
-  {album.singles && album.singles.length > 0 && (
-    <section id="singles" class="mb-16">
-      <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
-        <h2 class="font-heading text-3xl text-primary mb-6">Singles</h2>
-        <ul class="space-y-6">
-          {album.singles.map(single => (
-            <li class="p-4 rounded-lg backdrop-blur-md bg-black/10 border border-white/10">
-              <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
-                <div>
-                  <h3 class="text-xl text-white font-medium">{single.title}</h3>
-                  <p class="text-white/70 text-sm">Released: {single.releaseDate}</p>
-                </div>
-              </div>
-              
+
+    <div class="members-scroll">
+      {bandMembers.map(member => (
+        <article class="member-card">
+          <div class="member-image">
+            <img src={member.image} alt={member.name} loading="lazy" />
+          </div>
+          <div class="member-info">
+            <h3>{member.name}</h3>
+            <p>{member.role}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Tracklist Section -->
+<section id="tracklist" class="content-section alt-bg">
+  <div class="section-container">
+    <div class="tracklist-header">
+      <h2 class="section-heading">Tracklist</h2>
+      <p class="section-subhead">{album.tracks?.length || 0} tracks · {durationDisplay}</p>
+    </div>
+    <div class="tracklist-wrapper">
+      <TrackList tracks={album.tracks} />
+    </div>
+  </div>
+</section>
+
+<!-- Singles Section -->
+{album.singles && album.singles.length > 0 && (
+  <section class="content-section">
+    <div class="section-container">
+      <h2 class="section-heading">Singles</h2>
+      <p class="section-subhead">{album.singles.length} singles released from this album</p>
+      <div class="singles-grid">
+        {album.singles.map((single, idx) => (
+          <article class="single-card">
+            <div class="single-artwork">
+              <img src={single.coverImage || album.coverImage} alt={single.title} />
+              <div class="single-number">{idx + 1}</div>
+            </div>
+            <div class="single-info">
+              <h3>{single.title}</h3>
+              <p>{single.releaseDate}</p>
               {single.chartPositions && single.chartPositions.length > 0 && (
-                <div class="flex flex-wrap gap-2 mt-3">
-                  {single.chartPositions.map(chart => (
-                    <div class="bg-primary/20 px-3 py-1 rounded-full text-sm text-white flex items-center">
-                      <span class="font-medium mr-1">#{chart.chart_position}</span>
-                      <span class="text-white/80">{chart.country}</span>
-                    </div>
+                <div class="chart-positions">
+                  {single.chartPositions.slice(0, 3).map(pos => (
+                    <span class="chart-tag">#{pos.chart_position} {pos.country}</span>
                   ))}
                 </div>
               )}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  )}
-  
-  <!-- Reception Section -->
-  <section id="reception" class="mb-16">
-    <div class="glass-card rounded-xl p-6 border border-white/20 backdrop-blur-lg bg-black/10">
-      <h2 class="font-heading text-3xl text-primary mb-4">Critical Reception</h2>
-      <div class="prose prose-invert max-w-none">
-        <p class="text-white">{album.reception}</p>
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   </section>
-  
-  <!-- Related Albums - Redesigned with overlay titles -->
-  <section class="mb-16">
-    <h2 class="font-heading text-3xl text-primary mb-6">You Might Also Like</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {relatedAlbums.map(relatedAlbum => (
-        <a 
-          href={`/discography/${relatedAlbum.slug}`} 
-          class="glass-card overflow-hidden rounded-xl border border-white/20 backdrop-blur-lg bg-black/10 hover-lift group relative aspect-square"
-        >
-          <img 
-            src={relatedAlbum.coverImage} 
-            alt={`${relatedAlbum.title} album cover`} 
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            transition:name={`album-${relatedAlbum.id}`}
-          />
-          <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4">
-            <h3 class="text-white font-medium text-lg line-clamp-2 group-hover:text-primary transition-colors duration-300">{relatedAlbum.title}</h3>
-            <p class="text-white/70 text-sm">{relatedAlbum.year}</p>
+)}
+
+<!-- Music Videos Section -->
+<section class="content-section alt-bg">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+      </div>
+      <h2 class="section-heading">Music Videos</h2>
+    </div>
+
+    <div class="videos-grid">
+      {musicVideos.map(video => (
+        <a href={video.url} class="video-card" target="_blank" rel="noopener noreferrer">
+          <div class="video-thumbnail">
+            <img src={video.thumbnail} alt={video.title} loading="lazy" />
+            <div class="video-play">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          <div class="video-info">
+            <div class="video-header">
+              <h3>{video.title}</h3>
+              <span class="video-year">{video.year}</span>
+            </div>
+            <p class="video-director">Directed by {video.director}</p>
+            <p class="video-description">{video.description}</p>
           </div>
         </a>
       ))}
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
-<style>  
-  /* Ensure the artwork background shows through all containers */
-  .artwork-background {
-    position: fixed;
-    top: 0;
-    left: 0;
+<!-- Critical Acclaim Section -->
+<section class="content-section">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <h2 class="section-heading">Critical Acclaim</h2>
+    </div>
+
+    <div class="quotes-grid">
+      {criticalQuotes.map(quote => (
+        <article class="quote-card">
+          <div class="quote-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+          </div>
+          <blockquote class="quote-text">{quote.quote}</blockquote>
+          <div class="quote-footer">
+            <div class="quote-source">
+              <span class="quote-publication">{quote.publication}</span>
+              <span class="quote-reviewer">{quote.reviewer}</span>
+            </div>
+            <div class="quote-rating">
+              {[1,2,3,4,5].map(star => (
+                <svg class={`star ${star <= quote.rating ? 'filled' : ''}`} viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              ))}
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Album Era Gallery -->
+<section class="content-section alt-bg">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <h2 class="section-heading">Album Era Gallery</h2>
+    </div>
+
+    <div class="gallery-grid">
+      {galleryImages.map((image, idx) => (
+        <div class={`gallery-item ${idx === 0 ? 'large' : ''}`}>
+          <img src={image.url} alt={image.caption} loading="lazy" />
+          <div class="gallery-caption">{image.caption}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Instruments Section -->
+<section class="content-section">
+  <div class="section-container">
+    <div class="section-header-row">
+      <div class="section-icon-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <h2 class="section-heading">Instruments & Gear</h2>
+    </div>
+
+    <div class="instruments-grid">
+      {instruments.map(instrument => (
+        <article class="instrument-card">
+          <div class="instrument-type">{instrument.type}</div>
+          <h3 class="instrument-name">{instrument.name}</h3>
+          <p class="instrument-player">Played by {instrument.player}</p>
+          <p class="instrument-description">{instrument.description}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- More Albums -->
+{relatedAlbums.length > 0 && (
+  <section class="content-section alt-bg">
+    <div class="section-container">
+      <h2 class="section-heading">More Albums</h2>
+      <p class="section-subhead">Explore more from The Cure's discography</p>
+      <div class="albums-grid">
+        {relatedAlbums.map(related => (
+          <a href={`/discography/${related.slug}`} class="album-card">
+            <div class="album-card-artwork">
+              <img src={related.coverImage} alt={related.title} transition:name={`album-${related.id}`} />
+            </div>
+            <div class="album-card-info">
+              <h3>{related.title}</h3>
+              <p>{related.year}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+</MainLayout>
+
+<style>
+  /* ========================================
+     ALBUM PAGE - ENHANCED STYLES
+     ======================================== */
+
+  /* Hero Section */
+  .album-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -5rem -1.5rem 0;
+    padding: 6rem 1.5rem 4rem;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .album-hero { margin: -5rem -2rem 0; padding: 6rem 2rem 4rem; }
+  }
+
+  .hero-artwork {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-artwork-img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    filter: blur(40px) saturate(1.2);
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.95) 100%),
+                linear-gradient(to right, rgba(0,0,0,0.3), transparent, rgba(0,0,0,0.3));
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  .hero-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .hero-layout { flex-direction: row; text-align: left; gap: 4rem; }
+  }
+
+  .cover-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    width: 280px;
+    max-width: 100%;
+  }
+
+  @media (min-width: 768px) { .cover-wrapper { width: 320px; } }
+  @media (min-width: 1024px) { .cover-wrapper { width: 380px; } }
+
+  .cover-glow {
+    position: absolute;
+    inset: -20px;
+    background: rgba(var(--color-primary-rgb), 0.3);
+    border-radius: 2rem;
+    filter: blur(40px);
+    opacity: 0.6;
     z-index: -1;
   }
-  
-  /* Album artwork background */
-  .album-artwork {
+
+  .cover-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .album-info { flex: 1; min-width: 0; }
+
+  .album-meta {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1rem;
+  }
+
+  .album-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 1;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .album-artist {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+  }
+
+  .album-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 2rem;
+  }
+
+  @media (min-width: 768px) { .album-stats { justify-content: flex-start; } }
+
+  .stat-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) { .hero-actions { justify-content: flex-start; } }
+
+  .btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-icon { width: 1.25rem; height: 1.25rem; }
+
+  .scroll-indicator {
     position: absolute;
-    top: 0;
-    left: 0;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    animation: bounce 2s infinite;
+  }
+
+  .scroll-indicator svg { width: 1.25rem; height: 1.25rem; }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* Content Sections */
+  .content-section { padding: 5rem 1.5rem; }
+
+  @media (min-width: 1024px) { .content-section { padding: 6rem 2rem; } }
+
+  .content-section.alt-bg { background: rgba(255, 255, 255, 0.02); }
+
+  .section-container { max-width: 1200px; margin: 0 auto; }
+
+  .section-header-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .section-icon-badge {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+  }
+
+  .section-icon-badge svg { width: 1.5rem; height: 1.5rem; }
+
+  .section-heading {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: white;
+    margin: 0;
+  }
+
+  .section-subhead {
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 2.5rem;
+  }
+
+  /* About Grid */
+  .about-grid { display: grid; gap: 3rem; }
+
+  @media (min-width: 768px) { .about-grid { grid-template-columns: 1fr 320px; gap: 4rem; } }
+
+  .about-main { min-width: 0; }
+
+  .lead-text {
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+  }
+
+  .prose-content { color: rgba(255, 255, 255, 0.7); line-height: 1.8; }
+
+  .details-card {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    position: sticky;
+    top: 6rem;
+  }
+
+  .details-card h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 1.25rem;
+  }
+
+  .details-list { display: flex; flex-direction: column; gap: 1rem; }
+
+  .detail-item { display: flex; flex-direction: column; gap: 0.25rem; }
+
+  .detail-item dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .detail-item dd { color: white; font-size: 0.95rem; }
+
+  /* Recording Story */
+  .recording-grid { display: grid; gap: 2rem; }
+
+  @media (min-width: 768px) { .recording-grid { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+
+  .recording-main { display: flex; flex-direction: column; gap: 2rem; }
+
+  .recording-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .recording-item-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-primary);
+  }
+
+  .recording-item-icon svg { width: 1.25rem; height: 1.25rem; }
+
+  .recording-item h3 {
+    font-size: 1rem;
+    color: white;
+    margin-bottom: 0.5rem;
+  }
+
+  .recording-item p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  .behind-sound-card {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+
+  .behind-sound-card h3 {
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 1rem;
+  }
+
+  .behind-sound-card p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.8;
+    font-size: 0.95rem;
+  }
+
+  /* Band Members */
+  .members-scroll {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .members-scroll { grid-template-columns: repeat(6, 1fr); }
+  }
+
+  .member-card {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .member-card:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.4);
+    transform: translateY(-4px);
+  }
+
+  .member-image {
+    aspect-ratio: 1;
+    overflow: hidden;
+  }
+
+  .member-image img {
     width: 100%;
     height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.3;
-    filter: blur(20px);
+    object-fit: cover;
+    filter: grayscale(30%);
+    transition: filter 0.3s ease;
   }
-  
-  /* Hover lift effect */
-  .hover-lift {
-    transition: transform 0.3s var(--ease-out);
+
+  .member-card:hover .member-image img { filter: grayscale(0%); }
+
+  .member-info {
+    padding: 1rem;
+    text-align: center;
   }
-  
-  .hover-lift:hover {
+
+  .member-info h3 {
+    font-size: 0.95rem;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+
+  .member-info p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Tracklist */
+  .tracklist-header { margin-bottom: 2rem; }
+
+  .tracklist-wrapper {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    overflow: hidden;
+  }
+
+  /* Singles Grid */
+  .singles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .single-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .single-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+    transform: translateY(-2px);
+  }
+
+  .single-artwork {
+    position: relative;
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+  }
+
+  .single-artwork img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+
+  .single-number {
+    position: absolute;
+    top: -0.5rem;
+    left: -0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--color-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .single-info { flex: 1; min-width: 0; }
+
+  .single-info h3 { font-size: 1rem; color: white; margin-bottom: 0.25rem; }
+
+  .single-info > p { font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; }
+
+  .chart-positions { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+  .chart-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    border-radius: 9999px;
+    color: var(--color-primary);
+  }
+
+  /* Music Videos */
+  .videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .video-card {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .video-card:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.4);
     transform: translateY(-4px);
+  }
+
+  .video-thumbnail {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+
+  .video-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .video-card:hover .video-thumbnail img { transform: scale(1.05); }
+
+  .video-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .video-card:hover .video-play { opacity: 1; }
+
+  .video-play svg {
+    width: 3rem;
+    height: 3rem;
+    color: white;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  }
+
+  .video-info { padding: 1.25rem; }
+
+  .video-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .video-header h3 { font-size: 1.1rem; color: white; margin: 0; }
+
+  .video-year {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    color: rgba(255, 255, 255, 0.7);
+    flex-shrink: 0;
+  }
+
+  .video-director {
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .video-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.6;
+  }
+
+  /* Critical Acclaim Quotes */
+  .quotes-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) { .quotes-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .quote-card {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .quote-icon {
+    color: var(--color-primary);
+    opacity: 0.5;
+  }
+
+  .quote-icon svg { width: 2rem; height: 2rem; }
+
+  .quote-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    font-style: italic;
+    flex: 1;
+    margin: 0;
+  }
+
+  .quote-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .quote-source { display: flex; flex-direction: column; gap: 0.125rem; }
+
+  .quote-publication {
+    font-weight: 600;
+    color: white;
+    font-size: 0.95rem;
+  }
+
+  .quote-reviewer {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .quote-rating { display: flex; gap: 0.25rem; }
+
+  .quote-rating .star {
+    width: 1rem;
+    height: 1rem;
+    color: rgba(255, 255, 255, 0.2);
+  }
+
+  .quote-rating .star.filled { color: var(--color-primary); }
+
+  /* Gallery */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .gallery-item {
+    position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+  }
+
+  .gallery-item.large {
+    grid-column: span 2;
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .gallery-item:hover img { transform: scale(1.05); }
+
+  .gallery-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+
+  .gallery-item:hover .gallery-caption {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Instruments */
+  .instruments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .instrument-card {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .instrument-card:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+    transform: translateY(-2px);
+  }
+
+  .instrument-type {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .instrument-name {
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+
+  .instrument-player {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.75rem;
+  }
+
+  .instrument-description {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.6;
+  }
+
+  /* Albums Grid */
+  .albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) { .albums-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .album-card {
+    text-decoration: none;
+    transition: transform 0.3s ease;
+  }
+
+  .album-card:hover { transform: translateY(-4px); }
+
+  .album-card-artwork {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .album-card-artwork img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .album-card:hover .album-card-artwork img { transform: scale(1.05); }
+
+  .album-card-info h3 {
+    font-size: 1rem;
+    color: white;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+
+  .album-card-info p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
   }
 </style>

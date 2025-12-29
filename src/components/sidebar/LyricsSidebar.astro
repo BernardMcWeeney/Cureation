@@ -1,0 +1,184 @@
+---
+// Sidebar for lyrics listing pages - album quick-jump and decade filters
+
+interface Album {
+  title: string;
+  slug: string;
+  coverImage: string;
+  year: string;
+}
+
+interface Props {
+  albums?: Album[];
+  activeFilter?: string;
+}
+
+const { albums = [], activeFilter } = Astro.props;
+
+const navItems = [
+  { title: 'All Songs', path: '/lyrics', icon: 'list' },
+  { title: 'By Album', path: '/lyrics/album', icon: 'album' },
+  { title: 'A-Z Index', path: '/lyrics/a-z', icon: 'az' },
+  { title: 'Search', path: '/lyrics/search', icon: 'search' }
+];
+
+const decadeFilters = [
+  { id: '1980s', name: '1980s', startYear: 1980, endYear: 1989 },
+  { id: '1990s', name: '1990s', startYear: 1990, endYear: 1999 },
+  { id: '2000s', name: '2000s', startYear: 2000, endYear: 2009 },
+  { id: '2010s', name: '2010s+', startYear: 2010, endYear: 2030 }
+];
+---
+
+<aside class="sticky top-24 w-full space-y-6">
+  <!-- Navigation -->
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
+    <div class="p-4 border-b border-white/10">
+      <h2 class="font-heading text-xl text-primary">Lyrics</h2>
+    </div>
+    <nav class="p-2">
+      <ul class="space-y-1">
+        {navItems.map((item) => (
+          <li>
+            <a
+              href={item.path}
+              class={`block px-4 py-2 rounded-lg transition-all duration-300 ${
+                activeFilter === item.title
+                  ? 'bg-primary/20 text-primary'
+                  : 'text-white hover:bg-white/10 hover:text-primary'
+              }`}
+            >
+              {item.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Decade Filters -->
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
+    <div class="p-4 border-b border-white/10">
+      <h3 class="font-heading text-xl text-primary">Filter by Decade</h3>
+    </div>
+    <div class="p-3 space-y-2" id="decade-filters">
+      {decadeFilters.map((decade) => (
+        <button
+          type="button"
+          data-decade={decade.id}
+          data-start={decade.startYear}
+          data-end={decade.endYear}
+          class="decade-filter-btn w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300"
+        >
+          {decade.name}
+        </button>
+      ))}
+      <button
+        type="button"
+        id="clear-decade-filter"
+        class="hidden w-full text-center px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/70 hover:text-white text-sm transition-all duration-300 mt-2"
+      >
+        Show All
+      </button>
+    </div>
+  </div>
+
+  <!-- Album Quick Jump -->
+  {albums.length > 0 && (
+    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
+      <div class="p-4 border-b border-white/10">
+        <h3 class="font-heading text-xl text-primary">Albums</h3>
+      </div>
+      <div class="p-2 max-h-64 overflow-y-auto">
+        <ul class="space-y-1">
+          {albums.slice(0, 10).map((album) => (
+            <li>
+              <a
+                href={`/discography/${album.slug}`}
+                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 hover:text-primary transition-all duration-300"
+              >
+                <img
+                  src={album.coverImage}
+                  alt=""
+                  class="w-6 h-6 rounded object-cover"
+                  loading="lazy"
+                />
+                <span class="flex-1 truncate">{album.title}</span>
+                <span class="text-white/50 text-xs">{album.year}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )}
+</aside>
+
+<script>
+  function initDecadeFilters() {
+    const filterBtns = document.querySelectorAll('.decade-filter-btn');
+    const clearBtn = document.getElementById('clear-decade-filter');
+    const songCards = document.querySelectorAll('[data-song-year]');
+    const decadeSections = document.querySelectorAll('.decade-section[data-decade]');
+
+    if (!filterBtns.length) return;
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const startYear = parseInt(btn.getAttribute('data-start') || '0');
+        const endYear = parseInt(btn.getAttribute('data-end') || '9999');
+        const decadeId = btn.getAttribute('data-decade');
+
+        // Update button states
+        filterBtns.forEach((b) => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/30'));
+        btn.classList.add('ring-2', 'ring-primary', 'bg-primary/30');
+
+        // Show clear button
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        // Filter by decade sections if they exist
+        if (decadeSections.length > 0) {
+          decadeSections.forEach((section) => {
+            const sectionDecade = section.getAttribute('data-decade');
+            if (sectionDecade === decadeId) {
+              (section as HTMLElement).style.display = '';
+            } else {
+              (section as HTMLElement).style.display = 'none';
+            }
+          });
+        }
+
+        // Filter individual song cards if they exist
+        if (songCards.length > 0) {
+          songCards.forEach((card) => {
+            const year = parseInt(card.getAttribute('data-song-year') || '0');
+            if (year >= startYear && year <= endYear) {
+              (card as HTMLElement).style.display = '';
+            } else {
+              (card as HTMLElement).style.display = 'none';
+            }
+          });
+        }
+      });
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        // Reset button states
+        filterBtns.forEach((b) => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/30'));
+        clearBtn.classList.add('hidden');
+
+        // Show all sections/cards
+        decadeSections.forEach((section) => {
+          (section as HTMLElement).style.display = '';
+        });
+        songCards.forEach((card) => {
+          (card as HTMLElement).style.display = '';
+        });
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initDecadeFilters);
+  document.addEventListener('astro:page-load', initDecadeFilters);
+</script>

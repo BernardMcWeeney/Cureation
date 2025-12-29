@@ -1,0 +1,277 @@
+---
+// Pagefind Search Component
+// This component integrates with Pagefind for client-side search
+
+interface Props {
+  placeholder?: string;
+  showFilters?: boolean;
+}
+
+const { placeholder = 'Search lyrics, songs, albums...', showFilters = true } = Astro.props;
+---
+
+<div class="search-container">
+  <div id="pagefind-search" class="pagefind-ui" data-placeholder={placeholder}></div>
+
+  {showFilters && (
+    <div class="search-filters mt-4 flex flex-wrap gap-2" id="search-filters">
+      <button
+        type="button"
+        class="filter-btn active px-3 py-1.5 rounded-lg bg-black/50 border border-primary/40 text-white text-sm transition-all duration-300"
+        data-filter="all"
+      >
+        All
+      </button>
+      <button
+        type="button"
+        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-primary/30 transition-all duration-300"
+        data-filter="song"
+      >
+        Songs
+      </button>
+      <button
+        type="button"
+        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-primary/30 transition-all duration-300"
+        data-filter="album"
+      >
+        Albums
+      </button>
+      <button
+        type="button"
+        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-primary/30 transition-all duration-300"
+        data-filter="lyrics"
+      >
+        Lyrics
+      </button>
+    </div>
+  )}
+</div>
+
+<style is:global>
+  /* Custom Pagefind UI Styling to match glass aesthetic */
+  .pagefind-ui {
+    --pagefind-ui-scale: 1;
+    --pagefind-ui-primary: var(--color-primary, #89b0c9);
+    --pagefind-ui-text: #ffffff;
+    --pagefind-ui-background: transparent;
+    --pagefind-ui-border: rgba(255, 255, 255, 0.2);
+    --pagefind-ui-tag: rgba(255, 255, 255, 0.1);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 0.75rem;
+    --pagefind-ui-image-border-radius: 0.5rem;
+    --pagefind-ui-image-box-ratio: 1;
+    --pagefind-ui-font: inherit;
+  }
+
+  .pagefind-ui__search-input {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: white !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+  }
+
+  .pagefind-ui__search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .pagefind-ui__search-input:focus {
+    border-color: var(--color-primary, #89b0c9) !important;
+    box-shadow: 0 0 0 2px rgba(137, 176, 201, 0.2) !important;
+    outline: none !important;
+  }
+
+  .pagefind-ui__search-clear {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .pagefind-ui__search-clear:hover {
+    color: white !important;
+  }
+
+  .pagefind-ui__results-area {
+    margin-top: 1.5rem;
+  }
+
+  .pagefind-ui__result {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 0.75rem !important;
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .pagefind-ui__result:hover {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border-color: rgba(var(--color-primary-rgb), 0.4) !important;
+    transform: translateY(-2px);
+  }
+
+  .pagefind-ui__result-link {
+    color: white !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+  }
+
+  .pagefind-ui__result-link:hover {
+    color: var(--color-primary, #89b0c9) !important;
+  }
+
+  .pagefind-ui__result-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .pagefind-ui__result-excerpt {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .pagefind-ui__result-excerpt mark {
+    background: rgba(137, 176, 201, 0.3) !important;
+    color: white !important;
+    padding: 0.1em 0.2em;
+    border-radius: 0.25rem;
+  }
+
+  .pagefind-ui__result-image {
+    border-radius: 0.5rem !important;
+    object-fit: cover !important;
+  }
+
+  .pagefind-ui__result-tag {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 9999px !important;
+    padding: 0.25rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .pagefind-ui__message {
+    color: rgba(255, 255, 255, 0.6) !important;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .pagefind-ui__button {
+    background: rgba(137, 176, 201, 0.2) !important;
+    border: 1px solid rgba(137, 176, 201, 0.3) !important;
+    color: white !important;
+    border-radius: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .pagefind-ui__button:hover {
+    background: rgba(137, 176, 201, 0.3) !important;
+  }
+
+  /* Filter button active state */
+  .filter-btn.active {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(var(--color-primary-rgb, 137, 176, 201), 0.4);
+    color: white;
+  }
+</style>
+
+<script>
+  async function initPagefind() {
+    const container = document.getElementById('pagefind-search');
+    if (!container) return;
+
+    try {
+      // Check if pagefind files exist by trying to fetch them first
+      const pagefindPath = '/_pagefind/pagefind.js';
+      const checkResponse = await fetch(pagefindPath, { method: 'HEAD' });
+
+      if (!checkResponse.ok) {
+        throw new Error('Pagefind not built yet');
+      }
+
+      // Load Pagefind CSS dynamically
+      if (!document.querySelector('link[href="/_pagefind/pagefind-ui.css"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/_pagefind/pagefind-ui.css';
+        document.head.appendChild(link);
+      }
+
+      // Use Function constructor to avoid Vite's static analysis
+      const importPagefind = new Function('return import("/_pagefind/pagefind.js")');
+      const importPagefindUI = new Function('return import("/_pagefind/pagefind-ui.js")');
+
+      const pagefind = await importPagefind();
+      await pagefind.options({
+        excerptLength: 20,
+        highlightParam: 'highlight'
+      });
+
+      const { PagefindUI } = await importPagefindUI();
+      const placeholder = container.dataset.placeholder || 'Search...';
+
+      new PagefindUI({
+        element: '#pagefind-search',
+        showImages: true,
+        showEmptyFilters: false,
+        resetStyles: false,
+        translations: {
+          placeholder: placeholder,
+          zero_results: 'No results found for "[SEARCH_TERM]"',
+          many_results: '[COUNT] results for "[SEARCH_TERM]"',
+          one_result: '1 result for "[SEARCH_TERM]"',
+          searching: 'Searching...'
+        }
+      });
+
+      // Set up filter buttons after a short delay to ensure UI is rendered
+      setTimeout(() => {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const searchInput = document.querySelector('.pagefind-ui__search-input') as HTMLInputElement;
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const filter = btn.getAttribute('data-filter');
+
+            // Update button states
+            filterBtns.forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Update search with filter
+            if (searchInput && searchInput.value) {
+              const baseQuery = searchInput.value.replace(/\s*(song|album|lyrics):/gi, '').trim();
+              if (filter && filter !== 'all') {
+                searchInput.value = `${filter}: ${baseQuery}`;
+              } else {
+                searchInput.value = baseQuery;
+              }
+              // Trigger search update
+              searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+          });
+        });
+      }, 100);
+    } catch (e) {
+      // Pagefind not yet built - show fallback message
+      container.innerHTML = `
+        <div class="text-center py-8 text-white/60">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-12 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p class="text-lg mb-2">Search is available after build</p>
+          <p class="text-sm">Run <code class="px-2 py-1 bg-white/10 rounded">npm run build</code> to enable search functionality.</p>
+        </div>
+      `;
+    }
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', initPagefind);
+  document.addEventListener('astro:page-load', initPagefind);
+</script>

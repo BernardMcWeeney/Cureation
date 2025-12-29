@@ -1,0 +1,113 @@
+---
+interface Props {
+  position: number;
+  title: string;
+  songSlug?: string;
+  setType: 'main' | 'encore' | 'encore2' | 'acoustic';
+  notes?: string;
+  isCover?: boolean;
+  duration?: string;
+}
+
+const {
+  position,
+  title,
+  songSlug,
+  setType,
+  notes,
+  isCover = false,
+  duration
+} = Astro.props;
+
+// Determine badge color based on set type
+const badgeClasses: Record<string, string> = {
+  main: 'bg-white/10 text-white/70',
+  encore: 'bg-primary/20 text-primary',
+  encore2: 'bg-accent/20 text-accent',
+  acoustic: 'bg-green-500/20 text-green-400'
+};
+
+const badgeClass = badgeClasses[setType] || badgeClasses.main;
+---
+
+<li class="setlist-song-item group flex items-center gap-4 py-3 px-4 rounded-lg hover:bg-white/5 transition-colors duration-200">
+  <!-- Position number -->
+  <span class="w-8 text-center text-white/40 text-sm font-mono tabular-nums" aria-hidden="true">
+    {position.toString().padStart(2, '0')}
+  </span>
+
+  <!-- Song info -->
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2">
+      {songSlug ? (
+        <a
+          href={`/lyrics/${songSlug}`}
+          class="text-white hover:text-primary transition-colors duration-200 truncate"
+        >
+          {title}
+        </a>
+      ) : (
+        <span class="text-white truncate">{title}</span>
+      )}
+
+      {isCover && (
+        <span class="shrink-0 px-2 py-0.5 text-xs rounded bg-yellow-500/20 text-yellow-400">
+          Cover
+        </span>
+      )}
+    </div>
+
+    {notes && (
+      <p class="text-white/50 text-sm mt-1 line-clamp-1">{notes}</p>
+    )}
+  </div>
+
+  <!-- Duration if available -->
+  {duration && (
+    <span class="text-white/40 text-sm font-mono tabular-nums hidden sm:block">
+      {duration}
+    </span>
+  )}
+
+  <!-- Set type badge (only show for non-main sets) -->
+  {setType !== 'main' && (
+    <span class={`shrink-0 px-2 py-1 text-xs rounded ${badgeClass}`}>
+      {setType === 'encore' ? 'Encore' : setType === 'encore2' ? 'Encore 2' : 'Acoustic'}
+    </span>
+  )}
+
+  <!-- Link indicator -->
+  {songSlug && (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="size-4 text-white/30 group-hover:text-primary transition-colors duration-200"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14"></path>
+      <path d="m12 5 7 7-7 7"></path>
+    </svg>
+  )}
+</li>
+
+<style>
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .setlist-song-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .setlist-song-item:last-child {
+    border-bottom: none;
+  }
+</style>

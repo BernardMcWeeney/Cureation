@@ -1,0 +1,294 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import BlogCard from '../../../components/BlogCard.astro';
+import BlogSidebar from '../../../components/sidebar/BlogSidebar.astro';
+
+// Types
+interface DirectusBlog {
+  id: number | string;
+  title: string;
+  slug?: string;
+  excerpt: string;
+  content?: string;
+  featured_image?: string;
+  featured?: boolean;
+  category: string;
+  tags?: string[];
+  author_name?: string;
+  date_published?: string;
+  reading_time?: number;
+  status?: string;
+}
+
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  featuredImage?: string;
+  featured: boolean;
+  category: string;
+  tags: string[];
+  authorName?: string;
+  publishedDate: string;
+  formattedDate: string;
+  readingTime: number;
+}
+
+// Helper functions
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s]/gi, '')
+    .replace(/\s+/g, '-');
+}
+
+function estimateReadingTime(content: string): number {
+  const wordsPerMinute = 200;
+  const wordCount = content?.split(/\s+/).length || 0;
+  return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+}
+
+// Category display info
+const categoryInfo: Record<string, { title: string; description: string }> = {
+  news: {
+    title: 'News',
+    description: 'Latest news, announcements, and updates about The Cure.'
+  },
+  history: {
+    title: 'History',
+    description: 'Deep dives into the history and legacy of The Cure.'
+  },
+  analysis: {
+    title: 'Analysis',
+    description: 'In-depth analysis of albums, songs, and artistic themes.'
+  },
+  reviews: {
+    title: 'Reviews',
+    description: 'Concert reviews, album reviews, and retrospectives.'
+  },
+  interviews: {
+    title: 'Interviews',
+    description: 'Interviews and conversations about The Cure.'
+  }
+};
+
+export async function getStaticPaths() {
+  try {
+    const response = await fetch('https://dash.cureation.net/items/blogs?filter[status][_eq]=published');
+    const blogData = await response.json();
+
+    if (!blogData.data || !Array.isArray(blogData.data)) {
+      return [];
+    }
+
+    // Get all unique categories
+    const categories = [...new Set(blogData.data.map((post: DirectusBlog) =>
+      (post.category || 'news').toLowerCase()
+    ))];
+
+    // Process all posts
+    const allPosts = blogData.data.map((post: DirectusBlog) => {
+      const publishedDate = post.date_published || new Date().toISOString();
+
+      return {
+        id: post.id.toString(),
+        title: post.title || 'Untitled',
+        slug: post.slug || generateSlug(post.title || 'untitled'),
+        excerpt: post.excerpt || '',
+        featuredImage: post.featured_image
+          ? `https://dash.cureation.net/assets/${post.featured_image}`
+          : undefined,
+        featured: post.featured || false,
+        category: post.category || 'News',
+        tags: post.tags || [],
+        authorName: post.author_name,
+        publishedDate,
+        formattedDate: formatDate(publishedDate),
+        readingTime: post.reading_time || estimateReadingTime(post.content || post.excerpt || '')
+      };
+    }).sort((a: BlogPost, b: BlogPost) => {
+      return new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime();
+    });
+
+    // Calculate category counts
+    const categoryCounts: Record<string, number> = {};
+    allPosts.forEach((post: BlogPost) => {
+      const cat = post.category.toLowerCase();
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    });
+
+    const categoryList = Object.entries(categoryCounts)
+      .map(([name, count]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        slug: name,
+        count
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // Generate paths for each category
+    return categories.map((category: string) => {
+      const categoryPosts = allPosts.filter((post: BlogPost) =>
+        post.category.toLowerCase() === category
+      );
+
+      const recentPosts = allPosts.slice(0, 5).map((p: BlogPost) => ({
+        title: p.title,
+        slug: p.slug,
+        formattedDate: p.formattedDate,
+        category: p.category
+      }));
+
+      return {
+        params: { category },
+        props: {
+          category,
+          posts: categoryPosts,
+          categories: categoryList,
+          recentPosts,
+          totalPosts: allPosts.length
+        }
+      };
+    });
+  } catch (error) {
+    console.error('Error in getStaticPaths for blog categories:', error);
+    return [];
+  }
+}
+
+const { category, posts, categories, recentPosts, totalPosts } = Astro.props;
+
+const info = categoryInfo[category] || {
+  title: category.charAt(0).toUpperCase() + category.slice(1),
+  description: `Articles in the ${category} category.`
+};
+---
+
+<MainLayout
+  title={`${info.title} - Blog`}
+  description={info.description}
+  showSidebar={true}
+  customSidebar={true}
+  pageClass="bg-black"
+>
+  <BlogSidebar
+    slot="sidebar"
+    categories={categories}
+    recentPosts={recentPosts}
+    activeCategory={category}
+    totalPosts={totalPosts}
+  />
+
+  <!-- Breadcrumb -->
+  <nav class="mb-8" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-white/60">
+      <li><a href="/blog" class="hover:text-primary transition-colors">Blog</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-white capitalize">{info.title}</li>
+    </ol>
+  </nav>
+
+  <!-- Category Header -->
+  <section class="mb-16">
+    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="badge capitalize">{info.title}</span>
+          <div class="divider-gradient flex-1 max-w-24"></div>
+        </div>
+
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
+          {info.title}
+        </h1>
+        <p class="text-white/70 text-lg md:text-xl max-w-3xl leading-relaxed">
+          {info.description}
+        </p>
+
+        <div class="flex flex-wrap gap-6 mt-8 pt-6 border-t border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-display text-primary">{posts.length}</span>
+            <span class="text-white/50 text-sm">Articles</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Posts Grid -->
+  <section class="mb-12">
+    {posts.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posts.map((post: BlogPost, index: number) => (
+          <div style={`--index: ${index + 1}`}>
+            <BlogCard
+              title={post.title}
+              excerpt={post.excerpt}
+              slug={post.slug}
+              featuredImage={post.featuredImage}
+              category={post.category}
+              publishedDate={post.publishedDate}
+              formattedDate={post.formattedDate}
+              readingTime={post.readingTime}
+              authorName={post.authorName}
+            />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="glass-card rounded-2xl p-12 text-center">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 class="font-heading text-2xl text-white mb-2">No Posts Yet</h3>
+        <p class="text-white/60 max-w-md mx-auto">
+          No articles in this category yet. Check back soon!
+        </p>
+        <a
+          href="/blog"
+          class="inline-block mt-6 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+        >
+          View All Posts
+        </a>
+      </div>
+    )}
+  </section>
+
+  <!-- Back to blog -->
+  <div class="text-center">
+    <a
+      href="/blog"
+      class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      All Categories
+    </a>
+  </div>
+</MainLayout>
+
+<style>
+  /* Blog grid animations */
+  .grid {
+    --stagger-delay: 75ms;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  :global(.grid > div) {
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+    animation-delay: calc(var(--stagger-delay) * var(--index, 1));
+  }
+</style>

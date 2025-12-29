@@ -1,0 +1,143 @@
+---
+interface Props {
+  date: string;
+  formattedDate: string;
+  venue: string;
+  city: string;
+  country: string;
+  tourName?: string;
+  slug: string;
+  songCount: number;
+  featured?: boolean;
+  coverImage?: string;
+}
+
+const {
+  date,
+  formattedDate,
+  venue,
+  city,
+  country,
+  tourName,
+  slug,
+  songCount,
+  featured = false,
+  coverImage
+} = Astro.props;
+
+const location = `${city}, ${country}`;
+const fallbackImage = '/images/placeholder-concert.jpg';
+---
+
+<a
+  href={`/setlists/${slug}`}
+  class={`setlist-card group block ${featured ? 'featured' : ''}`}
+  aria-label={`View setlist from ${venue}, ${location} on ${formattedDate}`}
+>
+  <div class="card-inner relative overflow-hidden rounded-2xl h-full">
+    <!-- Background image or gradient -->
+    <div class="relative aspect-[4/3] overflow-hidden">
+      {coverImage ? (
+        <img
+          src={coverImage}
+          alt={`Concert at ${venue}`}
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
+        />
+      ) : (
+        <div class="w-full h-full bg-gradient-to-br from-primary/20 via-black to-accent/10"></div>
+      )}
+
+      <!-- Multi-layer gradient overlay -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
+
+      <!-- Shine effect on hover -->
+      <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+      <!-- Date badge -->
+      <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/15 text-white/90 text-xs font-medium">
+        <time datetime={date}>{formattedDate}</time>
+      </div>
+
+      <!-- Tour badge -->
+      {tourName && (
+        <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-lg border border-primary/40 text-primary text-xs font-medium">
+          {tourName}
+        </div>
+      )}
+    </div>
+
+    <!-- Content overlay at bottom -->
+    <div class="absolute bottom-0 left-0 right-0 p-5">
+      <h3 class="font-display text-2xl md:text-3xl text-white mb-1 group-hover:text-glow transition-all duration-300 line-clamp-1">
+        {venue}
+      </h3>
+
+      <p class="text-white/70 text-sm mb-3">
+        {location}
+      </p>
+
+      <div class="flex items-center justify-between">
+        <span class="text-white/50 text-sm">
+          {songCount} {songCount === 1 ? 'song' : 'songs'}
+        </span>
+        <div class="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+          <span class="text-sm font-medium">View Setlist</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Border glow effect -->
+    <div class="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-primary/40 transition-colors duration-500 pointer-events-none"></div>
+  </div>
+</a>
+
+<style>
+  .setlist-card {
+    --card-glow: rgba(var(--color-primary-rgb, 137, 176, 201), 0.4);
+  }
+
+  .card-inner {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.5s ease;
+  }
+
+  .setlist-card:hover .card-inner {
+    transform: translateY(-8px);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.4),
+      0 0 60px var(--card-glow);
+  }
+
+  /* Featured card styling */
+  .setlist-card.featured .card-inner {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .setlist-card.featured:hover .card-inner {
+    box-shadow:
+      0 24px 50px rgba(0, 0, 0, 0.5),
+      0 0 80px var(--card-glow);
+  }
+
+  /* Text glow on hover */
+  .group:hover h3 {
+    text-shadow: 0 0 30px var(--card-glow);
+  }
+
+  /* Line clamp utility */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+</style>

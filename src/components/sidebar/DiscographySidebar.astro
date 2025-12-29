@@ -1,0 +1,146 @@
+---
+// Sidebar for discography listing pages - category navigation with functional era filters
+
+interface Category {
+  title: string;
+  path: string;
+}
+
+interface Props {
+  categories: Category[];
+  activeCategory: string;
+}
+
+const { categories, activeCategory } = Astro.props;
+
+const eraFilters = [
+  { id: 'early', name: 'Early Years', years: '1978-1982', startYear: 1978, endYear: 1982 },
+  { id: 'golden', name: 'Golden Era', years: '1983-1992', startYear: 1983, endYear: 1992 },
+  { id: 'later', name: 'Later Works', years: '1993-2008', startYear: 1993, endYear: 2008 },
+  { id: 'recent', name: 'Recent', years: '2009-Present', startYear: 2009, endYear: 2030 }
+];
+---
+
+<aside class="sticky top-24 w-full space-y-6">
+  <!-- Category Navigation -->
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
+    <div class="p-4 border-b border-white/10">
+      <h2 class="font-heading text-xl text-primary">Discography</h2>
+    </div>
+    <nav class="p-2">
+      <ul class="space-y-1">
+        {categories.map((category) => (
+          <li>
+            <a
+              href={category.path}
+              class={`block px-4 py-2 rounded-lg transition-all duration-300 ${
+                activeCategory === category.title
+                  ? 'bg-primary/20 text-primary'
+                  : 'text-white hover:bg-white/10 hover:text-primary'
+              }`}
+            >
+              {category.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Era Filters -->
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
+    <div class="p-4 border-b border-white/10">
+      <h3 class="font-heading text-xl text-primary">Filter by Era</h3>
+    </div>
+    <div class="p-3 space-y-2" id="era-filters">
+      {eraFilters.map((era) => (
+        <button
+          type="button"
+          data-era={era.id}
+          data-start={era.startYear}
+          data-end={era.endYear}
+          class="era-filter-btn w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300 flex items-center justify-between group"
+        >
+          <span>{era.name}</span>
+          <span class="text-xs text-white/50 group-hover:text-white/70">{era.years}</span>
+        </button>
+      ))}
+      <button
+        type="button"
+        id="clear-era-filter"
+        class="hidden w-full text-center px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/70 hover:text-white text-sm transition-all duration-300 mt-2"
+      >
+        Clear Filter
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
+    <h3 class="font-heading text-lg text-primary mb-3">Quick Links</h3>
+    <div class="space-y-2">
+      <a
+        href="/lyrics"
+        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+      >
+        Browse Lyrics
+      </a>
+      <a
+        href="/lyrics/search"
+        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+      >
+        Search Songs
+      </a>
+    </div>
+  </div>
+</aside>
+
+<script>
+  function initEraFilters() {
+    const filterBtns = document.querySelectorAll('.era-filter-btn');
+    const clearBtn = document.getElementById('clear-era-filter');
+    const albumCards = document.querySelectorAll('[data-album-year]');
+
+    if (!filterBtns.length || !albumCards.length) return;
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const startYear = parseInt(btn.getAttribute('data-start') || '0');
+        const endYear = parseInt(btn.getAttribute('data-end') || '9999');
+
+        // Update button states
+        filterBtns.forEach((b) => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/30'));
+        btn.classList.add('ring-2', 'ring-primary', 'bg-primary/30');
+
+        // Show clear button
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        // Filter albums
+        albumCards.forEach((card) => {
+          const year = parseInt(card.getAttribute('data-album-year') || '0');
+          if (year >= startYear && year <= endYear) {
+            (card as HTMLElement).style.display = '';
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        // Reset button states
+        filterBtns.forEach((b) => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/30'));
+        clearBtn.classList.add('hidden');
+
+        // Show all albums
+        albumCards.forEach((card) => {
+          (card as HTMLElement).style.display = '';
+        });
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initEraFilters);
+  document.addEventListener('astro:page-load', initEraFilters);
+</script>

@@ -5,13 +5,13 @@ const currentYear = new Date().getFullYear();
 const footerLinks = getFooterLinks();
 ---
 
-<footer class="relative bg-black border-t border-white">
+<footer class="relative bg-black/30 backdrop-blur-lg border-t border-white/10">
   <div class="responsive-container py-16">
     <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
       <!-- Brand Section -->
       <div class="md:col-span-4 lg:col-span-5">
         <a href="/" class="flex items-center gap-3 mb-6 group">
-          <div class="w-10 h-10 bg-primary/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
+          <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
             <img
               src="/logo.png"
               alt="Logo"
@@ -33,7 +33,7 @@ const footerLinks = getFooterLinks();
               href={siteConfig.social.twitter}
               target="_blank"
               rel="noopener noreferrer"
-              class="p-3 rounded-full border border-white/20 backdrop-blur-md bg-black/20 hover:bg-primary/20 hover:border-primary/30 transition-all duration-300"
+              class="p-3 rounded-full border border-white/20 backdrop-blur-md bg-white/10 hover:bg-white/15 hover:border-primary/40 transition-all duration-300"
               aria-label="Twitter"
             >
               <svg
@@ -120,7 +120,7 @@ const footerLinks = getFooterLinks();
     </div>
 
     <!-- Bottom Section -->
-    <div class="mt-16 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
       <p class="text-sm text-white/80">
         © {currentYear} {siteConfig.name}. All rights reserved.
       </p>

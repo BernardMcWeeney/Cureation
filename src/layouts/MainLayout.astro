@@ -1,12 +1,13 @@
 ---
 // src/layouts/MainLayout.astro
 
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Sidebar from '../components/Sidebar.astro';
 import SearchEnhancer from '../components/SearchEnhancer.astro';
 import siteConfig from '../config/site.config';
+import { getDefaultTheme } from '../config/theme.config';
 import '../styles/global.css';
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
   sidebarActiveItem?: string;
   sidebarItems?: Array<{ title: string; path: string }>;
   pageClass?: string;
+  theme?: string;
+  customSidebar?: boolean;
 }
 
 const {
@@ -27,6 +30,8 @@ const {
   sidebarActiveItem = '',
   sidebarItems = [],
   pageClass = '',
+  theme = getDefaultTheme(),
+  customSidebar = false
 } = Astro.props;
 
 const siteUrl = import.meta.env.SITE || siteConfig.url;
@@ -35,7 +40,7 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
 ---
 
 <!DOCTYPE html>
-<html lang="en" style="color-scheme: dark;">
+<html lang="en" style="color-scheme: dark;" data-theme={theme}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -68,39 +73,88 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
 
     <!-- Fonts & Transitions -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <script is:inline>
-      const savedTheme = localStorage.getItem('theme') || 'disintegration';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    </script>
-    <ViewTransitions />
+    <ClientRouter />
     <slot name="head" />
   </head>
 
   <body class={`min-h-screen flex flex-col ${pageClass}`}>
-    <!-- Background image with layered overlay for better readability -->
-    <div class="fixed inset-0 z-[-2]">
-      <div
-        class="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={ogImage ? `background-image: url(${ogImage})` : ''}
-      ></div>
-      <!-- Gradient overlay provides better text contrast -->
-      <div class="absolute inset-0 bg-linear-to-b from-black/10 via-black/5 to-black/10"></div>
+    <!-- Background layer - always present, shows album art when ogImage provided -->
+    <div class="fixed inset-0 z-0 overflow-hidden bg-black">
+      {ogImage && (
+        <>
+          <!-- Album artwork - more visible with less blur -->
+          <div
+            class="absolute -inset-8 bg-cover bg-center bg-no-repeat"
+            style={`background-image: url(${ogImage}); filter: blur(20px) saturate(1.3); opacity: 0.85; transform: scale(1.1);`}
+          ></div>
+          <!-- Subtle gradient overlay - much lighter for better art visibility -->
+          <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        </>
+      )}
     </div>
 
-    <Header />
+    <!-- Content wrapper with z-index above background -->
+    <div class="relative z-10 flex flex-col min-h-screen">
+      <!-- Skip link for keyboard navigation -->
+      <a href="#main-content" class="skip-link">Skip to main content</a>
+      <Header />
     <div class="h-6"></div>
-    <main class="grow pt-20">
+    <main id="main-content" class="grow pt-20">
       <div class="responsive-container flex flex-col md:flex-row gap-8">
         <div class={showSidebar ? 'md:w-3/4 lg:w-4/5' : 'w-full'}>
           <slot />
         </div>
         {showSidebar && (
-          <aside class="md:w-1/4 lg:w-1/5">
-            <Sidebar
-              activeItem={sidebarActiveItem}
-              items={sidebarItems}
-            />
-          </aside>
+          <>
+            {/* Mobile sidebar toggle */}
+            <button
+              type="button"
+              id="sidebar-toggle"
+              class="md:hidden fixed bottom-4 right-4 z-50 p-4 rounded-full bg-primary/90 text-white shadow-lg hover:bg-primary transition-colors"
+              aria-label="Toggle sidebar"
+              aria-expanded="false"
+              aria-controls="mobile-sidebar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* Sidebar - hidden on mobile by default */}
+            <aside
+              id="mobile-sidebar"
+              class="fixed md:relative inset-0 md:inset-auto z-40 md:z-auto md:w-1/4 lg:w-1/5 transform translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out"
+            >
+              {/* Mobile backdrop */}
+              <div class="md:hidden absolute inset-0 bg-black/70 backdrop-blur-md sidebar-backdrop hidden" />
+
+              {/* Sidebar content */}
+              <div class="absolute md:relative right-0 top-0 bottom-0 w-80 md:w-full overflow-y-auto bg-black/90 backdrop-blur-xl md:bg-transparent p-4 md:p-0">
+                {/* Mobile close button */}
+                <button
+                  type="button"
+                  class="md:hidden absolute top-4 right-4 p-2 text-white/70 hover:text-white"
+                  aria-label="Close sidebar"
+                  id="sidebar-close"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                <div class="pt-12 md:pt-0">
+                  {customSidebar ? (
+                    <slot name="sidebar" />
+                  ) : (
+                    <Sidebar
+                      activeItem={sidebarActiveItem}
+                      items={sidebarItems}
+                    />
+                  )}
+                </div>
+              </div>
+            </aside>
+          </>
         )}
       </div>
     </main>
@@ -110,19 +164,62 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
     <SearchEnhancer />
     
     <slot name="after-footer" />
+    </div><!-- End content wrapper -->
     <script>
+      // Smooth scroll for anchor links
       document
         .querySelectorAll('a[href^="#"]')
         .forEach((anchor) => {
           anchor.addEventListener('click', (e) => {
             e.preventDefault();
-            document
-              .getElementById(
-                anchor.getAttribute('href').slice(1)
-              )
-              ?.scrollIntoView({ behavior: 'smooth' });
+            const href = anchor.getAttribute('href');
+            if (href) {
+              document
+                .getElementById(href.slice(1))
+                ?.scrollIntoView({ behavior: 'smooth' });
+            }
           });
         });
+
+      // Mobile sidebar toggle
+      function initMobileSidebar() {
+        const toggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('mobile-sidebar');
+        const closeBtn = document.getElementById('sidebar-close');
+        const backdrop = sidebar?.querySelector('.sidebar-backdrop');
+
+        if (!toggle || !sidebar) return;
+
+        const openSidebar = () => {
+          sidebar.classList.remove('translate-x-full');
+          sidebar.classList.add('translate-x-0');
+          backdrop?.classList.remove('hidden');
+          toggle.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+        };
+
+        const closeSidebar = () => {
+          sidebar.classList.add('translate-x-full');
+          sidebar.classList.remove('translate-x-0');
+          backdrop?.classList.add('hidden');
+          toggle.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        };
+
+        toggle.addEventListener('click', openSidebar);
+        closeBtn?.addEventListener('click', closeSidebar);
+        backdrop?.addEventListener('click', closeSidebar);
+
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && !sidebar.classList.contains('translate-x-full')) {
+            closeSidebar();
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', initMobileSidebar);
+      document.addEventListener('astro:page-load', initMobileSidebar);
     </script>
   </body>
 </html>

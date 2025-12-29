@@ -1,7 +1,5 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { ViewTransitions } from 'astro:transitions';
-import SiteConfig from '../config/site.config.js';
 
 const sidebarItems = [
   { title: 'About Cureation', path: '/about' },
@@ -10,92 +8,305 @@ const sidebarItems = [
   { title: 'Disclaimer', path: '/about/disclaimer' }
 ];
 
-// Placeholder data - in production, this would come from your CMS
 const foundedDate = "October 2023";
+
+// Site features
+const features = [
+  {
+    icon: '💿',
+    title: 'Discography',
+    description: 'Complete album collection with artwork, tracklists, and detailed information.'
+  },
+  {
+    icon: '🎤',
+    title: 'Setlists',
+    description: 'Archive of live performances with full setlists from concerts worldwide.'
+  },
+  {
+    icon: '📝',
+    title: 'Lyrics',
+    description: 'Searchable lyrics database with album context and song information.'
+  },
+  {
+    icon: '📰',
+    title: 'Blog',
+    description: 'News, articles, and deep dives into the band\'s history and legacy.'
+  }
+];
+
+// Timeline milestones
+const timeline = [
+  {
+    year: '1976',
+    title: 'The Beginning',
+    description: 'Easy Cure formed in Crawley, England by Robert Smith, Michael Dempsey, and Lol Tolhurst.'
+  },
+  {
+    year: '1978',
+    title: 'The Cure is Born',
+    description: 'The band officially becomes "The Cure" and signs with Fiction Records.'
+  },
+  {
+    year: '1979',
+    title: 'Debut Album',
+    description: 'Three Imaginary Boys released, marking the start of an incredible journey.'
+  },
+  {
+    year: '1989',
+    title: 'Disintegration',
+    description: 'The masterpiece album that defined a generation and cemented their legacy.'
+  },
+  {
+    year: '2019',
+    title: 'Rock Hall Induction',
+    description: 'The Cure inducted into the Rock and Roll Hall of Fame.'
+  },
+  {
+    year: '2023',
+    title: 'Cureation Launches',
+    description: 'This fan archive project begins to celebrate the band\'s incredible legacy.'
+  }
+];
 ---
 
-<MainLayout 
-  title="About Cureation" 
+<MainLayout
+  title="About Cureation"
   description="Learn more about Cureation, a fan-built tribute to The Cure - created by fans for fans."
   showSidebar={true}
   sidebarActiveItem="About Cureation"
   sidebarItems={sidebarItems}
+  pageClass="bg-black"
 >
-  <section>
-    <div class="mb-12">
-      <h1 class="font-display text-5xl md:text-6xl text-white mb-4" transition:animate="slide">About Cureation</h1>
-      <p class="text-white/80 max-w-3xl" transition:animate="fade">
-        A modern tribute to The Cure, built by fans for fans.
-      </p>
-    </div>
+  <!-- Hero Section -->
+  <section class="mb-16">
+    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
+      <!-- Decorative gradient orbs -->
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
 
-    <div class="grid grid-cols-1 gap-8">
-      <div>
-        <div class="bg-black/30 backdrop-blur-md p-6 md:p-8 rounded-xl border border-white/10 shadow-xl transition-all duration-300 hover:shadow-2xl hover:bg-black/40">
-          <h2 class="font-display text-3xl text-primary mb-6">Our Mission</h2>
-          
-          <p class="text-white/90 mb-6">
-            Cureation is a community-driven archive and celebration of The Cure's legacy, music, and cultural impact. Built with passion by fans, for fans, our goal is to create the definitive resource for everything related to one of music's most influential and enduring bands.
-          </p>
-          
-          <p class="text-white/90 mb-6">
-            We've designed Cureation to be beautiful, intuitive, and comprehensive - a digital space where the atmosphere and emotion of The Cure's music is reflected in every aspect of the experience. Through our discography, lyrics archives, setlist database, and curated content, we aim to honor the band's rich history while fostering a vibrant community of dedicated fans.
-          </p>
-          
-          <p class="text-white/90 mb-6">
-            This project is constantly evolving, with plans for enhanced features, deeper archives, and more ways for fans to contribute and connect. We welcome contributions, suggestions, and feedback as we continue to build this tribute to a band that has touched countless lives across generations.
-          </p>
+      <div class="relative p-8 md:p-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="badge">Fan Project</span>
+          <div class="divider-gradient flex-1 max-w-24"></div>
         </div>
-        <div class="mt-12 mb-12 p-6 bg-black/40 backdrop-blur-md rounded-xl border border-white/10">
-            <h2 class="font-display text-3xl text-primary mb-6">Important Note</h2>
-            <p class="text-white/80">
-              Cureation is an unofficial fan project not affiliated with The Cure or their representatives. All media (lyrics, album art, setlists) remain the property of their respective owners. This site exists solely to celebrate and document the band's remarkable artistic journey.
-            </p>
+
+        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow" transition:animate="slide">
+          About Cureation
+        </h1>
+        <p class="text-white/70 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
+          A modern tribute to The Cure, built by fans for fans. Celebrating over four decades of music, art, and cultural impact.
+        </p>
+
+        <!-- Quick stats -->
+        <div class="flex flex-wrap gap-6 mt-8 pt-6 border-t border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-display text-primary">45+</span>
+            <span class="text-white/50 text-sm">Years of Music</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-display text-primary">13</span>
+            <span class="text-white/50 text-sm">Studio Albums</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-display text-primary">∞</span>
+            <span class="text-white/50 text-sm">Dedicated Fans</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
-  
-  <!-- Custom sidebar widgets using the slot system -->
+
+  <!-- Mission Section -->
+  <section class="mb-16">
+    <div class="glass-card rounded-2xl p-8 md:p-10 border border-white/20">
+      <h2 class="font-heading text-3xl text-primary mb-6">Our Mission</h2>
+
+      <div class="space-y-6 text-white/80 leading-relaxed">
+        <p>
+          Cureation is a community-driven archive and celebration of The Cure's legacy, music, and cultural impact. Built with passion by fans, for fans, our goal is to create the definitive resource for everything related to one of music's most influential and enduring bands.
+        </p>
+
+        <p>
+          We've designed Cureation to be beautiful, intuitive, and comprehensive - a digital space where the atmosphere and emotion of The Cure's music is reflected in every aspect of the experience. Through our discography, lyrics archives, setlist database, and curated content, we aim to honor the band's rich history while fostering a vibrant community of dedicated fans.
+        </p>
+
+        <p>
+          This project is constantly evolving, with plans for enhanced features, deeper archives, and more ways for fans to contribute and connect. We welcome contributions, suggestions, and feedback as we continue to build this tribute to a band that has touched countless lives across generations.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="mb-16">
+    <div class="flex items-center gap-4 mb-8">
+      <h2 class="font-heading text-2xl text-primary">What We Offer</h2>
+      <div class="divider-gradient flex-1"></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      {features.map((feature) => (
+        <div class="glass-card rounded-xl p-6 border border-white/20 hover:border-primary/40 transition-colors group">
+          <div class="text-4xl mb-4" aria-hidden="true">{feature.icon}</div>
+          <h3 class="font-heading text-xl text-white mb-2 group-hover:text-primary transition-colors">
+            {feature.title}
+          </h3>
+          <p class="text-white/60 text-sm">
+            {feature.description}
+          </p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Timeline Section -->
+  <section class="mb-16">
+    <div class="flex items-center gap-4 mb-8">
+      <h2 class="font-heading text-2xl text-primary">The Journey</h2>
+      <div class="divider-gradient flex-1"></div>
+    </div>
+
+    <div class="relative">
+      <!-- Timeline line -->
+      <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary/50 via-primary/20 to-transparent" aria-hidden="true"></div>
+
+      <ol class="space-y-8" aria-label="Timeline of The Cure's history">
+        {timeline.map((item, index) => (
+          <li class={`relative flex items-start gap-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+            <!-- Timeline dot -->
+            <div class="absolute left-4 md:left-1/2 w-3 h-3 rounded-full bg-primary transform -translate-x-1/2 mt-2 ring-4 ring-black" aria-hidden="true"></div>
+
+            <!-- Content card -->
+            <div class={`ml-12 md:ml-0 md:w-[calc(50%-2rem)] glass-card rounded-xl p-6 border border-white/20 ${index % 2 === 0 ? 'md:mr-auto' : 'md:ml-auto'}`}>
+              <div class="flex items-center gap-3 mb-2">
+                <span class="px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
+                  {item.year}
+                </span>
+              </div>
+              <h3 class="font-heading text-lg text-white mb-2">{item.title}</h3>
+              <p class="text-white/60 text-sm">{item.description}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Disclaimer Section -->
+  <section class="mb-16">
+    <div class="glass-card rounded-2xl p-8 border border-amber-500/20 bg-amber-500/5">
+      <div class="flex items-start gap-4">
+        <div class="text-3xl shrink-0" aria-hidden="true">⚠️</div>
+        <div>
+          <h2 class="font-heading text-xl text-amber-400 mb-3">Important Note</h2>
+          <p class="text-white/70 leading-relaxed">
+            Cureation is an unofficial fan project not affiliated with The Cure or their representatives. All media (lyrics, album art, setlists) remain the property of their respective owners. This site exists solely to celebrate and document the band's remarkable artistic journey.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact CTA -->
+  <section class="mb-12">
+    <div class="glass-card-glow rounded-2xl p-8 md:p-12 text-center relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
+
+      <h2 class="font-heading text-2xl text-white mb-4 relative">Get Involved</h2>
+      <p class="text-white/60 max-w-lg mx-auto mb-6 relative">
+        Want to contribute, report an issue, or just say hello? We'd love to hear from you.
+      </p>
+      <a
+        href="mailto:hello@cureation.net"
+        class="inline-flex items-center gap-2 px-8 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors relative"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+        </svg>
+        Contact Us
+      </a>
+    </div>
+  </section>
+
+  <!-- Custom sidebar widgets -->
   <div slot="sidebar">
     <!-- Logo widget -->
-    <div class="backdrop-blur-md bg-black/30 p-6 rounded-xl border border-white/10 flex flex-col items-center text-center transition-all duration-300 hover:bg-black/40 mb-6">
+    <div class="backdrop-blur-lg bg-black/20 p-6 rounded-xl border border-white/20 flex flex-col items-center text-center mb-6">
       <div class="font-display text-3xl text-white mb-2">Cureation</div>
       <div class="w-16 h-1 bg-primary mb-4"></div>
-      <p class="text-white/70 text-sm">A digital monument to musical legacy</p>
+      <p class="text-white/60 text-sm">A digital monument to musical legacy</p>
     </div>
-    
+
     <!-- Founded date widget -->
-    <div class="backdrop-blur-md bg-black/30 p-6 rounded-xl border border-white/10 transition-all duration-300 hover:bg-black/40 mb-6">
-      <h3 class="font-display text-xl text-white mb-3">Founded</h3>
+    <div class="backdrop-blur-lg bg-black/20 p-6 rounded-xl border border-white/20 mb-6">
+      <h3 class="font-heading text-lg text-primary mb-3">Founded</h3>
       <div class="flex items-center justify-between">
         <span class="text-white/80">{foundedDate}</span>
         <span class="text-primary">♦</span>
       </div>
     </div>
-    
+
+    <!-- Quick Links -->
+    <div class="backdrop-blur-lg bg-black/20 p-6 rounded-xl border border-white/20 mb-6">
+      <h3 class="font-heading text-lg text-primary mb-3">Explore</h3>
+      <div class="space-y-2">
+        <a
+          href="/discography"
+          class="block px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm transition-colors"
+        >
+          Discography
+        </a>
+        <a
+          href="/setlists"
+          class="block px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm transition-colors"
+        >
+          Setlists
+        </a>
+        <a
+          href="/lyrics"
+          class="block px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm transition-colors"
+        >
+          Lyrics
+        </a>
+        <a
+          href="/blog"
+          class="block px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm transition-colors"
+        >
+          Blog
+        </a>
+      </div>
+    </div>
+
     <!-- Contact widget -->
-    <div class="backdrop-blur-md bg-black/30 p-6 rounded-xl border border-white/10 transition-all duration-300 hover:bg-black/40">
-      <h3 class="font-display text-xl text-white mb-3">Get Involved</h3>
-      <p class="text-white/70 text-sm mb-4">Want to contribute or have questions?</p>
-      <a href="mailto:hello@cureation.net" class="inline-block w-full text-center bg-black/40 backdrop-blur-md py-2 px-4 rounded-lg border border-white/20 text-white hover:bg-black/60 transition-all duration-300">Contact Us</a>
+    <div class="backdrop-blur-lg bg-black/20 p-6 rounded-xl border border-white/20">
+      <h3 class="font-heading text-lg text-primary mb-3">Get Involved</h3>
+      <p class="text-white/60 text-sm mb-4">Want to contribute or have questions?</p>
+      <a
+        href="mailto:hello@cureation.net"
+        class="inline-block w-full text-center bg-primary/20 py-2 px-4 rounded-lg border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+      >
+        Contact Us
+      </a>
     </div>
   </div>
 </MainLayout>
 
 <style>
+  /* Timeline responsive adjustments */
+  @media (max-width: 768px) {
+    .timeline-line {
+      left: 1rem;
+    }
+  }
+
   /* Add custom animations */
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  
+
   section {
     animation: fadeIn 0.5s ease forwards;
-  }
-  
-  /* Add a subtle glow effect to primary elements */
-  :global(.text-primary) {
-    text-shadow: 0 0 15px var(--primary-color-glow, rgba(255, 255, 255, 0.15));
   }
 </style>

@@ -1,0 +1,104 @@
+---
+// Sidebar for song/lyrics pages - shows album tracklist with current highlighted
+
+interface Track {
+  number: number;
+  title: string;
+  slug: string;
+  duration: string;
+}
+
+interface Props {
+  currentSong: {
+    title: string;
+    trackNumber: number;
+  };
+  album: {
+    title: string;
+    slug: string;
+    coverImage: string;
+    year: string;
+  };
+  albumTracks: Track[];
+}
+
+const { currentSong, album, albumTracks } = Astro.props;
+
+// Generate slug for comparison
+const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+---
+
+<aside class="sticky top-24 w-full space-y-6">
+  <!-- Album Card -->
+  <a
+    href={`/discography/${album.slug}`}
+    class="block backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl overflow-hidden hover:border-white/30 transition-all duration-300 group"
+  >
+    <div class="relative aspect-square">
+      <img
+        src={album.coverImage}
+        alt={album.title}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      <div class="absolute bottom-0 left-0 right-0 p-4">
+        <p class="text-white font-medium group-hover:text-primary transition-colors">{album.title}</p>
+        <p class="text-white/60 text-sm">{album.year}</p>
+      </div>
+    </div>
+  </a>
+
+  <!-- Album Tracklist -->
+  <div class="backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl overflow-hidden">
+    <div class="p-4 border-b border-white/10">
+      <h2 class="font-heading text-xl text-primary">Tracklist</h2>
+    </div>
+    <nav class="p-2 max-h-96 overflow-y-auto">
+      <ul class="space-y-1">
+        {albumTracks.map((track) => {
+          const trackSlug = track.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+          const isCurrent = trackSlug === currentSlug;
+          return (
+            <li>
+              <a
+                href={`/lyrics/${trackSlug}`}
+                class={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-300 ${
+                  isCurrent
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-white hover:bg-white/10 hover:text-primary'
+                }`}
+                aria-current={isCurrent ? 'page' : undefined}
+              >
+                <span class={`w-5 text-right ${isCurrent ? 'text-primary' : 'text-white/50'}`}>
+                  {track.number}
+                </span>
+                <span class="flex-1 truncate">{track.title}</span>
+                <span class={`text-xs ${isCurrent ? 'text-primary/70' : 'text-white/50'}`}>
+                  {track.duration}
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl p-4">
+    <div class="flex gap-2">
+      <a
+        href={`/discography/${album.slug}#tracks`}
+        class="flex-1 text-center px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-white text-sm transition-colors duration-300"
+      >
+        View Album
+      </a>
+      <a
+        href="/lyrics"
+        class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm transition-colors duration-300"
+      >
+        All Lyrics
+      </a>
+    </div>
+  </div>
+</aside>

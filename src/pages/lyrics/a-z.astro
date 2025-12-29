@@ -1,0 +1,283 @@
+---
+// src/pages/lyrics/a-z.astro - Alphabetical Song Index
+import MainLayout from '../../layouts/MainLayout.astro';
+import LyricsSidebar from '../../components/sidebar/LyricsSidebar.astro';
+
+interface Song {
+  id: number;
+  title: string;
+  slug: string;
+  albumTitle: string;
+  albumSlug: string;
+  albumCover: string;
+  year: string;
+  hasLyrics: boolean;
+}
+
+interface Album {
+  title: string;
+  slug: string;
+  cover_art: string;
+  year: string;
+}
+
+// Fetch albums data
+const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
+const albumsData = await albumsResponse.json();
+const albums: Record<number, Album> = albumsData.data.reduce((acc: Record<number, Album>, album: any) => {
+  acc[album.id] = {
+    title: album.title || 'Unknown Album',
+    slug: album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : 'unknown-album'),
+    cover_art: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
+    year: album.release_date ? new Date(album.release_date).getFullYear().toString() : ''
+  };
+  return acc;
+}, {});
+
+// Fetch all songs
+const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+const songsData = await songsResponse.json();
+
+// Format and sort songs alphabetically
+const songs: Song[] = songsData.data
+  .filter((song: any) => song.title)
+  .map((song: any) => ({
+    id: song.id,
+    title: song.title,
+    slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-'),
+    albumTitle: albums[song.album]?.title || 'Unknown Album',
+    albumSlug: albums[song.album]?.slug || 'unknown',
+    albumCover: albums[song.album]?.cover_art || '/images/placeholder-album.jpg',
+    year: albums[song.album]?.year || '',
+    hasLyrics: !!song.lyrics
+  }))
+  .sort((a: Song, b: Song) => a.title.localeCompare(b.title));
+
+// Group songs by first letter
+const songsByLetter: Record<string, Song[]> = {};
+songs.forEach((song: Song) => {
+  const firstChar = song.title.charAt(0).toUpperCase();
+  const letter = /[A-Z]/.test(firstChar) ? firstChar : '#';
+  if (!songsByLetter[letter]) {
+    songsByLetter[letter] = [];
+  }
+  songsByLetter[letter].push(song);
+});
+
+// Get all letters that have songs
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+const availableLetters = alphabet.filter(letter => songsByLetter[letter]?.length > 0);
+
+// Stats
+const songsWithLyrics = songs.filter(s => s.hasLyrics).length;
+---
+
+<MainLayout
+  title="Songs A-Z"
+  description="Browse all The Cure songs alphabetically - find any song quickly with our A-Z index."
+  showSidebar={true}
+  customSidebar={true}
+  pageClass="bg-black"
+>
+<LyricsSidebar
+  slot="sidebar"
+  activeFilter="A-Z"
+  albums={Object.values(albums).map(a => ({
+    title: a.title,
+    slug: a.slug,
+    coverImage: a.cover_art,
+    year: a.year
+  })).sort((a, b) => parseInt(b.year) - parseInt(a.year))}
+/>
+
+  <!-- Hero Section -->
+  <section class="mb-12">
+    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
+      <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary/20 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="badge">Alphabetical Index</span>
+          <div class="divider-gradient flex-1 max-w-24"></div>
+        </div>
+
+        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow">
+          Songs A-Z
+        </h1>
+        <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8 leading-relaxed">
+          Browse the complete collection of The Cure songs alphabetically. Jump to any letter to find your favorite tracks instantly.
+        </p>
+
+        <!-- Quick stats -->
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/20">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{songs.length}</span>
+            <span class="text-white/80 text-base font-medium">Total Songs</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{songsWithLyrics}</span>
+            <span class="text-white/80 text-base font-medium">With Lyrics</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{availableLetters.length}</span>
+            <span class="text-white/80 text-base font-medium">Letters</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alphabet Navigation -->
+  <section class="mb-10 sticky top-20 z-30">
+    <div class="glass-card rounded-xl p-4 backdrop-blur-xl bg-black/60 border border-white/15">
+      <div class="flex flex-wrap justify-center gap-2">
+        {alphabet.map(letter => {
+          const hasLetterSongs = songsByLetter[letter]?.length > 0;
+          return (
+            <a
+              href={hasLetterSongs ? `#letter-${letter}` : undefined}
+              class={`size-10 rounded-lg flex items-center justify-center text-lg font-semibold transition-all duration-300 ${
+                hasLetterSongs
+                  ? 'bg-white/10 text-white hover:bg-primary/30 hover:text-primary border border-white/10 hover:border-primary/40'
+                  : 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'
+              }`}
+              aria-disabled={!hasLetterSongs}
+            >
+              {letter}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Songs by Letter -->
+  <section>
+    <div class="space-y-12">
+      {availableLetters.map(letter => (
+        <div id={`letter-${letter}`} class="scroll-mt-40">
+          <!-- Letter header -->
+          <div class="flex items-center gap-4 mb-6">
+            <div class="size-16 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center">
+              <span class="font-display text-4xl text-primary">{letter}</span>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-3">
+                <span class="text-white/70 text-sm">{songsByLetter[letter].length} songs</span>
+                <div class="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Songs grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {songsByLetter[letter].map(song => (
+              <a
+                href={`/lyrics/${song.slug}`}
+                class="song-card-az group"
+              >
+                <!-- Album art background -->
+                <div class="absolute inset-0 z-0 overflow-hidden rounded-xl">
+                  <img
+                    src={song.albumCover}
+                    alt=""
+                    class="w-full h-full object-cover blur-sm scale-110 opacity-40 group-hover:opacity-60 group-hover:scale-115 transition-all duration-500"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40"></div>
+                </div>
+
+                <div class="relative z-10 p-4 flex items-center gap-4">
+                  <!-- Album thumbnail -->
+                  <div class="size-14 shrink-0 rounded-lg overflow-hidden ring-2 ring-white/20 group-hover:ring-primary/50 shadow-lg transition-all duration-300">
+                    <img
+                      src={song.albumCover}
+                      alt=""
+                      class="size-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <!-- Song info -->
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-white font-semibold text-lg truncate group-hover:text-primary transition-colors duration-300 text-shadow">
+                      {song.title}
+                    </h3>
+                    <p class="text-white/70 text-sm truncate">{song.albumTitle}</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-white/50 text-xs">{song.year}</span>
+                      {song.hasLyrics && (
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-primary/30 text-primary border border-primary/40">Lyrics</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <!-- Arrow -->
+                  <div class="shrink-0 size-10 rounded-full bg-white/10 group-hover:bg-primary/30 flex items-center justify-center transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Back to top button -->
+  <div class="fixed bottom-8 right-8 z-50">
+    <a
+      href="#"
+      class="size-14 rounded-full bg-primary/80 backdrop-blur-sm border border-primary/50 flex items-center justify-center text-white shadow-2xl hover:bg-primary hover:scale-110 transition-all duration-300"
+      aria-label="Back to top"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+      </svg>
+    </a>
+  </div>
+</MainLayout>
+
+<style>
+  /* Song card styling */
+  .song-card-az {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 80px;
+  }
+
+  .song-card-az:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.5);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
+                0 0 50px rgba(var(--color-primary-rgb), 0.15);
+    transform: translateY(-3px);
+  }
+
+  .song-card-az:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Text shadow for readability */
+  .text-shadow {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8),
+                 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Alphabet nav shadow */
+  .sticky {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+</style>

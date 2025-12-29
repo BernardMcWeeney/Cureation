@@ -8,7 +8,7 @@ const { activeItem, items } = Astro.props;
 ---
 
 <aside class="sticky top-24 w-full">
-  <div class="backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl overflow-hidden">
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
     <div class="p-4 border-b border-white/10">
       <h2 class="font-heading text-3xl text-primary">Navigation</h2>
     </div>
@@ -33,19 +33,19 @@ const { activeItem, items } = Astro.props;
     </nav>
   </div>
   
-  <div class="mt-6 backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl p-4">
+  <div class="mt-6 backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
     <h3 class="font-heading text-2xl text-primary mb-3">Filter by Era</h3>
     <div class="space-y-2">
-      <button class="w-full text-left px-3 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg text-white transition-colors duration-300">
+      <button class="w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300">
         Early Years (1978-1982)
       </button>
-      <button class="w-full text-left px-3 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg text-white transition-colors duration-300">
+      <button class="w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300">
         Golden Era (1983-1992)
       </button>
-      <button class="w-full text-left px-3 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg text-white transition-colors duration-300">
+      <button class="w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300">
         Later Works (1993-2008)
       </button>
-      <button class="w-full text-left px-3 py-2 bg-primary/10 hover:bg-primary/20 rounded-lg text-white transition-colors duration-300">
+      <button class="w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300">
         Recent (2009-Present)
       </button>
     </div>

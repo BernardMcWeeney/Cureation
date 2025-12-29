@@ -1,0 +1,154 @@
+---
+interface Props {
+  title: string;
+  excerpt: string;
+  slug: string;
+  featuredImage?: string;
+  category: string;
+  publishedDate: string;
+  formattedDate: string;
+  readingTime?: number;
+  featured?: boolean;
+  authorName?: string;
+}
+
+const {
+  title,
+  excerpt,
+  slug,
+  featuredImage,
+  category,
+  publishedDate,
+  formattedDate,
+  readingTime,
+  featured = false,
+  authorName
+} = Astro.props;
+
+// Category colors
+const categoryColors: Record<string, string> = {
+  news: 'bg-blue-500/20 text-blue-400 border-blue-500/40',
+  history: 'bg-amber-500/20 text-amber-400 border-amber-500/40',
+  analysis: 'bg-purple-500/20 text-purple-400 border-purple-500/40',
+  reviews: 'bg-green-500/20 text-green-400 border-green-500/40',
+  interviews: 'bg-pink-500/20 text-pink-400 border-pink-500/40'
+};
+
+const categoryClass = categoryColors[category.toLowerCase()] || 'bg-primary/20 text-primary border-primary/40';
+const fallbackImage = '/images/placeholder-blog.jpg';
+---
+
+<article class={`blog-card group ${featured ? 'featured' : ''}`}>
+  <a
+    href={`/blog/${slug}`}
+    class="block h-full"
+    aria-label={`Read article: ${title}`}
+  >
+    <div class="card-inner relative overflow-hidden rounded-2xl h-full flex flex-col">
+      <!-- Featured image -->
+      <div class="relative aspect-[16/9] overflow-hidden">
+        <img
+          src={featuredImage || fallbackImage}
+          alt=""
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
+        />
+
+        <!-- Gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
+
+        <!-- Shine effect on hover -->
+        <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+        <!-- Category badge -->
+        <div class={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium border ${categoryClass}`}>
+          {category}
+        </div>
+
+        <!-- Reading time -->
+        {readingTime && (
+          <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/15 text-white/90 text-xs">
+            {readingTime} min read
+          </div>
+        )}
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 p-5 flex flex-col">
+        <h3 class="font-heading text-xl md:text-2xl text-white mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2">
+          {title}
+        </h3>
+
+        <p class="text-white/60 text-sm mb-4 line-clamp-2 flex-1">
+          {excerpt}
+        </p>
+
+        <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+          <div class="flex items-center gap-2">
+            <time datetime={publishedDate} class="text-white/40 text-xs">
+              {formattedDate}
+            </time>
+            {authorName && (
+              <>
+                <span class="text-white/20" aria-hidden="true">·</span>
+                <span class="text-white/40 text-xs">{authorName}</span>
+              </>
+            )}
+          </div>
+
+          <div class="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+            <span class="text-sm font-medium">Read</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Border glow effect -->
+      <div class="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-primary/40 transition-colors duration-500 pointer-events-none"></div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .blog-card {
+    --card-glow: rgba(var(--color-primary-rgb, 137, 176, 201), 0.4);
+  }
+
+  .card-inner {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.5s ease;
+  }
+
+  .blog-card:hover .card-inner {
+    transform: translateY(-8px);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.4),
+      0 0 60px var(--card-glow);
+  }
+
+  /* Featured card styling */
+  .blog-card.featured .card-inner {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .blog-card.featured:hover .card-inner {
+    box-shadow:
+      0 24px 50px rgba(0, 0, 0, 0.5),
+      0 0 80px var(--card-glow);
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+</style>

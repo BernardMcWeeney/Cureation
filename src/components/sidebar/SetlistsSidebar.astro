@@ -1,0 +1,182 @@
+---
+// Sidebar for setlists listing - year/tour navigation with filters
+
+interface Tour {
+  name: string;
+  slug: string;
+  count: number;
+}
+
+interface Props {
+  tours?: Tour[];
+  years?: number[];
+  totalShows?: number;
+  totalCountries?: number;
+  activeYear?: number;
+  activeTour?: string;
+}
+
+const {
+  tours = [],
+  years = [],
+  totalShows = 0,
+  totalCountries = 0,
+  activeYear,
+  activeTour
+} = Astro.props;
+
+// Generate decade filters from years
+const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b) => b - a);
+---
+
+<aside class="sticky top-24 w-full space-y-6">
+  <!-- Stats Overview -->
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
+    <h2 class="font-heading text-xl text-primary mb-4">Setlist Archive</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="text-center p-3 bg-black/40 border border-white/10 rounded-lg">
+        <span class="block text-2xl font-display text-primary">{totalShows}</span>
+        <span class="text-xs text-white/50">Shows</span>
+      </div>
+      <div class="text-center p-3 bg-black/40 border border-white/10 rounded-lg">
+        <span class="block text-2xl font-display text-primary">{totalCountries}</span>
+        <span class="text-xs text-white/50">Countries</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decade Filters -->
+  {decades.length > 0 && (
+    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
+      <div class="p-4 border-b border-white/10">
+        <h3 class="font-heading text-xl text-primary">Filter by Decade</h3>
+      </div>
+      <div class="p-3 space-y-2" id="decade-filters">
+        {decades.map((decade) => (
+          <button
+            type="button"
+            data-decade={decade}
+            data-start={decade}
+            data-end={decade + 9}
+            class="decade-filter-btn w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300 flex items-center justify-between group"
+            aria-pressed="false"
+          >
+            <span>{decade}s</span>
+            <span class="text-xs text-white/50 group-hover:text-white/70">{decade}-{decade + 9}</span>
+          </button>
+        ))}
+        <button
+          type="button"
+          id="clear-decade-filter"
+          class="hidden w-full text-center px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/70 hover:text-white text-sm transition-all duration-300 mt-2"
+        >
+          Clear Filter
+        </button>
+      </div>
+    </div>
+  )}
+
+  <!-- Tour Filters -->
+  {tours.length > 0 && (
+    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
+      <div class="p-4 border-b border-white/10">
+        <h3 class="font-heading text-xl text-primary">By Tour</h3>
+      </div>
+      <nav class="p-2 max-h-64 overflow-y-auto">
+        <ul class="space-y-1">
+          {tours.map((tour) => (
+            <li>
+              <a
+                href={`/setlists?tour=${tour.slug}`}
+                class={`block px-4 py-2 rounded-lg transition-all duration-300 flex items-center justify-between ${
+                  activeTour === tour.slug
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-white hover:bg-white/10 hover:text-primary'
+                }`}
+              >
+                <span class="truncate">{tour.name}</span>
+                <span class="text-xs text-white/40 ml-2">{tour.count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  )}
+
+  <!-- Quick Links -->
+  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
+    <h3 class="font-heading text-lg text-primary mb-3">Quick Links</h3>
+    <div class="space-y-2">
+      <a
+        href="/discography"
+        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+      >
+        Browse Albums
+      </a>
+      <a
+        href="/lyrics"
+        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+      >
+        Browse Lyrics
+      </a>
+    </div>
+  </div>
+</aside>
+
+<script>
+  function initDecadeFilters() {
+    const filterBtns = document.querySelectorAll('.decade-filter-btn');
+    const clearBtn = document.getElementById('clear-decade-filter');
+    const setlistCards = document.querySelectorAll('[data-setlist-year]');
+
+    if (!filterBtns.length || !setlistCards.length) return;
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const startYear = parseInt(btn.getAttribute('data-start') || '0');
+        const endYear = parseInt(btn.getAttribute('data-end') || '9999');
+
+        // Update button states
+        filterBtns.forEach((b) => {
+          b.classList.remove('ring-2', 'ring-primary', 'bg-primary/30');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('ring-2', 'ring-primary', 'bg-primary/30');
+        btn.setAttribute('aria-pressed', 'true');
+
+        // Show clear button
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        // Filter setlists
+        setlistCards.forEach((card) => {
+          const year = parseInt(card.getAttribute('data-setlist-year') || '0');
+          if (year >= startYear && year <= endYear) {
+            (card as HTMLElement).style.display = '';
+          } else {
+            (card as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        // Reset button states
+        filterBtns.forEach((b) => {
+          b.classList.remove('ring-2', 'ring-primary', 'bg-primary/30');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        clearBtn.classList.add('hidden');
+
+        // Show all setlists
+        setlistCards.forEach((card) => {
+          (card as HTMLElement).style.display = '';
+        });
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initDecadeFilters);
+  document.addEventListener('astro:page-load', initDecadeFilters);
+</script>

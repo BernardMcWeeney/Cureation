@@ -9,12 +9,12 @@ const navItems = getNavigation();
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="fixed w-full z-50 backdrop-blur-lg bg-black/20 border-b border-white">
+<header class="fixed w-full z-50 backdrop-blur-lg bg-white/5 border-b border-white/10">
   <div class="responsive-container">
     <div class="flex items-center justify-between h-16 md:h-20">
       <!-- Logo -->
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 bg-primary/20 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
+        <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
           <img src="/logo.png" alt="Logo" class="w-6 h-6 rounded-full object-contain" />
         </div>
         <span class="font-display text-5xl text-primary group-hover:text-primary/80 transition-colors duration-300">
@@ -50,7 +50,7 @@ const currentPath = Astro.url.pathname;
         <!-- Search -->
         <button
           id="search-button"
-          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:border-white/40 transition-[background-color,border-color] duration-300"
+          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-white/10 rounded-full border border-white/20 hover:border-white/40 hover:bg-white/15 transition-all duration-300"
           aria-label="Open search"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,26 +60,10 @@ const currentPath = Astro.url.pathname;
           <span class="sr-only">Search</span>
         </button>
 
-        <!-- Theme -->
-        <button
-          id="theme-menu-button"
-          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:border-white/40 transition-[background-color,border-color] duration-300"
-          aria-label="Switch album theme"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 
-                 7.343l1.657-1.657a2 2 0 012.828 0l2.829 
-                 2.829a2 2 0 010 2.828l-8.486 
-                 8.485M7 17h.01"
-            />
-          </svg>
-        </button>
-
         <!-- Mobile Toggle -->
         <button
           id="mobile-menu-toggle"
-          class="text-primary md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/20 rounded-full border border-white/20 hover:border-white/40 transition-[background-color,border-color] duration-300"
+          class="text-primary md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-white/10 rounded-full border border-white/20 hover:border-white/40 hover:bg-white/15 transition-all duration-300"
           aria-label="Open main menu"
           aria-expanded="false"
         >
@@ -96,7 +80,7 @@ const currentPath = Astro.url.pathname;
 <!-- Search Overlay -->
 <div
   id="search-overlay"
-  class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+  class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-40 flex items-center justify-center p-4"
   role="dialog" aria-modal="true"
 >
   <div class="relative w-full max-w-md">
@@ -118,7 +102,7 @@ const currentPath = Astro.url.pathname;
         name="q"
         type="search"
         placeholder="Search..."
-        class="w-full p-3 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:ring-2 focus:ring-primary"
+        class="w-full p-3 rounded-lg bg-white/10 backdrop-blur-lg text-white placeholder-white/50 border border-white/20 focus:ring-2 focus:ring-primary focus:border-primary/50"
       />
       <!-- Add a submit button for accessibility -->
       <button type="submit" class="sr-only">Search</button>
@@ -129,7 +113,7 @@ const currentPath = Astro.url.pathname;
 <!-- Mobile Nav -->
 <nav
   id="mobile-menu"
-  class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-30 p-6 md:hidden"
+  class="hidden fixed inset-0 bg-black/90 backdrop-blur-lg z-30 p-6 md:hidden"
 >
   <ul class="flex flex-col gap-4">
     {navItems.map(item => (
@@ -149,72 +133,46 @@ const currentPath = Astro.url.pathname;
   </ul>
 </nav>
 
-<!-- Theme Overlay -->
-<div
-  id="theme-overlay"
-  class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-6 pt-20"
-  role="dialog" aria-modal="true"
->
-  <div class="relative w-full max-w-sm">
-    <button
-      id="close-theme"
-      class="absolute top-2 right-2 text-white hover:text-white/80"
-      aria-label="Close theme switcher"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-    <div class="text-lg text-white mb-4">Album Themes</div>
-    <div class="flex flex-col gap-2">
-      {siteConfig.availableThemes.map(theme => (
-        <button
-          data-theme-value={theme.id}
-          class="theme-item w-full text-left flex items-center justify-between hover:bg-white/10 rounded-lg p-2 text-white focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <span>{theme.name}</span>
-          <span class="text-xs text-white/70">{theme.year}</span>
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
-
 <script>
   function bindControls() {
     // ── Search Overlay Toggle ─────────────────────────
-    const searchBtn   = document.getElementById('search-button');
+    const searchBtn = document.getElementById('search-button');
     const closeSearch = document.getElementById('close-search');
-    const overlay     = document.getElementById('search-overlay');
-    const searchInput = document.getElementById('search-input');
-    const searchForm  = document.getElementById('search-form');
+    const overlay = document.getElementById('search-overlay');
+    const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+    const searchForm = document.getElementById('search-form');
 
-    searchBtn.onclick = () => {
-      overlay.classList.toggle('hidden');
-      if (!overlay.classList.contains('hidden')) {
-        searchInput.focus();
-      }
-    };
-    
-    closeSearch.onclick = () => overlay.classList.add('hidden');
-    overlay.onclick    = e => {
-      if (e.target === overlay) {
-        overlay.classList.add('hidden');
-      }
-    };
-    
+    if (searchBtn && overlay && searchInput) {
+      searchBtn.onclick = () => {
+        overlay.classList.toggle('hidden');
+        if (!overlay.classList.contains('hidden')) {
+          searchInput.focus();
+        }
+      };
+    }
+
+    if (closeSearch && overlay) {
+      closeSearch.onclick = () => overlay.classList.add('hidden');
+      overlay.onclick = (e) => {
+        if (e.target === overlay) {
+          overlay.classList.add('hidden');
+        }
+      };
+    }
+
     // Handle form submission
-    searchForm.addEventListener('submit', (e) => {
-      const query = searchInput.value.trim();
-      if (!query) {
-        e.preventDefault(); // Prevent empty submissions
-      }
-    });
-    
+    if (searchForm && searchInput) {
+      searchForm.addEventListener('submit', (e) => {
+        const query = searchInput.value.trim();
+        if (!query) {
+          e.preventDefault();
+        }
+      });
+    }
+
     // Handle escape key
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && !overlay.classList.contains('hidden')) {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) {
         overlay.classList.add('hidden');
       }
     });
@@ -223,36 +181,13 @@ const currentPath = Astro.url.pathname;
     const mobileToggle = document.getElementById('mobile-menu-toggle');
     const mobileMenu   = document.getElementById('mobile-menu');
 
-    mobileToggle.onclick = () => {
-      const isOpen = mobileToggle.getAttribute('aria-expanded') === 'true';
-      mobileToggle.setAttribute('aria-expanded', String(!isOpen));
-      mobileMenu.classList.toggle('hidden');
-    };
-
-    // ── Theme Overlay Toggle & Switch ───────────────
-    const themeBtn     = document.getElementById('theme-menu-button');
-    const themeClose   = document.getElementById('close-theme');
-    const themeOverlay = document.getElementById('theme-overlay');
-
-    themeBtn.onclick    = () => themeOverlay.classList.toggle('hidden');
-    themeClose.onclick  = () => themeOverlay.classList.add('hidden');
-    themeOverlay.onclick= e => {
-      if (e.target === themeOverlay) {
-        themeOverlay.classList.add('hidden');
-      }
-    };
-
-    // ── Theme Switcher Functionality ───────────────
-    const applyTheme = theme => {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-    };
-    // initial application
-    applyTheme(localStorage.getItem('theme') || 'disintegration');
-
-    document.querySelectorAll('.theme-item').forEach(btn => {
-      btn.onclick = () => applyTheme(btn.getAttribute('data-theme-value'));
-    });
+    if (mobileToggle && mobileMenu) {
+      mobileToggle.onclick = () => {
+        const isOpen = mobileToggle.getAttribute('aria-expanded') === 'true';
+        mobileToggle.setAttribute('aria-expanded', String(!isOpen));
+        mobileMenu.classList.toggle('hidden');
+      };
+    }
   }
 
   // bind on initial load

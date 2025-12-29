@@ -6,11 +6,22 @@ import siteConfig from '../config/site.config';
 import '../styles/global.css';
 import SearchEnhancer from '../components/SearchEnhancer.astro';
 
-const { 
-  title, 
-  description, 
+import { getDefaultTheme } from '../config/theme.config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  pageClass?: string;
+  theme?: string;
+}
+
+const {
+  title,
+  description,
   ogImage,
-  pageClass = ''
+  pageClass = '',
+  theme = getDefaultTheme()
 } = Astro.props;
 
 // Generate full URLs for social sharing
@@ -20,7 +31,7 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
 ---
 
 <!DOCTYPE html>
-<html lang="en" style="color-scheme: dark;">
+<html lang="en" style="color-scheme: dark;" data-theme={theme}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -75,12 +86,6 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
   <!-- Preconnect & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <!-- Dark‑mode flash prevention -->
-  <script is:inline>
-    const savedTheme = localStorage.getItem('theme') || 'disintegration';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  </script>
 
   <!-- View transitions -->
   <ViewTransitions />

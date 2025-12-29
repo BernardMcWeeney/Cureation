@@ -1,10 +1,30 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import AlbumCard from '../../components/AlbumCard.astro';
-import { ViewTransitions } from 'astro:transitions';
+import DiscographySidebar from '../../components/sidebar/DiscographySidebar.astro';
 
-// Sidebar configuration
-const sidebarItems = [
+// Types for album data
+interface DirectusAlbum {
+  id: number | string;
+  title: string;
+  release_date?: string;
+  cover_art?: string;
+  slug?: string;
+  featured?: boolean;
+}
+
+interface Album {
+  id: string;
+  title: string;
+  year: string;
+  releaseDate: string;
+  coverImage: string;
+  slug: string;
+  featured: boolean;
+}
+
+// Sidebar categories
+const categories = [
   { title: 'Studio Albums', path: '/discography' },
   { title: 'Live Albums', path: '/discography/live' },
   { title: 'Compilations', path: '/discography/compilations' },
@@ -15,12 +35,13 @@ const sidebarItems = [
 // Fetch album data from the CMS
 const response = await fetch('https://dash.cureation.net/items/discography');
 const albumData = await response.json();
-const albums = albumData.data.map(album => ({
+const albums: Album[] = albumData.data.map((album: DirectusAlbum) => ({
   id: album.id.toString(),
   title: album.title,
   year: album.release_date
     ? new Date(album.release_date).getFullYear().toString()
     : '',
+  releaseDate: album.release_date || '',
   coverImage: album.cover_art
     ? `https://dash.cureation.net/assets/${album.cover_art}`
     : '/images/placeholder-album.jpg',
@@ -29,38 +50,87 @@ const albums = albumData.data.map(album => ({
     .replace(/[^\w\s]/gi, '')
     .replace(/\s+/g, '-') : 'unknown-album'),
   featured: album.featured || false
-}));
+})).sort((a: Album, b: Album) => {
+  // Sort by release date (oldest first)
+  if (!a.releaseDate) return 1;
+  if (!b.releaseDate) return -1;
+  return new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime();
+});
 
-const featuredAlbums = albums.filter(album => album.featured) || [];
-const regularAlbums = albums.filter(album => !album.featured) || [];
+const featuredAlbums = albums.filter((album: Album) => album.featured) || [];
+const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
 ---
 
 <MainLayout
   title="Discography"
   description="Explore the complete discography of The Cure, from their debut album to their most recent releases."
   showSidebar={true}
-  sidebarActiveItem="Studio Albums"
-  sidebarItems={sidebarItems}
+  customSidebar={true}
   pageClass="bg-black"
 >
-  <ViewTransitions />
-  
-  <section class="mb-12">
-    <div class="mb-12">
-      <h1 class="font-display text-5xl md:text-6xl text-white mb-4" transition:animate="slide">
-        The Cure Discography
-      </h1>
-      <p class="text-white/80 max-w-3xl" transition:animate="fade">
-        Explore the complete studio album collection of The Cure, spanning over four decades of musical innovation
-        and artistic evolution. Click on any album to discover more details, tracklists, and stories behind the music.
-      </p>
-    </div>
+<DiscographySidebar
+  slot="sidebar"
+  categories={categories}
+  activeCategory="Studio Albums"
+/>
 
-    {featuredAlbums.length > 0 && (
-      <div class="mb-12">
-        <h2 class="font-display text-3xl text-primary mb-6" transition:animate="slide">Essential Albums</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featuredAlbums.map(album => (
+  <!-- Hero Section -->
+  <section class="mb-16">
+    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
+      <!-- Decorative gradient orbs -->
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="badge">Complete Collection</span>
+          <div class="divider-gradient flex-1 max-w-24"></div>
+        </div>
+
+        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow" transition:animate="slide">
+          The Cure Discography
+        </h1>
+        <p class="text-white/90 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
+          Explore the complete studio album collection of The Cure, spanning over four decades of musical innovation and artistic evolution.
+        </p>
+
+        <!-- Quick stats -->
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/20">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{albums.length}</span>
+            <span class="text-white/80 text-base font-medium">Albums</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">45+</span>
+            <span class="text-white/80 text-base font-medium">Years</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{featuredAlbums.length}</span>
+            <span class="text-white/80 text-base font-medium">Essential</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured/Essential Albums -->
+  {featuredAlbums.length > 0 && (
+    <section class="mb-16">
+      <div class="flex items-center gap-4 mb-8">
+        <div class="flex items-center gap-3">
+          <div class="size-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <h2 class="font-heading text-2xl md:text-3xl text-primary text-glow">Essential Albums</h2>
+        </div>
+        <div class="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {featuredAlbums.map(album => (
+          <div data-album-year={album.year}>
             <AlbumCard
               title={album.title}
               coverImage={album.coverImage}
@@ -69,25 +139,39 @@ const regularAlbums = albums.filter(album => !album.featured) || [];
               featured={true}
               id={album.id}
             />
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    )}
+    </section>
+  )}
 
-    <div>
-      <h2 class="font-display text-4xl text-primary mb-6" transition:animate="slide">Studio Albums</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-        {regularAlbums.map((album, index) => (
+  <!-- All Studio Albums -->
+  <section class="mb-12">
+    <div class="flex items-center gap-4 mb-8">
+      <div class="flex items-center gap-3">
+        <div class="size-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <h2 class="font-heading text-2xl md:text-3xl text-primary text-glow">Studio Albums</h2>
+      </div>
+      <div class="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+      {regularAlbums.map((album, index) => (
+        <div data-album-year={album.year} style={`--index: ${index + 1}`}>
           <AlbumCard
             title={album.title}
             coverImage={album.coverImage}
             year={album.year}
             slug={album.slug}
             id={album.id}
-            style={`--index: ${index + 1}`}
           />
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   </section>
 </MainLayout>
