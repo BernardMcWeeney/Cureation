@@ -96,11 +96,13 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
   <!-- Additional head -->
   <slot name="head" />
 </head>
-<body class="min-h-screen flex flex-col">
-  <!-- Optional decorative overlay -->
-  <div
-    class="fixed inset-0 bg-linear-to-b from-base-300/20 to-base-300/5 pointer-events-none -z-50"
-  ></div>
+<body class="min-h-screen flex flex-col noise-overlay">
+  <!-- Enhanced theme-aware background -->
+  <div class="fixed inset-0 -z-50 theme-gradient-bg">
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, rgba(var(--color-primary-rgb), 0.12) 0%, transparent 50%);"></div>
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse at bottom right, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 50%);"></div>
+    <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 70%, rgba(var(--color-primary-rgb), 0.05) 0%, transparent 40%);"></div>
+  </div>
 
   <Header />
 

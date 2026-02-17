@@ -1,0 +1,62 @@
+---
+const stats = [
+  {
+    value: '50+',
+    label: 'Years of Music',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />`
+  },
+  {
+    value: '14',
+    label: 'Studio Albums',
+    icon: `<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>`
+  },
+  {
+    value: '200+',
+    label: 'Songs',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />`
+  },
+  {
+    value: '1,000+',
+    label: 'Live Shows',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.069A1 1 0 0121 8.87V15.13a1 1 0 01-1.447.899L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />`
+  },
+  {
+    value: '2019',
+    label: 'Hall of Fame',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />`
+  },
+  {
+    value: '5',
+    label: 'Continents',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />`
+  },
+];
+---
+
+<section class="py-10">
+  <div class="responsive-container">
+    <div class="divider-gradient mb-10 opacity-60"></div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {stats.map((stat) => (
+        <div class="glass-stat p-4 text-center group hover:scale-105 transition-transform duration-300">
+          <div class="flex justify-center mb-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-4 text-primary/50 group-hover:text-primary/80 transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.5"
+              set:html={stat.icon}
+            />
+          </div>
+          <p class="font-display text-4xl md:text-5xl text-primary mb-1 text-glow leading-none">{stat.value}</p>
+          <p class="text-white/45 text-xs uppercase tracking-widest mt-1">{stat.label}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="divider-gradient mt-10 opacity-60"></div>
+  </div>
+</section>

@@ -1,0 +1,171 @@
+---
+// All The Cure studio albums in chronological order
+// Real covers loaded from Directus; fallback images shown below
+const albums = [
+  {
+    slug: 'three-imaginary-boys',
+    title: 'Three Imaginary Boys',
+    year: '1979',
+    cover: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'seventeen-seconds',
+    title: 'Seventeen Seconds',
+    year: '1980',
+    cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'faith',
+    title: 'Faith',
+    year: '1981',
+    cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'pornography',
+    title: 'Pornography',
+    year: '1982',
+    cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'the-top',
+    title: 'The Top',
+    year: '1984',
+    cover: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'the-head-on-the-door',
+    title: 'The Head on the Door',
+    year: '1985',
+    cover: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'kiss-me',
+    title: 'Kiss Me Kiss Me Kiss Me',
+    year: '1987',
+    cover: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'disintegration',
+    title: 'Disintegration',
+    year: '1989',
+    cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'wish',
+    title: 'Wish',
+    year: '1992',
+    cover: 'https://images.unsplash.com/photo-1461784180009-21121b2f204c?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'wild-mood-swings',
+    title: 'Wild Mood Swings',
+    year: '1996',
+    cover: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'bloodflowers',
+    title: 'Bloodflowers',
+    year: '2000',
+    cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'the-cure',
+    title: 'The Cure',
+    year: '2004',
+    cover: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=400&fit=crop',
+  },
+  {
+    slug: '4-13-dream',
+    title: '4:13 Dream',
+    year: '2008',
+    cover: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&h=400&fit=crop',
+  },
+  {
+    slug: 'songs-of-a-lost-world',
+    title: 'Songs of a Lost World',
+    year: '2024',
+    cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
+  },
+];
+---
+
+<section class="py-16">
+  <div class="responsive-container">
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-4">
+        <h2 class="font-heading text-2xl text-primary">Discography</h2>
+        <div class="h-px w-20 bg-gradient-to-r from-primary/30 to-transparent"></div>
+      </div>
+      <a
+        href="/discography"
+        class="group text-sm text-white/50 hover:text-primary transition-colors flex items-center gap-1.5"
+      >
+        Full discography
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Scrollable strip -->
+    <div class="relative">
+      <div class="album-strip flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory">
+        {albums.map((album) => (
+          <a
+            href={`/discography/${album.slug}`}
+            class="group flex-none snap-start w-32 md:w-40"
+          >
+            <div class="relative aspect-square overflow-hidden rounded-lg ring-1 ring-white/10 group-hover:ring-primary/50 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.6),0_0_20px_rgba(var(--color-primary-rgb),0.2)]">
+              <img
+                src={album.cover}
+                alt={album.title}
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                loading="lazy"
+              />
+              <!-- Overlay on hover -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2.5">
+                <p class="text-white text-xs font-medium text-shadow leading-tight album-title">{album.title}</p>
+                <p class="text-primary text-xs text-shadow mt-0.5">{album.year}</p>
+              </div>
+              <!-- Year badge always visible -->
+              <div class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-sm text-white/60 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                {album.year}
+              </div>
+            </div>
+            <p class="mt-2 text-white/40 text-xs text-center truncate px-1 group-hover:text-white/70 transition-colors duration-200">
+              {album.year}
+            </p>
+          </a>
+        ))}
+      </div>
+
+      <!-- Right fade -->
+      <div class="absolute top-0 right-0 bottom-3 w-20 bg-gradient-to-l from-black to-transparent pointer-events-none z-10"></div>
+      <!-- Left fade -->
+      <div class="absolute top-0 left-0 bottom-3 w-8 bg-gradient-to-r from-black to-transparent pointer-events-none z-10"></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .album-strip {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--color-primary-rgb), 0.25) transparent;
+  }
+  .album-strip::-webkit-scrollbar {
+    height: 3px;
+  }
+  .album-strip::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .album-strip::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-primary-rgb), 0.25);
+    border-radius: 2px;
+  }
+  .album-title {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+</style>

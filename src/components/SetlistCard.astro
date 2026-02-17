@@ -102,30 +102,56 @@ const fallbackImage = '/images/placeholder-concert.jpg';
   }
 
   .card-inner {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.06) 0%,
+      rgba(0, 0, 0, 0.55) 25%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 0 20px rgba(var(--color-primary-rgb), 0.03);
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.5s ease;
+                box-shadow 0.5s ease,
+                background 0.5s ease;
   }
 
   .setlist-card:hover .card-inner {
     transform: translateY(-8px);
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.1) 0%,
+      rgba(0, 0, 0, 0.6) 25%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
     box-shadow:
-      0 20px 40px rgba(0, 0, 0, 0.4),
-      0 0 60px var(--card-glow);
+      0 20px 40px rgba(0, 0, 0, 0.5),
+      0 0 60px var(--card-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   /* Featured card styling */
   .setlist-card.featured .card-inner {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.08) 0%,
+      rgba(0, 0, 0, 0.6) 25%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      0 0 30px rgba(var(--color-primary-rgb), 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .setlist-card.featured:hover .card-inner {
     box-shadow:
       0 24px 50px rgba(0, 0, 0, 0.5),
-      0 0 80px var(--card-glow);
+      0 0 80px var(--card-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
   }
 
   /* Text glow on hover */

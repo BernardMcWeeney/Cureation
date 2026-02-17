@@ -1,97 +1,101 @@
 ---
+import type { NewsPost } from '../types/directus';
+
 interface Props {
-  title: string;
-  excerpt: string;
-  slug: string;
-  featuredImage?: string;
-  category: string;
-  publishedDate: string;
-  formattedDate: string;
-  readingTime?: number;
+  post: NewsPost;
   featured?: boolean;
-  authorName?: string;
+  compact?: boolean;
 }
 
-const {
-  title,
-  excerpt,
-  slug,
-  featuredImage,
-  category,
-  publishedDate,
-  formattedDate,
-  readingTime,
-  featured = false,
-  authorName
-} = Astro.props;
+const { post, featured = false, compact = false } = Astro.props;
 
 // Category colors
 const categoryColors: Record<string, string> = {
   news: 'bg-blue-500/20 text-blue-400 border-blue-500/40',
-  history: 'bg-amber-500/20 text-amber-400 border-amber-500/40',
-  analysis: 'bg-purple-500/20 text-purple-400 border-purple-500/40',
   reviews: 'bg-green-500/20 text-green-400 border-green-500/40',
-  interviews: 'bg-pink-500/20 text-pink-400 border-pink-500/40'
+  interviews: 'bg-pink-500/20 text-pink-400 border-pink-500/40',
+  rumors: 'bg-amber-500/20 text-amber-400 border-amber-500/40',
+  editorials: 'bg-purple-500/20 text-purple-400 border-purple-500/40'
 };
 
-const categoryClass = categoryColors[category.toLowerCase()] || 'bg-primary/20 text-primary border-primary/40';
+const categoryClass = categoryColors[post.category] || 'bg-primary/20 text-primary border-primary/40';
 const fallbackImage = '/images/placeholder-blog.jpg';
 ---
 
-<article class={`blog-card group ${featured ? 'featured' : ''}`}>
+<article class={`news-card group ${featured ? 'featured' : ''} ${compact ? 'compact' : ''}`}>
   <a
-    href={`/blog/${slug}`}
+    href={`/news/${post.slug}`}
     class="block h-full"
-    aria-label={`Read article: ${title}`}
+    aria-label={`Read article: ${post.title}`}
   >
     <div class="card-inner relative overflow-hidden rounded-2xl h-full flex flex-col">
-      <!-- Featured image -->
-      <div class="relative aspect-[16/9] overflow-hidden">
+      {/* Featured image */}
+      <div class={`relative overflow-hidden ${compact ? 'aspect-[16/10]' : 'aspect-[16/9]'}`}>
         <img
-          src={featuredImage || fallbackImage}
+          src={post.featuredImage || fallbackImage}
           alt=""
           class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
         />
 
-        <!-- Gradient overlay -->
+        {/* Gradient overlay */}
         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
 
-        <!-- Shine effect on hover -->
+        {/* Shine effect on hover */}
         <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-        <!-- Category badge -->
+        {/* Category badge */}
         <div class={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium border ${categoryClass}`}>
-          {category}
+          {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
         </div>
 
-        <!-- Reading time -->
-        {readingTime && (
+        {/* Reading time */}
+        {!compact && post.readingTime && (
           <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/15 text-white/90 text-xs">
-            {readingTime} min read
+            {post.readingTime} min read
+          </div>
+        )}
+
+        {/* Rating for reviews */}
+        {post.category === 'reviews' && post.rating && (
+          <div class="absolute bottom-4 left-4 flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class={`size-4 ${i < post.rating! ? 'text-yellow-400 fill-yellow-400' : 'text-white/30'}`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+            ))}
           </div>
         )}
       </div>
 
-      <!-- Content -->
-      <div class="flex-1 p-5 flex flex-col">
-        <h3 class="font-heading text-xl md:text-2xl text-white mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2">
-          {title}
+      {/* Content */}
+      <div class={`flex-1 flex flex-col ${compact ? 'p-4' : 'p-5'}`}>
+        <h3 class={`font-heading text-white mb-2 group-hover:text-primary transition-colors duration-300 ${compact ? 'text-lg line-clamp-2' : 'text-xl md:text-2xl line-clamp-2'}`}>
+          {post.title}
         </h3>
 
-        <p class="text-white/60 text-sm mb-4 line-clamp-2 flex-1">
-          {excerpt}
-        </p>
+        {!compact && (
+          <p class="text-white/60 text-sm mb-4 line-clamp-2 flex-1">
+            {post.excerpt}
+          </p>
+        )}
 
-        <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+        <div class={`flex items-center justify-between ${compact ? '' : 'mt-auto pt-4 border-t border-white/10'}`}>
           <div class="flex items-center gap-2">
-            <time datetime={publishedDate} class="text-white/40 text-xs">
-              {formattedDate}
+            <time datetime={post.publishedDate} class="text-white/40 text-xs">
+              {post.formattedDate}
             </time>
-            {authorName && (
+            {!compact && post.authorName && (
               <>
                 <span class="text-white/20" aria-hidden="true">·</span>
-                <span class="text-white/40 text-xs">{authorName}</span>
+                <span class="text-white/40 text-xs">{post.authorName}</span>
               </>
             )}
           </div>
@@ -106,14 +110,14 @@ const fallbackImage = '/images/placeholder-blog.jpg';
         </div>
       </div>
 
-      <!-- Border glow effect -->
+      {/* Border glow effect */}
       <div class="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-primary/40 transition-colors duration-500 pointer-events-none"></div>
     </div>
   </a>
 </article>
 
 <style>
-  .blog-card {
+  .news-card {
     --card-glow: rgba(var(--color-primary-rgb, 137, 176, 201), 0.4);
   }
 
@@ -135,7 +139,7 @@ const fallbackImage = '/images/placeholder-blog.jpg';
                 background 0.5s ease;
   }
 
-  .blog-card:hover .card-inner {
+  .news-card:hover .card-inner {
     transform: translateY(-8px);
     background: linear-gradient(
       145deg,
@@ -150,7 +154,7 @@ const fallbackImage = '/images/placeholder-blog.jpg';
   }
 
   /* Featured card styling */
-  .blog-card.featured .card-inner {
+  .news-card.featured .card-inner {
     background: linear-gradient(
       145deg,
       rgba(var(--color-primary-rgb), 0.08) 0%,
@@ -163,11 +167,32 @@ const fallbackImage = '/images/placeholder-blog.jpg';
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  .blog-card.featured:hover .card-inner {
+  .news-card.featured:hover .card-inner {
     box-shadow:
       0 24px 50px rgba(0, 0, 0, 0.5),
       0 0 80px var(--card-glow),
       inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  /* Compact card styling */
+  .news-card.compact .card-inner {
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.04) 0%,
+      rgba(0, 0, 0, 0.5) 25%,
+      rgba(0, 0, 0, 0.45) 100%
+    );
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .news-card.compact:hover .card-inner {
+    transform: translateY(-4px);
+    box-shadow:
+      0 12px 24px rgba(0, 0, 0, 0.4),
+      0 0 30px var(--card-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   /* Line clamp utilities */

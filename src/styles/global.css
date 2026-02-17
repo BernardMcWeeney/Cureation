@@ -31,13 +31,13 @@
   /* Define a spacing scale to use with Tailwind utility classes */
   --spacing: 0.25rem;
 
-  /* Border radius values */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
+  /* Border radius values - sharper editorial aesthetic */
+  --radius-sm: 0.25rem;    /* 4px */
+  --radius-md: 0.375rem;   /* 6px */
+  --radius-lg: 0.5rem;     /* 8px */
+  --radius-xl: 0.625rem;   /* 10px */
+  --radius-2xl: 0.75rem;   /* 12px */
+  --radius-3xl: 1rem;      /* 16px */
 
   /* Glass effect values - enhanced */
   --glass-opacity: 0.15;
@@ -50,6 +50,17 @@
   --glow-md: 0 0 20px rgba(var(--color-primary-rgb), 0.4);
   --glow-lg: 0 0 40px rgba(var(--color-primary-rgb), 0.5);
   --glow-xl: 0 0 60px rgba(var(--color-primary-rgb), 0.6);
+
+  /* Glass hierarchy - enhanced with theme tinting */
+  --glass-noise-opacity: 0.05;
+  --glass-surface-bg: rgba(255, 255, 255, 0.03);
+  --glass-surface-border: rgba(255, 255, 255, 0.08);
+  --glass-panel-bg: rgba(0, 0, 0, 0.5);
+  --glass-panel-border: rgba(255, 255, 255, 0.12);
+  --glass-inset-bg: rgba(0, 0, 0, 0.4);
+  --glass-inset-border: rgba(255, 255, 255, 0.06);
+  --glass-elevated-bg: rgba(0, 0, 0, 0.6);
+  --glass-elevated-border: rgba(255, 255, 255, 0.15);
 }
 
 /* Add some global styles */
@@ -168,6 +179,32 @@
     opacity: 0.4;
     transform: scale(1.1);
   }
+
+  /* Global noise texture overlay for depth */
+  .noise-overlay {
+    position: relative;
+  }
+
+  .noise-overlay::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: var(--glass-noise-opacity, 0.05);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+  }
+
+  /* Theme-aware gradient background enhancement */
+  .theme-gradient-bg {
+    background:
+      radial-gradient(ellipse at top left, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(var(--color-primary-rgb), 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at center, rgba(var(--color-primary-rgb), 0.02) 0%, transparent 70%),
+      #000000;
+  }
 }
 
 /* Custom utilities */
@@ -226,6 +263,270 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.1),
                 var(--glow-md);
     transform: translateY(-2px);
+  }
+
+  /* ========================================
+     NEW GLASS HIERARCHY SYSTEM
+     ======================================== */
+
+  /* Glass Surface - Base layer with subtle theme tint */
+  .glass-surface {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(
+      135deg,
+      rgba(var(--color-primary-rgb), 0.06) 0%,
+      rgba(var(--color-primary-rgb), 0.02) 50%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+    border: 1px solid rgba(var(--color-primary-rgb), 0.15);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 0 20px rgba(var(--color-primary-rgb), 0.03);
+  }
+
+  /* Glass Panel - Primary content containers with stronger presence */
+  .glass-panel {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.12) 0%,
+      rgba(var(--color-primary-rgb), 0.06) 20%,
+      rgba(10, 15, 30, 0.85) 100%
+    );
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    transition: all 0.4s var(--ease-smooth);
+  }
+
+  .glass-panel:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.45);
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.6),
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      var(--glow-sm);
+  }
+
+  /* Glass Tile - For bento grid tiles with image background support */
+  .glass-tile {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.15) 0%,
+      rgba(var(--color-primary-rgb), 0.08) 30%,
+      rgba(10, 15, 30, 0.9) 100%
+    );
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    transition: all 0.4s var(--ease-smooth);
+  }
+
+  .glass-tile:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.5);
+    transform: translateY(-4px);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.6),
+      0 8px 24px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      var(--glow-md);
+  }
+
+  /* Glass Tile with background image - TRUE GLASSMORPHISM */
+  .glass-tile-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.4s var(--ease-smooth);
+  }
+
+  /* Background image layer - vivid and visible */
+  .glass-tile-image::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: var(--tile-bg-image);
+    background-size: cover;
+    background-position: center;
+    filter: blur(0px) saturate(1.3) brightness(1.1);
+    transform: scale(1.05);
+    opacity: 1;
+    z-index: 0;
+    transition: all 0.6s ease;
+  }
+
+  /* Frosted glass overlay - subtle, not opaque */
+  .glass-tile-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(0, 0, 0, 0.3) 50%,
+      rgba(0, 0, 0, 0.5) 100%
+    );
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    z-index: 1;
+  }
+
+  .glass-tile-image:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-4px);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.5),
+      0 8px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      var(--glow-md);
+  }
+
+  .glass-tile-image:hover::before {
+    filter: blur(0px) saturate(1.5) brightness(1.15);
+    transform: scale(1.1);
+  }
+
+  .glass-tile-image > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Variant: heavier blur for text-heavy tiles */
+  .glass-tile-image-heavy::after {
+    backdrop-filter: blur(24px) saturate(1.1);
+    -webkit-backdrop-filter: blur(24px) saturate(1.1);
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+  }
+
+  /* Glass Inset - Recessed inner areas */
+  .glass-inset {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.35) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, 0.3),
+      inset 0 0 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Glass Elevated - Floating elements with prominent glow */
+  .glass-elevated {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(
+      135deg,
+      rgba(var(--color-primary-rgb), 0.1) 0%,
+      rgba(0, 0, 0, 0.6) 40%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(var(--color-primary-rgb), 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.4s var(--ease-smooth);
+  }
+
+  .glass-elevated:hover {
+    transform: translateY(-4px);
+    border-color: rgba(var(--color-primary-rgb), 0.4);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.6),
+      var(--glow-lg),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  /* Glass Stat Card - For statistics and metrics */
+  .glass-stat {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+      135deg,
+      rgba(var(--color-primary-rgb), 0.1) 0%,
+      rgba(var(--color-primary-rgb), 0.04) 50%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.3s var(--ease-smooth);
+  }
+
+  .glass-stat:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--color-primary-rgb), 0.15) 0%,
+      rgba(var(--color-primary-rgb), 0.06) 50%,
+      rgba(0, 0, 0, 0.45) 100%
+    );
+    border-color: rgba(var(--color-primary-rgb), 0.35);
+    box-shadow:
+      0 6px 20px rgba(0, 0, 0, 0.4),
+      var(--glow-sm);
+  }
+
+  /* Theme divider with gradient */
+  .divider-theme {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(var(--color-primary-rgb), 0.4) 20%,
+      rgba(var(--color-primary-rgb), 0.6) 50%,
+      rgba(var(--color-primary-rgb), 0.4) 80%,
+      transparent 100%
+    );
+  }
+
+  /* Section header with theme accent */
+  .section-header {
+    position: relative;
+    padding-bottom: 1rem;
+  }
+
+  .section-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 2px;
   }
 
   /* Glassmorphic song card with album art background */

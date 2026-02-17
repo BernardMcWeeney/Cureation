@@ -31,14 +31,14 @@ const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b
 
 <aside class="sticky top-24 w-full space-y-6">
   <!-- Stats Overview -->
-  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
+  <div class="glass-surface rounded-xl p-4">
     <h2 class="font-heading text-xl text-primary mb-4">Setlist Archive</h2>
     <div class="grid grid-cols-2 gap-4">
-      <div class="text-center p-3 bg-black/40 border border-white/10 rounded-lg">
+      <div class="glass-stat text-center p-3 rounded-lg">
         <span class="block text-2xl font-display text-primary">{totalShows}</span>
         <span class="text-xs text-white/50">Shows</span>
       </div>
-      <div class="text-center p-3 bg-black/40 border border-white/10 rounded-lg">
+      <div class="glass-stat text-center p-3 rounded-lg">
         <span class="block text-2xl font-display text-primary">{totalCountries}</span>
         <span class="text-xs text-white/50">Countries</span>
       </div>
@@ -47,9 +47,9 @@ const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b
 
   <!-- Decade Filters -->
   {decades.length > 0 && (
-    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-white/10">
-        <h3 class="font-heading text-xl text-primary">Filter by Decade</h3>
+    <div class="glass-surface rounded-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-white/10">
+        <h3 class="font-heading text-lg text-primary">Filter by Decade</h3>
       </div>
       <div class="p-3 space-y-2" id="decade-filters">
         {decades.map((decade) => (
@@ -58,7 +58,7 @@ const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b
             data-decade={decade}
             data-start={decade}
             data-end={decade + 9}
-            class="decade-filter-btn w-full text-left px-3 py-2 bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300 flex items-center justify-between group"
+            class="decade-filter-btn w-full text-left px-3 py-2 glass-inset hover:bg-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300 flex items-center justify-between group"
             aria-pressed="false"
           >
             <span>{decade}s</span>
@@ -78,9 +78,9 @@ const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b
 
   <!-- Tour Filters -->
   {tours.length > 0 && (
-    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-white/10">
-        <h3 class="font-heading text-xl text-primary">By Tour</h3>
+    <div class="glass-surface rounded-xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-white/10">
+        <h3 class="font-heading text-lg text-primary">By Tour</h3>
       </div>
       <nav class="p-2 max-h-64 overflow-y-auto">
         <ul class="space-y-1">
@@ -105,18 +105,18 @@ const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b
   )}
 
   <!-- Quick Links -->
-  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
+  <div class="glass-surface rounded-xl p-4">
     <h3 class="font-heading text-lg text-primary mb-3">Quick Links</h3>
     <div class="space-y-2">
       <a
         href="/discography"
-        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
       >
         Browse Albums
       </a>
       <a
         href="/lyrics"
-        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
       >
         Browse Lyrics
       </a>

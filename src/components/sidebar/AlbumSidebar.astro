@@ -39,29 +39,29 @@ const formattedDuration = `${Math.floor(totalMinutes)} min`;
 
 <aside class="sticky top-24 w-full space-y-6">
   <!-- Album Stats -->
-  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
-    <div class="p-4 border-b border-white/10">
+  <div class="glass-surface rounded-xl overflow-hidden">
+    <div class="p-4 divider-theme border-b">
       <h2 class="font-heading text-xl text-primary">Album Info</h2>
     </div>
-    <div class="p-4 grid grid-cols-2 gap-4 text-sm">
-      <div>
-        <p class="text-white/60">Tracks</p>
+    <div class="p-4 grid grid-cols-2 gap-3 text-sm">
+      <div class="glass-stat p-3 rounded-lg">
+        <p class="text-white/60 text-xs">Tracks</p>
         <p class="text-white font-medium">{tracks.length}</p>
       </div>
-      <div>
-        <p class="text-white/60">Duration</p>
+      <div class="glass-stat p-3 rounded-lg">
+        <p class="text-white/60 text-xs">Duration</p>
         <p class="text-white font-medium">{formattedDuration}</p>
       </div>
-      <div>
-        <p class="text-white/60">Year</p>
+      <div class="glass-stat p-3 rounded-lg col-span-2">
+        <p class="text-white/60 text-xs">Year</p>
         <p class="text-white font-medium">{album.year}</p>
       </div>
     </div>
   </div>
 
   <!-- Tracklist Navigation -->
-  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
-    <div class="p-4 border-b border-white/10">
+  <div class="glass-surface rounded-xl overflow-hidden">
+    <div class="p-4 divider-theme border-b">
       <h2 class="font-heading text-xl text-primary">Tracklist</h2>
     </div>
     <nav class="p-2 max-h-80 overflow-y-auto">
@@ -84,8 +84,8 @@ const formattedDuration = `${Math.floor(totalMinutes)} min`;
 
   <!-- Related Albums -->
   {relatedAlbums.length > 0 && (
-    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-white/10">
+    <div class="glass-surface rounded-xl overflow-hidden">
+      <div class="p-4 divider-theme border-b">
         <h2 class="font-heading text-xl text-primary">More Albums</h2>
       </div>
       <div class="p-3 space-y-2">

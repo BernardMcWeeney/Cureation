@@ -1,0 +1,252 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import {
+  getOverallStats,
+  getMostPlayedSongs,
+  getRarestSongs,
+  getTourStatistics
+} from '../../lib/directus';
+
+// Fetch all stats data
+const [overallStats, mostPlayed, rarestSongs, tourStats] = await Promise.all([
+  getOverallStats(),
+  getMostPlayedSongs(10),
+  getRarestSongs(10),
+  getTourStatistics()
+]);
+
+// Calculate max plays for bar chart scaling
+const maxPlays = mostPlayed[0]?.totalPlays || 1;
+---
+
+<MainLayout
+  title="Statistics"
+  description="Data and insights about The Cure - most played songs, tour statistics, and more"
+>
+  {/* Hero section */}
+  <section class="mb-12">
+    <div class="glass-panel p-8 md:p-10">
+      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header">Statistics</h1>
+      <p class="text-white/60 text-lg max-w-2xl mb-8 mt-6">
+        Dive into the data behind The Cure's legendary career - song frequencies,
+        tour statistics, chart performance, and more.
+      </p>
+
+      {/* Overview stats */}
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div class="glass-stat p-4 text-center">
+          <p class="text-3xl font-bold text-primary">{overallStats.yearsActive}</p>
+          <p class="text-sm text-white/50 mt-1">Years Active</p>
+        </div>
+        <div class="glass-stat p-4 text-center">
+          <p class="text-3xl font-bold text-primary">{overallStats.totalAlbums}</p>
+          <p class="text-sm text-white/50 mt-1">Albums</p>
+        </div>
+        <div class="glass-stat p-4 text-center">
+          <p class="text-3xl font-bold text-primary">{overallStats.totalSongs}</p>
+          <p class="text-sm text-white/50 mt-1">Songs</p>
+        </div>
+        <div class="glass-stat p-4 text-center">
+          <p class="text-3xl font-bold text-primary">{overallStats.totalShows.toLocaleString()}</p>
+          <p class="text-sm text-white/50 mt-1">Live Shows</p>
+        </div>
+        <div class="glass-stat p-4 text-center">
+          <p class="text-3xl font-bold text-primary">{overallStats.countriesVisited}</p>
+          <p class="text-sm text-white/50 mt-1">Countries</p>
+        </div>
+        <div class="glass-stat p-4 text-center">
+          <p class="text-3xl font-bold text-primary">{overallStats.averageSongsPerShow}</p>
+          <p class="text-sm text-white/50 mt-1">Avg Songs/Show</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Most played songs */}
+  <section class="mb-12">
+    <div class="glass-panel p-6 md:p-8">
+      <h2 class="text-2xl text-white mb-6 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+        Most Played Songs
+      </h2>
+
+      {mostPlayed.length > 0 ? (
+        <div class="space-y-4">
+          {mostPlayed.map((song, index) => (
+            <div class="flex items-center gap-4">
+              <span class={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
+                index === 1 ? 'bg-gray-400/20 text-gray-300' :
+                index === 2 ? 'bg-amber-600/20 text-amber-500' :
+                'bg-white/5 text-white/40'
+              }`}>
+                {index + 1}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                  <a
+                    href={`/lyrics/search?q=${encodeURIComponent(song.songTitle)}`}
+                    class="text-white hover:text-primary transition-colors truncate"
+                  >
+                    {song.songTitle}
+                  </a>
+                  <span class="text-white/60 text-sm ml-4 shrink-0">
+                    {song.totalPlays.toLocaleString()} plays
+                  </span>
+                </div>
+                <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    class="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-1000"
+                    style={`width: ${(song.totalPlays / maxPlays) * 100}%`}
+                  ></div>
+                </div>
+                <p class="text-white/40 text-xs mt-1">{song.albumTitle}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p class="text-white/60 text-center py-8">No play statistics available yet.</p>
+      )}
+    </div>
+  </section>
+
+  {/* Rarest songs and Tour stats side by side */}
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+    {/* Rarest songs */}
+    <section>
+      <div class="glass-panel p-6 h-full">
+        <h2 class="text-2xl text-white mb-6 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          Rarest Songs
+        </h2>
+
+        {rarestSongs.length > 0 ? (
+          <ul class="space-y-3">
+            {rarestSongs.map((song, index) => (
+              <li class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="text-white/40 text-sm w-5">{index + 1}.</span>
+                  <div class="min-w-0">
+                    <p class="text-white truncate">{song.songTitle}</p>
+                    <p class="text-white/40 text-xs">{song.albumTitle}</p>
+                  </div>
+                </div>
+                <div class="text-right shrink-0 ml-4">
+                  <p class="text-purple-400 font-medium">{song.totalPlays}</p>
+                  <p class="text-white/40 text-xs">plays</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="text-white/60 text-center py-8">No rarest songs data available.</p>
+        )}
+      </div>
+    </section>
+
+    {/* Tour statistics */}
+    <section>
+      <div class="glass-panel p-6 h-full">
+        <h2 class="text-2xl text-white mb-6 flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Tour Statistics
+        </h2>
+
+        {tourStats.length > 0 ? (
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-white/10">
+                  <th class="text-left py-2 text-white/50 font-medium">Tour</th>
+                  <th class="text-right py-2 text-white/50 font-medium">Year</th>
+                  <th class="text-right py-2 text-white/50 font-medium">Shows</th>
+                  <th class="text-right py-2 text-white/50 font-medium">Countries</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tourStats.slice(0, 10).map(tour => (
+                  <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td class="py-3 text-white">{tour.name}</td>
+                    <td class="py-3 text-white/60 text-right">{tour.year}</td>
+                    <td class="py-3 text-white/60 text-right">{tour.totalShows}</td>
+                    <td class="py-3 text-white/60 text-right">{tour.countries.length}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p class="text-white/60 text-center py-8">No tour statistics available.</p>
+        )}
+      </div>
+    </section>
+  </div>
+
+  {/* Quick navigation */}
+  <section>
+    <h2 class="text-2xl text-white mb-6 section-header">Explore More Stats</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      <a href="/stats/songs" class="group">
+        <div class="glass-elevated p-5 text-center">
+          <div class="p-3 rounded-xl bg-green-500/20 w-fit mx-auto mb-3 group-hover:bg-green-500/30 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            </svg>
+          </div>
+          <h3 class="text-white group-hover:text-green-400 transition-colors">Song Stats</h3>
+          <p class="text-white/50 text-sm mt-1">Detailed song data</p>
+        </div>
+      </a>
+
+      <a href="/stats/tours" class="group">
+        <div class="glass-elevated p-5 text-center">
+          <div class="p-3 rounded-xl bg-blue-500/20 w-fit mx-auto mb-3 group-hover:bg-blue-500/30 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-white group-hover:text-blue-400 transition-colors">Tour Stats</h3>
+          <p class="text-white/50 text-sm mt-1">Tour breakdowns</p>
+        </div>
+      </a>
+
+      <a href="/stats/charts" class="group">
+        <div class="glass-elevated p-5 text-center">
+          <div class="p-3 rounded-xl bg-amber-500/20 w-fit mx-auto mb-3 group-hover:bg-amber-500/30 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <h3 class="text-white group-hover:text-amber-400 transition-colors">Chart History</h3>
+          <p class="text-white/50 text-sm mt-1">Chart performance</p>
+        </div>
+      </a>
+
+      <a href="/stats/trends" class="group">
+        <div class="glass-elevated p-5 text-center">
+          <div class="p-3 rounded-xl bg-purple-500/20 w-fit mx-auto mb-3 group-hover:bg-purple-500/30 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <h3 class="text-white group-hover:text-purple-400 transition-colors">Trends</h3>
+          <p class="text-white/50 text-sm mt-1">Historical trends</p>
+        </div>
+      </a>
+    </div>
+  </section>
+</MainLayout>
+
+<style>
+  /* Rarest songs list items with glass inset */
+  section li {
+    transition: all 0.3s ease;
+  }
+</style>

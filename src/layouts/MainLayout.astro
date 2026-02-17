@@ -77,19 +77,28 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
     <slot name="head" />
   </head>
 
-  <body class={`min-h-screen flex flex-col ${pageClass}`}>
+  <body class={`min-h-screen flex flex-col noise-overlay ${pageClass}`}>
     <!-- Background layer - always present, shows album art when ogImage provided -->
-    <div class="fixed inset-0 z-0 overflow-hidden bg-black">
-      {ogImage && (
+    <div class={`fixed inset-0 z-0 overflow-hidden ${ogImage ? 'bg-black' : 'theme-gradient-bg'}`}>
+      {ogImage ? (
         <>
           <!-- Album artwork - more visible with less blur -->
           <div
             class="absolute -inset-8 bg-cover bg-center bg-no-repeat"
             style={`background-image: url(${ogImage}); filter: blur(20px) saturate(1.3); opacity: 0.85; transform: scale(1.1);`}
           ></div>
-          <!-- Subtle gradient overlay - much lighter for better art visibility -->
+          <!-- Subtle gradient overlay with theme tint -->
           <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+          <!-- Theme color wash -->
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at top, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 60%);"></div>
         </>
+      ) : (
+        <!-- Enhanced gradient background when no image -->
+        <div class="absolute inset-0">
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, rgba(var(--color-primary-rgb), 0.12) 0%, transparent 50%);"></div>
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at bottom right, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 50%);"></div>
+          <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 70%, rgba(var(--color-primary-rgb), 0.05) 0%, transparent 40%);"></div>
+        </div>
       )}
     </div>
 

@@ -34,9 +34,9 @@ const categoryColors: Record<string, string> = {
 
 <aside class="sticky top-24 w-full space-y-6">
   <!-- Stats Overview -->
-  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
+  <div class="glass-surface p-4">
     <h2 class="font-heading text-xl text-primary mb-4">Blog</h2>
-    <div class="text-center p-3 bg-black/40 border border-white/10 rounded-lg">
+    <div class="glass-stat text-center p-3">
       <span class="block text-2xl font-display text-primary">{totalPosts}</span>
       <span class="text-xs text-white/50">Articles</span>
     </div>
@@ -44,9 +44,9 @@ const categoryColors: Record<string, string> = {
 
   <!-- Category Navigation -->
   {categories.length > 0 && (
-    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-white/10">
-        <h3 class="font-heading text-xl text-primary">Categories</h3>
+    <div class="glass-surface overflow-hidden">
+      <div class="px-4 py-3 border-b border-white/10">
+        <h3 class="font-heading text-lg text-primary">Categories</h3>
       </div>
       <nav class="p-2">
         <ul class="space-y-1">
@@ -85,15 +85,15 @@ const categoryColors: Record<string, string> = {
 
   <!-- Recent Posts -->
   {recentPosts.length > 0 && (
-    <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-white/10">
-        <h3 class="font-heading text-xl text-primary">Recent Posts</h3>
+    <div class="glass-surface overflow-hidden">
+      <div class="px-4 py-3 border-b border-white/10">
+        <h3 class="font-heading text-lg text-primary">Recent Posts</h3>
       </div>
       <div class="p-3 space-y-3">
         {recentPosts.map((post) => (
           <a
             href={`/blog/${post.slug}`}
-            class="block p-3 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 transition-all duration-300 group"
+            class="block p-3 rounded-lg glass-inset hover:bg-white/5 border border-transparent hover:border-primary/30 transition-all duration-300 group"
           >
             <h4 class="text-white text-sm group-hover:text-primary transition-colors line-clamp-2 mb-1">
               {post.title}
@@ -112,24 +112,24 @@ const categoryColors: Record<string, string> = {
   )}
 
   <!-- Quick Links -->
-  <div class="backdrop-blur-xl bg-black/50 border border-white/12 rounded-xl p-4">
+  <div class="glass-surface p-4">
     <h3 class="font-heading text-lg text-primary mb-3">Quick Links</h3>
     <div class="space-y-2">
       <a
         href="/discography"
-        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/5 border border-transparent hover:border-primary/30 text-white text-sm transition-all duration-300"
       >
         Browse Albums
       </a>
       <a
         href="/setlists"
-        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/5 border border-transparent hover:border-primary/30 text-white text-sm transition-all duration-300"
       >
         View Setlists
       </a>
       <a
         href="/lyrics"
-        class="block px-3 py-2 rounded-lg bg-black/40 hover:bg-black/50 border border-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/5 border border-transparent hover:border-primary/30 text-white text-sm transition-all duration-300"
       >
         Browse Lyrics
       </a>

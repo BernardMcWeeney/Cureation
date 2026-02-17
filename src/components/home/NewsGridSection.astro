@@ -1,0 +1,115 @@
+---
+import type { NewsPost } from '../../types/directus';
+import { mockNewsPosts } from '../../lib/mockData';
+
+interface Props {
+  posts?: NewsPost[];
+  startIndex?: number;
+}
+
+const { posts: propPosts, startIndex = 1 } = Astro.props;
+const allPosts = propPosts && propPosts.length > 0 ? propPosts : mockNewsPosts;
+const posts = allPosts.slice(startIndex, startIndex + 3);
+
+const categoryColors: Record<string, string> = {
+  news: 'bg-blue-500/20 text-blue-300 border-blue-500/35',
+  reviews: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35',
+  interviews: 'bg-pink-500/20 text-pink-300 border-pink-500/35',
+  rumors: 'bg-amber-500/20 text-amber-300 border-amber-500/35',
+  editorials: 'bg-purple-500/20 text-purple-300 border-purple-500/35',
+};
+---
+
+{posts.length > 0 && (
+  <section class="py-16">
+    <div class="responsive-container">
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+          <h2 class="font-heading text-2xl text-primary">More From the Archive</h2>
+          <div class="h-px w-20 bg-gradient-to-r from-primary/30 to-transparent"></div>
+        </div>
+        <a
+          href="/news"
+          class="group text-sm text-white/50 hover:text-primary transition-colors flex items-center gap-1.5"
+        >
+          All news
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {posts.map((post) => (
+          <a href={`/news/${post.slug}`} class="group">
+            <div class="glass-panel overflow-hidden h-full flex flex-col">
+              <!-- Thumbnail -->
+              {post.featuredImage ? (
+                <div class="relative aspect-[16/9] overflow-hidden">
+                  <img
+                    src={post.featuredImage}
+                    alt=""
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div
+                    class={`absolute top-3 left-3 px-2 py-0.5 rounded-md text-xs font-medium border backdrop-blur-sm ${categoryColors[post.category] || 'bg-primary/20 text-primary/80 border-primary/35'}`}
+                  >
+                    {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
+                  </div>
+                  {post.rating && (
+                    <div class="absolute top-3 right-3 flex gap-0.5">
+                      {Array.from({ length: post.rating }).map(() => (
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div class="aspect-[16/9] bg-gradient-to-br from-primary/20 via-black to-accent/10 relative">
+                  <div
+                    class={`absolute top-3 left-3 px-2 py-0.5 rounded-md text-xs font-medium border backdrop-blur-sm ${categoryColors[post.category] || 'bg-primary/20 text-primary/80 border-primary/35'}`}
+                  >
+                    {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
+                  </div>
+                </div>
+              )}
+
+              <!-- Content -->
+              <div class="p-5 flex flex-col flex-1">
+                <h3 class="font-heading text-base text-white mb-2 group-hover:text-primary transition-colors duration-300 leading-snug news-title">
+                  {post.title}
+                </h3>
+                <p class="text-white/55 text-sm flex-1 leading-relaxed news-excerpt mb-4">
+                  {post.excerpt}
+                </p>
+                <div class="flex items-center justify-between text-xs text-white/35 mt-auto pt-3 border-t border-white/8">
+                  <time datetime={post.publishedDate}>{post.formattedDate}</time>
+                  <span>{post.readingTime} min read</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .news-title {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .news-excerpt {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+</style>

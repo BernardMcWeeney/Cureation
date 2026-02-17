@@ -125,21 +125,25 @@ export const siteConfig: SiteConfig = {
 
   navigation: {
     main: [
-      { name: "Home", path: "/" },
+      { name: "News", path: "/news" },
       { name: "Discography", path: "/discography" },
       { name: "Lyrics", path: "/lyrics" },
       { name: "Setlists", path: "/setlists" },
-      { name: "Blog", path: "/blog" },
-      { name: "About", path: "/about" },
+      { name: "Wiki", path: "/wiki" },
+      { name: "Stats", path: "/stats" },
     ],
     footer: {
       explore: [
         { name: "Discography", path: "/discography" },
         { name: "Lyrics", path: "/lyrics" },
         { name: "Setlists", path: "/setlists" },
-        { name: "Blog", path: "/blog" },
+        { name: "News", path: "/news" },
+        { name: "Gallery", path: "/gallery" },
+        { name: "Statistics", path: "/stats" },
       ],
       community: [
+        { name: "Forums", path: "/community" },
+        { name: "Wiki & History", path: "/wiki" },
         { name: "About the Project", path: "/about" },
         { name: "Contribute", path: "/about#contribute" },
         {

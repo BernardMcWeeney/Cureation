@@ -1,0 +1,153 @@
+---
+import type { WikiMember } from '../../types/directus';
+
+interface Props {
+  currentMembers?: WikiMember[];
+  pastMembers?: WikiMember[];
+  activePage?: string;
+}
+
+const { currentMembers = [], pastMembers = [], activePage } = Astro.props;
+
+const navItems = [
+  { name: 'Overview', path: '/wiki', icon: 'home' },
+  { name: 'Timeline', path: '/wiki/timeline', icon: 'clock' },
+  { name: 'Band Members', path: '/wiki/members', icon: 'users' },
+  { name: 'Side Projects', path: '/wiki/side-projects', icon: 'music' },
+  { name: 'Equipment & Gear', path: '/wiki/gear', icon: 'settings' },
+  { name: 'Lore & Trivia', path: '/wiki/lore', icon: 'book' }
+];
+
+const icons: Record<string, string> = {
+  home: `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>`,
+  clock: `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+  users: `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`,
+  music: `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>`,
+  settings: `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`,
+  book: `<svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`
+};
+---
+
+<div class="space-y-6">
+  {/* Quick facts */}
+  <div class="glass-surface rounded-xl p-5">
+    <h3 class="text-lg font-heading text-white mb-4">The Cure</h3>
+    <dl class="space-y-2 text-sm">
+      <div class="glass-stat p-2 rounded-lg flex justify-between">
+        <dt class="text-white/50">Founded</dt>
+        <dd class="text-white">1976</dd>
+      </div>
+      <div class="glass-stat p-2 rounded-lg flex justify-between">
+        <dt class="text-white/50">Origin</dt>
+        <dd class="text-white">Crawley, England</dd>
+      </div>
+      <div class="glass-stat p-2 rounded-lg flex justify-between">
+        <dt class="text-white/50">Genre</dt>
+        <dd class="text-white">Rock, Post-Punk, Gothic</dd>
+      </div>
+      <div class="glass-stat p-2 rounded-lg flex justify-between">
+        <dt class="text-white/50">Years Active</dt>
+        <dd class="text-white">1976 - Present</dd>
+      </div>
+    </dl>
+  </div>
+
+  {/* Navigation */}
+  <div class="glass-surface rounded-xl p-5">
+    <h3 class="text-lg font-heading text-white mb-4">Wiki Navigation</h3>
+    <nav aria-label="Wiki navigation">
+      <ul class="space-y-1">
+        {navItems.map(item => (
+          <li>
+            <a
+              href={item.path}
+              class={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
+                activePage === item.path
+                  ? 'bg-primary/20 text-primary border border-primary/40'
+                  : 'text-white/70 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span set:html={icons[item.icon]} />
+              <span>{item.name}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  {/* Current members */}
+  {currentMembers.length > 0 && (
+    <div class="glass-surface rounded-xl p-5">
+      <h3 class="text-lg font-heading text-white mb-4">Current Members</h3>
+      <ul class="space-y-3">
+        {currentMembers.map(member => (
+          <li>
+            <a href={`/wiki/members/${member.slug}`} class="group flex items-center gap-3">
+              {member.photo ? (
+                <img
+                  src={member.photo}
+                  alt={member.name}
+                  class="w-10 h-10 rounded-full object-cover border border-white/10"
+                />
+              ) : (
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span class="text-primary text-sm font-medium">
+                    {member.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <div class="flex-1 min-w-0">
+                <p class="text-white/90 text-sm group-hover:text-primary transition-colors truncate">
+                  {member.name}
+                </p>
+                <p class="text-white/40 text-xs truncate">
+                  {member.instruments.join(', ')}
+                </p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {/* Related links */}
+  <div class="glass-surface rounded-xl p-5">
+    <h3 class="text-lg font-heading text-white mb-4">External Links</h3>
+    <ul class="space-y-2">
+      <li>
+        <a
+          href="https://www.thecure.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 text-white/70 hover:text-primary transition-colors text-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          Official Website
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </li>
+      <li>
+        <a
+          href="https://en.wikipedia.org/wiki/The_Cure"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 text-white/70 hover:text-primary transition-colors text-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          Wikipedia
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

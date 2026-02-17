@@ -2,26 +2,8 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import AlbumCard from '../../components/AlbumCard.astro';
 import DiscographySidebar from '../../components/sidebar/DiscographySidebar.astro';
-
-// Types for album data
-interface DirectusAlbum {
-  id: number | string;
-  title: string;
-  release_date?: string;
-  cover_art?: string;
-  slug?: string;
-  featured?: boolean;
-}
-
-interface Album {
-  id: string;
-  title: string;
-  year: string;
-  releaseDate: string;
-  coverImage: string;
-  slug: string;
-  featured: boolean;
-}
+import { fetchAlbums, formatAlbum, getAlbumEra, eraMetadata } from '../../lib/directus';
+import type { AlbumEra } from '../../types/directus';
 
 // Sidebar categories
 const categories = [
@@ -32,33 +14,39 @@ const categories = [
   { title: 'B-sides', path: '/discography/b-sides' }
 ];
 
-// Fetch album data from the CMS
-const response = await fetch('https://dash.cureation.net/items/discography');
-const albumData = await response.json();
-const albums: Album[] = albumData.data.map((album: DirectusAlbum) => ({
-  id: album.id.toString(),
-  title: album.title,
-  year: album.release_date
-    ? new Date(album.release_date).getFullYear().toString()
-    : '',
-  releaseDate: album.release_date || '',
-  coverImage: album.cover_art
-    ? `https://dash.cureation.net/assets/${album.cover_art}`
-    : '/images/placeholder-album.jpg',
-  slug: album.slug || (album.title ? album.title
-    .toLowerCase()
-    .replace(/[^\w\s]/gi, '')
-    .replace(/\s+/g, '-') : 'unknown-album'),
-  featured: album.featured || false
-})).sort((a: Album, b: Album) => {
-  // Sort by release date (oldest first)
-  if (!a.releaseDate) return 1;
-  if (!b.releaseDate) return -1;
-  return new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime();
+// Fetch and format album data
+const albumsRaw = await fetchAlbums();
+const albums = albumsRaw.map(album => ({
+  ...formatAlbum(album),
+  era: album.era || getAlbumEra(album.release_date),
+  rawDate: album.release_date
+})).sort((a, b) => {
+  if (!a.rawDate) return 1;
+  if (!b.rawDate) return -1;
+  return new Date(a.rawDate).getTime() - new Date(b.rawDate).getTime();
 });
 
-const featuredAlbums = albums.filter((album: Album) => album.featured) || [];
-const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
+// Group albums by era
+const albumsByEra = albums.reduce((acc, album) => {
+  if (!acc[album.era]) acc[album.era] = [];
+  acc[album.era].push(album);
+  return acc;
+}, {} as Record<AlbumEra, typeof albums>);
+
+// Era order for display
+const eraOrder: AlbumEra[] = ['early', 'pop', 'classic', 'experimental', 'modern'];
+
+// Era colors for visual distinction
+const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> = {
+  early: { bg: 'bg-violet-500/20', border: 'border-violet-500/30', text: 'text-violet-400' },
+  pop: { bg: 'bg-pink-500/20', border: 'border-pink-500/30', text: 'text-pink-400' },
+  classic: { bg: 'bg-blue-500/20', border: 'border-blue-500/30', text: 'text-blue-400' },
+  experimental: { bg: 'bg-amber-500/20', border: 'border-amber-500/30', text: 'text-amber-400' },
+  modern: { bg: 'bg-green-500/20', border: 'border-green-500/30', text: 'text-green-400' }
+};
+
+const featuredAlbums = albums.filter(album => album.featured);
+const totalAlbums = albums.length;
 ---
 
 <MainLayout
@@ -75,8 +63,8 @@ const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
 />
 
   <!-- Hero Section -->
-  <section class="mb-16">
-    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
+  <section class="mb-12">
+    <div class="glass-panel overflow-hidden relative">
       <!-- Decorative gradient orbs -->
       <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
@@ -87,7 +75,7 @@ const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
           <div class="divider-gradient flex-1 max-w-24"></div>
         </div>
 
-        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow" transition:animate="slide">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow" transition:animate="slide">
           The Cure Discography
         </h1>
         <p class="text-white/90 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
@@ -97,7 +85,7 @@ const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
         <!-- Quick stats -->
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/20">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{albums.length}</span>
+            <span class="text-3xl font-display text-primary text-glow">{totalAlbums}</span>
             <span class="text-white/80 text-base font-medium">Albums</span>
           </div>
           <div class="flex items-center gap-3">
@@ -105,32 +93,64 @@ const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
             <span class="text-white/80 text-base font-medium">Years</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{featuredAlbums.length}</span>
-            <span class="text-white/80 text-base font-medium">Essential</span>
+            <span class="text-3xl font-display text-primary text-glow">{eraOrder.length}</span>
+            <span class="text-white/80 text-base font-medium">Eras</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Featured/Essential Albums -->
-  {featuredAlbums.length > 0 && (
-    <section class="mb-16">
-      <div class="flex items-center gap-4 mb-8">
-        <div class="flex items-center gap-3">
-          <div class="size-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-          </div>
-          <h2 class="font-heading text-2xl md:text-3xl text-primary text-glow">Essential Albums</h2>
-        </div>
-        <div class="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+  <!-- View Toggle -->
+  <section class="mb-8">
+    <div class="flex flex-wrap items-center gap-4">
+      <div class="flex items-center gap-2 p-1 rounded-xl bg-black/40 border border-white/10">
+        <button
+          type="button"
+          id="view-by-era"
+          class="view-toggle px-4 py-2 rounded-lg text-sm font-medium transition-all active"
+        >
+          By Era
+        </button>
+        <button
+          type="button"
+          id="view-chronological"
+          class="view-toggle px-4 py-2 rounded-lg text-sm font-medium transition-all"
+        >
+          Chronological
+        </button>
+        <button
+          type="button"
+          id="view-featured"
+          class="view-toggle px-4 py-2 rounded-lg text-sm font-medium transition-all"
+        >
+          Essential
+        </button>
       </div>
+      <div class="text-sm text-white/50">
+        <span id="album-count">{totalAlbums}</span> albums
+      </div>
+    </div>
+  </section>
 
+  <!-- Featured/Essential Albums (hidden by default) -->
+  <section id="featured-section" class="mb-16 hidden">
+    <div class="flex items-center gap-4 mb-8">
+      <div class="flex items-center gap-3">
+        <div class="size-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <h2 class="font-heading text-2xl md:text-3xl text-primary text-glow">Essential Albums</h2>
+      </div>
+      <div class="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+    </div>
+
+    {featuredAlbums.length > 0 ? (
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {featuredAlbums.map(album => (
-          <div data-album-year={album.year}>
+        {featuredAlbums.map((album, index) => (
+          <div data-album-year={album.year} style={`--index: ${index + 1}`}>
             <AlbumCard
               title={album.title}
               coverImage={album.coverImage}
@@ -142,36 +162,114 @@ const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
           </div>
         ))}
       </div>
-    </section>
-  )}
+    ) : (
+      <div class="glass-card p-8 text-center">
+        <p class="text-white/60">No essential albums marked yet.</p>
+      </div>
+    )}
+  </section>
 
-  <!-- All Studio Albums -->
-  <section class="mb-12">
+  <!-- Albums by Era View (default) -->
+  <section id="era-view" class="space-y-16">
+    {eraOrder.map(era => {
+      const eraAlbums = albumsByEra[era] || [];
+      if (eraAlbums.length === 0) return null;
+
+      const meta = eraMetadata[era];
+      const colors = eraColors[era];
+
+      return (
+        <div class="era-section" data-era={era}>
+          <div class="flex items-center gap-4 mb-8">
+            <div class="flex items-center gap-3">
+              <div class={`size-10 rounded-lg ${colors.bg} border ${colors.border} flex items-center justify-center`}>
+                <svg xmlns="http://www.w3.org/2000/svg" class={`size-5 ${colors.text}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class={`font-heading text-2xl md:text-3xl ${colors.text}`}>{meta.name}</h2>
+                <p class="text-white/50 text-sm">{meta.years} · {meta.description}</p>
+              </div>
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-white/20 to-transparent"></div>
+            <span class={`px-3 py-1 rounded-full ${colors.bg} border ${colors.border} ${colors.text} text-sm font-medium`}>
+              {eraAlbums.length} albums
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+            {eraAlbums.map((album, index) => (
+              <div data-album-year={album.year} data-album-era={era} style={`--index: ${index + 1}`}>
+                <AlbumCard
+                  title={album.title}
+                  coverImage={album.coverImage}
+                  year={album.year}
+                  slug={album.slug}
+                  featured={album.featured}
+                  id={album.id}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </section>
+
+  <!-- Chronological View (hidden by default) -->
+  <section id="chronological-view" class="mb-12 hidden">
     <div class="flex items-center gap-4 mb-8">
       <div class="flex items-center gap-3">
         <div class="size-10 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
-            <circle cx="12" cy="12" r="3"/>
+            <polyline points="12 6 12 12 16 14"/>
           </svg>
         </div>
-        <h2 class="font-heading text-2xl md:text-3xl text-primary text-glow">Studio Albums</h2>
+        <h2 class="font-heading text-2xl md:text-3xl text-primary text-glow">All Studio Albums</h2>
       </div>
       <div class="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-      {regularAlbums.map((album, index) => (
-        <div data-album-year={album.year} style={`--index: ${index + 1}`}>
+      {albums.map((album, index) => (
+        <div data-album-year={album.year} data-album-era={album.era} style={`--index: ${index + 1}`}>
           <AlbumCard
             title={album.title}
             coverImage={album.coverImage}
             year={album.year}
             slug={album.slug}
+            featured={album.featured}
             id={album.id}
           />
         </div>
       ))}
+    </div>
+  </section>
+
+  <!-- Era Timeline -->
+  <section class="mt-16 pt-8 border-t border-white/10">
+    <h2 class="text-2xl text-white mb-8">The Cure Through the Eras</h2>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {eraOrder.map(era => {
+        const meta = eraMetadata[era];
+        const colors = eraColors[era];
+        const count = albumsByEra[era]?.length || 0;
+
+        return (
+          <button
+            type="button"
+            class={`era-quick-nav group p-4 rounded-xl ${colors.bg} border ${colors.border} hover:scale-105 transition-all duration-300 text-left`}
+            data-target-era={era}
+          >
+            <p class={`font-heading text-lg ${colors.text}`}>{meta.name}</p>
+            <p class="text-white/50 text-xs mb-2">{meta.years}</p>
+            <p class="text-white/70 text-sm">{count} albums</p>
+          </button>
+        );
+      })}
     </div>
   </section>
 </MainLayout>
@@ -187,9 +285,90 @@ const regularAlbums = albums.filter((album: Album) => !album.featured) || [];
     to { opacity: 1; transform: translateY(0); }
   }
 
-  :global(.grid > a) {
+  :global(.grid > div) {
     animation: fadeIn 0.5s ease forwards;
     opacity: 0;
     animation-delay: calc(var(--stagger-delay) * var(--index, 1));
   }
+
+  /* View toggle styles */
+  .view-toggle {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .view-toggle:hover {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .view-toggle.active {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    color: var(--color-primary);
+  }
 </style>
+
+<script>
+  function initDiscographyViews() {
+    const viewByEra = document.getElementById('view-by-era');
+    const viewChronological = document.getElementById('view-chronological');
+    const viewFeatured = document.getElementById('view-featured');
+
+    const eraView = document.getElementById('era-view');
+    const chronoView = document.getElementById('chronological-view');
+    const featuredSection = document.getElementById('featured-section');
+
+    const viewToggles = document.querySelectorAll('.view-toggle');
+    const eraQuickNav = document.querySelectorAll('.era-quick-nav');
+
+    function showView(view: 'era' | 'chronological' | 'featured') {
+      // Update button states
+      viewToggles.forEach(btn => btn.classList.remove('active'));
+
+      // Hide all sections
+      if (eraView) eraView.classList.add('hidden');
+      if (chronoView) chronoView.classList.add('hidden');
+      if (featuredSection) featuredSection.classList.add('hidden');
+
+      // Show selected view
+      switch (view) {
+        case 'era':
+          viewByEra?.classList.add('active');
+          if (eraView) eraView.classList.remove('hidden');
+          break;
+        case 'chronological':
+          viewChronological?.classList.add('active');
+          if (chronoView) chronoView.classList.remove('hidden');
+          break;
+        case 'featured':
+          viewFeatured?.classList.add('active');
+          if (featuredSection) featuredSection.classList.remove('hidden');
+          break;
+      }
+    }
+
+    viewByEra?.addEventListener('click', () => showView('era'));
+    viewChronological?.addEventListener('click', () => showView('chronological'));
+    viewFeatured?.addEventListener('click', () => showView('featured'));
+
+    // Era quick navigation - scroll to era section
+    eraQuickNav.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetEra = btn.getAttribute('data-target-era');
+        const eraSection = document.querySelector(`.era-section[data-era="${targetEra}"]`);
+
+        if (eraSection) {
+          // Make sure era view is showing
+          showView('era');
+
+          // Scroll to section
+          setTimeout(() => {
+            eraSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initDiscographyViews);
+  document.addEventListener('astro:page-load', initDiscographyViews);
+</script>

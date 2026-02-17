@@ -32,7 +32,7 @@ const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').rep
   <!-- Album Card -->
   <a
     href={`/discography/${album.slug}`}
-    class="block backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl overflow-hidden hover:border-white/30 transition-all duration-300 group"
+    class="block glass-surface rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 group"
   >
     <div class="relative aspect-square">
       <img
@@ -49,8 +49,8 @@ const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').rep
   </a>
 
   <!-- Album Tracklist -->
-  <div class="backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl overflow-hidden">
-    <div class="p-4 border-b border-white/10">
+  <div class="glass-surface rounded-xl overflow-hidden">
+    <div class="p-4 divider-theme border-b">
       <h2 class="font-heading text-xl text-primary">Tracklist</h2>
     </div>
     <nav class="p-2 max-h-96 overflow-y-auto">
@@ -85,17 +85,17 @@ const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').rep
   </div>
 
   <!-- Quick Actions -->
-  <div class="backdrop-blur-lg bg-black/20 border border-white/20 rounded-xl p-4">
+  <div class="glass-surface rounded-xl p-4">
     <div class="flex gap-2">
       <a
         href={`/discography/${album.slug}#tracks`}
-        class="flex-1 text-center px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-white text-sm transition-colors duration-300"
+        class="flex-1 text-center px-3 py-2 rounded-lg glass-elevated hover:bg-primary/20 text-white text-sm transition-colors duration-300"
       >
         View Album
       </a>
       <a
         href="/lyrics"
-        class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm transition-colors duration-300"
+        class="flex-1 text-center px-3 py-2 rounded-lg glass-inset hover:bg-white/10 text-white text-sm transition-colors duration-300"
       >
         All Lyrics
       </a>

@@ -5,7 +5,7 @@ const currentYear = new Date().getFullYear();
 const footerLinks = getFooterLinks();
 ---
 
-<footer class="relative bg-black/30 backdrop-blur-lg border-t border-white/10">
+<footer class="relative mt-16 pt-8 bg-black/40 backdrop-blur-xl border-t" style="border-image: linear-gradient(90deg, transparent, rgba(var(--color-primary-rgb), 0.3), transparent) 1;">
   <div class="responsive-container py-16">
     <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
       <!-- Brand Section -->
@@ -120,7 +120,7 @@ const footerLinks = getFooterLinks();
     </div>
 
     <!-- Bottom Section -->
-    <div class="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="mt-16 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4" style="border-image: linear-gradient(90deg, transparent, rgba(var(--color-primary-rgb), 0.2), transparent) 1;">
       <p class="text-sm text-white/80">
         © {currentYear} {siteConfig.name}. All rights reserved.
       </p>

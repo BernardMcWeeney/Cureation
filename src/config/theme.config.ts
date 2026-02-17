@@ -22,7 +22,6 @@ export const themeConfig: ThemeConfig = {
     'bloodflowers': 'bloodflowers',
     'the-cure': 'the-cure',
     '4-13-dream': '4-13-dream',
-    '413-dream': '4-13-dream',
   }
 };
 

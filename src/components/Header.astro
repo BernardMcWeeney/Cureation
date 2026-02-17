@@ -9,7 +9,7 @@ const navItems = getNavigation();
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="fixed w-full z-50 backdrop-blur-lg bg-white/5 border-b border-white/10">
+<header class="fixed w-full z-50 backdrop-blur-xl bg-black/40 border-b" style="border-image: linear-gradient(90deg, transparent, rgba(var(--color-primary-rgb), 0.3), transparent) 1;">
   <div class="responsive-container">
     <div class="flex items-center justify-between h-16 md:h-20">
       <!-- Logo -->
@@ -50,7 +50,7 @@ const currentPath = Astro.url.pathname;
         <!-- Search -->
         <button
           id="search-button"
-          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-white/10 rounded-full border border-white/20 hover:border-white/40 hover:bg-white/15 transition-all duration-300"
+          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/30 rounded-full border border-white/15 hover:border-primary/40 hover:bg-black/40 hover:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)] transition-all duration-300"
           aria-label="Open search"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +63,7 @@ const currentPath = Astro.url.pathname;
         <!-- Mobile Toggle -->
         <button
           id="mobile-menu-toggle"
-          class="text-primary md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-white/10 rounded-full border border-white/20 hover:border-white/40 hover:bg-white/15 transition-all duration-300"
+          class="text-primary md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/30 rounded-full border border-white/15 hover:border-primary/40 hover:bg-black/40 hover:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)] transition-all duration-300"
           aria-label="Open main menu"
           aria-expanded="false"
         >

@@ -1,0 +1,110 @@
+---
+import type { Setlist } from '../../lib/directus';
+
+interface Props {
+  setlist: Setlist | null;
+}
+
+const { setlist } = Astro.props;
+---
+
+<section class="py-8">
+  <div class="responsive-container">
+    {setlist ? (
+      <a href={`/setlists/${setlist.slug}`} class="group block">
+        <div class="glass-card-hover overflow-hidden">
+          <div class="flex flex-col md:flex-row">
+            {/* Image/gradient background */}
+            <div class="md:w-2/5 relative aspect-[16/9] md:aspect-auto overflow-hidden">
+              {setlist.coverImage ? (
+                <img
+                  src={setlist.coverImage}
+                  alt={`Concert at ${setlist.venue}`}
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="w-full h-full min-h-[200px] bg-gradient-to-br from-primary/30 via-black to-accent/20 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-16 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                  </svg>
+                </div>
+              )}
+              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/80"></div>
+
+              {/* Date badge */}
+              <div class="absolute top-4 left-4 px-4 py-2 rounded-xl bg-black/60 backdrop-blur-lg border border-white/15">
+                <time datetime={setlist.date} class="text-white font-medium text-lg">
+                  {setlist.formattedDate}
+                </time>
+              </div>
+
+              {/* Tour badge */}
+              {setlist.tourName && (
+                <div class="absolute bottom-4 left-4 px-3 py-1 rounded-full bg-primary/20 backdrop-blur-lg border border-primary/40 text-primary text-xs font-medium">
+                  {setlist.tourName}
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div class="md:w-3/5 p-6 md:p-8 flex flex-col justify-center">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="badge-outline text-xs">Latest Setlist</span>
+              </div>
+
+              <h3 class="font-display text-3xl md:text-4xl text-white mb-2 group-hover:text-glow transition-all duration-300">
+                {setlist.venue}
+              </h3>
+
+              <p class="text-white/70 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {setlist.location}
+              </p>
+
+              {/* Song preview */}
+              {setlist.songs.length > 0 && (
+                <div class="mb-4">
+                  <p class="text-white/50 text-sm mb-2">Setlist preview:</p>
+                  <ul class="text-white/80 text-sm space-y-1">
+                    {setlist.songs.slice(0, 3).map((song, i) => (
+                      <li class="flex items-center gap-2">
+                        <span class="text-primary/60 text-xs">{i + 1}.</span>
+                        {song.title}
+                      </li>
+                    ))}
+                    {setlist.songs.length > 3 && (
+                      <li class="text-white/50 text-xs">+ {setlist.songs.length - 3} more songs</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+
+              <div class="flex items-center justify-between mt-auto">
+                <span class="text-white/50 text-sm">
+                  {setlist.songCount} {setlist.songCount === 1 ? 'song' : 'songs'}
+                </span>
+
+                <div class="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                  <span class="text-sm font-medium">View Setlist</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    ) : (
+      <div class="glass-card p-8 text-center">
+        <p class="text-white/60">No setlist available.</p>
+        <a href="/setlists" class="inline-block mt-4 text-primary hover:underline">Browse all setlists</a>
+      </div>
+    )}
+  </div>
+</section>

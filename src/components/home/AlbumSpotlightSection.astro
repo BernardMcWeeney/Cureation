@@ -1,0 +1,134 @@
+---
+import type { Album } from '../../types/directus';
+import { mockAlbums } from '../../lib/mockData';
+import siteConfig from '../../config/site.config';
+
+interface Props {
+  album?: Album | null;
+  showHeader?: boolean;
+}
+
+const { album: propAlbum, showHeader = true } = Astro.props;
+
+// Use featured album from config, or prop, or fallback to mock
+const featuredSlug = siteConfig.featured?.album || 'disintegration';
+const album: Album = propAlbum || mockAlbums.find(a => a.slug === featuredSlug) || mockAlbums[0];
+
+// Calculate album age
+const releaseYear = album.releaseDate ? new Date(album.releaseDate).getFullYear() : null;
+const yearsOld = releaseYear ? new Date().getFullYear() - releaseYear : null;
+---
+
+<div class="h-full">
+  {showHeader && (
+    <div class="flex items-center gap-4 mb-6">
+      <h2 class="font-heading text-2xl text-primary">Album of the Month</h2>
+      <div class="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent"></div>
+    </div>
+  )}
+
+  <a href={`/discography/${album.slug}`} class="group block h-full">
+    <div
+      class="glass-tile-image overflow-hidden h-full"
+      style={album.coverImage ? `--tile-bg-image: url('${album.coverImage}')` : ''}
+    >
+      <div class="flex flex-col md:flex-row h-full">
+        <!-- Album Cover -->
+        <div class="md:w-2/5 relative">
+          <div class="aspect-square md:aspect-auto md:h-full overflow-hidden">
+            {album.coverImage ? (
+              <img
+                src={album.coverImage}
+                alt={album.title}
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div class="w-full h-full min-h-[280px] bg-gradient-to-br from-primary/30 via-black to-accent/20 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-20 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </div>
+            )}
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/70 md:block hidden"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent md:hidden"></div>
+          </div>
+
+          <!-- Featured badge -->
+          <div class="absolute top-4 left-4">
+            <div class="px-3 py-1 rounded-md bg-primary/90 backdrop-blur-sm text-white text-xs font-medium uppercase tracking-wider">
+              Featured
+            </div>
+          </div>
+        </div>
+
+        <!-- Album Info -->
+        <div class="md:w-3/5 p-6 md:p-8 flex flex-col justify-center relative z-10">
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            {album.type && (
+              <span class="px-2 py-1 rounded-md bg-white/15 backdrop-blur-sm text-white/80 text-xs uppercase tracking-wider">
+                {album.type}
+              </span>
+            )}
+            {releaseYear && (
+              <span class="text-white/60 text-sm">{releaseYear}</span>
+            )}
+            {yearsOld && (
+              <span class="text-white/50 text-sm">({yearsOld} years ago)</span>
+            )}
+          </div>
+
+          <h3 class="font-heading text-3xl md:text-4xl text-white mb-4 group-hover:text-primary transition-colors duration-300 text-shadow">
+            {album.title}
+          </h3>
+
+          {album.description && (
+            <p class="text-white/80 mb-6 line-clamp-3 text-shadow">
+              {album.description}
+            </p>
+          )}
+
+          <!-- Quick Stats -->
+          <div class="flex flex-wrap gap-6 mb-6">
+            {album.trackCount && album.trackCount > 0 && (
+              <div>
+                <p class="text-2xl font-display text-primary">{album.trackCount}</p>
+                <p class="text-white/60 text-sm">Tracks</p>
+              </div>
+            )}
+            {album.duration && (
+              <div>
+                <p class="text-2xl font-display text-primary">{album.duration}</p>
+                <p class="text-white/60 text-sm">Runtime</p>
+              </div>
+            )}
+            {album.label && (
+              <div>
+                <p class="text-lg font-medium text-white/90">{album.label}</p>
+                <p class="text-white/60 text-sm">Label</p>
+              </div>
+            )}
+          </div>
+
+          <div class="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+            <span class="font-medium">Explore Album</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+<style>
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+</style>
