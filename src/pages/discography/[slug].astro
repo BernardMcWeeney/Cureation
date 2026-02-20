@@ -1,22 +1,36 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import TrackList from "../../components/TrackList.astro";
+import AlbumCard from "../../components/AlbumCard.astro";
+
+const typeLabels: Record<string, string> = {
+  studio: 'Studio Album',
+  live: 'Live Album',
+  compilation: 'Compilation',
+  ep: 'EP',
+  single: 'Single',
+  deluxe: 'Deluxe Edition',
+  reissue: 'Reissue',
+  boxset: 'Box Set',
+  soundtrack: 'Soundtrack',
+  remix: 'Remix Album',
+};
 
 export async function getStaticPaths() {
   try {
-    const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
+    const albumsResponse = await fetch('https://dash.cureation.net/items/discography?limit=200');
     const albumsData = await albumsResponse.json();
 
-    const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+    const songsResponse = await fetch('https://dash.cureation.net/items/songs?limit=500');
     const songsData = await songsResponse.json();
 
-    const singlesResponse = await fetch('https://dash.cureation.net/items/singles');
+    const singlesResponse = await fetch('https://dash.cureation.net/items/singles?limit=100');
     const singlesData = await singlesResponse.json();
 
-    const paths = await Promise.all(albumsData.data.map(async (album) => {
+    const paths = await Promise.all(albumsData.data.map(async (album: any) => {
       let slug = album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : `album-${album.id}`);
 
-      const formattedAlbum = {
+      const formattedAlbum: Record<string, any> = {
         id: album.id.toString(),
         title: album.title || 'Unknown Album',
         slug: slug,
@@ -28,9 +42,18 @@ export async function getStaticPaths() {
         description: album.description || '',
         background: album.background_text || '',
         reception: album.critical_reception || '',
+        type: album.type || 'studio',
+        parentAlbumId: album.parent_album || null,
+        parentAlbumTitle: null as string | null,
+        spotifyUrl: album.spotify_url || null,
+        appleMusicUrl: album.apple_music_url || null,
+        discCount: album.disc_count || 1,
+        trackCount: album.track_count || 0,
+        catalogNumber: album.catalog_number || null,
+        genreTags: album.genre_tags || [],
+        credits: album.credits || '',
         recordingStudios: album.recording_studios || 'Various Studios, UK',
         genre: album.genre || 'Alternative Rock, Post-Punk',
-        // New fields for enhanced sections (from Directus or mock)
         recordingLocation: album.recording_location || null,
         recordingStory: album.recording_story || null,
         behindTheSound: album.behind_the_sound || null,
@@ -39,6 +62,8 @@ export async function getStaticPaths() {
         criticalQuotes: album.critical_quotes || null,
         galleryImages: album.gallery_images || null,
         instruments: album.instruments || null,
+        tracks: [] as any[],
+        singles: [] as any[],
       };
 
       formattedAlbum.tracks = songsData.data
@@ -59,11 +84,20 @@ export async function getStaticPaths() {
           coverImage: single.cover_art ? `https://dash.cureation.net/assets/${single.cover_art}` : null
         }));
 
+      // Find parent album title if this is a deluxe/reissue
+      if (album.parent_album) {
+        const parent = albumsData.data.find(a => a.id === album.parent_album);
+        if (parent) formattedAlbum.parentAlbumTitle = parent.title;
+      }
+
       return formattedAlbum;
     }));
 
     return paths.map(album => {
-      const relatedAlbums = paths.filter(a => a.slug !== album.slug).slice(0, 4);
+      // Related albums: same type first, then others, excluding self
+      const sameType = paths.filter(a => a.slug !== album.slug && a.type === album.type).slice(0, 2);
+      const others = paths.filter(a => a.slug !== album.slug && a.type !== album.type).slice(0, 4 - sameType.length);
+      const relatedAlbums = [...sameType, ...others];
       return { params: { slug: album.slug }, props: { album, relatedAlbums } };
     });
   } catch (error) {
@@ -83,104 +117,6 @@ const totalDuration = album.tracks?.reduce((total, track) => {
 const hours = Math.floor(totalDuration / 60);
 const mins = Math.round(totalDuration % 60);
 const durationDisplay = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
-
-// ============================================
-// MOCK DATA - Replace with Directus fields
-// ============================================
-
-// Recording Story (from Directus: album.recording_location, album.recording_story, album.behind_the_sound)
-const recordingData = album.recordingLocation || {
-  location: "Hookend Recording Studios in Checkendon, Oxfordshire, England",
-  locationDescription: "The remote countryside location provided the perfect isolation for the band to create their darkest and most atmospheric work.",
-  production: `Produced by ${album.producer}. The recording sessions spanned several months, with the band embracing a more expansive and layered sound.`,
-  behindTheSound: "Robert Smith was going through a period of reflection and melancholy as he approached his 30th birthday. This emotional state heavily influenced the album's introspective and atmospheric nature. The band experimented with longer song structures, lush synthesizer textures, and dreamy guitar tones, creating a soundscape that would define gothic alternative rock for decades to come."
-};
-
-// Band Members for this album era (from Directus: album.band_lineup)
-const bandMembers = album.bandLineup || [
-  { name: "Robert Smith", role: "Vocals, Guitar, Keyboards", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop" },
-  { name: "Porl Thompson", role: "Guitar, Keyboards", image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop" },
-  { name: "Simon Gallup", role: "Bass Guitar", image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop" },
-  { name: "Boris Williams", role: "Drums, Percussion", image: "https://images.unsplash.com/photo-1524230659092-07f99a75c013?w=400&h=400&fit=crop" },
-  { name: "Lol Tolhurst", role: "Keyboards", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
-  { name: "Roger O'Donnell", role: "Keyboards", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop" }
-];
-
-// Music Videos (from Directus: album.music_videos)
-const musicVideos = album.musicVideos || [
-  {
-    title: "Lullaby",
-    year: album.year || "1989",
-    director: "Tim Pope",
-    description: "A surreal nightmare featuring giant spiders, this became one of The Cure's most iconic videos.",
-    thumbnail: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600&h=340&fit=crop",
-    url: "#"
-  },
-  {
-    title: "Lovesong",
-    year: album.year || "1989",
-    director: "Tim Pope",
-    description: "Written by Robert Smith for his wife, this tender love song became a major hit.",
-    thumbnail: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=340&fit=crop",
-    url: "#"
-  },
-  {
-    title: "Pictures of You",
-    year: album.year || "1990",
-    director: "Tim Pope",
-    description: "A melancholic masterpiece featuring burning photographs and nostalgic imagery.",
-    thumbnail: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&h=340&fit=crop",
-    url: "#"
-  }
-];
-
-// Critical Acclaim Quotes (from Directus: album.critical_quotes)
-const criticalQuotes = album.criticalQuotes || [
-  {
-    quote: "A towering achievement in gothic rock, this is The Cure's masterpiece of atmospheric melancholy.",
-    publication: "Rolling Stone",
-    reviewer: "David Fricke",
-    rating: 5
-  },
-  {
-    quote: "Breathtakingly beautiful and devastatingly sad, this is The Cure at their most expansive and emotionally raw.",
-    publication: "NME",
-    reviewer: "Stuart Bailie",
-    rating: 5
-  },
-  {
-    quote: "An epic exploration of loss, longing, and despair that transformed alternative rock forever.",
-    publication: "Pitchfork",
-    reviewer: "Ryan Schreiber",
-    rating: 5
-  },
-  {
-    quote: "The Cure's crowning glory, a record of stunning emotional depth and sonic innovation.",
-    publication: "AllMusic",
-    reviewer: "Steve Huey",
-    rating: 5
-  }
-];
-
-// Gallery Images (from Directus: album.gallery_images)
-const galleryImages = album.galleryImages || [
-  { url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop", caption: "Studio session" },
-  { url: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=600&fit=crop", caption: "Recording at Hookend" },
-  { url: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&h=600&fit=crop", caption: "Live performance" },
-  { url: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=800&h=600&fit=crop", caption: "Promotional shoot" },
-  { url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&h=600&fit=crop", caption: "Behind the scenes" },
-  { url: "https://images.unsplash.com/photo-1524230659092-07f99a75c013?w=800&h=600&fit=crop", caption: "Album artwork session" }
-];
-
-// Instruments (from Directus: album.instruments)
-const instruments = album.instruments || [
-  { name: "Fender Jazzmaster", type: "Guitar", player: "Robert Smith", description: "The signature guitar tone throughout the album" },
-  { name: "Fender Bass VI", type: "Bass", player: "Simon Gallup", description: "Providing the deep, melodic bass lines" },
-  { name: "Roland Juno-60", type: "Synthesizer", player: "Roger O'Donnell", description: "Creating the lush atmospheric pads" },
-  { name: "Oberheim OB-Xa", type: "Synthesizer", player: "Lol Tolhurst", description: "String and pad sounds" },
-  { name: "Yamaha DX7", type: "Synthesizer", player: "Various", description: "Electric piano and bell tones" },
-  { name: "Ludwig Drums", type: "Drums", player: "Boris Williams", description: "Powerful yet restrained drumming" }
-];
 ---
 
 <MainLayout
@@ -192,1126 +128,361 @@ const instruments = album.instruments || [
   theme={album.slug}
 >
 
-<!-- Full-Screen Hero -->
-<section class="album-hero">
-  <div class="hero-artwork">
-    <img src={album.coverImage} alt="" class="hero-artwork-img" />
-    <div class="hero-overlay"></div>
-  </div>
+  <!-- Breadcrumb -->
+  <nav class="mb-8" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-white/60">
+      <li><a href="/discography" class="hover:text-primary transition-colors">Discography</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-white truncate max-w-[200px]">{album.title}</li>
+    </ol>
+  </nav>
 
-  <div class="hero-content">
-    <div class="hero-layout">
-      <div class="cover-wrapper">
-        <div class="cover-glow"></div>
-        <img src={album.coverImage} alt={`${album.title} album cover`} class="cover-image" transition:name={`album-${album.id}`} />
+  <!-- Album Header -->
+  <section class="mb-12">
+    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
+      <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <div class="flex flex-col sm:flex-row gap-6 md:gap-10">
+          <!-- Album Cover -->
+          <div class="shrink-0">
+            <img
+              src={album.coverImage}
+              alt={`${album.title} album cover`}
+              class="w-48 md:w-56 aspect-square rounded-xl shadow-2xl object-cover"
+              transition:name={`album-${album.id}`}
+            />
+          </div>
+
+          <!-- Album Info -->
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span class="badge">{typeLabels[album.type] || 'Album'}</span>
+              <span class="text-white/30">·</span>
+              <span class="text-white/70 text-sm">{album.recordLabel}</span>
+            </div>
+
+            <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
+              {album.title}
+            </h1>
+
+            <!-- Metadata -->
+            <div class="flex flex-wrap items-center gap-4 text-white/80 mb-6">
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                  <line x1="16" x2="16" y1="2" y2="6"></line>
+                  <line x1="8" x2="8" y1="2" y2="6"></line>
+                  <line x1="3" x2="21" y1="10" y2="10"></line>
+                </svg>
+                <span>{album.releaseDate}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+                </svg>
+                <span>{album.genre}</span>
+              </div>
+            </div>
+
+            <!-- Streaming Links -->
+            {(album.spotifyUrl || album.appleMusicUrl) && (
+              <div class="flex flex-wrap gap-3 mb-6">
+                {album.spotifyUrl && (
+                  <a href={album.spotifyUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1DB954]/20 border border-[#1DB954]/40 text-[#1DB954] text-sm hover:bg-[#1DB954]/30 transition-colors">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                    Spotify
+                  </a>
+                )}
+                {album.appleMusicUrl && (
+                  <a href={album.appleMusicUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FC3C44]/20 border border-[#FC3C44]/40 text-[#FC3C44] text-sm hover:bg-[#FC3C44]/30 transition-colors">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026-.747.043-1.49.123-2.193.4-1.336.53-2.3 1.452-2.865 2.78-.192.448-.292.925-.363 1.408-.056.392-.088.785-.1 1.18 0 .032-.007.062-.01.093v12.223c.01.14.017.283.027.424.05.815.154 1.624.497 2.373.65 1.42 1.738 2.353 3.234 2.802.42.127.856.187 1.297.228.468.043.937.065 1.407.066 3.69.004 7.378.002 11.066.002.39 0 .78-.01 1.17-.04.79-.06 1.57-.17 2.31-.5 1.42-.64 2.35-1.73 2.8-3.22.13-.42.19-.86.23-1.3.04-.47.06-.94.06-1.41V6.124zm-6.928 5.055v5.97c0 .497-.045.983-.218 1.45-.312.84-.945 1.354-1.815 1.573-.508.128-1.03.17-1.55.1-.96-.124-1.682-.66-2.045-1.57-.244-.608-.29-1.244-.103-1.878.273-.92.946-1.468 1.835-1.733.364-.108.74-.175 1.112-.24.38-.063.76-.126 1.13-.215.36-.087.543-.32.595-.684.013-.088.02-.178.02-.267V8.572c0-.145-.028-.272-.152-.37-.116-.092-.254-.1-.39-.074l-.06.015-5.7 1.29c-.095.022-.184.058-.19.174-.003.033-.01.064-.01.097v7.386c0 .492-.04.978-.207 1.446-.31.843-.94 1.36-1.812 1.58-.507.13-1.028.174-1.55.106-.963-.12-1.687-.655-2.054-1.564-.247-.61-.292-1.25-.104-1.885.275-.926.95-1.474 1.845-1.74.368-.11.748-.176 1.123-.243.376-.064.75-.128 1.118-.214.375-.088.553-.324.6-.7.008-.063.013-.128.013-.192V5.644c0-.395.108-.642.48-.76.056-.017.113-.032.17-.046L19.002 4.1c.237-.054.477-.1.72-.097.325.005.533.2.567.527.007.068.01.137.01.205v6.444h-.233z"/></svg>
+                    Apple Music
+                  </a>
+                )}
+              </div>
+            )}
+
+            <!-- Stats -->
+            <div class="flex flex-wrap gap-6 pt-6 border-t border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl font-display text-primary">{album.tracks?.length || 0}</span>
+                <span class="text-white/70 text-sm">Tracks</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-2xl font-display text-primary">{durationDisplay}</span>
+                <span class="text-white/70 text-sm">Duration</span>
+              </div>
+              {album.singles?.length > 0 && (
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl font-display text-primary">{album.singles.length}</span>
+                  <span class="text-white/70 text-sm">Singles</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+  </section>
 
-      <div class="album-info">
-        <p class="album-meta">{album.year} · Studio Album · {album.recordLabel}</p>
-        <h1 class="album-title">{album.title}</h1>
-        <p class="album-artist">The Cure</p>
+  <!-- About -->
+  {(album.description || album.background) && (
+    <section class="mb-12">
+      <div class="glass-tile p-8 md:p-10">
+        <h2 class="font-heading text-2xl text-primary mb-6">About the Album</h2>
+        {album.description && <p class="text-xl text-white/90 leading-relaxed mb-4">{album.description}</p>}
+        {album.background && <p class="text-white/80 leading-relaxed">{album.background}</p>}
 
-        <div class="album-stats">
-          <span>{album.tracks?.length || 0} songs</span>
-          <span class="stat-dot"></span>
-          <span>{durationDisplay}</span>
-          {album.singles?.length > 0 && (
-            <>
-              <span class="stat-dot"></span>
-              <span>{album.singles.length} singles</span>
-            </>
+        {/* Essential details */}
+        <div class="flex flex-wrap gap-x-8 gap-y-4 mt-8 pt-6 border-t border-white/10 text-sm">
+          <div>
+            <span class="text-white/60 block mb-1">Producer</span>
+            <span class="text-white">{album.producer}</span>
+          </div>
+          <div>
+            <span class="text-white/60 block mb-1">Studio</span>
+            <span class="text-white">{album.recordingStudios}</span>
+          </div>
+          {album.catalogNumber && (
+            <div>
+              <span class="text-white/60 block mb-1">Catalog #</span>
+              <span class="text-white">{album.catalogNumber}</span>
+            </div>
           )}
         </div>
-
-        <div class="hero-actions">
-          <a href="#tracklist" class="btn-primary">
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            View Tracklist
-          </a>
-          <a href="#about" class="btn-secondary">Learn More</a>
-        </div>
       </div>
-    </div>
-  </div>
+    </section>
+  )}
 
-  <div class="scroll-indicator">
-    <span>Scroll to explore</span>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-  </div>
-</section>
-
-<!-- About Section -->
-<section id="about" class="content-section">
-  <div class="section-container">
-    <div class="about-grid">
-      <div class="about-main">
-        <h2 class="section-heading">About the Album</h2>
-        {album.description && <p class="lead-text">{album.description}</p>}
-        {album.background && <div class="prose-content"><p>{album.background}</p></div>}
+  <!-- Tracklist -->
+  <section class="mb-12">
+    <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/20">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-heading text-2xl text-primary">Tracklist</h2>
+        <span class="text-white/70 text-sm">{album.tracks?.length || 0} tracks · {durationDisplay}</span>
       </div>
-      <aside class="about-sidebar">
-        <div class="details-card">
-          <h3>Details</h3>
-          <dl class="details-list">
-            <div class="detail-item"><dt>Released</dt><dd>{album.releaseDate}</dd></div>
-            <div class="detail-item"><dt>Label</dt><dd>{album.recordLabel}</dd></div>
-            <div class="detail-item"><dt>Producer</dt><dd>{album.producer}</dd></div>
-            <div class="detail-item"><dt>Genre</dt><dd>{album.genre}</dd></div>
-            <div class="detail-item"><dt>Studio</dt><dd>{album.recordingStudios}</dd></div>
-          </dl>
-        </div>
-      </aside>
-    </div>
-  </div>
-</section>
-
-<!-- Recording Story Section -->
-<section class="content-section alt-bg">
-  <div class="section-container">
-    <div class="section-header-row">
-      <div class="section-icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      </div>
-      <h2 class="section-heading">The Recording Story</h2>
-    </div>
-
-    <div class="recording-grid">
-      <div class="recording-main">
-        <div class="recording-item">
-          <div class="recording-item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          </div>
-          <div>
-            <h3>Location</h3>
-            <p>Recorded at {recordingData.location}. {recordingData.locationDescription}</p>
-          </div>
-        </div>
-
-        <div class="recording-item">
-          <div class="recording-item-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-          </div>
-          <div>
-            <h3>Production</h3>
-            <p>{recordingData.production}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="recording-sidebar">
-        <div class="behind-sound-card">
-          <h3>Behind the Sound</h3>
-          <p>{recordingData.behindTheSound}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Band Members Section -->
-<section class="content-section">
-  <div class="section-container">
-    <div class="section-header-row">
-      <div class="section-icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      </div>
-      <h2 class="section-heading">Band Members</h2>
-    </div>
-
-    <div class="members-scroll">
-      {bandMembers.map(member => (
-        <article class="member-card">
-          <div class="member-image">
-            <img src={member.image} alt={member.name} loading="lazy" />
-          </div>
-          <div class="member-info">
-            <h3>{member.name}</h3>
-            <p>{member.role}</p>
-          </div>
-        </article>
-      ))}
-    </div>
-  </div>
-</section>
-
-<!-- Tracklist Section -->
-<section id="tracklist" class="content-section alt-bg">
-  <div class="section-container">
-    <div class="tracklist-header">
-      <h2 class="section-heading">Tracklist</h2>
-      <p class="section-subhead">{album.tracks?.length || 0} tracks · {durationDisplay}</p>
-    </div>
-    <div class="tracklist-wrapper">
       <TrackList tracks={album.tracks} />
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Singles Section -->
-{album.singles && album.singles.length > 0 && (
-  <section class="content-section">
-    <div class="section-container">
-      <h2 class="section-heading">Singles</h2>
-      <p class="section-subhead">{album.singles.length} singles released from this album</p>
-      <div class="singles-grid">
-        {album.singles.map((single, idx) => (
-          <article class="single-card">
-            <div class="single-artwork">
-              <img src={single.coverImage || album.coverImage} alt={single.title} />
-              <div class="single-number">{idx + 1}</div>
+  <!-- Singles -->
+  {album.singles && album.singles.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">Singles</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {album.singles.map((single: any, idx: number) => (
+          <div class="glass-card rounded-xl p-4 border border-white/20 flex gap-4">
+            <div class="relative shrink-0 w-16 h-16">
+              <img src={single.coverImage || album.coverImage} alt={single.title} class="w-full h-full object-cover rounded-lg" />
+              <div class="absolute -top-1.5 -left-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-[10px] font-bold text-white">{idx + 1}</div>
             </div>
-            <div class="single-info">
-              <h3>{single.title}</h3>
-              <p>{single.releaseDate}</p>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-white font-medium truncate">{single.title}</h3>
+              <p class="text-white/70 text-sm">{single.releaseDate}</p>
               {single.chartPositions && single.chartPositions.length > 0 && (
-                <div class="chart-positions">
-                  {single.chartPositions.slice(0, 3).map(pos => (
-                    <span class="chart-tag">#{pos.chart_position} {pos.country}</span>
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                  {single.chartPositions.slice(0, 3).map((pos: any) => (
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-primary/15 text-primary">#{pos.chart_position} {pos.country}</span>
                   ))}
                 </div>
               )}
             </div>
-          </article>
+          </div>
         ))}
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )}
 
-<!-- Music Videos Section -->
-<section class="content-section alt-bg">
-  <div class="section-container">
-    <div class="section-header-row">
-      <div class="section-icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
-      </div>
-      <h2 class="section-heading">Music Videos</h2>
-    </div>
-
-    <div class="videos-grid">
-      {musicVideos.map(video => (
-        <a href={video.url} class="video-card" target="_blank" rel="noopener noreferrer">
-          <div class="video-thumbnail">
-            <img src={video.thumbnail} alt={video.title} loading="lazy" />
-            <div class="video-play">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-          </div>
-          <div class="video-info">
-            <div class="video-header">
-              <h3>{video.title}</h3>
-              <span class="video-year">{video.year}</span>
-            </div>
-            <p class="video-director">Directed by {video.director}</p>
-            <p class="video-description">{video.description}</p>
-          </div>
-        </a>
-      ))}
-    </div>
-  </div>
-</section>
-
-<!-- Critical Acclaim Section -->
-<section class="content-section">
-  <div class="section-container">
-    <div class="section-header-row">
-      <div class="section-icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      </div>
-      <h2 class="section-heading">Critical Acclaim</h2>
-    </div>
-
-    <div class="quotes-grid">
-      {criticalQuotes.map(quote => (
-        <article class="quote-card">
-          <div class="quote-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
-          </div>
-          <blockquote class="quote-text">{quote.quote}</blockquote>
-          <div class="quote-footer">
-            <div class="quote-source">
-              <span class="quote-publication">{quote.publication}</span>
-              <span class="quote-reviewer">{quote.reviewer}</span>
-            </div>
-            <div class="quote-rating">
-              {[1,2,3,4,5].map(star => (
-                <svg class={`star ${star <= quote.rating ? 'filled' : ''}`} viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  <!-- Recording Story (only if real data from Directus) -->
+  {album.recordingLocation && (
+    <section class="mb-12">
+      <div class="glass-tile p-8 md:p-10">
+        <h2 class="font-heading text-2xl text-primary mb-6">The Recording Story</h2>
+        <div class="grid gap-6 md:grid-cols-2">
+          <div class="space-y-4">
+            {album.recordingLocation.location && (
+              <div class="flex gap-3 items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
                 </svg>
-              ))}
+                <div>
+                  <h3 class="text-white font-medium mb-1">Location</h3>
+                  <p class="text-white/80 text-sm leading-relaxed">{album.recordingLocation.location}{album.recordingLocation.locationDescription ? `. ${album.recordingLocation.locationDescription}` : ''}</p>
+                </div>
+              </div>
+            )}
+            {album.recordingLocation.production && (
+              <div class="flex gap-3 items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+                </svg>
+                <div>
+                  <h3 class="text-white font-medium mb-1">Production</h3>
+                  <p class="text-white/80 text-sm leading-relaxed">{album.recordingLocation.production}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          {album.recordingLocation.behindTheSound && (
+            <div class="glass-inset rounded-xl p-5">
+              <h3 class="text-white font-medium mb-2">Behind the Sound</h3>
+              <p class="text-white/80 text-sm leading-relaxed">{album.recordingLocation.behindTheSound}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Band Members (only if real data from Directus) -->
+  {album.bandLineup && album.bandLineup.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">Band Members</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        {album.bandLineup.map((member: any) => (
+          <div class="glass-card rounded-xl overflow-hidden border border-white/20">
+            <div class="aspect-square overflow-hidden">
+              <img src={member.image} alt={member.name} loading="lazy" class="w-full h-full object-cover" />
+            </div>
+            <div class="p-3 text-center">
+              <h3 class="text-sm text-white font-medium">{member.name}</h3>
+              <p class="text-xs text-white/70">{member.role}</p>
             </div>
           </div>
-        </article>
-      ))}
-    </div>
-  </div>
-</section>
-
-<!-- Album Era Gallery -->
-<section class="content-section alt-bg">
-  <div class="section-container">
-    <div class="section-header-row">
-      <div class="section-icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        ))}
       </div>
-      <h2 class="section-heading">Album Era Gallery</h2>
-    </div>
+    </section>
+  )}
 
-    <div class="gallery-grid">
-      {galleryImages.map((image, idx) => (
-        <div class={`gallery-item ${idx === 0 ? 'large' : ''}`}>
-          <img src={image.url} alt={image.caption} loading="lazy" />
-          <div class="gallery-caption">{image.caption}</div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
-
-<!-- Instruments Section -->
-<section class="content-section">
-  <div class="section-container">
-    <div class="section-header-row">
-      <div class="section-icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-      </div>
-      <h2 class="section-heading">Instruments & Gear</h2>
-    </div>
-
-    <div class="instruments-grid">
-      {instruments.map(instrument => (
-        <article class="instrument-card">
-          <div class="instrument-type">{instrument.type}</div>
-          <h3 class="instrument-name">{instrument.name}</h3>
-          <p class="instrument-player">Played by {instrument.player}</p>
-          <p class="instrument-description">{instrument.description}</p>
-        </article>
-      ))}
-    </div>
-  </div>
-</section>
-
-<!-- More Albums -->
-{relatedAlbums.length > 0 && (
-  <section class="content-section alt-bg">
-    <div class="section-container">
-      <h2 class="section-heading">More Albums</h2>
-      <p class="section-subhead">Explore more from The Cure's discography</p>
-      <div class="albums-grid">
-        {relatedAlbums.map(related => (
-          <a href={`/discography/${related.slug}`} class="album-card">
-            <div class="album-card-artwork">
-              <img src={related.coverImage} alt={related.title} transition:name={`album-${related.id}`} />
+  <!-- Music Videos (only if real data from Directus) -->
+  {album.musicVideos && album.musicVideos.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">Music Videos</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {album.musicVideos.map((video: any) => (
+          <a href={video.url} class="glass-tile overflow-hidden group" target="_blank" rel="noopener noreferrer">
+            <div class="relative aspect-video overflow-hidden">
+              <img src={video.thumbnail} alt={video.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg class="size-12 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </div>
             </div>
-            <div class="album-card-info">
-              <h3>{related.title}</h3>
-              <p>{related.year}</p>
+            <div class="p-4">
+              <h3 class="text-white font-medium">{video.title}</h3>
+              <p class="text-sm text-primary">{video.director ? `Directed by ${video.director}` : video.year}</p>
+              {video.description && <p class="text-sm text-white/70 mt-1 line-clamp-2">{video.description}</p>}
             </div>
           </a>
         ))}
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )}
+
+  <!-- Critical Acclaim (only if real data from Directus) -->
+  {album.criticalQuotes && album.criticalQuotes.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">Critical Acclaim</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {album.criticalQuotes.map((quote: any) => (
+          <div class="glass-card rounded-xl p-6 border border-white/20">
+            <blockquote class="text-white/85 italic leading-relaxed mb-4">"{quote.quote}"</blockquote>
+            <div class="flex justify-between items-end pt-4 border-t border-white/10">
+              <div>
+                <span class="text-white font-medium text-sm block">{quote.publication}</span>
+                {quote.reviewer && <span class="text-white/70 text-xs">{quote.reviewer}</span>}
+              </div>
+              {quote.rating && (
+                <div class="flex gap-0.5">
+                  {[1,2,3,4,5].map((star: number) => (
+                    <svg class={`size-4 ${star <= quote.rating ? 'text-primary' : 'text-white/20'}`} viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Gallery (only if real data from Directus) -->
+  {album.galleryImages && album.galleryImages.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">Album Era Gallery</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {album.galleryImages.map((image: any, idx: number) => (
+          <div class={`relative rounded-xl overflow-hidden group ${idx === 0 ? 'col-span-2 row-span-2' : 'aspect-[4/3]'}`}>
+            <img src={image.url} alt={image.caption || ''} loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            {image.caption && (
+              <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent text-sm text-white/90 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                {image.caption}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Instruments (only if real data from Directus) -->
+  {album.instruments && album.instruments.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">Instruments & Gear</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {album.instruments.map((instrument: any) => (
+          <div class="glass-card rounded-xl p-5 border border-white/20">
+            <span class="text-xs uppercase tracking-wider text-primary">{instrument.type}</span>
+            <h3 class="text-white font-medium mt-1">{instrument.name}</h3>
+            <p class="text-sm text-white/70 mt-1">Played by {instrument.player}</p>
+            {instrument.description && <p class="text-sm text-white/60 mt-2 leading-relaxed">{instrument.description}</p>}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Related Albums -->
+  {relatedAlbums.length > 0 && (
+    <section class="mb-12">
+      <h2 class="font-heading text-2xl text-primary mb-6">More Albums</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {relatedAlbums.map((related: any) => (
+          <AlbumCard
+            title={related.title}
+            coverImage={related.coverImage}
+            year={related.year}
+            slug={related.slug}
+            id={related.id}
+            type={related.type || 'studio'}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Back to Discography -->
+  <div class="text-center">
+    <a
+      href="/discography"
+      class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      Back to Discography
+    </a>
+  </div>
 
 </MainLayout>
 
 <style>
-  /* ========================================
-     ALBUM PAGE - ENHANCED STYLES
-     ======================================== */
-
-  /* Hero Section */
-  .album-hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: -5rem -1.5rem 0;
-    padding: 6rem 1.5rem 4rem;
+  .line-clamp-2 {
     overflow: hidden;
-  }
-
-  @media (min-width: 1024px) {
-    .album-hero { margin: -5rem -2rem 0; padding: 6rem 2rem 4rem; }
-  }
-
-  .hero-artwork {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .hero-artwork-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: blur(40px) saturate(1.2);
-    transform: scale(1.1);
-    opacity: 0.6;
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.95) 100%),
-                linear-gradient(to right, rgba(0,0,0,0.3), transparent, rgba(0,0,0,0.3));
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    max-width: 1200px;
-  }
-
-  .hero-layout {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2.5rem;
-    text-align: center;
-  }
-
-  @media (min-width: 768px) {
-    .hero-layout { flex-direction: row; text-align: left; gap: 4rem; }
-  }
-
-  .cover-wrapper {
-    position: relative;
-    flex-shrink: 0;
-    width: 280px;
-    max-width: 100%;
-  }
-
-  @media (min-width: 768px) { .cover-wrapper { width: 320px; } }
-  @media (min-width: 1024px) { .cover-wrapper { width: 380px; } }
-
-  .cover-glow {
-    position: absolute;
-    inset: -20px;
-    background: rgba(var(--color-primary-rgb), 0.3);
-    border-radius: 2rem;
-    filter: blur(40px);
-    opacity: 0.6;
-    z-index: -1;
-  }
-
-  .cover-image {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 0.75rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
-
-  .album-info { flex: 1; min-width: 0; }
-
-  .album-meta {
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 1rem;
-  }
-
-  .album-title {
-    font-family: var(--font-display);
-    font-size: clamp(3rem, 8vw, 6rem);
-    line-height: 1;
-    color: white;
-    margin-bottom: 0.5rem;
-    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-  }
-
-  .album-artist {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--color-primary);
-    margin-bottom: 1.5rem;
-  }
-
-  .album-stats {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 2rem;
-  }
-
-  @media (min-width: 768px) { .album-stats { justify-content: flex-start; } }
-
-  .stat-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-  }
-
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-  }
-
-  @media (min-width: 768px) { .hero-actions { justify-content: flex-start; } }
-
-  .btn-primary, .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.75rem;
-    border-radius: 9999px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    text-decoration: none;
-  }
-
-  .btn-primary {
-    background: var(--color-primary);
-    color: white;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(var(--color-primary-rgb), 0.4);
-  }
-
-  .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  .btn-icon { width: 1.25rem; height: 1.25rem; }
-
-  .scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    animation: bounce 2s infinite;
-  }
-
-  .scroll-indicator svg { width: 1.25rem; height: 1.25rem; }
-
-  @keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(8px); }
-  }
-
-  /* Content Sections */
-  .content-section { padding: 5rem 1.5rem; }
-
-  @media (min-width: 1024px) { .content-section { padding: 6rem 2rem; } }
-
-  .content-section.alt-bg { background: rgba(255, 255, 255, 0.02); }
-
-  .section-container { max-width: 1200px; margin: 0 auto; }
-
-  .section-header-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .section-icon-badge {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 0.75rem;
-    background: rgba(var(--color-primary-rgb), 0.15);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-primary);
-  }
-
-  .section-icon-badge svg { width: 1.5rem; height: 1.5rem; }
-
-  .section-heading {
-    font-family: var(--font-heading);
-    font-size: 2rem;
-    color: white;
-    margin: 0;
-  }
-
-  .section-subhead {
-    color: rgba(255, 255, 255, 0.5);
-    margin-bottom: 2.5rem;
-  }
-
-  /* About Grid */
-  .about-grid { display: grid; gap: 3rem; }
-
-  @media (min-width: 768px) { .about-grid { grid-template-columns: 1fr 320px; gap: 4rem; } }
-
-  .about-main { min-width: 0; }
-
-  .lead-text {
-    font-size: 1.25rem;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 1.5rem;
-  }
-
-  .prose-content { color: rgba(255, 255, 255, 0.7); line-height: 1.8; }
-
-  .details-card {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    position: sticky;
-    top: 6rem;
-  }
-
-  .details-card h3 {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.5);
-    margin-bottom: 1.25rem;
-  }
-
-  .details-list { display: flex; flex-direction: column; gap: 1rem; }
-
-  .detail-item { display: flex; flex-direction: column; gap: 0.25rem; }
-
-  .detail-item dt {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.4);
-  }
-
-  .detail-item dd { color: white; font-size: 0.95rem; }
-
-  /* Recording Story */
-  .recording-grid { display: grid; gap: 2rem; }
-
-  @media (min-width: 768px) { .recording-grid { grid-template-columns: 1fr 1fr; gap: 3rem; } }
-
-  .recording-main { display: flex; flex-direction: column; gap: 2rem; }
-
-  .recording-item {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .recording-item-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 0.5rem;
-    background: rgba(var(--color-primary-rgb), 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--color-primary);
-  }
-
-  .recording-item-icon svg { width: 1.25rem; height: 1.25rem; }
-
-  .recording-item h3 {
-    font-size: 1rem;
-    color: white;
-    margin-bottom: 0.5rem;
-  }
-
-  .recording-item p {
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.7;
-    font-size: 0.95rem;
-  }
-
-  .behind-sound-card {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 1rem;
-    padding: 1.5rem;
-  }
-
-  .behind-sound-card h3 {
-    font-size: 1.1rem;
-    color: white;
-    margin-bottom: 1rem;
-  }
-
-  .behind-sound-card p {
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.8;
-    font-size: 0.95rem;
-  }
-
-  /* Band Members */
-  .members-scroll {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .members-scroll { grid-template-columns: repeat(6, 1fr); }
-  }
-
-  .member-card {
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-
-  .member-card:hover {
-    border-color: rgba(var(--color-primary-rgb), 0.4);
-    transform: translateY(-4px);
-  }
-
-  .member-image {
-    aspect-ratio: 1;
-    overflow: hidden;
-  }
-
-  .member-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(30%);
-    transition: filter 0.3s ease;
-  }
-
-  .member-card:hover .member-image img { filter: grayscale(0%); }
-
-  .member-info {
-    padding: 1rem;
-    text-align: center;
-  }
-
-  .member-info h3 {
-    font-size: 0.95rem;
-    color: white;
-    margin-bottom: 0.25rem;
-  }
-
-  .member-info p {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  /* Tracklist */
-  .tracklist-header { margin-bottom: 2rem; }
-
-  .tracklist-wrapper {
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 0.5rem;
-    overflow: hidden;
-  }
-
-  /* Singles Grid */
-  .singles-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .single-card {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-  }
-
-  .single-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(var(--color-primary-rgb), 0.3);
-    transform: translateY(-2px);
-  }
-
-  .single-artwork {
-    position: relative;
-    flex-shrink: 0;
-    width: 80px;
-    height: 80px;
-  }
-
-  .single-artwork img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0.5rem;
-  }
-
-  .single-number {
-    position: absolute;
-    top: -0.5rem;
-    left: -0.5rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    background: var(--color-primary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: white;
-  }
-
-  .single-info { flex: 1; min-width: 0; }
-
-  .single-info h3 { font-size: 1rem; color: white; margin-bottom: 0.25rem; }
-
-  .single-info > p { font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 0.5rem; }
-
-  .chart-positions { display: flex; flex-wrap: wrap; gap: 0.375rem; }
-
-  .chart-tag {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.5rem;
-    background: rgba(var(--color-primary-rgb), 0.15);
-    border-radius: 9999px;
-    color: var(--color-primary);
-  }
-
-  /* Music Videos */
-  .videos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .video-card {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    overflow: hidden;
-    text-decoration: none;
-    transition: all 0.3s ease;
-  }
-
-  .video-card:hover {
-    border-color: rgba(var(--color-primary-rgb), 0.4);
-    transform: translateY(-4px);
-  }
-
-  .video-thumbnail {
-    position: relative;
-    aspect-ratio: 16/9;
-    overflow: hidden;
-  }
-
-  .video-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .video-card:hover .video-thumbnail img { transform: scale(1.05); }
-
-  .video-play {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .video-card:hover .video-play { opacity: 1; }
-
-  .video-play svg {
-    width: 3rem;
-    height: 3rem;
-    color: white;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
-  }
-
-  .video-info { padding: 1.25rem; }
-
-  .video-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .video-header h3 { font-size: 1.1rem; color: white; margin: 0; }
-
-  .video-year {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.75rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 9999px;
-    color: rgba(255, 255, 255, 0.7);
-    flex-shrink: 0;
-  }
-
-  .video-director {
-    font-size: 0.85rem;
-    color: var(--color-primary);
-    margin-bottom: 0.75rem;
-  }
-
-  .video-description {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.6;
-  }
-
-  /* Critical Acclaim Quotes */
-  .quotes-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 768px) { .quotes-grid { grid-template-columns: repeat(2, 1fr); } }
-
-  .quote-card {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .quote-icon {
-    color: var(--color-primary);
-    opacity: 0.5;
-  }
-
-  .quote-icon svg { width: 2rem; height: 2rem; }
-
-  .quote-text {
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.9);
-    font-style: italic;
-    flex: 1;
-    margin: 0;
-  }
-
-  .quote-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  .quote-source { display: flex; flex-direction: column; gap: 0.125rem; }
-
-  .quote-publication {
-    font-weight: 600;
-    color: white;
-    font-size: 0.95rem;
-  }
-
-  .quote-reviewer {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  .quote-rating { display: flex; gap: 0.25rem; }
-
-  .quote-rating .star {
-    width: 1rem;
-    height: 1rem;
-    color: rgba(255, 255, 255, 0.2);
-  }
-
-  .quote-rating .star.filled { color: var(--color-primary); }
-
-  /* Gallery */
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    .gallery-grid { grid-template-columns: repeat(3, 1fr); }
-  }
-
-  .gallery-item {
-    position: relative;
-    border-radius: 0.75rem;
-    overflow: hidden;
-    aspect-ratio: 4/3;
-  }
-
-  .gallery-item.large {
-    grid-column: span 2;
-    grid-row: span 2;
-    aspect-ratio: auto;
-  }
-
-  .gallery-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .gallery-item:hover img { transform: scale(1.05); }
-
-  .gallery-caption {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.9);
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-  }
-
-  .gallery-item:hover .gallery-caption {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Instruments */
-  .instruments-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .instrument-card {
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-  }
-
-  .instrument-card:hover {
-    border-color: rgba(var(--color-primary-rgb), 0.3);
-    transform: translateY(-2px);
-  }
-
-  .instrument-type {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-primary);
-    margin-bottom: 0.5rem;
-  }
-
-  .instrument-name {
-    font-size: 1.1rem;
-    color: white;
-    margin-bottom: 0.25rem;
-  }
-
-  .instrument-player {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 0.75rem;
-  }
-
-  .instrument-description {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.5);
-    line-height: 1.6;
-  }
-
-  /* Albums Grid */
-  .albums-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 768px) { .albums-grid { grid-template-columns: repeat(4, 1fr); } }
-
-  .album-card {
-    text-decoration: none;
-    transition: transform 0.3s ease;
-  }
-
-  .album-card:hover { transform: translateY(-4px); }
-
-  .album-card-artwork {
-    position: relative;
-    aspect-ratio: 1;
-    overflow: hidden;
-    border-radius: 0.75rem;
-    margin-bottom: 0.75rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  }
-
-  .album-card-artwork img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .album-card:hover .album-card-artwork img { transform: scale(1.05); }
-
-  .album-card-info h3 {
-    font-size: 1rem;
-    color: white;
-    margin-bottom: 0.25rem;
-    font-weight: 500;
-  }
-
-  .album-card-info p {
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.5);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 </style>

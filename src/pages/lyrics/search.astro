@@ -44,7 +44,11 @@ const albums = rawAlbums.map((album) => ({
         </p>
 
         <!-- Pagefind Search -->
-        <SearchWidget placeholder="Search lyrics, songs, albums..." showFilters={true} />
+        <SearchWidget
+          placeholder="Search lyrics, songs, albums..."
+          showFilters={true}
+          initialQuery={query}
+        />
       </div>
     </div>
   </section>

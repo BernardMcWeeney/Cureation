@@ -5,7 +5,7 @@
 // =============================================================================
 
 export type AlbumEra = 'early' | 'pop' | 'classic' | 'experimental' | 'modern';
-export type AlbumType = 'studio' | 'live' | 'compilation' | 'ep' | 'single';
+export type AlbumType = 'studio' | 'live' | 'compilation' | 'ep' | 'single' | 'deluxe' | 'reissue' | 'boxset' | 'soundtrack' | 'remix';
 
 export interface DirectusAlbum {
   id: number;
@@ -21,27 +21,32 @@ export interface DirectusAlbum {
   featured?: boolean;
   era?: AlbumEra;
   type?: AlbumType;
-  spotify_id?: string;
-  apple_music_id?: string;
+  parent_album?: number;
+  spotify_url?: string;
+  apple_music_url?: string;
   bandcamp_url?: string;
+  disc_count?: number;
+  track_count?: number;
+  catalog_number?: string;
+  genre_tags?: string[];
+  credits?: string;
 }
 
 // =============================================================================
 // SONG TYPES
 // =============================================================================
 
-export interface LyricAnnotation {
-  line: number;
+export interface LyricStructuredLine {
+  line_id: string;
+  line_no: number;
   text: string;
-  author?: string;
-  date_created?: string;
 }
 
-export interface SongVersion {
-  type: 'album' | 'demo' | 'live' | 'acoustic' | 'remix';
-  source: string;
-  notes?: string;
-  year?: number;
+export interface LyricStructuredSection {
+  section_id: string;
+  label: string;
+  order: number;
+  lines: LyricStructuredLine[];
 }
 
 export interface DirectusSong {
@@ -51,13 +56,10 @@ export interface DirectusSong {
   track_number?: number;
   duration?: string;
   lyrics?: string;
+  lyrics_structured?: LyricStructuredSection[];
+  song_meaning?: string;
   listen_links?: ListenLink[];
   credits?: string;
-  annotations?: LyricAnnotation[];
-  versions?: SongVersion[];
-  first_played?: string;
-  last_played?: string;
-  times_played?: number;
 }
 
 export interface DirectusSingle {
@@ -93,6 +95,15 @@ export interface Album {
   background: string;
   reception: string;
   featured: boolean;
+  type: AlbumType;
+  parentAlbumId?: number;
+  spotifyUrl?: string;
+  appleMusicUrl?: string;
+  discCount: number;
+  trackCount: number;
+  catalogNumber?: string;
+  genreTags: string[];
+  credits?: string;
   tracks?: Track[];
   singles?: Single[];
 }

@@ -2,19 +2,23 @@
 // src/pages/lyrics/album.astro
 import MainLayout from '../../layouts/MainLayout.astro';
 import LyricsSidebar from '../../components/sidebar/LyricsSidebar.astro';
+import { createSongSlug } from '../../lib/lyrics-helpers';
+
+const DIRECTUS_URL = 'https://dash.cureation.net';
 
 // Fetch albums data
-const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
+const albumsResponse = await fetch(
+  `${DIRECTUS_URL}/items/discography?limit=-1&fields=id,title,cover_art,release_date`
+);
 const albumsData = await albumsResponse.json();
 
 interface AlbumData {
-  id: number;
+  id: number | string;
   title: string;
   slug: string;
   coverImage: string;
   year: string;
-  songIds: number[];
-  songs?: SongData[];
+  songs: SongData[];
 }
 
 interface SongData {
@@ -26,39 +30,51 @@ interface SongData {
   slug: string;
 }
 
-const albums: AlbumData[] = albumsData.data.map((album: any) => ({
-  id: album.id,
-  title: album.title || 'Unknown Album',
-  slug: album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : 'unknown-album'),
-  coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
-  year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
-  songIds: album.songs || []
-})).sort((a: AlbumData, b: AlbumData) => parseInt(b.year || '0') - parseInt(a.year || '0'));
-
 // Fetch all songs
-const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+const songsResponse = await fetch(
+  `${DIRECTUS_URL}/items/songs?limit=-1&fields=id,title,album,duration,track_number,lyrics`
+);
 const songsData = await songsResponse.json();
-const songsMap: Record<number, SongData> = songsData.data
-  .filter((song: any) => song.title)
-  .reduce((acc: Record<number, SongData>, song: any) => {
-    acc[song.id] = {
-      id: song.id,
-      title: song.title,
-      duration: song.duration || '0:00',
-      trackNumber: song.track_number,
-      hasLyrics: !!song.lyrics,
-      slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')
-    };
-    return acc;
-  }, {});
+const songsByAlbum: Record<string, SongData[]> = {};
 
-// Add songs to each album
-albums.forEach((album: AlbumData) => {
-  album.songs = album.songIds
-    .map(id => songsMap[id])
-    .filter((song): song is SongData => !!song)
-    .sort((a, b) => a.trackNumber - b.trackNumber);
+for (const song of (songsData.data || []).filter((entry: any) => entry.title)) {
+  const albumId = typeof song.album === 'object' && song.album ? song.album.id : song.album;
+  if (albumId == null) continue;
+  const albumKey = String(albumId);
+
+  if (!songsByAlbum[albumKey]) {
+    songsByAlbum[albumKey] = [];
+  }
+
+  songsByAlbum[albumKey].push({
+    id: song.id,
+    title: song.title,
+    duration: song.duration || '0:00',
+    trackNumber: song.track_number || 0,
+    hasLyrics: !!song.lyrics,
+    slug: createSongSlug(song.title)
+  });
+}
+
+Object.values(songsByAlbum).forEach((tracks) => {
+  tracks.sort((a, b) => {
+    if (a.trackNumber && b.trackNumber) return a.trackNumber - b.trackNumber;
+    if (a.trackNumber) return -1;
+    if (b.trackNumber) return 1;
+    return a.title.localeCompare(b.title);
+  });
 });
+
+const albums: AlbumData[] = (albumsData.data || [])
+  .map((album: any) => ({
+    id: album.id,
+    title: album.title || 'Unknown Album',
+    slug: createSongSlug(album.title || `album-${album.id}`),
+    coverImage: album.cover_art ? `${DIRECTUS_URL}/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
+    year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
+    songs: songsByAlbum[String(album.id)] || []
+  }))
+  .sort((a: AlbumData, b: AlbumData) => parseInt(b.year || '0', 10) - parseInt(a.year || '0', 10));
 
 // Stats for the hero
 const totalSongs = albums.reduce((sum, album) => sum + (album.songs?.length || 0), 0);

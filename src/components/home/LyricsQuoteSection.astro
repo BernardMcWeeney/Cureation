@@ -63,17 +63,17 @@ const lyricsSlug = song?.title
 
       <!-- Song attribution -->
       <a
-        href={`/lyrics/${song.albumSlug}/${lyricsSlug}`}
+        href={`/lyrics/${lyricsSlug}`}
         class="group inline-flex flex-col items-center gap-1.5"
       >
         <p class="text-white/70 text-sm tracking-[0.2em] uppercase group-hover:text-primary transition-colors duration-300">
           {song.title}
         </p>
-        <p class="text-white/35 text-xs tracking-widest group-hover:text-primary/60 transition-colors duration-300">
+        <p class="text-white/60 text-xs tracking-widest group-hover:text-primary/60 transition-colors duration-300">
           {song.albumTitle}
           {song.year && ` · ${song.year}`}
         </p>
-        <div class="flex items-center gap-1.5 mt-2 text-white/40 group-hover:text-primary/70 text-xs transition-colors duration-300">
+        <div class="flex items-center gap-1.5 mt-2 text-white/60 group-hover:text-primary/70 text-xs transition-colors duration-300">
           <span>Read full lyrics</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>

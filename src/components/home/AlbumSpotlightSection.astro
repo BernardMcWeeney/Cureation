@@ -75,7 +75,7 @@ const yearsOld = releaseYear ? new Date().getFullYear() - releaseYear : null;
               <span class="text-white/60 text-sm">{releaseYear}</span>
             )}
             {yearsOld && (
-              <span class="text-white/50 text-sm">({yearsOld} years ago)</span>
+              <span class="text-white/70 text-sm">({yearsOld} years ago)</span>
             )}
           </div>
 
@@ -94,19 +94,19 @@ const yearsOld = releaseYear ? new Date().getFullYear() - releaseYear : null;
             {album.trackCount && album.trackCount > 0 && (
               <div>
                 <p class="text-2xl font-display text-primary">{album.trackCount}</p>
-                <p class="text-white/60 text-sm">Tracks</p>
+                <p class="text-white/70 text-sm">Tracks</p>
               </div>
             )}
             {album.duration && (
               <div>
                 <p class="text-2xl font-display text-primary">{album.duration}</p>
-                <p class="text-white/60 text-sm">Runtime</p>
+                <p class="text-white/70 text-sm">Runtime</p>
               </div>
             )}
             {album.label && (
               <div>
                 <p class="text-lg font-medium text-white/90">{album.label}</p>
-                <p class="text-white/60 text-sm">Label</p>
+                <p class="text-white/70 text-sm">Label</p>
               </div>
             )}
           </div>

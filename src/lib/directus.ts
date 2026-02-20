@@ -128,8 +128,59 @@ export function formatAlbum(album: DirectusAlbum): Album {
     description: album.description || 'No description available.',
     background: album.background_text || 'No background information available.',
     reception: album.critical_reception || 'No critical reception information available.',
-    featured: album.featured || false
+    featured: album.featured || false,
+    type: (album.type as AlbumType) || 'studio',
+    parentAlbumId: album.parent_album,
+    spotifyUrl: album.spotify_url,
+    appleMusicUrl: album.apple_music_url,
+    discCount: album.disc_count || 1,
+    trackCount: album.track_count || 0,
+    catalogNumber: album.catalog_number,
+    genreTags: album.genre_tags || [],
+    credits: album.credits,
   };
+}
+
+// Album type display labels
+export const albumTypeLabels: Record<AlbumType, string> = {
+  studio: 'Studio Album',
+  live: 'Live Album',
+  compilation: 'Compilation',
+  ep: 'EP',
+  single: 'Single',
+  deluxe: 'Deluxe Edition',
+  reissue: 'Reissue',
+  boxset: 'Box Set',
+  soundtrack: 'Soundtrack',
+  remix: 'Remix Album',
+};
+
+// Fetch albums by type
+export async function fetchAlbumsByType(type: AlbumType): Promise<DirectusAlbum[]> {
+  return fetchFromDirectus<DirectusAlbum>(`/discography?filter[type][_eq]=${type}&sort=release_date`);
+}
+
+// Fetch albums grouped by type (for discography index)
+export async function fetchAlbumsGroupedByType(): Promise<Record<string, Album[]>> {
+  const albums = await fetchAlbums();
+  const grouped: Record<string, Album[]> = {};
+
+  for (const album of albums) {
+    const type = (album.type as AlbumType) || 'studio';
+    if (!grouped[type]) grouped[type] = [];
+    grouped[type].push(formatAlbum(album));
+  }
+
+  // Sort each group by release date
+  for (const type of Object.keys(grouped)) {
+    grouped[type].sort((a, b) => {
+      if (!a.year) return 1;
+      if (!b.year) return -1;
+      return parseInt(a.year) - parseInt(b.year);
+    });
+  }
+
+  return grouped;
 }
 
 // Format a raw song into a Track type
@@ -143,8 +194,33 @@ export function formatTrack(song: DirectusSong): Track {
   };
 }
 
-// Format lyrics into structured parts
-export function formatLyrics(lyrics: string | undefined): LyricPart[] | null {
+// Format lyrics into structured parts.
+// Prefer lyrics_structured when available, and fall back to legacy text lyrics.
+export function formatLyrics(
+  lyrics: string | undefined,
+  lyricsStructured?: Array<{
+    label?: string;
+    lines?: Array<{ text?: string }>;
+  }>
+): LyricPart[] | null {
+  if (lyricsStructured && Array.isArray(lyricsStructured) && lyricsStructured.length > 0) {
+    return lyricsStructured.map((section) => {
+      const label = (section.label || '').trim();
+      const lines = (section.lines || [])
+        .map((line) => (line.text || '').trim())
+        .filter(Boolean);
+
+      const content = label
+        ? [`[${label}]`, ...lines].join('\n')
+        : lines.join('\n');
+
+      return {
+        type: label ? 'section' : 'verse',
+        content,
+      };
+    }).filter((part) => part.content.trim().length > 0);
+  }
+
   if (!lyrics) return null;
 
   return lyrics.split('\n\n').map((verse) => ({
@@ -160,7 +236,7 @@ export function formatSong(song: DirectusSong): Song {
     title: song.title,
     trackNumber: song.track_number || 0,
     duration: song.duration || '0:00',
-    lyrics: formatLyrics(song.lyrics),
+    lyrics: formatLyrics(song.lyrics, song.lyrics_structured),
     listenLinks: song.listen_links || [],
     credits: song.credits,
     hasLyrics: !!song.lyrics
@@ -277,27 +353,27 @@ export function getSongOfTheDay(songs: SongWithAlbum[]): SongWithAlbum {
 
 interface DirectusSetlist {
   id: number | string;
-  event_date: string;
+  date: string;
   venue: string;
   city: string;
   country: string;
   state_province?: string;
   tour_name?: string;
-  tour_leg?: string;
+  tour?: number;
   slug?: string;
   notes?: string;
-  featured?: boolean;
-  cover_image?: string;
-  songs?: SetlistSong[];
-  status?: string;
+  song_count?: number;
+  venue_image?: string;
+  source?: string;
 }
 
 interface SetlistSong {
-  song_id: number;
+  song_id?: number;
   position: number;
-  set_type: 'main' | 'encore' | 'encore2' | 'acoustic';
+  set_type: string;
   notes?: string;
   is_cover?: boolean;
+  song_title?: string;
 }
 
 export interface Setlist {
@@ -310,9 +386,9 @@ export interface Setlist {
   country: string;
   location: string;
   tourName?: string;
-  tourLeg?: string;
   slug: string;
   notes?: string;
+  source?: string;
   featured: boolean;
   coverImage?: string;
   songs: SetlistSongDisplay[];
@@ -320,32 +396,57 @@ export interface Setlist {
 }
 
 export interface SetlistSongDisplay {
+  songId?: number;
   position: number;
   title: string;
   songSlug?: string;
-  setType: 'main' | 'encore' | 'encore2' | 'acoustic';
+  setType: string;
   notes?: string;
   isCover: boolean;
   duration?: string;
 }
 
+let setlistsWithSongsPromise: Promise<Setlist[]> | null = null;
+let songStatsPromise: Promise<SongStats[]> | null = null;
+
 // Fetch all setlists
 export async function fetchSetlists(): Promise<DirectusSetlist[]> {
-  return fetchFromDirectus<DirectusSetlist>('/setlists?sort=-date');
+  return fetchFromDirectus<DirectusSetlist>('/setlists?sort=-date&limit=-1');
 }
 
-// Fetch songs for a specific setlist from the setlist_songs junction collection
-async function fetchSetlistSongs(setlistId: number | string): Promise<SetlistSong[]> {
-  const rows = await fetchFromDirectus<any>(`/setlist_songs?filter[setlist][_eq]=${setlistId}&sort=position&limit=100`);
-  return rows.map((r: any) => ({
-    song_id: r.song || 0,
-    position: r.position || 0,
-    set_type: r.set_type || 'main',
-    notes: r.notes,
-    is_cover: false,
-    // Carry the denormalised title for easy lookup
-    _song_title: r.song_title,
-  }));
+async function fetchAllSetlistSongs(): Promise<Map<string, SetlistSong[]>> {
+  const rows = await fetchFromDirectus<any>(
+    '/setlist_songs?fields=setlist,song,song_title,position,set_type,notes,is_cover&sort=setlist,position&limit=-1'
+  );
+
+  const songsBySetlist = new Map<string, SetlistSong[]>();
+
+  rows.forEach((row: any) => {
+    const setlistRaw = typeof row.setlist === 'object' && row.setlist
+      ? row.setlist.id
+      : row.setlist;
+    if (setlistRaw === null || setlistRaw === undefined) return;
+
+    const setlistId = setlistRaw.toString();
+    const songEntry: SetlistSong = {
+      song_id: row.song || undefined,
+      song_title: row.song_title || undefined,
+      position: row.position || 0,
+      set_type: row.set_type || 'main',
+      notes: row.notes || undefined,
+      is_cover: row.is_cover || false,
+    };
+
+    const existing = songsBySetlist.get(setlistId) || [];
+    existing.push(songEntry);
+    songsBySetlist.set(setlistId, existing);
+  });
+
+  songsBySetlist.forEach((songs) => {
+    songs.sort((a, b) => a.position - b.position);
+  });
+
+  return songsBySetlist;
 }
 
 // Format date for display
@@ -360,8 +461,7 @@ export function formatDate(dateString: string, options?: Intl.DateTimeFormatOpti
 
 // Format a setlist
 export function formatSetlist(setlist: DirectusSetlist, songsMap?: Map<number, DirectusSong>, setlistSongs?: SetlistSong[]): Setlist {
-  // Support both `date` (our schema) and `event_date` (legacy schema)
-  const eventDate = (setlist as any).date || setlist.event_date || '';
+  const eventDate = setlist.date || '';
   const year = eventDate ? new Date(eventDate).getFullYear() : 0;
   const location = setlist.state_province
     ? `${setlist.city}, ${setlist.state_province}, ${setlist.country}`
@@ -369,12 +469,13 @@ export function formatSetlist(setlist: DirectusSetlist, songsMap?: Map<number, D
 
   const slug = setlist.slug || generateSetlistSlug(setlist.venue || '', setlist.city || '', eventDate);
 
-  // Use pre-fetched setlistSongs if provided, otherwise fall back to embedded songs
-  const rawSongs: SetlistSong[] = setlistSongs || setlist.songs || [];
+  // Use pre-fetched setlistSongs if provided
+  const rawSongs: SetlistSong[] = setlistSongs || [];
   const songs: SetlistSongDisplay[] = rawSongs.map((song: any) => {
     const songData = song.song_id ? songsMap?.get(song.song_id) : undefined;
-    const title = songData?.title || song._song_title || `Song #${song.song_id}`;
+    const title = songData?.title || song.song_title || `Song #${song.position}`;
     return {
+      songId: song.song_id,
       position: song.position,
       title,
       songSlug: title ? generateSlug(title) : undefined,
@@ -385,8 +486,7 @@ export function formatSetlist(setlist: DirectusSetlist, songsMap?: Map<number, D
     };
   }).sort((a, b) => a.position - b.position);
 
-  // Support both `venue_image` (our schema) and `cover_image` (legacy)
-  const rawCoverImage = (setlist as any).venue_image || setlist.cover_image;
+  const rawCoverImage = setlist.venue_image;
   const coverImage = rawCoverImage
     ? (rawCoverImage.startsWith('http') ? rawCoverImage : getAssetUrl(rawCoverImage))
     : undefined;
@@ -401,13 +501,13 @@ export function formatSetlist(setlist: DirectusSetlist, songsMap?: Map<number, D
     country: setlist.country || '',
     location,
     tourName: setlist.tour_name,
-    tourLeg: setlist.tour_leg,
     slug,
     notes: setlist.notes,
-    featured: setlist.featured || false,
+    source: setlist.source,
+    featured: false,
     coverImage,
     songs,
-    songCount: (setlist as any).song_count || songs.length
+    songCount: setlist.song_count || songs.length
   };
 }
 
@@ -422,26 +522,32 @@ export function generateSetlistSlug(venue: string, city: string, date: string): 
 
 // Get all setlists with song details
 export async function getSetlistsWithSongs(): Promise<Setlist[]> {
-  const [setlists, songs] = await Promise.all([fetchSetlists(), fetchSongs()]);
+  if (setlistsWithSongsPromise) {
+    return setlistsWithSongsPromise;
+  }
 
-  const songsMap = new Map<number, DirectusSong>();
-  songs.forEach((song) => songsMap.set(song.id, song));
+  setlistsWithSongsPromise = (async () => {
+    const [setlists, songs, songsBySetlist] = await Promise.all([
+      fetchSetlists(),
+      fetchSongs(),
+      fetchAllSetlistSongs()
+    ]);
 
-  // Fetch setlist_songs for the most recent setlists (limit to avoid hammering the API)
-  const recentSetlists = setlists.slice(0, 10);
-  const songsBySetlist = new Map<string, SetlistSong[]>();
+    const songsMap = new Map<number, DirectusSong>();
+    songs.forEach((song) => songsMap.set(song.id, song));
 
-  await Promise.all(
-    recentSetlists.map(async (setlist) => {
-      const slSongs = await fetchSetlistSongs(setlist.id);
-      songsBySetlist.set(setlist.id.toString(), slSongs);
-    })
-  );
+    return setlists.map((setlist) => {
+      const slSongs = songsBySetlist.get(setlist.id.toString()) || [];
+      return formatSetlist(setlist, songsMap, slSongs);
+    });
+  })();
 
-  return setlists.map((setlist) => {
-    const slSongs = songsBySetlist.get(setlist.id.toString());
-    return formatSetlist(setlist, songsMap, slSongs);
-  });
+  try {
+    return await setlistsWithSongsPromise;
+  } catch (error) {
+    setlistsWithSongsPromise = null;
+    throw error;
+  }
 }
 
 // ============================================
@@ -1029,83 +1135,100 @@ export async function getForumPosts(threadId: string): Promise<ForumPost[]> {
 
 // Calculate song statistics from setlists
 export async function getSongStatistics(): Promise<SongStats[]> {
-  const [setlists, songs] = await Promise.all([
-    getSetlistsWithSongs(),
-    fetchSongs()
-  ]);
+  if (songStatsPromise) {
+    return songStatsPromise;
+  }
 
-  const songStatsMap = new Map<number, {
-    plays: number;
-    firstPlayed?: string;
-    lastPlayed?: string;
-    years: Map<number, number>;
-    tours: Map<string, number>;
-  }>();
+  songStatsPromise = (async () => {
+    const [setlists, songs, albums] = await Promise.all([
+      getSetlistsWithSongs(),
+      fetchSongs(),
+      fetchAlbums()
+    ]);
 
-  // Process setlists to build stats
-  setlists.forEach(setlist => {
-    setlist.songs.forEach(song => {
-      // We need to find the song ID from the title
-      const matchedSong = songs.find(s =>
-        generateSlug(s.title) === song.songSlug || s.title === song.title
-      );
-      if (!matchedSong) return;
+    const songIdBySlug = new Map<string, number>();
+    songs.forEach((song) => {
+      songIdBySlug.set(generateSlug(song.title), song.id);
+    });
 
-      const existing = songStatsMap.get(matchedSong.id) || {
-        plays: 0,
-        years: new Map(),
-        tours: new Map()
+    const songStatsMap = new Map<number, {
+      plays: number;
+      firstPlayed?: string;
+      lastPlayed?: string;
+      years: Map<number, number>;
+      tours: Map<string, number>;
+    }>();
+
+    setlists.forEach((setlist) => {
+      setlist.songs.forEach((song) => {
+        const fallbackSongId = song.songSlug ? songIdBySlug.get(song.songSlug) : songIdBySlug.get(generateSlug(song.title));
+        const songId = song.songId || fallbackSongId;
+        if (!songId) return;
+
+        const existing = songStatsMap.get(songId) || {
+          plays: 0,
+          years: new Map<number, number>(),
+          tours: new Map<string, number>()
+        };
+
+        existing.plays += 1;
+
+        if (!existing.firstPlayed || setlist.date < existing.firstPlayed) {
+          existing.firstPlayed = setlist.date;
+        }
+        if (!existing.lastPlayed || setlist.date > existing.lastPlayed) {
+          existing.lastPlayed = setlist.date;
+        }
+
+        if (setlist.year > 0) {
+          existing.years.set(setlist.year, (existing.years.get(setlist.year) || 0) + 1);
+        }
+
+        if (setlist.tourName) {
+          existing.tours.set(setlist.tourName, (existing.tours.get(setlist.tourName) || 0) + 1);
+        }
+
+        songStatsMap.set(songId, existing);
+      });
+    });
+
+    const albumMap = new Map<number, DirectusAlbum>();
+    albums.forEach((album) => albumMap.set(album.id, album));
+
+    const stats: SongStats[] = songs.map((song) => {
+      const songData = songStatsMap.get(song.id);
+      const album = albumMap.get(song.album);
+
+      return {
+        songId: song.id,
+        songTitle: song.title,
+        songSlug: generateSlug(song.title),
+        albumTitle: album?.title || 'Unknown Album',
+        totalPlays: songData?.plays || 0,
+        firstPlayed: songData?.firstPlayed,
+        lastPlayed: songData?.lastPlayed,
+        yearsPlayed: songData
+          ? Array.from(songData.years.entries())
+              .map(([year, count]) => ({ year, count }))
+              .sort((a, b) => a.year - b.year)
+          : [],
+        toursPlayed: songData
+          ? Array.from(songData.tours.entries())
+              .map(([tour, count]) => ({ tour, count }))
+              .sort((a, b) => b.count - a.count)
+          : []
       };
-
-      existing.plays++;
-
-      if (!existing.firstPlayed || setlist.date < existing.firstPlayed) {
-        existing.firstPlayed = setlist.date;
-      }
-      if (!existing.lastPlayed || setlist.date > existing.lastPlayed) {
-        existing.lastPlayed = setlist.date;
-      }
-
-      existing.years.set(setlist.year, (existing.years.get(setlist.year) || 0) + 1);
-
-      if (setlist.tourName) {
-        existing.tours.set(setlist.tourName, (existing.tours.get(setlist.tourName) || 0) + 1);
-      }
-
-      songStatsMap.set(matchedSong.id, existing);
     });
-  });
 
-  // Get album info for songs
-  const albums = await fetchAlbums();
-  const albumMap = new Map<number, DirectusAlbum>();
-  albums.forEach(album => albumMap.set(album.id, album));
+    return stats.sort((a, b) => b.totalPlays - a.totalPlays);
+  })();
 
-  // Convert to array format
-  const stats: SongStats[] = [];
-
-  songs.forEach(song => {
-    const songData = songStatsMap.get(song.id);
-    const album = albumMap.get(song.album);
-
-    stats.push({
-      songId: song.id,
-      songTitle: song.title,
-      songSlug: generateSlug(song.title),
-      albumTitle: album?.title || 'Unknown Album',
-      totalPlays: songData?.plays || 0,
-      firstPlayed: songData?.firstPlayed,
-      lastPlayed: songData?.lastPlayed,
-      yearsPlayed: songData
-        ? Array.from(songData.years.entries()).map(([year, count]) => ({ year, count })).sort((a, b) => a.year - b.year)
-        : [],
-      toursPlayed: songData
-        ? Array.from(songData.tours.entries()).map(([tour, count]) => ({ tour, count })).sort((a, b) => b.count - a.count)
-        : []
-    });
-  });
-
-  return stats.sort((a, b) => b.totalPlays - a.totalPlays);
+  try {
+    return await songStatsPromise;
+  } catch (error) {
+    songStatsPromise = null;
+    throw error;
+  }
 }
 
 // Get most played songs
@@ -1139,7 +1262,7 @@ export async function getTourStatistics(): Promise<TourStats[]> {
     if (!setlist.tourName) return;
 
     const existing = tourMap.get(setlist.tourName) || {
-      year: setlist.year,
+      year: setlist.year || 0,
       shows: 0,
       countries: new Set(),
       totalSongs: 0,
@@ -1147,9 +1270,14 @@ export async function getTourStatistics(): Promise<TourStats[]> {
     };
 
     existing.shows++;
-    existing.countries.add(setlist.country);
-    existing.totalSongs += setlist.songCount;
-    setlist.songs.forEach(song => existing.uniqueSongs.add(song.title));
+    if (setlist.year > 0 && (existing.year === 0 || setlist.year < existing.year)) {
+      existing.year = setlist.year;
+    }
+    if (setlist.country) {
+      existing.countries.add(setlist.country);
+    }
+    existing.totalSongs += setlist.songCount || setlist.songs.length;
+    setlist.songs.forEach(song => existing.uniqueSongs.add(song.title.toLowerCase().trim()));
 
     tourMap.set(setlist.tourName, existing);
   });
@@ -1162,7 +1290,7 @@ export async function getTourStatistics(): Promise<TourStats[]> {
     totalSongsPlayed: data.totalSongs,
     uniqueSongs: data.uniqueSongs.size,
     averageSongsPerShow: Math.round(data.totalSongs / data.shows)
-  })).sort((a, b) => b.year - a.year);
+  })).sort((a, b) => b.totalShows - a.totalShows);
 }
 
 // Get overall statistics
@@ -1178,19 +1306,30 @@ export async function getOverallStats(): Promise<OverallStats> {
   let totalSongsPlayed = 0;
 
   setlists.forEach(setlist => {
-    countries.add(setlist.country);
-    totalSongsPlayed += setlist.songCount;
+    if (setlist.country) {
+      countries.add(setlist.country);
+    }
+    totalSongsPlayed += setlist.songCount || setlist.songs.length;
   });
 
-  const mostPlayed = songStats.find(s => s.totalPlays > 0) || songStats[0];
-  const rarest = songStats.filter(s => s.totalPlays > 0).sort((a, b) => a.totalPlays - b.totalPlays)[0] || songStats[0];
+  const fallbackSongStat: SongStats = {
+    songId: 0,
+    songTitle: 'N/A',
+    songSlug: 'na',
+    albumTitle: 'N/A',
+    totalPlays: 0,
+    yearsPlayed: [],
+    toursPlayed: []
+  };
+  const mostPlayed = songStats.find(s => s.totalPlays > 0) || songStats[0] || fallbackSongStat;
+  const rarest = songStats.filter(s => s.totalPlays > 0).sort((a, b) => a.totalPlays - b.totalPlays)[0] || songStats[0] || fallbackSongStat;
 
   return {
     totalAlbums: albums.length,
     totalSongs: songs.length,
     totalShows: setlists.length,
     countriesVisited: countries.size,
-    yearsActive: new Date().getFullYear() - 1976,
+    yearsActive: new Date().getFullYear() - 1976 + 1,
     averageSongsPerShow: setlists.length > 0 ? Math.round(totalSongsPlayed / setlists.length) : 0,
     mostPlayedSong: mostPlayed,
     rarestSong: rarest

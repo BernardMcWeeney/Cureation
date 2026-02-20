@@ -3,40 +3,52 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import LyricsSidebar from '../../components/sidebar/LyricsSidebar.astro';
 import { ViewTransitions } from 'astro:transitions';
+import { createSongSlug } from '../../lib/lyrics-helpers';
+
+const DIRECTUS_URL = 'https://dash.cureation.net';
 
 // Fetch albums data to link songs to their albums
-const albumsResponse = await fetch('https://dash.cureation.net/items/discography');
+const albumsResponse = await fetch(
+  `${DIRECTUS_URL}/items/discography?limit=-1&fields=id,title,cover_art,release_date`
+);
 const albumsData = await albumsResponse.json();
-const albums = albumsData.data.reduce((acc, album) => {
-  acc[album.id] = {
+const albums = (albumsData.data || []).reduce((acc: Record<string, any>, album: any) => {
+  const albumKey = String(album.id);
+  acc[albumKey] = {
     title: album.title || 'Unknown Album',
-    slug: album.slug || (album.title ? album.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-') : 'unknown-album'),
-    cover_art: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
+    slug: createSongSlug(album.title || 'unknown-album'),
+    cover_art: album.cover_art ? `${DIRECTUS_URL}/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
     year: album.release_date ? new Date(album.release_date).getFullYear().toString() : ''
   };
   return acc;
 }, {});
 
 // Fetch all songs
-const songsResponse = await fetch('https://dash.cureation.net/items/songs');
+const songsResponse = await fetch(
+  `${DIRECTUS_URL}/items/songs?limit=-1&fields=id,title,album,duration,lyrics`
+);
 const songsData = await songsResponse.json();
 
 // Format the songs data with album information - filter out songs without titles
-const songs = songsData.data
+const songs = (songsData.data || [])
   .filter(song => song.title) // Only include songs that have titles
-  .map(song => ({
-    id: song.id,
-    title: song.title,
-    albumId: song.album,
-    albumTitle: albums[song.album]?.title || 'Unknown Album',
-    albumSlug: albums[song.album]?.slug || 'unknown',
-    albumCover: albums[song.album]?.cover_art || '/images/placeholder-album.jpg',
-    year: albums[song.album]?.year || '',
-    duration: song.duration || '0:00',
-    hasLyrics: !!song.lyrics,
-    lyrics: song.lyrics || '',
-    slug: song.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')
-  }));
+  .map(song => {
+    const albumId = typeof song.album === 'object' && song.album ? song.album.id : song.album;
+    const albumKey = albumId != null ? String(albumId) : '';
+    return {
+      id: song.id,
+      title: song.title,
+      albumId,
+      albumTitle: albums[albumKey]?.title || 'Unknown Album',
+      albumSlug: albums[albumKey]?.slug || 'unknown-album',
+      albumCover: albums[albumKey]?.cover_art || '/images/placeholder-album.jpg',
+      year: albums[albumKey]?.year || '',
+      duration: song.duration || '0:00',
+      hasLyrics: !!song.lyrics,
+      lyrics: song.lyrics || '',
+      slug: createSongSlug(song.title)
+    };
+  });
 
 // Get a deterministic "Lyric of the Day" based on the current date
 const songsWithLyrics = songs.filter((song: any) => song.hasLyrics);
@@ -67,16 +79,18 @@ if (lyricOfTheDay?.lyrics) {
 
 // Group songs by decade for a nice timeline display
 const songsByDecade = songs.reduce((acc, song) => {
-  if (!song.year) return acc;
-  
-  const decade = `${song.year.slice(0, 3)}0s`;
+  const decade = song.year ? `${song.year.slice(0, 3)}0s` : 'Unknown';
   if (!acc[decade]) acc[decade] = [];
   acc[decade].push(song);
   return acc;
 }, {});
 
 // Sort decades chronologically
-const sortedDecades = Object.keys(songsByDecade).sort();
+const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
+  if (a === 'Unknown') return 1;
+  if (b === 'Unknown') return -1;
+  return parseInt(a, 10) - parseInt(b, 10);
+});
 ---
 
 <MainLayout
@@ -94,7 +108,7 @@ const sortedDecades = Object.keys(songsByDecade).sort();
     slug: a.slug,
     coverImage: a.cover_art,
     year: a.year
-  })).sort((a: any, b: any) => parseInt(b.year) - parseInt(a.year))}
+  })).sort((a: any, b: any) => parseInt(b.year || '0', 10) - parseInt(a.year || '0', 10))}
 />
   <ViewTransitions />
   

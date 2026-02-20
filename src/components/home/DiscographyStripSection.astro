@@ -1,92 +1,20 @@
 ---
-// All The Cure studio albums in chronological order
-// Real covers loaded from Directus; fallback images shown below
-const albums = [
-  {
-    slug: 'three-imaginary-boys',
-    title: 'Three Imaginary Boys',
-    year: '1979',
-    cover: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'seventeen-seconds',
-    title: 'Seventeen Seconds',
-    year: '1980',
-    cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'faith',
-    title: 'Faith',
-    year: '1981',
-    cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'pornography',
-    title: 'Pornography',
-    year: '1982',
-    cover: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'the-top',
-    title: 'The Top',
-    year: '1984',
-    cover: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'the-head-on-the-door',
-    title: 'The Head on the Door',
-    year: '1985',
-    cover: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'kiss-me',
-    title: 'Kiss Me Kiss Me Kiss Me',
-    year: '1987',
-    cover: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'disintegration',
-    title: 'Disintegration',
-    year: '1989',
-    cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'wish',
-    title: 'Wish',
-    year: '1992',
-    cover: 'https://images.unsplash.com/photo-1461784180009-21121b2f204c?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'wild-mood-swings',
-    title: 'Wild Mood Swings',
-    year: '1996',
-    cover: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'bloodflowers',
-    title: 'Bloodflowers',
-    year: '2000',
-    cover: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'the-cure',
-    title: 'The Cure',
-    year: '2004',
-    cover: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=400&fit=crop',
-  },
-  {
-    slug: '4-13-dream',
-    title: '4:13 Dream',
-    year: '2008',
-    cover: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&h=400&fit=crop',
-  },
-  {
-    slug: 'songs-of-a-lost-world',
-    title: 'Songs of a Lost World',
-    year: '2024',
-    cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop',
-  },
-];
+import { fetchAlbums, formatAlbum } from '../../lib/directus';
+
+// Fetch real album data from Directus
+const rawAlbums = await fetchAlbums();
+const allAlbums = rawAlbums.map(formatAlbum);
+
+// Filter to studio albums and sort chronologically
+const albums = allAlbums
+  .filter(a => a.type === 'studio')
+  .sort((a, b) => parseInt(a.year || '0') - parseInt(b.year || '0'))
+  .map(a => ({
+    slug: a.slug,
+    title: a.title,
+    year: a.year,
+    cover: a.coverImage,
+  }));
 ---
 
 <section class="py-16">
@@ -132,7 +60,7 @@ const albums = [
                 {album.year}
               </div>
             </div>
-            <p class="mt-2 text-white/40 text-xs text-center truncate px-1 group-hover:text-white/70 transition-colors duration-200">
+            <p class="mt-2 text-white/60 text-xs text-center truncate px-1 group-hover:text-white/80 transition-colors duration-200">
               {album.year}
             </p>
           </a>

@@ -91,7 +91,7 @@ const membersForSection: WikiMember[] = members && members.length > 0
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Song of the Day — spans 2 cols on lg -->
           <a
-            href={`/lyrics/${songOfTheDay.albumSlug}/${songOfTheDay.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')}`}
+            href={`/lyrics/${songOfTheDay.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')}`}
             class="group lg:col-span-2"
           >
             <div
@@ -152,16 +152,16 @@ const membersForSection: WikiMember[] = members && members.length > 0
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <span class="text-white/70 text-sm font-medium uppercase tracking-wider">Stats</span>
+                <span class="text-white/80 text-sm font-medium uppercase tracking-wider">Stats</span>
               </div>
               <div class="flex-1 grid grid-cols-2 gap-4 items-center">
                 <div>
                   <p class="text-4xl font-display text-cyan-400">14</p>
-                  <p class="text-white/60 text-xs">Albums</p>
+                  <p class="text-white/70 text-xs">Albums</p>
                 </div>
                 <div>
                   <p class="text-4xl font-display text-cyan-400">200+</p>
-                  <p class="text-white/60 text-xs">Songs</p>
+                  <p class="text-white/70 text-xs">Songs</p>
                 </div>
               </div>
             </div>
@@ -286,7 +286,7 @@ const membersForSection: WikiMember[] = members && members.length > 0
               </div>
               <h2 class="font-heading text-xl text-white">Join the Community</h2>
             </div>
-            <p class="text-white/70 mb-6">
+            <p class="text-white/80 mb-6">
               Connect with fellow fans, share your memories, discuss albums, and be part of the Cureation community.
             </p>
             <div class="flex flex-wrap gap-3">
@@ -309,7 +309,7 @@ const membersForSection: WikiMember[] = members && members.length > 0
               </div>
               <h2 class="font-heading text-xl text-white">Stay Connected</h2>
             </div>
-            <p class="text-white/70 mb-6">
+            <p class="text-white/80 mb-6">
               Get the latest news, new content alerts, and exclusive updates delivered to your inbox.
             </p>
             <form class="flex gap-3" action="/api/newsletter" method="POST">
@@ -318,7 +318,7 @@ const membersForSection: WikiMember[] = members && members.length > 0
                 name="email"
                 placeholder="your@email.com"
                 required
-                class="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-primary/50 focus:outline-none text-sm"
+                class="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:border-primary/50 focus:outline-none text-sm"
               />
               <button type="submit" class="px-5 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors text-sm">
                 Subscribe

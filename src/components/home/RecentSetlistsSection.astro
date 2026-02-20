@@ -70,14 +70,14 @@ function getSongs(setlist: Setlist | MockSetlist): string[] {
                 </h3>
                 <p class="text-white/75 text-sm mb-1 text-shadow">{setlist.location}</p>
                 {tourName && (
-                  <p class="text-white/50 text-xs uppercase tracking-wider text-shadow">{tourName}</p>
+                  <p class="text-white/70 text-xs uppercase tracking-wider text-shadow">{tourName}</p>
                 )}
               </div>
 
               <!-- Songs preview chips -->
               {songs.length > 0 && (
                 <div class="mt-4 pt-3 border-t border-white/15">
-                  <p class="text-white/40 text-xs uppercase tracking-widest mb-2 text-shadow">Played</p>
+                  <p class="text-white/60 text-xs uppercase tracking-widest mb-2 text-shadow">Played</p>
                   <div class="flex flex-wrap gap-1.5">
                     {songs.map((title: string) => (
                       <span class="px-2 py-0.5 rounded bg-white/15 backdrop-blur-sm text-white/75 text-xs text-shadow">

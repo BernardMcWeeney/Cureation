@@ -1,32 +1,11 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import SetlistCard from '../../components/SetlistCard.astro';
-import SetlistsSidebar from '../../components/sidebar/SetlistsSidebar.astro';
 
-// Types for setlist data
-interface DirectusSetlist {
-  id: number | string;
-  event_date: string;
-  venue: string;
-  city: string;
-  country: string;
-  tour_name?: string;
-  slug?: string;
-  notes?: string;
-  featured?: boolean;
-  cover_image?: string;
-  songs?: SetlistSong[];
-}
+const DIRECTUS_URL = 'https://dash.cureation.net';
+const PER_PAGE = 36;
 
-interface SetlistSong {
-  song_id: number;
-  position: number;
-  set_type: string;
-  notes?: string;
-  is_cover?: boolean;
-}
-
-interface Setlist {
+interface SetlistItem {
   id: string;
   date: string;
   formattedDate: string;
@@ -36,9 +15,8 @@ interface Setlist {
   country: string;
   tourName?: string;
   slug: string;
-  featured: boolean;
-  coverImage?: string;
   songCount: number;
+  coverImage?: string;
 }
 
 // Format date helper
@@ -50,7 +28,6 @@ function formatDate(dateString: string): string {
   });
 }
 
-// Generate slug from venue, city, and date
 function generateSlug(venue: string, city: string, date: string): string {
   const dateSlug = date.split('T')[0];
   return `${venue}-${city}-${dateSlug}`
@@ -59,52 +36,48 @@ function generateSlug(venue: string, city: string, date: string): string {
     .replace(/\s+/g, '-');
 }
 
-// Fetch setlist data from the CMS
-let setlists: Setlist[] = [];
+// Fetch all setlists
+let setlists: SetlistItem[] = [];
 let tours: { name: string; slug: string; count: number }[] = [];
 let years: number[] = [];
+let countries: string[] = [];
 let totalCountries = 0;
 
 try {
-  const response = await fetch('https://dash.cureation.net/items/setlists?filter[status][_eq]=published&sort=-event_date');
-  const setlistData = await response.json();
+  const response = await fetch(`${DIRECTUS_URL}/items/setlists?sort=-date&limit=-1&fields=id,date,venue,city,country,tour_name,slug,song_count,venue_image,state_province`);
+  const data = await response.json();
 
-  if (setlistData.data && Array.isArray(setlistData.data)) {
-    setlists = setlistData.data.map((setlist: DirectusSetlist) => {
-      const eventDate = setlist.event_date || '';
-      const year = eventDate ? new Date(eventDate).getFullYear() : 0;
+  if (data.data && Array.isArray(data.data)) {
+    setlists = data.data.map((s: any) => {
+      const date = s.date || '';
+      const year = date ? new Date(date).getFullYear() : 0;
+      const coverImage = s.venue_image
+        ? (s.venue_image.startsWith('http') ? s.venue_image : `${DIRECTUS_URL}/assets/${s.venue_image}`)
+        : undefined;
 
       return {
-        id: setlist.id.toString(),
-        date: eventDate,
-        formattedDate: eventDate ? formatDate(eventDate) : 'Date TBA',
+        id: s.id.toString(),
+        date,
+        formattedDate: date ? formatDate(date) : 'Date TBA',
         year,
-        venue: setlist.venue || 'Unknown Venue',
-        city: setlist.city || 'Unknown City',
-        country: setlist.country || '',
-        tourName: setlist.tour_name,
-        slug: setlist.slug || generateSlug(setlist.venue || '', setlist.city || '', eventDate),
-        featured: setlist.featured || false,
-        coverImage: setlist.cover_image
-          ? `https://dash.cureation.net/assets/${setlist.cover_image}`
-          : undefined,
-        songCount: setlist.songs?.length || 0
+        venue: s.venue || 'Unknown Venue',
+        city: s.city || 'Unknown City',
+        country: s.country || '',
+        tourName: s.tour_name || undefined,
+        slug: s.slug || generateSlug(s.venue || '', s.city || '', date),
+        songCount: s.song_count || 0,
+        coverImage,
       };
-    }).sort((a: Setlist, b: Setlist) => {
-      // Sort by date (newest first)
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
+    }).sort((a: SetlistItem, b: SetlistItem) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
 
-    // Extract unique years
-    years = [...new Set(setlists.map((s: Setlist) => s.year).filter((y: number) => y > 0))].sort((a, b) => b - a);
-
-    // Extract unique countries
-    const countries = [...new Set(setlists.map((s: Setlist) => s.country).filter(Boolean))];
+    years = [...new Set(setlists.map(s => s.year).filter(y => y > 0))].sort((a, b) => b - a);
+    countries = [...new Set(setlists.map(s => s.country).filter(Boolean))].sort();
     totalCountries = countries.length;
 
-    // Extract and count tours
     const tourCounts: Record<string, number> = {};
-    setlists.forEach((s: Setlist) => {
+    setlists.forEach(s => {
       if (s.tourName) {
         tourCounts[s.tourName] = (tourCounts[s.tourName] || 0) + 1;
       }
@@ -121,29 +94,19 @@ try {
   console.error('Error fetching setlists:', error);
 }
 
-const featuredSetlists = setlists.filter((s: Setlist) => s.featured);
-const regularSetlists = setlists.filter((s: Setlist) => !s.featured);
+const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b) => b - a);
+const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
 ---
 
 <MainLayout
   title="Setlists"
-  description="Browse the complete archive of The Cure's live setlists from concerts around the world."
-  showSidebar={true}
-  customSidebar={true}
+  description="Browse 748+ complete setlists from The Cure's live concerts spanning over four decades."
+  showSidebar={false}
   pageClass="bg-black"
 >
-  <SetlistsSidebar
-    slot="sidebar"
-    tours={tours}
-    years={years}
-    totalShows={setlists.length}
-    totalCountries={totalCountries}
-  />
-
   <!-- Hero Section -->
-  <section class="mb-16">
+  <section class="mb-10">
     <div class="glass-panel overflow-hidden relative">
-      <!-- Decorative gradient orbs -->
       <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
 
@@ -153,18 +116,22 @@ const regularSetlists = setlists.filter((s: Setlist) => !s.featured);
           <div class="divider-gradient flex-1 max-w-24"></div>
         </div>
 
-        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow" transition:animate="slide">
+        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow">
           Setlist Archive
         </h1>
-        <p class="text-white/70 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
-          Explore the complete collection of The Cure's live performances, from intimate club shows to massive arena tours spanning over four decades.
+        <p class="text-white/70 text-lg md:text-xl max-w-3xl leading-relaxed">
+          The definitive collection of The Cure's live performances — every song, every show, every tour.
         </p>
 
         <!-- Quick stats -->
         <div class="flex flex-wrap gap-6 mt-8 pt-6 border-t border-white/10">
           <div class="flex items-center gap-2">
-            <span class="text-2xl font-display text-primary">{setlists.length}</span>
+            <span class="text-2xl font-display text-primary">{setlists.length.toLocaleString()}</span>
             <span class="text-white/50 text-sm">Shows</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-display text-primary">{totalSongs.toLocaleString()}</span>
+            <span class="text-white/50 text-sm">Performances</span>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-2xl font-display text-primary">{totalCountries}</span>
@@ -174,51 +141,90 @@ const regularSetlists = setlists.filter((s: Setlist) => !s.featured);
             <span class="text-2xl font-display text-primary">{tours.length}</span>
             <span class="text-white/50 text-sm">Tours</span>
           </div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-display text-primary">{years.length > 0 ? `${years[years.length - 1]}–${years[0]}` : '—'}</span>
+            <span class="text-white/50 text-sm">Years</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Featured Setlists -->
-  {featuredSetlists.length > 0 && (
-    <section class="mb-16">
-      <div class="flex items-center gap-4 mb-8">
-        <h2 class="font-heading text-2xl text-primary">Notable Shows</h2>
-        <div class="divider-gradient flex-1"></div>
+  <!-- Search & Filters -->
+  <section class="mb-8">
+    <div class="flex flex-col lg:flex-row gap-4">
+      <!-- Search bar -->
+      <div class="relative flex-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input
+          type="text"
+          id="setlist-search"
+          placeholder="Search venues, cities, countries..."
+          class="w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
+        />
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {featuredSetlists.map((setlist) => (
-          <div data-setlist-year={setlist.year}>
-            <SetlistCard
-              date={setlist.date}
-              formattedDate={setlist.formattedDate}
-              venue={setlist.venue}
-              city={setlist.city}
-              country={setlist.country}
-              tourName={setlist.tourName}
-              slug={setlist.slug}
-              songCount={setlist.songCount}
-              featured={true}
-              coverImage={setlist.coverImage}
-            />
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
+      <!-- Filter dropdowns -->
+      <div class="flex gap-3 flex-wrap">
+        <select id="filter-decade" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-primary/50 focus:outline-none transition-colors appearance-none cursor-pointer min-w-[140px]">
+          <option value="">All Decades</option>
+          {decades.map(d => (
+            <option value={d}>{d}s</option>
+          ))}
+        </select>
 
-  <!-- All Setlists -->
-  <section class="mb-12">
-    <div class="flex items-center gap-4 mb-8">
-      <h2 class="font-heading text-2xl text-primary">All Shows</h2>
-      <div class="divider-gradient flex-1"></div>
+        <select id="filter-year" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-primary/50 focus:outline-none transition-colors appearance-none cursor-pointer min-w-[120px]">
+          <option value="">All Years</option>
+          {years.map(y => (
+            <option value={y}>{y}</option>
+          ))}
+        </select>
+
+        <select id="filter-tour" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-primary/50 focus:outline-none transition-colors appearance-none cursor-pointer min-w-[180px]">
+          <option value="">All Tours</option>
+          {tours.map(t => (
+            <option value={t.name}>{t.name} ({t.count})</option>
+          ))}
+        </select>
+
+        <select id="filter-country" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-primary/50 focus:outline-none transition-colors appearance-none cursor-pointer min-w-[160px]">
+          <option value="">All Countries</option>
+          {countries.map(c => (
+            <option value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
     </div>
 
+    <!-- Active filters & results count -->
+    <div class="flex items-center justify-between mt-4">
+      <div id="results-count" class="text-white/50 text-sm">
+        Showing {Math.min(PER_PAGE, setlists.length)} of {setlists.length} shows
+      </div>
+      <button id="clear-filters" class="hidden text-sm text-primary hover:text-primary/80 transition-colors">
+        Clear all filters
+      </button>
+    </div>
+  </section>
+
+  <!-- Setlist Grid -->
+  <section class="mb-12">
     {setlists.length > 0 ? (
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {regularSetlists.map((setlist, index) => (
-          <div data-setlist-year={setlist.year} style={`--index: ${index + 1}`}>
+      <div id="setlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {setlists.map((setlist, index) => (
+          <div
+            class="setlist-item"
+            data-venue={setlist.venue.toLowerCase()}
+            data-city={setlist.city.toLowerCase()}
+            data-country={setlist.country.toLowerCase()}
+            data-year={setlist.year}
+            data-tour={setlist.tourName?.toLowerCase() || ''}
+            data-index={index}
+            style={index >= PER_PAGE ? 'display:none' : ''}
+          >
             <SetlistCard
               date={setlist.date}
               formattedDate={setlist.formattedDate}
@@ -235,30 +241,216 @@ const regularSetlists = setlists.filter((s: Setlist) => !s.featured);
       </div>
     ) : (
       <div class="glass-card rounded-2xl p-12 text-center">
-        <div class="text-6xl mb-4">🎤</div>
         <h3 class="font-heading text-2xl text-white mb-2">No Setlists Yet</h3>
         <p class="text-white/60 max-w-md mx-auto">
-          The setlist archive is being built. Check back soon for concert data from The Cure's legendary live performances.
+          The setlist archive is being built. Check back soon for concert data.
         </p>
       </div>
     )}
+
+    <!-- No results message -->
+    <div id="no-results" class="hidden glass-card rounded-2xl p-12 text-center">
+      <h3 class="font-heading text-2xl text-white mb-2">No Matching Shows</h3>
+      <p class="text-white/60 max-w-md mx-auto">
+        Try adjusting your search or filters.
+      </p>
+    </div>
+
+    <!-- Pagination / Load More -->
+    <div id="pagination" class="mt-10 flex flex-col items-center gap-4">
+      <button
+        id="load-more"
+        class="px-8 py-3 rounded-xl bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors font-medium"
+      >
+        Load More Shows
+      </button>
+      <div id="page-info" class="text-white/40 text-sm"></div>
+    </div>
   </section>
 </MainLayout>
 
 <style>
-  /* Setlist grid animations */
-  .grid {
-    --stagger-delay: 75ms;
+  select option {
+    background: #1a1a2e;
+    color: white;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+  .setlist-item {
+    animation: fadeSlideIn 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
-  :global(.grid > div) {
-    animation: fadeIn 0.5s ease forwards;
-    opacity: 0;
-    animation-delay: calc(var(--stagger-delay) * var(--index, 1));
-  }
 </style>
+
+<script is:inline define:vars={{ PER_PAGE }}>
+  function initSetlistFilters() {
+    const searchInput = document.getElementById('setlist-search');
+    const filterDecade = document.getElementById('filter-decade');
+    const filterYear = document.getElementById('filter-year');
+    const filterTour = document.getElementById('filter-tour');
+    const filterCountry = document.getElementById('filter-country');
+    const clearBtn = document.getElementById('clear-filters');
+    const resultsCount = document.getElementById('results-count');
+    const noResults = document.getElementById('no-results');
+    const grid = document.getElementById('setlist-grid');
+    const loadMoreBtn = document.getElementById('load-more');
+    const pageInfo = document.getElementById('page-info');
+    const items = document.querySelectorAll('.setlist-item');
+
+    if (!grid || !items.length) return;
+
+    let currentPage = 1;
+    let matchingItems = [];
+
+    function getFilters() {
+      return {
+        search: (searchInput?.value || '').toLowerCase().trim(),
+        decade: filterDecade?.value || '',
+        year: filterYear?.value || '',
+        tour: (filterTour?.value || '').toLowerCase(),
+        country: (filterCountry?.value || '').toLowerCase(),
+      };
+    }
+
+    function applyFilters() {
+      const filters = getFilters();
+      const hasFilters = filters.search || filters.decade || filters.year || filters.tour || filters.country;
+
+      matchingItems = [];
+
+      items.forEach((item) => {
+        const venue = item.dataset.venue || '';
+        const city = item.dataset.city || '';
+        const country = item.dataset.country || '';
+        const year = parseInt(item.dataset.year || '0');
+        const tour = item.dataset.tour || '';
+
+        let matches = true;
+
+        if (filters.search) {
+          const haystack = `${venue} ${city} ${country} ${tour}`;
+          matches = haystack.includes(filters.search);
+        }
+
+        if (matches && filters.decade) {
+          const decadeStart = parseInt(filters.decade);
+          matches = year >= decadeStart && year <= decadeStart + 9;
+        }
+
+        if (matches && filters.year) {
+          matches = year === parseInt(filters.year);
+        }
+
+        if (matches && filters.tour) {
+          matches = tour === filters.tour;
+        }
+
+        if (matches && filters.country) {
+          matches = country === filters.country;
+        }
+
+        if (matches) {
+          matchingItems.push(item);
+        }
+      });
+
+      // Reset page
+      currentPage = 1;
+      renderPage();
+
+      // Show/hide clear button
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !hasFilters);
+      }
+
+      // Show/hide no results
+      if (noResults) {
+        noResults.classList.toggle('hidden', matchingItems.length > 0);
+      }
+      if (grid) {
+        grid.classList.toggle('hidden', matchingItems.length === 0);
+      }
+    }
+
+    function renderPage() {
+      const totalVisible = currentPage * PER_PAGE;
+
+      // Hide all items first
+      items.forEach((item) => {
+        item.style.display = 'none';
+      });
+
+      // Show matching items up to current page
+      matchingItems.forEach((item, idx) => {
+        if (idx < totalVisible) {
+          item.style.display = '';
+        }
+      });
+
+      // Update results count
+      const showing = Math.min(totalVisible, matchingItems.length);
+      if (resultsCount) {
+        resultsCount.textContent = `Showing ${showing} of ${matchingItems.length} shows`;
+      }
+
+      // Update load more button
+      if (loadMoreBtn) {
+        loadMoreBtn.style.display = totalVisible >= matchingItems.length ? 'none' : '';
+      }
+
+      // Update page info
+      if (pageInfo) {
+        const remaining = matchingItems.length - showing;
+        pageInfo.textContent = remaining > 0 ? `${remaining} more shows` : '';
+      }
+    }
+
+    // Initialize matching items (all by default)
+    matchingItems = Array.from(items);
+    renderPage();
+
+    // Event listeners
+    let searchTimeout;
+    searchInput?.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(applyFilters, 200);
+    });
+
+    filterDecade?.addEventListener('change', () => {
+      // When decade changes, clear year filter if it's outside the decade
+      if (filterDecade.value && filterYear) {
+        const decadeStart = parseInt(filterDecade.value);
+        const selectedYear = parseInt(filterYear.value);
+        if (selectedYear && (selectedYear < decadeStart || selectedYear > decadeStart + 9)) {
+          filterYear.value = '';
+        }
+      }
+      applyFilters();
+    });
+
+    filterYear?.addEventListener('change', applyFilters);
+    filterTour?.addEventListener('change', applyFilters);
+    filterCountry?.addEventListener('change', applyFilters);
+
+    clearBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (filterDecade) filterDecade.value = '';
+      if (filterYear) filterYear.value = '';
+      if (filterTour) filterTour.value = '';
+      if (filterCountry) filterCountry.value = '';
+      applyFilters();
+    });
+
+    loadMoreBtn?.addEventListener('click', () => {
+      currentPage++;
+      renderPage();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initSetlistFilters);
+  document.addEventListener('astro:page-load', initSetlistFilters);
+</script>

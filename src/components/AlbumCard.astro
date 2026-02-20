@@ -1,4 +1,19 @@
 ---
+import type { AlbumType } from '../types/directus';
+
+const typeLabels: Record<string, string> = {
+  studio: 'Studio Album',
+  live: 'Live Album',
+  compilation: 'Compilation',
+  ep: 'EP',
+  single: 'Single',
+  deluxe: 'Deluxe Edition',
+  reissue: 'Reissue',
+  boxset: 'Box Set',
+  soundtrack: 'Soundtrack',
+  remix: 'Remix Album',
+};
+
 interface Props {
   title: string;
   coverImage: string;
@@ -6,9 +21,11 @@ interface Props {
   slug: string;
   featured?: boolean;
   id?: string;
+  type?: AlbumType;
 }
 
-const { title, coverImage, year, slug, featured = false, id } = Astro.props;
+const { title, coverImage, year, slug, featured = false, id, type = 'studio' } = Astro.props;
+const typeLabel = typeLabels[type] || 'Album';
 ---
 
 <a
@@ -45,7 +62,7 @@ const { title, coverImage, year, slug, featured = false, id } = Astro.props;
       </h3>
 
       <div class="flex items-center justify-between">
-        <span class="text-white/80 text-sm font-medium text-shadow">Studio Album</span>
+        <span class="text-white/80 text-sm font-medium text-shadow">{typeLabel}</span>
         <div class="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
           <span class="text-sm font-semibold">Explore</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

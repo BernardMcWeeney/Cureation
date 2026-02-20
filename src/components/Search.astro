@@ -5,13 +5,19 @@
 interface Props {
   placeholder?: string;
   showFilters?: boolean;
+  initialQuery?: string;
 }
 
-const { placeholder = 'Search lyrics, songs, albums...', showFilters = true } = Astro.props;
+const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, initialQuery = '' } = Astro.props;
 ---
 
 <div class="search-container">
-  <div id="pagefind-search" class="pagefind-ui" data-placeholder={placeholder}></div>
+  <div
+    id="pagefind-search"
+    class="pagefind-ui"
+    data-placeholder={placeholder}
+    data-initial-query={initialQuery}
+  ></div>
 
   {showFilters && (
     <div class="search-filters mt-4 flex flex-wrap gap-2" id="search-filters">
@@ -182,9 +188,214 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true } = 
 </style>
 
 <script>
+  const DIRECTUS_BASE = 'https://dash.cureation.net/items';
+
+  function escapeHtml(value) {
+    return (value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function slugify(value) {
+    return (value || '')
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-');
+  }
+
+  function renderFallbackForm(query = '') {
+    return `
+      <form action="/lyrics/search" method="get" class="mb-6">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input
+            type="search"
+            name="q"
+            value="${escapeHtml(query)}"
+            placeholder="Search songs, lyrics, albums..."
+            class="w-full px-4 py-3 rounded-lg bg-black/50 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-primary/40"
+            required
+          />
+          <button
+            type="submit"
+            class="px-5 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+          >
+            Search
+          </button>
+        </div>
+      </form>
+    `;
+  }
+
+  function getInitialQuery(container) {
+    const fromData = (container.dataset.initialQuery || '').trim();
+    const fromUrl = new URLSearchParams(window.location.search).get('q') || '';
+    return (fromData || fromUrl).trim();
+  }
+
+  async function renderDirectusFallback(container, query) {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      container.innerHTML = `
+        ${renderFallbackForm('')}
+        <div class="text-center py-8 text-white/60">
+          <p class="text-lg mb-2">Type a search term to begin.</p>
+          <p class="text-sm">Search checks songs and albums directly from Directus.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `${renderFallbackForm(trimmed)}
+      <div class="text-center py-6 text-white/60">
+        Searching for "${escapeHtml(trimmed)}"...
+      </div>`;
+
+    try {
+      const [songsRes, albumsRes] = await Promise.all([
+        fetch(`${DIRECTUS_BASE}/songs?limit=-1&fields=id,title,lyrics`),
+        fetch(`${DIRECTUS_BASE}/discography?limit=-1&fields=id,title,slug,description`)
+      ]);
+      const songsData = await songsRes.json();
+      const albumsData = await albumsRes.json();
+
+      const q = trimmed.toLowerCase();
+
+      const songResults = (songsData.data || [])
+        .filter((song) => {
+          const title = (song.title || '').toLowerCase();
+          const lyrics = (song.lyrics || '').toLowerCase();
+          return title.includes(q) || lyrics.includes(q);
+        })
+        .slice(0, 30)
+        .map((song) => ({
+          type: 'Song',
+          title: song.title || 'Untitled Song',
+          url: `/lyrics/${slugify(song.title || '')}`,
+          excerpt: 'Matched in title or lyrics'
+        }));
+
+      const albumResults = (albumsData.data || [])
+        .filter((album) => {
+          const title = (album.title || '').toLowerCase();
+          const description = (album.description || '').toLowerCase();
+          return title.includes(q) || description.includes(q);
+        })
+        .slice(0, 20)
+        .map((album) => ({
+          type: 'Album',
+          title: album.title || 'Untitled Album',
+          url: `/discography/${album.slug || slugify(album.title || '')}`,
+          excerpt: 'Matched in album details'
+        }));
+
+      const combined = [...songResults, ...albumResults];
+      if (combined.length === 0) {
+        container.innerHTML = `
+          ${renderFallbackForm(trimmed)}
+          <div class="text-center py-8 text-white/60">
+            <p class="text-lg mb-2">No results found for "${escapeHtml(trimmed)}".</p>
+            <p class="text-sm">Try a broader term.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const resultItems = combined.map((item) => `
+        <article class="pagefind-ui__result">
+          <div class="pagefind-ui__result-title">
+            <a class="pagefind-ui__result-link" href="${escapeHtml(item.url)}">${escapeHtml(item.title)}</a>
+          </div>
+          <p class="pagefind-ui__result-excerpt">${escapeHtml(item.excerpt)}</p>
+          <div class="mt-2">
+            <span class="pagefind-ui__result-tag">${escapeHtml(item.type)}</span>
+          </div>
+        </article>
+      `).join('');
+
+      container.innerHTML = `
+        ${renderFallbackForm(trimmed)}
+        <div class="text-white/50 text-sm mb-4">${combined.length} fallback results for "${escapeHtml(trimmed)}"</div>
+        <div class="pagefind-ui__results-area">${resultItems}</div>
+      `;
+    } catch (error) {
+      container.innerHTML = `
+        ${renderFallbackForm(trimmed)}
+        <div class="text-center py-8 text-white/60">
+          <p class="text-lg mb-2">Search is temporarily unavailable.</p>
+          <p class="text-sm">Please try again in a moment.</p>
+        </div>
+      `;
+    }
+  }
+
+  function detectResultType(resultEl) {
+    const link = resultEl.querySelector('.pagefind-ui__result-link');
+    const href = (link?.getAttribute('href') || '').toLowerCase();
+    if (href.includes('/discography/')) return 'album';
+    if (href.includes('/lyrics/')) return 'lyrics';
+    if (href.includes('/songs/')) return 'song';
+    return 'all';
+  }
+
+  function applyResultFilter(container, filter) {
+    const resultNodes = container.querySelectorAll('.pagefind-ui__result');
+    let visible = 0;
+
+    resultNodes.forEach((node) => {
+      const type = detectResultType(node);
+      const shouldShow =
+        filter === 'all' ||
+        type === filter ||
+        (filter === 'song' && type === 'lyrics') ||
+        (filter === 'lyrics' && type === 'song');
+      node.style.display = shouldShow ? '' : 'none';
+      if (shouldShow) visible += 1;
+    });
+
+    let emptyNode = container.querySelector('.search-filter-empty');
+    if (!emptyNode) {
+      emptyNode = document.createElement('p');
+      emptyNode.className = 'search-filter-empty text-white/60 text-center py-4 hidden';
+      emptyNode.textContent = 'No results match this filter.';
+      const resultsArea = container.querySelector('.pagefind-ui__results-area');
+      resultsArea?.appendChild(emptyNode);
+    }
+    emptyNode.classList.toggle('hidden', visible > 0 || resultNodes.length === 0);
+  }
+
+  function triggerSearch(searchInput, query) {
+    if (!searchInput || !query) return;
+    searchInput.value = query;
+    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   async function initPagefind() {
     const container = document.getElementById('pagefind-search');
     if (!container) return;
+    if (container.dataset.initialized === 'true') return;
+    container.dataset.initialized = 'true';
+
+    let activeFilter = 'all';
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    function setActiveFilter(filter) {
+      activeFilter = filter || 'all';
+      filterBtns.forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-filter') === activeFilter);
+      });
+      applyResultFilter(container, activeFilter);
+    }
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = btn.getAttribute('data-filter') || 'all';
+        setActiveFilter(filter);
+      });
+    });
+    setActiveFilter('all');
 
     try {
       // Check if pagefind files exist by trying to fetch them first
@@ -230,44 +441,21 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true } = 
         }
       });
 
-      // Set up filter buttons after a short delay to ensure UI is rendered
+      const initialQuery = getInitialQuery(container);
+
       setTimeout(() => {
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const searchInput = document.querySelector('.pagefind-ui__search-input') as HTMLInputElement;
+        const searchInput = document.querySelector('.pagefind-ui__search-input');
 
-        filterBtns.forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const filter = btn.getAttribute('data-filter');
-
-            // Update button states
-            filterBtns.forEach((b) => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Update search with filter
-            if (searchInput && searchInput.value) {
-              const baseQuery = searchInput.value.replace(/\s*(song|album|lyrics):/gi, '').trim();
-              if (filter && filter !== 'all') {
-                searchInput.value = `${filter}: ${baseQuery}`;
-              } else {
-                searchInput.value = baseQuery;
-              }
-              // Trigger search update
-              searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-            }
+        if (searchInput) {
+          searchInput.addEventListener('input', () => {
+            setTimeout(() => applyResultFilter(container, activeFilter), 30);
           });
-        });
+          triggerSearch(searchInput, initialQuery);
+        }
       }, 100);
     } catch (e) {
-      // Pagefind not yet built - show fallback message
-      container.innerHTML = `
-        <div class="text-center py-8 text-white/60">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-12 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <p class="text-lg mb-2">Search is available after build</p>
-          <p class="text-sm">Run <code class="px-2 py-1 bg-white/10 rounded">npm run build</code> to enable search functionality.</p>
-        </div>
-      `;
+      await renderDirectusFallback(container, getInitialQuery(container));
+      setActiveFilter(activeFilter);
     }
   }
 

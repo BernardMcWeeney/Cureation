@@ -24,16 +24,16 @@ const createSlug = (title) => {
   <table class="w-full">
     <thead>
       <tr class="border-b border-white/10">
-        <th class="py-3 px-4 text-left text-sm text-white/60 font-normal">#</th>
-        <th class="py-3 px-4 text-left text-sm text-white/60 font-normal">Title</th>
-        <th class="py-3 px-4 text-right text-sm text-white/60 font-normal">Duration</th>
-        <th class="py-3 px-4 text-right text-sm text-white/60 font-normal">Listen</th>
+        <th class="py-3 px-4 text-left text-sm text-white/70 font-normal">#</th>
+        <th class="py-3 px-4 text-left text-sm text-white/70 font-normal">Title</th>
+        <th class="py-3 px-4 text-right text-sm text-white/70 font-normal">Duration</th>
+        <th class="py-3 px-4 text-right text-sm text-white/70 font-normal">Listen</th>
       </tr>
     </thead>
     <tbody>
       {tracks.map((track, index) => (
         <tr class={`hover:bg-white/5 transition-colors duration-200 ${index % 2 === 0 ? 'bg-black/10' : ''}`}>
-          <td class="py-3 px-4 text-white/80">{track.number}</td>
+          <td class="py-3 px-4 text-white/90">{track.number}</td>
           <td class="py-3 px-4">
             <a 
               href={`/lyrics/${createSlug(track.title)}`} 
@@ -42,7 +42,7 @@ const createSlug = (title) => {
               {track.title}
             </a>
           </td>
-          <td class="py-3 px-4 text-right text-white/80">{track.duration}</td>
+          <td class="py-3 px-4 text-right text-white/90">{track.duration}</td>
           <td class="py-3 px-4 text-right">
             {track.listen_link ? (
               <a 
@@ -74,7 +74,7 @@ const createSlug = (title) => {
   </table>
 </div>
 
-<div class="mt-4 flex justify-between text-white/60 text-sm">
+<div class="mt-4 flex justify-between text-white/70 text-sm">
   <div>{tracks.length} tracks</div>
   <div>
     {(() => {
