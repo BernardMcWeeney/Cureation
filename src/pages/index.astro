@@ -13,6 +13,7 @@ import RecentSetlistsSection from '../components/home/RecentSetlistsSection.astr
 import BandMembersSection from '../components/home/BandMembersSection.astro';
 import DiscographyStripSection from '../components/home/DiscographyStripSection.astro';
 import NewsGridSection from '../components/home/NewsGridSection.astro';
+import OnThisDaySection from '../components/home/OnThisDaySection.astro';
 
 // Data fetching
 import {
@@ -176,7 +177,10 @@ const membersForSection: WikiMember[] = members && members.length > 0
     <!-- 6. LYRICS QUOTE -->
     <LyricsQuoteSection song={songOfTheDay} />
 
-    <!-- 7. RECENT SHOWS -->
+    <!-- 7. ON THIS DAY -->
+    <OnThisDaySection />
+
+    <!-- 8. RECENT SHOWS -->
     <RecentSetlistsSection setlists={setlists} />
 
     <!-- 8. ALBUM SPOTLIGHT + QUICK LINKS -->

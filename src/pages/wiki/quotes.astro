@@ -1,0 +1,187 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import GothicCobweb from '../../components/GothicCobweb.astro';
+import GothicSwirls from '../../components/GothicSwirls.astro';
+
+// Directus quotes collection integration
+const DIRECTUS_URL = 'https://dash.cureation.net';
+const API_BASE = `${DIRECTUS_URL}/items`;
+const DIRECTUS_TOKEN = import.meta.env.DIRECTUS_TOKEN || '';
+
+interface Quote {
+  id: number;
+  text: string;
+  speaker?: string;
+  source?: string;
+  date?: string;
+  topic?: string;
+  album_context?: string;
+  status?: string;
+}
+
+let quotes: Quote[] = [];
+
+try {
+  const headers: Record<string, string> = {};
+  if (DIRECTUS_TOKEN) {
+    headers['Authorization'] = `Bearer ${DIRECTUS_TOKEN}`;
+  }
+
+  const res = await fetch(`${API_BASE}/quotes?limit=200&sort=-date`, { headers });
+  if (res.ok) {
+    const data = await res.json();
+    quotes = data.data || [];
+  }
+} catch (e) {
+  // Silently fall back
+}
+
+// Group by topic
+const quotesByTopic: Record<string, Quote[]> = {};
+quotes.forEach(q => {
+  const topic = q.topic || 'General';
+  if (!quotesByTopic[topic]) quotesByTopic[topic] = [];
+  quotesByTopic[topic].push(q);
+});
+
+// Group by speaker
+const quotesBySpeaker: Record<string, Quote[]> = {};
+quotes.forEach(q => {
+  const speaker = q.speaker || 'Unknown';
+  if (!quotesBySpeaker[speaker]) quotesBySpeaker[speaker] = [];
+  quotesBySpeaker[speaker].push(q);
+});
+---
+
+<MainLayout
+  title="Quotes & Interviews"
+  description="Notable quotes from Robert Smith and The Cure members across decades of interviews"
+>
+  <div class="relative">
+    <GothicCobweb position="top-right" size="lg" opacity={0.08} />
+  </div>
+
+  <!-- Breadcrumb -->
+  <nav class="mb-6" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-white/60">
+      <li><a href="/wiki" class="hover:text-primary transition-colors">Wiki</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-white">Quotes</li>
+    </ol>
+  </nav>
+
+  <!-- Hero -->
+  <section class="mb-12">
+    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
+      <GothicCobweb position="top-left" size="lg" opacity={0.12} />
+      <GothicCobweb position="bottom-right" size="md" opacity={0.06} />
+
+      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header lipstick-accent">
+        Quotes & Interviews
+      </h1>
+      <p class="text-white/60 text-lg max-w-2xl mt-6">
+        Memorable words from Robert Smith, Simon Gallup, and every member of The Cure across decades of press, interviews, and conversations.
+      </p>
+
+      {quotes.length > 0 && (
+        <div class="grid grid-cols-3 gap-4 mt-8">
+          <div class="glass-stat p-4 text-center">
+            <p class="text-3xl font-bold text-primary">{quotes.length}</p>
+            <p class="text-sm text-white/50 mt-1">Quotes</p>
+          </div>
+          <div class="glass-stat p-4 text-center">
+            <p class="text-3xl font-bold text-purple-400">{Object.keys(quotesBySpeaker).length}</p>
+            <p class="text-sm text-white/50 mt-1">Speakers</p>
+          </div>
+          <div class="glass-stat p-4 text-center">
+            <p class="text-3xl font-bold text-blue-400">{Object.keys(quotesByTopic).length}</p>
+            <p class="text-sm text-white/50 mt-1">Topics</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <GothicSwirls position="divider" />
+
+  {quotes.length > 0 ? (
+    <div class="space-y-6">
+      {quotes.map((quote, idx) => (
+        <div class={`glass-tile p-6 md:p-8 cure-rose-border relative overflow-hidden ${idx === 0 ? 'stained-glass' : ''}`}>
+          {idx === 0 && <GothicCobweb position="top-right" size="sm" opacity={0.06} />}
+
+          <blockquote class="text-white/90 text-lg md:text-xl leading-relaxed italic mb-4">
+            "{quote.text}"
+          </blockquote>
+
+          <div class="flex items-center justify-between flex-wrap gap-3 pt-4 border-t border-white/10">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <span class="text-primary text-sm font-bold">{(quote.speaker || '?')[0]}</span>
+              </div>
+              <div>
+                <p class="text-white font-medium text-sm">{quote.speaker || 'Unknown'}</p>
+                {quote.source && <p class="text-white/40 text-xs">{quote.source}</p>}
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              {quote.topic && (
+                <span class="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary">{quote.topic}</span>
+              )}
+              {quote.date && (
+                <span class="text-white/30 text-xs">{new Date(quote.date).getFullYear()}</span>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <section>
+      <div class="glass-panel p-8 md:p-12 text-center">
+        <div class="p-4 rounded-xl bg-primary/10 w-fit mx-auto mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+          </svg>
+        </div>
+        <h2 class="text-2xl text-white mb-3">Quotes Archive Coming Soon</h2>
+        <p class="text-white/50 max-w-md mx-auto mb-6">
+          We're compiling decades of interviews, press quotes, and memorable words from
+          The Cure and their contemporaries.
+        </p>
+        <p class="text-white/30 text-sm">
+          To contribute quotes, add items to the <code class="text-primary/70">quotes</code> collection in Directus.
+        </p>
+
+        <!-- Sample quotes in the meantime -->
+        <div class="mt-12 space-y-6 max-w-2xl mx-auto text-left">
+          <div class="glass-tile p-6 stained-glass">
+            <blockquote class="text-white/90 text-lg italic mb-3">
+              "I've never thought of The Cure as a goth band. We're far too happy for that."
+            </blockquote>
+            <p class="text-white/50 text-sm">- Robert Smith</p>
+          </div>
+          <div class="glass-tile p-6">
+            <blockquote class="text-white/90 text-lg italic mb-3">
+              "The only way I can describe the music we make is that it's like a beautiful sadness."
+            </blockquote>
+            <p class="text-white/50 text-sm">- Robert Smith</p>
+          </div>
+          <div class="glass-tile p-6">
+            <blockquote class="text-white/90 text-lg italic mb-3">
+              "I don't think of us as gloomy. I think we make music that acknowledges the full spectrum of human emotion."
+            </blockquote>
+            <p class="text-white/50 text-sm">- Robert Smith</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <div class="text-center mt-12">
+    <a href="/wiki" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      Back to Wiki
+    </a>
+  </div>
+</MainLayout>

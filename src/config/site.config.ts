@@ -140,6 +140,7 @@ export const siteConfig: SiteConfig = {
         { name: "News", path: "/news" },
         { name: "Gallery", path: "/gallery" },
         { name: "Statistics", path: "/stats" },
+        { name: "On This Day", path: "/on-this-day" },
       ],
       community: [
         { name: "Forums", path: "/community" },

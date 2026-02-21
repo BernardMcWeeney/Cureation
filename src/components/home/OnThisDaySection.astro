@@ -1,0 +1,88 @@
+---
+import GothicCobweb from '../GothicCobweb.astro';
+import { getSetlistsWithSongs, getTimelineEvents } from '../../lib/directus';
+
+const today = new Date();
+const currentMonth = today.getMonth() + 1;
+const currentDay = today.getDate();
+const dateString = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+const [setlists, events] = await Promise.all([
+  getSetlistsWithSongs(),
+  getTimelineEvents(),
+]);
+
+const todaySetlists = setlists.filter(s => {
+  if (!s.date) return false;
+  const d = new Date(s.date);
+  return d.getMonth() + 1 === currentMonth && d.getDate() === currentDay;
+}).sort((a, b) => b.year - a.year);
+
+const todayEvents = events.filter(e => {
+  if (!e.date) return false;
+  const d = new Date(e.date);
+  return d.getMonth() + 1 === currentMonth && d.getDate() === currentDay;
+});
+
+const hasContent = todaySetlists.length > 0 || todayEvents.length > 0;
+---
+
+<section class="py-16">
+  <div class="responsive-container">
+    <div class="gothic-heading mb-8">
+      <h2 class="font-heading text-xl md:text-2xl text-primary tracking-wider">On This Day</h2>
+    </div>
+
+    <a href="/on-this-day" class="block group">
+      <div class="glass-tile p-8 gothic-corners relative overflow-hidden bg-cobweb">
+        <GothicCobweb position="top-right" size="md" opacity={0.08} />
+
+        <div class="flex items-center gap-3 mb-4">
+          <div class="p-2 rounded-sm bg-primary/20 backdrop-blur-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <span class="text-white/60 text-sm uppercase tracking-[0.15em]">{dateString}</span>
+        </div>
+
+        {hasContent ? (
+          <div>
+            {todaySetlists.length > 0 && (
+              <div class="mb-4">
+                <p class="text-white/50 text-xs uppercase tracking-wider mb-2">Shows</p>
+                {todaySetlists.slice(0, 3).map(s => (
+                  <div class="flex items-center justify-between mb-2">
+                    <p class="text-white text-sm">{s.venue}, {s.city}</p>
+                    <span class="text-primary font-bold text-sm">{s.year}</span>
+                  </div>
+                ))}
+                {todaySetlists.length > 3 && (
+                  <p class="text-white/30 text-xs">+{todaySetlists.length - 3} more shows</p>
+                )}
+              </div>
+            )}
+            {todayEvents.length > 0 && (
+              <div>
+                <p class="text-white/50 text-xs uppercase tracking-wider mb-2">Events</p>
+                {todayEvents.slice(0, 2).map(e => (
+                  <div class="flex items-center justify-between mb-2">
+                    <p class="text-white text-sm">{e.title}</p>
+                    <span class="text-purple-400 font-bold text-sm">{e.year}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <p class="text-white/50">No recorded events on this date. Explore the full archive for more.</p>
+        )}
+
+        <div class="flex items-center gap-2 mt-4 text-primary text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+          <span>View full history</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>
