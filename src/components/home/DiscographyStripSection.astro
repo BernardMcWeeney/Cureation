@@ -1,11 +1,9 @@
 ---
 import { fetchAlbums, formatAlbum } from '../../lib/directus';
 
-// Fetch real album data from Directus
 const rawAlbums = await fetchAlbums();
 const allAlbums = rawAlbums.map(formatAlbum);
 
-// Filter to studio albums and sort chronologically
 const albums = allAlbums
   .filter(a => a.type === 'studio')
   .sort((a, b) => parseInt(a.year || '0') - parseInt(b.year || '0'))
@@ -20,16 +18,15 @@ const albums = allAlbums
 <section class="py-16">
   <div class="responsive-container">
     <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center gap-4">
-        <h2 class="font-heading text-2xl text-primary">Discography</h2>
-        <div class="h-px w-20 bg-gradient-to-r from-primary/30 to-transparent"></div>
+      <div class="gothic-heading flex-1">
+        <h2 class="font-heading text-xl md:text-2xl text-primary tracking-wider">Discography</h2>
       </div>
       <a
         href="/discography"
-        class="group text-sm text-white/50 hover:text-primary transition-colors flex items-center gap-1.5"
+        class="group text-sm text-white/40 hover:text-primary transition-colors flex items-center gap-1.5 ml-4"
       >
         Full discography
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
         </svg>
       </a>
@@ -43,7 +40,7 @@ const albums = allAlbums
             href={`/discography/${album.slug}`}
             class="group flex-none snap-start w-32 md:w-40"
           >
-            <div class="relative aspect-square overflow-hidden rounded-lg ring-1 ring-white/10 group-hover:ring-primary/50 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.6),0_0_20px_rgba(var(--color-primary-rgb),0.2)]">
+            <div class="relative aspect-square overflow-hidden rounded-sm ring-1 ring-white/[0.06] group-hover:ring-primary/40 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.7),0_0_20px_rgba(var(--color-primary-rgb),0.15)]">
               <img
                 src={album.cover}
                 alt={album.title}
@@ -53,14 +50,10 @@ const albums = allAlbums
               <!-- Overlay on hover -->
               <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-2.5">
                 <p class="text-white text-xs font-medium text-shadow leading-tight album-title">{album.title}</p>
-                <p class="text-primary text-xs text-shadow mt-0.5">{album.year}</p>
-              </div>
-              <!-- Year badge always visible -->
-              <div class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-sm text-white/60 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                {album.year}
+                <p class="text-primary/80 text-xs text-shadow mt-0.5">{album.year}</p>
               </div>
             </div>
-            <p class="mt-2 text-white/60 text-xs text-center truncate px-1 group-hover:text-white/80 transition-colors duration-200">
+            <p class="mt-2 text-white/40 text-xs text-center truncate px-1 group-hover:text-white/70 transition-colors duration-200">
               {album.year}
             </p>
           </a>
@@ -68,9 +61,9 @@ const albums = allAlbums
       </div>
 
       <!-- Right fade -->
-      <div class="absolute top-0 right-0 bottom-3 w-20 bg-gradient-to-l from-black to-transparent pointer-events-none z-10"></div>
+      <div class="absolute top-0 right-0 bottom-3 w-20 bg-gradient-to-l from-[#050505] to-transparent pointer-events-none z-10"></div>
       <!-- Left fade -->
-      <div class="absolute top-0 left-0 bottom-3 w-8 bg-gradient-to-r from-black to-transparent pointer-events-none z-10"></div>
+      <div class="absolute top-0 left-0 bottom-3 w-8 bg-gradient-to-r from-[#050505] to-transparent pointer-events-none z-10"></div>
     </div>
   </div>
 </section>
@@ -78,7 +71,7 @@ const albums = allAlbums
 <style>
   .album-strip {
     scrollbar-width: thin;
-    scrollbar-color: rgba(var(--color-primary-rgb), 0.25) transparent;
+    scrollbar-color: rgba(var(--color-primary-rgb), 0.2) transparent;
   }
   .album-strip::-webkit-scrollbar {
     height: 3px;
@@ -87,7 +80,7 @@ const albums = allAlbums
     background: transparent;
   }
   .album-strip::-webkit-scrollbar-thumb {
-    background: rgba(var(--color-primary-rgb), 0.25);
+    background: rgba(var(--color-primary-rgb), 0.2);
     border-radius: 2px;
   }
   .album-title {

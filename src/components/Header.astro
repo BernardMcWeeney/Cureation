@@ -3,58 +3,62 @@
 
 import siteConfig, { getNavigation } from '../config/site.config';
 
-// Navigation items from config
 const navItems = getNavigation();
-// Current path for active links
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="fixed w-full z-50 backdrop-blur-xl bg-black/40 border-b" style="border-image: linear-gradient(90deg, transparent, rgba(var(--color-primary-rgb), 0.3), transparent) 1;">
+<header class="fixed w-full z-50 backdrop-blur-xl bg-black/60 border-b border-white/[0.06]">
+  <!-- Gothic ornamental top line -->
+  <div class="absolute top-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 5%, rgba(var(--color-primary-rgb), 0.3) 30%, rgba(var(--color-primary-rgb), 0.5) 50%, rgba(var(--color-primary-rgb), 0.3) 70%, transparent 95%);"></div>
+
   <div class="responsive-container">
     <div class="flex items-center justify-between h-16 md:h-20">
       <!-- Logo -->
       <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center">
-          <img src="/logo.png" alt="Logo" class="w-6 h-6 rounded-full object-contain" />
+        <div class="w-10 h-10 bg-black/40 backdrop-blur-md rounded-sm border border-white/15 flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" class="w-6 h-6 rounded-sm object-contain" />
         </div>
         <span class="font-display text-5xl text-primary group-hover:text-primary/80 transition-colors duration-300">
           {siteConfig.logo.text}
         </span>
       </a>
 
-      <!-- Desktop Nav -->
-      <nav class="hidden md:flex">
-        <ul class="flex items-center gap-6">
-          {navItems.map(item => (
-            <li>
+      <!-- Desktop Nav with gothic separators -->
+      <nav class="hidden md:flex" aria-label="Main navigation">
+        <ul class="flex items-center gap-1">
+          {navItems.map((item, index) => (
+            <li class="flex items-center">
               <a
                 href={item.path}
-                class={`px-4 py-2 relative rounded-lg transition-colors duration-300
-                  ${currentPath === item.path 
-                    ? 'text-primary font-medium' 
-                    : 'text-white hover:text-primary'}
+                class={`px-4 py-2 relative text-sm tracking-widest uppercase transition-all duration-300
+                  ${currentPath === item.path
+                    ? 'text-primary font-medium'
+                    : 'text-white/80 hover:text-primary'}
                 `}
               >
                 {item.name}
                 {currentPath === item.path && (
-                  <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full"></span>
+                  <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[1px] bg-primary"></span>
                 )}
               </a>
+              {index < navItems.length - 1 && (
+                <span class="text-white/10 text-xs mx-1" aria-hidden="true">&#9670;</span>
+              )}
             </li>
           ))}
         </ul>
       </nav>
 
       <!-- Controls -->
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3">
         <!-- Search -->
         <button
           id="search-button"
-          class="text-primary w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/30 rounded-full border border-white/15 hover:border-primary/40 hover:bg-black/40 hover:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)] transition-all duration-300"
+          class="text-primary/80 w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/40 rounded-sm border border-white/10 hover:border-primary/30 hover:bg-black/50 hover:text-primary transition-all duration-300"
           aria-label="Open search"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <span class="sr-only">Search</span>
@@ -63,79 +67,96 @@ const currentPath = Astro.url.pathname;
         <!-- Mobile Toggle -->
         <button
           id="mobile-menu-toggle"
-          class="text-primary md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/30 rounded-full border border-white/15 hover:border-primary/40 hover:bg-black/40 hover:shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.3)] transition-all duration-300"
+          class="text-primary/80 md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/40 rounded-sm border border-white/10 hover:border-primary/30 hover:bg-black/50 hover:text-primary transition-all duration-300"
           aria-label="Open main menu"
           aria-expanded="false"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
               d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
       </div>
     </div>
   </div>
+
+  <!-- Gothic ornamental bottom line -->
+  <div class="absolute bottom-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 10%, rgba(var(--color-primary-rgb), 0.15) 30%, rgba(var(--color-primary-rgb), 0.2) 50%, rgba(var(--color-primary-rgb), 0.15) 70%, transparent 90%);"></div>
 </header>
 
 <!-- Search Overlay -->
 <div
   id="search-overlay"
-  class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-40 flex items-center justify-center p-4"
+  class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-40 flex items-center justify-center p-4"
   role="dialog" aria-modal="true"
 >
   <div class="relative w-full max-w-md">
-    <button
-      id="close-search"
-      class="absolute top-2 right-2 text-white hover:text-white/80"
-      aria-label="Close search"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-    
-    <!-- Fixed form element with proper method and action -->
-    <form id="search-form" action="/lyrics/search" method="get">
-      <input
-        id="search-input"
-        name="q"
-        type="search"
-        placeholder="Search..."
-        class="w-full p-3 rounded-lg bg-white/10 backdrop-blur-lg text-white placeholder-white/50 border border-white/20 focus:ring-2 focus:ring-primary focus:border-primary/50"
-      />
-      <!-- Add a submit button for accessibility -->
-      <button type="submit" class="sr-only">Search</button>
-    </form>
+    <div class="gothic-corners p-6 glass-panel">
+      <button
+        id="close-search"
+        class="absolute top-3 right-3 text-white/60 hover:text-white transition-colors"
+        aria-label="Close search"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <p class="font-heading text-sm text-primary/60 uppercase tracking-[0.2em] mb-4">Search the Archive</p>
+
+      <form id="search-form" action="/lyrics/search" method="get">
+        <input
+          id="search-input"
+          name="q"
+          type="search"
+          placeholder="Search lyrics, albums, setlists..."
+          class="w-full p-3 rounded-sm bg-black/50 backdrop-blur-lg text-white placeholder-white/40 border border-white/15 focus:ring-1 focus:ring-primary/50 focus:border-primary/30 transition-all"
+        />
+        <button type="submit" class="sr-only">Search</button>
+      </form>
+    </div>
   </div>
 </div>
 
 <!-- Mobile Nav -->
 <nav
   id="mobile-menu"
-  class="hidden fixed inset-0 bg-black/90 backdrop-blur-lg z-30 p-6 md:hidden"
+  class="hidden fixed inset-0 bg-black/95 backdrop-blur-lg z-30 md:hidden"
+  aria-label="Mobile navigation"
 >
-  <ul class="flex flex-col gap-4">
-    {navItems.map(item => (
-      <li>
-        <a
-          href={item.path}
-          class={`block px-4 py-2 rounded-lg transition-colors duration-300
-            ${currentPath === item.path
-              ? 'text-primary font-medium'
-              : 'text-white hover:text-primary'}
-          `}
-        >
-          {item.name}
-        </a>
-      </li>
-    ))}
-  </ul>
+  <div class="flex flex-col h-full justify-center px-8">
+    <!-- Gothic ornamental top -->
+    <div class="gothic-divider mb-8">
+      <span class="gothic-diamond"></span>
+    </div>
+
+    <ul class="flex flex-col gap-2">
+      {navItems.map(item => (
+        <li>
+          <a
+            href={item.path}
+            class={`block px-6 py-3 text-center text-lg tracking-[0.15em] uppercase transition-all duration-300 border-b border-white/5
+              ${currentPath === item.path
+                ? 'text-primary font-medium'
+                : 'text-white/70 hover:text-primary'}
+            `}
+          >
+            {item.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Gothic ornamental bottom -->
+    <div class="gothic-divider mt-8">
+      <span class="gothic-diamond"></span>
+    </div>
+  </div>
 </nav>
 
 <script>
   function bindControls() {
-    // ── Search Overlay Toggle ─────────────────────────
     const searchBtn = document.getElementById('search-button');
     const closeSearch = document.getElementById('close-search');
     const overlay = document.getElementById('search-overlay');
@@ -160,7 +181,6 @@ const currentPath = Astro.url.pathname;
       };
     }
 
-    // Handle form submission
     if (searchForm && searchInput) {
       searchForm.addEventListener('submit', (e) => {
         const query = searchInput.value.trim();
@@ -170,14 +190,12 @@ const currentPath = Astro.url.pathname;
       });
     }
 
-    // Handle escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) {
         overlay.classList.add('hidden');
       }
     });
 
-    // ── Mobile Nav Toggle ────────────────────────────
     const mobileToggle = document.getElementById('mobile-menu-toggle');
     const mobileMenu   = document.getElementById('mobile-menu');
 
@@ -187,11 +205,23 @@ const currentPath = Astro.url.pathname;
         mobileToggle.setAttribute('aria-expanded', String(!isOpen));
         mobileMenu.classList.toggle('hidden');
       };
+
+      mobileMenu.onclick = (e) => {
+        if (e.target === mobileMenu) {
+          mobileMenu.classList.add('hidden');
+          mobileToggle.setAttribute('aria-expanded', 'false');
+        }
+      };
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileMenu && !mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+        mobileToggle?.setAttribute('aria-expanded', 'false');
+      }
+    });
   }
 
-  // bind on initial load
   document.addEventListener('DOMContentLoaded', bindControls);
-  // re-bind after Astro client navigation
   document.addEventListener('astro:page-load', bindControls);
 </script>

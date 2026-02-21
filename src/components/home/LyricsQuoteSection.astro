@@ -28,30 +28,35 @@ const lyricsSlug = song?.title
           src={song.albumCover}
           alt=""
           class="absolute inset-0 w-full h-full object-cover scale-110"
-          style="filter: blur(60px) saturate(1.8) brightness(0.5);"
+          style="filter: blur(60px) saturate(1.5) brightness(0.4);"
           loading="lazy"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black"></div>
         <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80"></div>
+        <!-- Gothic vignette -->
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%);"></div>
       </div>
     )}
 
     <!-- Decorative noise grain -->
-    <div class="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-noise mix-blend-overlay"></div>
+    <div class="absolute inset-0 z-0 opacity-[0.04] pointer-events-none bg-noise mix-blend-overlay"></div>
 
     <div class="responsive-container relative z-10 text-center" style="max-width: 860px;">
-      <!-- Ornamental divider -->
+      <!-- Gothic ornamental divider -->
       <div class="flex items-center justify-center gap-4 mb-10">
-        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-primary/50"></div>
+        <div class="h-[1px] flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-primary/30"></div>
+        <div class="w-1.5 h-1.5 bg-primary/40 rotate-45"></div>
+        <!-- Gothic quote mark -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="size-5 text-primary/50"
+          class="size-5 text-primary/40"
           fill="currentColor"
           viewBox="0 0 24 24"
         >
           <path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z" />
         </svg>
-        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-primary/50"></div>
+        <div class="w-1.5 h-1.5 bg-primary/40 rotate-45"></div>
+        <div class="h-[1px] flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-primary/30"></div>
       </div>
 
       <!-- Lyric text -->
@@ -66,26 +71,28 @@ const lyricsSlug = song?.title
         href={`/lyrics/${lyricsSlug}`}
         class="group inline-flex flex-col items-center gap-1.5"
       >
-        <p class="text-white/70 text-sm tracking-[0.2em] uppercase group-hover:text-primary transition-colors duration-300">
+        <p class="text-white/60 text-sm tracking-[0.2em] uppercase group-hover:text-primary transition-colors duration-300">
           {song.title}
         </p>
-        <p class="text-white/60 text-xs tracking-widest group-hover:text-primary/60 transition-colors duration-300">
+        <p class="text-white/40 text-xs tracking-widest group-hover:text-primary/50 transition-colors duration-300">
           {song.albumTitle}
           {song.year && ` · ${song.year}`}
         </p>
-        <div class="flex items-center gap-1.5 mt-2 text-white/60 group-hover:text-primary/70 text-xs transition-colors duration-300">
+        <div class="flex items-center gap-1.5 mt-2 text-white/40 group-hover:text-primary/60 text-xs transition-colors duration-300">
           <span>Read full lyrics</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
           </svg>
         </div>
       </a>
 
-      <!-- Closing ornament -->
+      <!-- Closing gothic ornament -->
       <div class="flex items-center justify-center gap-4 mt-10">
-        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-primary/30"></div>
-        <div class="size-1.5 rounded-full bg-primary/40"></div>
-        <div class="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-primary/30"></div>
+        <div class="h-[1px] flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-primary/20"></div>
+        <div class="w-1 h-1 bg-primary/25 rotate-45"></div>
+        <div class="w-1.5 h-1.5 border border-primary/20 rotate-45"></div>
+        <div class="w-1 h-1 bg-primary/25 rotate-45"></div>
+        <div class="h-[1px] flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-primary/20"></div>
       </div>
     </div>
   </section>

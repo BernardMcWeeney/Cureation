@@ -7,57 +7,90 @@ const navigationTiles = [
   { title: 'Lyrics', path: '/lyrics', icon: 'text' }
 ];
 
-// Helper function to get icon component based on name
-const getIconElement = (iconName) => {
+const getIconElement = (iconName: string) => {
   switch (iconName) {
     case 'music':
-      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>';
     case 'list-music':
-      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3M3 6h4M3 10h4M3 14h4"/></svg>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3M3 6h4M3 10h4M3 14h4"/></svg>';
     case 'text':
-      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18 9l-7 7M18 9v6M18 9h6"/></svg>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18 9l-7 7M18 9v6M18 9h6"/></svg>';
     case 'newspaper':
-      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>';
     default:
-      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>';
   }
 };
 ---
 
-<!-- Hero section with full-screen background image -->
-<section class="relative min-h-screen flex items-center justify-center">
-  <!-- Background image - fully visible through glass elements -->
-  <img 
-    src="/images/hero-background.jpg" 
-    alt="The Cure live performance" 
+<!-- Hero section with gothic atmosphere -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+  <!-- Background image -->
+  <img
+    src="/images/hero-background.jpg"
+    alt="The Cure live performance"
     class="absolute inset-0 w-full h-full object-cover object-center z-0"
   />
-  
-  <!-- Subtle gradient overlay for text contrast -->
-  <div class="absolute inset-0 bg-linear-to-b from-black/30 to-black/10 z-10"></div>
-  
+
+  <!-- Dark gothic overlays - deeper vignette -->
+  <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/15 to-black/70 z-10"></div>
+  <div class="absolute inset-0 z-10" style="background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%);"></div>
+
+  <!-- Gothic corner ornaments -->
+  <div class="absolute top-24 left-6 md:left-12 w-12 md:w-16 h-12 md:h-16 border-t border-l border-white/[0.08] z-20 pointer-events-none"></div>
+  <div class="absolute top-24 right-6 md:right-12 w-12 md:w-16 h-12 md:h-16 border-t border-r border-white/[0.08] z-20 pointer-events-none"></div>
+  <div class="absolute bottom-32 left-6 md:left-12 w-12 md:w-16 h-12 md:h-16 border-b border-l border-white/[0.08] z-20 pointer-events-none"></div>
+  <div class="absolute bottom-32 right-6 md:right-12 w-12 md:w-16 h-12 md:h-16 border-b border-r border-white/[0.08] z-20 pointer-events-none"></div>
+
   <!-- Content -->
   <div class="relative z-20 w-full flex flex-col items-center justify-between min-h-screen">
-    <!-- Welcome section - centered vertically with text directly on hero image -->
+    <!-- Welcome section -->
     <div class="flex-1 flex items-center justify-center">
-      <div class="text-center">
-        <h1 class="font-display text-8xl md:text-9xl lg:text-10xl text-white text-shadow-lg mb-8">
-          Welcome to Cureation
+      <div class="text-center px-4">
+        <!-- Gothic ornamental line above -->
+        <div class="flex items-center justify-center gap-3 mb-6">
+          <div class="h-[1px] w-12 md:w-20 bg-gradient-to-r from-transparent to-white/25"></div>
+          <div class="w-1.5 h-1.5 bg-white/25 rotate-45"></div>
+          <div class="h-[1px] w-12 md:w-20 bg-gradient-to-l from-transparent to-white/25"></div>
+        </div>
+
+        <!-- Subtitle -->
+        <p class="font-heading text-xs md:text-sm tracking-[0.3em] uppercase text-white/50 mb-4 text-shadow">
+          A Fan Archive
+        </p>
+
+        <!-- Main title -->
+        <h1 class="font-display text-8xl md:text-9xl lg:text-10xl text-white text-shadow-lg mb-4">
+          Cureation
         </h1>
+
+        <!-- Tagline -->
+        <p class="font-heading text-xs md:text-sm tracking-[0.2em] uppercase text-white/40 text-shadow">
+          Celebrating the music &amp; legacy of The Cure
+        </p>
+
+        <!-- Gothic ornamental line below -->
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <div class="h-[1px] w-8 md:w-16 bg-gradient-to-r from-transparent to-white/15"></div>
+          <div class="w-1 h-1 bg-white/15 rotate-45"></div>
+          <div class="w-1.5 h-1.5 border border-white/15 rotate-45"></div>
+          <div class="w-1 h-1 bg-white/15 rotate-45"></div>
+          <div class="h-[1px] w-8 md:w-16 bg-gradient-to-l from-transparent to-white/15"></div>
+        </div>
       </div>
     </div>
-    
-    <!-- Navigation tiles - bottom section -->
-    <div class="w-full px-4 pb-16">
-      <div class="max-w-5xl mx-auto">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+    <!-- Navigation tiles with gothic styling -->
+    <div class="w-full px-4 pb-12 md:pb-16">
+      <div class="max-w-4xl mx-auto">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           {navigationTiles.map(tile => (
             <a
               href={tile.path}
-              class="p-3 flex flex-row items-center gap-3 text-center rounded-xl border border-white/20 backdrop-blur-lg bg-white/10 hover:bg-white/15 hover:border-primary/40 transition-all duration-300 group"
+              class="group p-3 flex flex-row items-center gap-3 rounded-sm border border-white/[0.08] backdrop-blur-lg bg-black/40 hover:bg-black/50 hover:border-primary/25 transition-all duration-300"
             >
-              <div class="text-white group-hover:text-primary transition-colors duration-300" set:html={getIconElement(tile.icon)} />
-              <span class="text-base text-white font-medium group-hover:text-white transition-colors duration-300">
+              <div class="text-white/50 group-hover:text-primary transition-colors duration-300" set:html={getIconElement(tile.icon)} />
+              <span class="text-sm tracking-widest uppercase text-white/70 font-medium group-hover:text-white transition-colors duration-300">
                 {tile.title}
               </span>
             </a>

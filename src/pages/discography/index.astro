@@ -45,11 +45,11 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
   description="The complete discography of The Cure — studio albums, compilations, live albums, deluxe editions, EPs, box sets, and more."
   pageClass="bg-black"
 >
-  <!-- Hero Section -->
+  <!-- Hero Section with gothic styling -->
   <section class="mb-10">
-    <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
+    <div class="glass-panel overflow-hidden relative gothic-corners">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
         <div class="flex items-center gap-3 mb-4">
@@ -60,22 +60,22 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
         <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow" transition:animate="slide">
           Discography
         </h1>
-        <p class="text-white/90 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
           Every release from The Cure — spanning over four decades of studio albums, compilations, live recordings, deluxe editions, and more.
         </p>
 
-        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/20">
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{totalReleases}</span>
-            <span class="text-white/80 text-base font-medium">Releases</span>
+            <span class="text-white/60 text-base font-medium">Releases</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{studioAlbums.length}</span>
-            <span class="text-white/80 text-base font-medium">Studio Albums</span>
+            <span class="text-white/60 text-base font-medium">Studio Albums</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">45+</span>
-            <span class="text-white/80 text-base font-medium">Years</span>
+            <span class="text-white/60 text-base font-medium">Years</span>
           </div>
         </div>
       </div>
@@ -91,14 +91,14 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
         return (
           <button
             type="button"
-            class={`type-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${idx === 0 ? 'active' : ''}`}
+            class={`type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide ${idx === 0 ? 'active' : ''}`}
             data-tab={tab.key}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d={tab.icon} />
             </svg>
             {tab.label}
-            <span class="tab-count px-1.5 py-0.5 rounded-md text-xs">{count}</span>
+            <span class="tab-count px-1.5 py-0.5 rounded-sm text-xs">{count}</span>
           </button>
         );
       })}
@@ -109,11 +109,11 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
   <section id="panel-studio" class="type-panel">
     <!-- Sub-toggle: By Era vs Chronological -->
     <div class="flex items-center gap-3 mb-8">
-      <div class="flex items-center gap-1 p-1 rounded-lg bg-black/40 border border-white/10">
-        <button type="button" id="studio-era-btn" class="studio-view-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all active">By Era</button>
-        <button type="button" id="studio-chrono-btn" class="studio-view-btn px-3 py-1.5 rounded-md text-xs font-medium transition-all">Chronological</button>
+      <div class="flex items-center gap-1 p-1 rounded-sm bg-black/40 border border-white/[0.08]">
+        <button type="button" id="studio-era-btn" class="studio-view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all active">By Era</button>
+        <button type="button" id="studio-chrono-btn" class="studio-view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all">Chronological</button>
       </div>
-      <span class="text-sm text-white/40">{studioAlbums.length} studio albums</span>
+      <span class="text-sm text-white/35">{studioAlbums.length} studio albums</span>
     </div>
 
     <!-- Era View -->
@@ -128,18 +128,18 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
           <div class="era-section" data-era={era}>
             <div class="flex items-center gap-4 mb-6">
               <div class="flex items-center gap-3">
-                <div class={`size-9 rounded-lg ${colors.bg} border ${colors.border} flex items-center justify-center`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" class={`size-4 ${colors.text}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class={`size-9 rounded-sm ${colors.bg} border ${colors.border} flex items-center justify-center`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" class={`size-4 ${colors.text}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" />
                   </svg>
                 </div>
                 <div>
                   <h2 class={`font-heading text-xl md:text-2xl ${colors.text}`}>{meta.name}</h2>
-                  <p class="text-white/50 text-xs">{meta.years} · {meta.description}</p>
+                  <p class="text-white/45 text-xs tracking-wide">{meta.years} · {meta.description}</p>
                 </div>
               </div>
-              <div class="flex-1 h-px bg-gradient-to-r from-white/20 to-transparent"></div>
-              <span class={`px-2.5 py-1 rounded-full ${colors.bg} border ${colors.border} ${colors.text} text-xs font-medium`}>
+              <div class="flex-1 h-px bg-gradient-to-r from-white/15 to-transparent"></div>
+              <span class={`px-2.5 py-1 rounded-sm ${colors.bg} border ${colors.border} ${colors.text} text-xs font-medium tracking-wider`}>
                 {eraAlbums.length}
               </span>
             </div>
@@ -211,8 +211,10 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
   })}
 
   <!-- Era Timeline (always visible at bottom) -->
-  <section class="mt-16 pt-8 border-t border-white/10">
-    <h2 class="text-2xl text-white mb-8">The Cure Through the Eras</h2>
+  <section class="mt-16 pt-8 border-t border-white/[0.08]">
+    <div class="gothic-heading mb-8">
+      <h2 class="font-heading text-xl md:text-2xl text-primary tracking-wider">The Cure Through the Eras</h2>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       {eraOrder.map(era => {
         const meta = eraMetadata[era];
@@ -222,12 +224,12 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
         return (
           <button
             type="button"
-            class={`era-quick-nav group p-4 rounded-xl ${colors.bg} border ${colors.border} hover:scale-105 transition-all duration-300 text-left`}
+            class={`era-quick-nav group p-4 rounded-sm ${colors.bg} border ${colors.border} hover:scale-105 transition-all duration-300 text-left gothic-corners`}
             data-target-era={era}
           >
             <p class={`font-heading text-lg ${colors.text}`}>{meta.name}</p>
-            <p class="text-white/50 text-xs mb-2">{meta.years}</p>
-            <p class="text-white/70 text-sm">{count} albums</p>
+            <p class="text-white/45 text-xs mb-2 tracking-wide">{meta.years}</p>
+            <p class="text-white/60 text-sm">{count} albums</p>
           </button>
         );
       })}
@@ -236,41 +238,41 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
 </MainLayout>
 
 <style>
-  /* Tab styling */
+  /* Tab styling - gothic squared */
   .type-tab {
-    color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
   .type-tab:hover {
     color: rgba(255, 255, 255, 0.85);
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
   }
   .type-tab.active {
-    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.15);
+    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.12);
     color: var(--color-primary);
-    border-color: rgba(var(--color-primary-rgb, 137, 176, 201), 0.3);
+    border-color: rgba(var(--color-primary-rgb, 137, 176, 201), 0.25);
   }
   .tab-count {
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.35);
   }
   .type-tab.active .tab-count {
-    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.2);
+    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.15);
     color: var(--color-primary);
   }
 
   /* Studio sub-toggle */
   .studio-view-btn {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.45);
   }
   .studio-view-btn:hover {
     color: rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
   }
   .studio-view-btn.active {
-    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.2);
+    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.15);
     color: var(--color-primary);
   }
 
