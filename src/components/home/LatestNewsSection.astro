@@ -26,11 +26,10 @@ const categoryColors: Record<string, string> = {
     </div>
 
     <a href={`/news/${post.slug}`} class="group block">
-      <div
-        class="glass-tile-image overflow-hidden gothic-corners"
-        style={post.featuredImage ? `--tile-bg-image: url('${post.featuredImage}')` : ''}
-      >
-        <div class="flex flex-col md:flex-row">
+      <div class="glass-panel overflow-hidden relative bg-cobweb">
+        <div class="absolute -top-24 -left-24 w-52 h-52 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -right-20 w-44 h-44 rounded-full bg-accent/[0.08] blur-2xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row relative z-10">
           {/* Image */}
           <div class="md:w-2/5 relative aspect-[16/9] md:aspect-auto overflow-hidden">
             {post.featuredImage ? (

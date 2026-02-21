@@ -6,15 +6,15 @@ const currentYear = new Date().getFullYear();
 const footerLinks = getFooterLinks();
 ---
 
-<footer class="relative mt-16 pt-8 bg-black/50 backdrop-blur-xl border-t border-white/[0.06] overflow-hidden">
+<footer class="relative mt-12 pt-6 bg-black/55 backdrop-blur-xl border-t border-white/[0.06] overflow-hidden">
   <GothicCobweb position="bottom-left" size="lg" opacity={0.05} />
   <GothicCobweb position="bottom-right" size="md" opacity={0.04} />
   <!-- Gothic ornamental top line -->
   <div class="absolute top-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 5%, rgba(var(--color-primary-rgb), 0.2) 30%, rgba(var(--color-primary-rgb), 0.35) 50%, rgba(var(--color-primary-rgb), 0.2) 70%, transparent 95%);"></div>
 
-  <div class="responsive-container py-16">
+  <div class="responsive-container py-10 md:py-12">
     <!-- Gothic divider at top -->
-    <div class="flex items-center justify-center gap-3 mb-12">
+    <div class="flex items-center justify-center gap-3 mb-8">
       <div class="h-[1px] flex-1 max-w-32 bg-gradient-to-r from-transparent to-primary/20"></div>
       <div class="w-1.5 h-1.5 bg-primary/30 rotate-45"></div>
       <div class="w-2 h-2 border border-primary/20 rotate-45"></div>
@@ -22,10 +22,10 @@ const footerLinks = getFooterLinks();
       <div class="h-[1px] flex-1 max-w-32 bg-gradient-to-l from-transparent to-primary/20"></div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10">
       <!-- Brand Section -->
-      <div class="md:col-span-4 lg:col-span-5">
-        <a href="/" class="flex items-center gap-3 mb-6 group">
+      <div class="md:col-span-5 lg:col-span-5">
+        <a href="/" class="flex items-center gap-3 mb-5 group">
           <div class="w-10 h-10 bg-black/40 backdrop-blur-md rounded-sm border border-white/15 flex items-center justify-center">
             <img
               src="/logo.png"
@@ -40,6 +40,20 @@ const footerLinks = getFooterLinks();
 
         <div class="mb-6 max-w-md">
           <p class="text-white/70">{siteConfig.description}</p>
+        </div>
+
+        <div class="mb-6 space-y-2">
+          <p class="text-white/50 text-xs uppercase tracking-[0.16em]">Contact</p>
+          <div class="flex flex-wrap gap-x-4 gap-y-1">
+            {Object.values(siteConfig.contact).map((item) => (
+              <a
+                href={`mailto:${item.email}`}
+                class="text-white/60 hover:text-primary transition-colors duration-300 text-sm"
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
         </div>
 
         <div class="flex gap-4">
@@ -70,8 +84,8 @@ const footerLinks = getFooterLinks();
       </div>
 
       <!-- Navigation and Contact Links -->
-      <div class="md:col-span-8 lg:col-span-7">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+      <div class="md:col-span-7 lg:col-span-7">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
           <!-- Explore Links -->
           <div>
             <h4 class="font-heading text-sm uppercase tracking-[0.2em] mb-5 text-primary/80">Explore</h4>
@@ -111,42 +125,24 @@ const footerLinks = getFooterLinks();
               ))}
             </ul>
           </div>
-
-          <!-- Contact Links -->
-          <div>
-            <h4 class="font-heading text-sm uppercase tracking-[0.2em] mb-5 text-primary/80">Contact</h4>
-            <ul class="space-y-3">
-              {Object.values(siteConfig.contact).map((item) => (
-                <li>
-                  <a
-                    href={`mailto:${item.email}`}
-                    class="text-white/60 hover:text-primary transition-colors duration-300 flex items-center gap-2 text-sm"
-                  >
-                    <span class="w-1 h-1 bg-primary/30 rotate-45 flex-shrink-0"></span>
-                    {item.label}: {item.email}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
       </div>
     </div>
 
     <!-- Bottom Section with gothic divider -->
-    <div class="mt-16">
-      <div class="flex items-center justify-center gap-3 mb-8">
+    <div class="mt-10">
+      <div class="flex items-center justify-center gap-3 mb-6">
         <div class="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/[0.06]"></div>
         <div class="w-1 h-1 bg-white/10 rotate-45"></div>
         <div class="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/[0.06]"></div>
       </div>
 
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-3">
         <p class="text-sm text-white/50">
           &copy; {currentYear} {siteConfig.name}. All rights reserved.
         </p>
 
-        <p class="text-xs text-white/40 text-center max-w-lg">
+        <p class="text-xs text-white/40 text-center max-w-lg leading-relaxed">
           Cureation is a fan project not affiliated with The Cure or their representatives.
           All media remain property of their respective owners.
         </p>

@@ -1,7 +1,13 @@
 ---
 import type { Album } from '../../types/directus';
-import { mockAlbums } from '../../lib/mockData';
 import siteConfig from '../../config/site.config';
+import { mockAlbums } from '../../lib/mockData';
+import {
+  fetchAlbums,
+  fetchSongs,
+  formatAlbum,
+  getSetlistsWithSongs,
+} from '../../lib/directus';
 
 interface Props {
   album?: Album | null;
@@ -10,13 +16,71 @@ interface Props {
 
 const { album: propAlbum, showHeader = true } = Astro.props;
 
-// Use featured album from config, or prop, or fallback to mock
 const featuredSlug = siteConfig.featured?.album || 'disintegration';
-const album: Album = propAlbum || mockAlbums.find(a => a.slug === featuredSlug) || mockAlbums[0];
+const directusAlbums = (await fetchAlbums()).map(formatAlbum);
+const sortedStudioAlbums = directusAlbums
+  .filter((album) => (album.type || 'studio') === 'studio')
+  .sort((a, b) => parseInt(b.year || '0', 10) - parseInt(a.year || '0', 10));
 
-// Calculate album age
-const releaseYear = album.releaseDate ? new Date(album.releaseDate).getFullYear() : null;
+const album: Album =
+  propAlbum ||
+  directusAlbums.find((candidate) => candidate.slug === featuredSlug) ||
+  sortedStudioAlbums[0] ||
+  mockAlbums.find((candidate) => candidate.slug === featuredSlug) ||
+  mockAlbums[0];
+
+const parsedReleaseYear = album.year ? parseInt(album.year, 10) : NaN;
+const releaseYear = Number.isFinite(parsedReleaseYear) ? parsedReleaseYear : null;
 const yearsOld = releaseYear ? new Date().getFullYear() - releaseYear : null;
+
+const [songs, setlists] = await Promise.all([
+  fetchSongs(),
+  getSetlistsWithSongs(),
+]);
+
+const albumId = Number(album.id);
+const albumSongTitles = new Set(
+  songs
+    .filter((song) => Number.isFinite(albumId) && song.album === albumId)
+    .map((song) => song.title.toLowerCase().trim())
+);
+
+const albumSongPlayCounts = new Map<string, number>();
+setlists.forEach((setlist) => {
+  setlist.songs.forEach((song) => {
+    const normalizedTitle = song.title.toLowerCase().trim();
+    if (albumSongTitles.has(normalizedTitle)) {
+      albumSongPlayCounts.set(song.title, (albumSongPlayCounts.get(song.title) || 0) + 1);
+    }
+  });
+});
+
+const topLiveSongs = Array.from(albumSongPlayCounts.entries())
+  .map(([songTitle, totalPlays]) => ({ songTitle, totalPlays }))
+  .sort((a, b) => b.totalPlays - a.totalPlays)
+  .slice(0, 3);
+const totalLivePlays = Array.from(albumSongPlayCounts.values()).reduce((total, count) => total + count, 0);
+
+const latestAlbumSetlists = setlists
+  .filter((setlist) =>
+    setlist.songs.some((song) => {
+      const normalizedTitle = song.title.toLowerCase().trim();
+      return albumSongTitles.size > 0
+        ? albumSongTitles.has(normalizedTitle)
+        : topLiveSongs.some((liveSong) => liveSong.songTitle.toLowerCase().trim() === normalizedTitle);
+    })
+  )
+  .slice(0, 2);
+
+const albumTypeLabel = (() => {
+  switch (album.type) {
+    case 'studio': return 'Studio Album';
+    case 'live': return 'Live Album';
+    case 'compilation': return 'Compilation';
+    case 'ep': return 'EP';
+    default: return 'Release';
+  }
+})();
 ---
 
 <div class="h-full">
@@ -28,92 +92,109 @@ const yearsOld = releaseYear ? new Date().getFullYear() - releaseYear : null;
   )}
 
   <a href={`/discography/${album.slug}`} class="group block h-full">
-    <div
-      class="glass-tile-image overflow-hidden h-full"
-      style={album.coverImage ? `--tile-bg-image: url('${album.coverImage}')` : ''}
-    >
-      <div class="flex flex-col md:flex-row h-full">
-        <!-- Album Cover -->
-        <div class="md:w-2/5 relative">
-          <div class="aspect-square md:aspect-auto md:h-full overflow-hidden">
-            {album.coverImage ? (
-              <img
-                src={album.coverImage}
-                alt={album.title}
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                loading="lazy"
-              />
-            ) : (
-              <div class="w-full h-full min-h-[280px] bg-gradient-to-br from-primary/30 via-black to-accent/20 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-20 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                  <circle cx="12" cy="12" r="10"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </div>
-            )}
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/70 md:block hidden"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent md:hidden"></div>
-          </div>
+    <div class="glass-panel overflow-hidden h-full">
+      <div class="flex flex-col lg:flex-row h-full">
+        <div class="lg:w-[36%] relative border-b lg:border-b-0 lg:border-r border-white/10">
+          {album.coverImage ? (
+            <img
+              src={album.coverImage}
+              alt={album.title}
+              class="w-full h-full object-cover min-h-[280px] lg:min-h-full transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div class="w-full h-full min-h-[280px] bg-gradient-to-br from-primary/20 via-black to-accent/20"></div>
+          )}
 
-          <!-- Featured badge -->
           <div class="absolute top-4 left-4">
-            <div class="px-3 py-1 rounded-md bg-primary/90 backdrop-blur-sm text-white text-xs font-medium uppercase tracking-wider">
+            <div class="px-3 py-1 rounded-sm bg-primary/85 text-white text-xs font-medium uppercase tracking-wider">
               Featured
             </div>
           </div>
         </div>
 
-        <!-- Album Info -->
-        <div class="md:w-3/5 p-6 md:p-8 flex flex-col justify-center relative z-10">
+        <div class="lg:w-[64%] p-6 md:p-8 flex flex-col">
           <div class="flex flex-wrap items-center gap-3 mb-4">
-            {album.type && (
-              <span class="px-2 py-1 rounded-md bg-white/15 backdrop-blur-sm text-white/80 text-xs uppercase tracking-wider">
-                {album.type}
-              </span>
-            )}
+            <span class="px-2 py-1 rounded-sm bg-white/10 border border-white/15 text-white/80 text-xs uppercase tracking-wider">
+              {albumTypeLabel}
+            </span>
             {releaseYear && (
-              <span class="text-white/60 text-sm">{releaseYear}</span>
+              <span class="text-white/70 text-sm">{releaseYear}</span>
             )}
-            {yearsOld && (
-              <span class="text-white/70 text-sm">({yearsOld} years ago)</span>
+            {yearsOld !== null && (
+              <span class="text-white/55 text-sm">{yearsOld} years old</span>
+            )}
+            {album.recordLabel && (
+              <span class="text-white/55 text-sm">Label: {album.recordLabel}</span>
             )}
           </div>
 
-          <h3 class="font-heading text-3xl md:text-4xl text-white mb-4 group-hover:text-primary transition-colors duration-300 text-shadow">
+          <h3 class="font-heading text-3xl md:text-4xl text-white mb-4 group-hover:text-primary transition-colors text-shadow">
             {album.title}
           </h3>
 
-          {album.description && (
-            <p class="text-white/80 mb-6 line-clamp-3 text-shadow">
-              {album.description}
-            </p>
-          )}
+          <p class="text-white/75 mb-5 line-clamp-3">
+            {album.description || 'Explore this key chapter in The Cure archive.'}
+          </p>
 
-          <!-- Quick Stats -->
-          <div class="flex flex-wrap gap-6 mb-6">
-            {album.trackCount && album.trackCount > 0 && (
-              <div>
-                <p class="text-2xl font-display text-primary">{album.trackCount}</p>
-                <p class="text-white/70 text-sm">Tracks</p>
-              </div>
-            )}
-            {album.duration && (
-              <div>
-                <p class="text-2xl font-display text-primary">{album.duration}</p>
-                <p class="text-white/70 text-sm">Runtime</p>
-              </div>
-            )}
-            {album.label && (
-              <div>
-                <p class="text-lg font-medium text-white/90">{album.label}</p>
-                <p class="text-white/70 text-sm">Label</p>
-              </div>
-            )}
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+            <div class="glass-stat p-3">
+              <p class="text-white/45 text-[11px] uppercase tracking-[0.14em]">Tracks</p>
+              <p class="text-white text-lg font-medium">{album.trackCount || '-'}</p>
+            </div>
+            <div class="glass-stat p-3">
+              <p class="text-white/45 text-[11px] uppercase tracking-[0.14em]">Live Plays</p>
+              <p class="text-white text-lg font-medium">{totalLivePlays || '-'}</p>
+            </div>
+            <div class="glass-stat p-3">
+              <p class="text-white/45 text-[11px] uppercase tracking-[0.14em]">Top Songs</p>
+              <p class="text-white text-lg font-medium">{topLiveSongs.length || '-'}</p>
+            </div>
+            <div class="glass-stat p-3">
+              <p class="text-white/45 text-[11px] uppercase tracking-[0.14em]">Recent Shows</p>
+              <p class="text-white text-lg font-medium">{latestAlbumSetlists.length || '-'}</p>
+            </div>
           </div>
 
-          <div class="flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
-            <span class="font-medium">Explore Album</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          {(topLiveSongs.length > 0 || latestAlbumSetlists.length > 0) && (
+            <div class="grid md:grid-cols-2 gap-4 mb-5">
+              <div class="glass-inset p-4">
+                <p class="text-white/45 text-xs uppercase tracking-[0.16em] mb-2">Live Staples</p>
+                {topLiveSongs.length > 0 ? (
+                  <div class="space-y-2">
+                    {topLiveSongs.map((song) => (
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="text-white text-sm leading-tight">{song.songTitle}</p>
+                        <span class="text-primary text-sm shrink-0">{song.totalPlays}x</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p class="text-white/50 text-sm">Live-play data is still building for this release.</p>
+                )}
+              </div>
+
+              <div class="glass-inset p-4">
+                <p class="text-white/45 text-xs uppercase tracking-[0.16em] mb-2">Recent Setlists</p>
+                {latestAlbumSetlists.length > 0 ? (
+                  <div class="space-y-2">
+                    {latestAlbumSetlists.map((setlist) => (
+                      <div class="flex items-center justify-between gap-3">
+                        <p class="text-white text-sm leading-tight">{setlist.venue}</p>
+                        <span class="text-white/60 text-xs shrink-0">{setlist.formattedDate}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p class="text-white/50 text-sm">No matching setlist plays logged yet.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div class="flex items-center gap-2 text-primary mt-auto">
+            <span class="font-medium">Explore album</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14"></path>
               <path d="m12 5 7 7-7 7"></path>
             </svg>

@@ -3,13 +3,77 @@
 // Adds ornamental swirl patterns typical of gothic/Victorian design
 interface Props {
   position?: 'left' | 'right' | 'both' | 'divider';
+  variant?: 'simple' | 'elaborate';
   class?: string;
 }
 
-const { position = 'both', class: className = '' } = Astro.props;
+const { position = 'both', variant = 'simple', class: className = '' } = Astro.props;
 ---
 
-{position === 'divider' ? (
+{position === 'divider' && variant === 'elaborate' ? (
+  <div class={`gothic-frill-divider py-8 ${className}`}>
+    <svg viewBox="0 0 800 80" class="w-full max-w-2xl mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left filigree scrollwork -->
+      <path d="M80 40 C100 40, 110 25, 130 25 C150 25, 150 40, 170 40 C150 40, 150 55, 130 55 C110 55, 100 40, 80 40Z" stroke="white" stroke-width="0.8" opacity="0.35" fill="none" />
+      <path d="M40 40 C60 22, 80 22, 110 28" stroke="white" stroke-width="0.6" opacity="0.3" fill="none" />
+      <path d="M40 40 C60 58, 80 58, 110 52" stroke="white" stroke-width="0.6" opacity="0.3" fill="none" />
+      <path d="M10 40 C25 30, 40 30, 55 35" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+      <path d="M10 40 C25 50, 40 50, 55 45" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+      <!-- Left thorn/leaf motifs -->
+      <path d="M130 28 C135 22, 142 20, 148 24" stroke="white" stroke-width="0.5" opacity="0.25" fill="none" />
+      <path d="M130 52 C135 58, 142 60, 148 56" stroke="white" stroke-width="0.5" opacity="0.25" fill="none" />
+      <path d="M95 32 L100 28 L105 32" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+      <path d="M95 48 L100 52 L105 48" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+      <!-- Left curling tendrils -->
+      <path d="M60 30 C65 26, 72 24, 76 28 C80 32, 78 36, 72 36" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+      <path d="M60 50 C65 54, 72 56, 76 52 C80 48, 78 44, 72 44" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+
+      <!-- Center ornament - gothic rose window motif -->
+      <circle cx="400" cy="40" r="12" stroke="white" stroke-width="0.8" opacity="0.4" fill="none" />
+      <circle cx="400" cy="40" r="6" stroke="white" stroke-width="0.6" opacity="0.35" fill="none" />
+      <circle cx="400" cy="40" r="2" fill="white" opacity="0.3" />
+      <!-- Rose window petals -->
+      <path d="M400 28 L404 34 L400 34 L396 34 Z" stroke="white" stroke-width="0.5" opacity="0.3" fill="none" />
+      <path d="M400 52 L404 46 L400 46 L396 46 Z" stroke="white" stroke-width="0.5" opacity="0.3" fill="none" />
+      <path d="M388 40 L394 44 L394 40 L394 36 Z" stroke="white" stroke-width="0.5" opacity="0.3" fill="none" />
+      <path d="M412 40 L406 44 L406 40 L406 36 Z" stroke="white" stroke-width="0.5" opacity="0.3" fill="none" />
+      <!-- Cross elements -->
+      <line x1="400" y1="20" x2="400" y2="27" stroke="white" stroke-width="0.5" opacity="0.25" />
+      <line x1="400" y1="53" x2="400" y2="60" stroke="white" stroke-width="0.5" opacity="0.25" />
+      <line x1="380" y1="40" x2="387" y2="40" stroke="white" stroke-width="0.5" opacity="0.25" />
+      <line x1="413" y1="40" x2="420" y2="40" stroke="white" stroke-width="0.5" opacity="0.25" />
+      <!-- Connecting lines with thorn accents -->
+      <path d="M170 40 L380 40" stroke="white" stroke-width="0.4" opacity="0.15" />
+      <path d="M420 40 L630 40" stroke="white" stroke-width="0.4" opacity="0.15" />
+      <!-- Small thorns along connecting line -->
+      <path d="M220 40 L225 35 L230 40" stroke="white" stroke-width="0.3" opacity="0.15" fill="none" />
+      <path d="M280 40 L285 35 L290 40" stroke="white" stroke-width="0.3" opacity="0.15" fill="none" />
+      <path d="M340 40 L345 35 L350 40" stroke="white" stroke-width="0.3" opacity="0.15" fill="none" />
+      <path d="M450 40 L455 35 L460 40" stroke="white" stroke-width="0.3" opacity="0.15" fill="none" />
+      <path d="M510 40 L515 35 L520 40" stroke="white" stroke-width="0.3" opacity="0.15" fill="none" />
+      <path d="M570 40 L575 35 L580 40" stroke="white" stroke-width="0.3" opacity="0.15" fill="none" />
+
+      <!-- Right filigree scrollwork (mirrored) -->
+      <path d="M720 40 C700 40, 690 25, 670 25 C650 25, 650 40, 630 40 C650 40, 650 55, 670 55 C690 55, 700 40, 720 40Z" stroke="white" stroke-width="0.8" opacity="0.35" fill="none" />
+      <path d="M760 40 C740 22, 720 22, 690 28" stroke="white" stroke-width="0.6" opacity="0.3" fill="none" />
+      <path d="M760 40 C740 58, 720 58, 690 52" stroke="white" stroke-width="0.6" opacity="0.3" fill="none" />
+      <path d="M790 40 C775 30, 760 30, 745 35" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+      <path d="M790 40 C775 50, 760 50, 745 45" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+      <!-- Right thorn/leaf motifs -->
+      <path d="M670 28 C665 22, 658 20, 652 24" stroke="white" stroke-width="0.5" opacity="0.25" fill="none" />
+      <path d="M670 52 C665 58, 658 60, 652 56" stroke="white" stroke-width="0.5" opacity="0.25" fill="none" />
+      <path d="M705 32 L700 28 L695 32" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+      <path d="M705 48 L700 52 L695 48" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+      <!-- Right curling tendrils -->
+      <path d="M740 30 C735 26, 728 24, 724 28 C720 32, 722 36, 728 36" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+      <path d="M740 50 C735 54, 728 56, 724 52 C720 48, 722 44, 728 44" stroke="white" stroke-width="0.4" opacity="0.2" fill="none" />
+
+      <!-- Outer fade lines -->
+      <path d="M0 40 L10 40" stroke="white" stroke-width="0.3" opacity="0.1" />
+      <path d="M790 40 L800 40" stroke="white" stroke-width="0.3" opacity="0.1" />
+    </svg>
+  </div>
+) : position === 'divider' ? (
   <div class={`gothic-swirl-divider py-6 ${className}`}>
     <svg viewBox="0 0 600 40" class="w-full max-w-xl mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
       <!-- Left swirl -->

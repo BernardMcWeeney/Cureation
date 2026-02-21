@@ -34,7 +34,7 @@ const fallbackImage = '/images/placeholder-concert.jpg';
   class={`setlist-card group block ${featured ? 'featured' : ''}`}
   aria-label={`View setlist from ${venue}, ${location} on ${formattedDate}`}
 >
-  <div class="card-inner relative overflow-hidden rounded-2xl h-full">
+  <div class="card-inner relative overflow-hidden h-full gothic-corners">
     <!-- Background image or gradient -->
     <div class="relative aspect-[4/3] overflow-hidden">
       {coverImage ? (
@@ -55,13 +55,13 @@ const fallbackImage = '/images/placeholder-concert.jpg';
       <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
       <!-- Date badge -->
-      <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-lg border border-white/15 text-white/90 text-xs font-medium">
+      <div class="absolute top-4 right-4 px-3 py-1 rounded-sm bg-black/60 backdrop-blur-lg border border-white/15 text-white/90 text-xs font-medium">
         <time datetime={date}>{formattedDate}</time>
       </div>
 
       <!-- Tour badge -->
       {tourName && (
-        <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/50 backdrop-blur-lg border border-primary/40 text-primary text-xs font-medium">
+        <div class="absolute top-4 left-4 px-3 py-1 rounded-sm bg-black/50 backdrop-blur-lg border border-primary/40 text-primary text-xs font-medium">
           {tourName}
         </div>
       )}
@@ -92,7 +92,7 @@ const fallbackImage = '/images/placeholder-concert.jpg';
     </div>
 
     <!-- Border glow effect -->
-    <div class="absolute inset-0 rounded-2xl border border-white/10 group-hover:border-primary/40 transition-colors duration-500 pointer-events-none"></div>
+    <div class="absolute inset-0 border border-white/10 group-hover:border-primary/40 transition-colors duration-500 pointer-events-none"></div>
   </div>
 </a>
 
@@ -130,6 +130,7 @@ const fallbackImage = '/images/placeholder-concert.jpg';
     box-shadow:
       0 20px 40px rgba(0, 0, 0, 0.5),
       0 0 60px var(--card-glow),
+      0 4px 20px rgba(var(--color-primary-rgb), 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 

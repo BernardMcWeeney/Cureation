@@ -108,9 +108,10 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
 
     <!-- Cobweb corner decorations -->
     <div class="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
-      <GothicCobweb position="top-left" size="lg" opacity={0.06} />
-      <GothicCobweb position="top-right" size="md" opacity={0.04} />
-      <GothicCobweb position="bottom-left" size="md" opacity={0.03} />
+      <GothicCobweb position="top-left" size="lg" variant="corner-frilly" opacity={0.08} />
+      <GothicCobweb position="top-right" size="lg" variant="corner" opacity={0.06} />
+      <GothicCobweb position="bottom-left" size="md" variant="corner" opacity={0.04} />
+      <GothicCobweb position="bottom-right" size="sm" variant="corner" opacity={0.03} />
     </div>
 
     <!-- Content wrapper with z-index above background -->

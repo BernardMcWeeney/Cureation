@@ -7,6 +7,7 @@ import '../styles/global.css';
 import SearchEnhancer from '../components/SearchEnhancer.astro';
 
 import { getDefaultTheme } from '../config/theme.config';
+import GothicCobweb from '../components/GothicCobweb.astro';
 
 interface Props {
   title?: string;
@@ -103,6 +104,14 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
     <div class="absolute inset-0" style="background: radial-gradient(ellipse at bottom right, rgba(var(--color-primary-rgb), 0.05) 0%, transparent 50%);"></div>
     <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 70%, rgba(var(--color-primary-rgb), 0.03) 0%, transparent 40%);"></div>
     <div class="absolute inset-0" style="background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%);"></div>
+  </div>
+
+  <!-- Cobweb corner decorations -->
+  <div class="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
+    <GothicCobweb position="top-left" size="lg" variant="corner-frilly" opacity={0.08} />
+    <GothicCobweb position="top-right" size="lg" variant="corner" opacity={0.06} />
+    <GothicCobweb position="bottom-left" size="md" variant="corner" opacity={0.04} />
+    <GothicCobweb position="bottom-right" size="sm" variant="corner" opacity={0.03} />
   </div>
 
   <Header />

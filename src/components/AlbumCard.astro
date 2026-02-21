@@ -33,7 +33,7 @@ const typeLabel = typeLabels[type] || 'Album';
   class={`album-card group block ${featured ? 'featured' : ''}`}
   data-theme={slug}
 >
-  <div class="card-inner relative overflow-hidden rounded-sm h-full gothic-corners">
+  <div class="card-inner relative overflow-hidden h-full gothic-corners">
     <!-- Album artwork -->
     <div class="relative aspect-square overflow-hidden">
       <img
@@ -77,7 +77,7 @@ const typeLabel = typeLabels[type] || 'Album';
     </div>
 
     <!-- Border frame -->
-    <div class="absolute inset-0 rounded-sm border border-white/[0.08] group-hover:border-primary/30 transition-colors duration-500 pointer-events-none"></div>
+    <div class="absolute inset-0 border border-white/[0.08] group-hover:border-primary/30 transition-colors duration-500 pointer-events-none"></div>
   </div>
 </a>
 
@@ -114,6 +114,7 @@ const typeLabel = typeLabels[type] || 'Album';
     box-shadow:
       0 20px 40px rgba(0, 0, 0, 0.6),
       0 0 50px var(--card-glow),
+      0 4px 20px rgba(var(--color-primary-rgb), 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
