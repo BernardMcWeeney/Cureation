@@ -2,13 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 
-// Homepage sections — existing
+// Homepage sections
 import LatestNewsSection from '../components/home/LatestNewsSection.astro';
 import ImageOfTheDaySection from '../components/home/ImageOfTheDaySection.astro';
 import AlbumSpotlightSection from '../components/home/AlbumSpotlightSection.astro';
 import AboutSection from '../components/home/AboutSection.astro';
-
-// Homepage sections — new
 import StatsSection from '../components/home/StatsSection.astro';
 import LyricsQuoteSection from '../components/home/LyricsQuoteSection.astro';
 import RecentSetlistsSection from '../components/home/RecentSetlistsSection.astro';
@@ -72,50 +70,49 @@ const membersForSection: WikiMember[] = members && members.length > 0
 ---
 
 <Layout>
-  <!-- ─── 1. HERO ───────────────────────────────────────────────────── -->
+  <!-- 1. HERO -->
   <Hero />
 
-  <div class="relative z-10 bg-gradient-to-b from-black/0 via-black to-black">
+  <div class="relative z-10 bg-gradient-to-b from-black/0 via-[#050505] to-[#050505]">
 
-    <!-- ─── 2. FEATURED STORY ─────────────────────────────────────── -->
+    <!-- 2. FEATURED STORY -->
     <LatestNewsSection post={featuredNews} />
 
-    <!-- ─── 3. TODAY ON CUREATION — bento grid ────────────────────── -->
+    <!-- 3. TODAY ON CUREATION -->
     <section class="py-16">
       <div class="responsive-container">
-        <div class="flex items-center gap-4 mb-8">
-          <h2 class="font-heading text-2xl text-primary">Today on Cureation</h2>
-          <div class="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent"></div>
+        <div class="gothic-heading mb-8">
+          <h2 class="font-heading text-xl md:text-2xl text-primary tracking-wider">Today on Cureation</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Song of the Day — spans 2 cols on lg -->
+          <!-- Song of the Day -->
           <a
             href={`/lyrics/${songOfTheDay.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')}`}
             class="group lg:col-span-2"
           >
             <div
-              class="glass-tile-image h-full p-6 flex flex-col min-h-[220px]"
+              class="glass-tile-image h-full p-6 flex flex-col min-h-[220px] gothic-corners"
               style={songOfTheDay.albumCover ? `--tile-bg-image: url('${songOfTheDay.albumCover}')` : ''}
             >
               <div class="flex items-center gap-3 mb-4">
-                <div class="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div class="p-2 rounded-sm bg-white/15 backdrop-blur-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                   </svg>
                 </div>
-                <span class="text-white/90 text-sm font-medium uppercase tracking-wider text-shadow">Song of the Day</span>
+                <span class="text-white/70 text-xs font-medium uppercase tracking-[0.15em] text-shadow">Song of the Day</span>
               </div>
               <h3 class="font-heading text-2xl text-white mb-2 group-hover:text-primary transition-colors text-shadow-lg">
                 {songOfTheDay.title}
               </h3>
-              <p class="text-white/90 text-sm mb-3 text-shadow">{songOfTheDay.albumTitle}</p>
+              <p class="text-white/70 text-sm mb-3 text-shadow">{songOfTheDay.albumTitle}</p>
               {lyricsSnippet && (
-                <p class="text-white/80 text-sm italic flex-1 text-shadow">"{lyricsSnippet}..."</p>
+                <p class="text-white/60 text-sm italic flex-1 text-shadow">"{lyricsSnippet}..."</p>
               )}
               <div class="flex items-center gap-2 mt-4 text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity text-shadow">
                 <span>Read lyrics</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
               </div>
             </div>
           </a>
@@ -123,45 +120,45 @@ const membersForSection: WikiMember[] = members && members.length > 0
           <!-- Latest Setlist -->
           <a href={`/setlists/${latestSetlist.slug}`} class="group">
             <div
-              class="glass-tile-image h-full p-6 flex flex-col min-h-[220px]"
+              class="glass-tile-image h-full p-6 flex flex-col min-h-[220px] gothic-corners"
               style={'venueImage' in latestSetlist && latestSetlist.venueImage ? `--tile-bg-image: url('${latestSetlist.venueImage}')` : ''}
             >
               <div class="flex items-center gap-3 mb-4">
-                <div class="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div class="p-2 rounded-sm bg-white/15 backdrop-blur-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span class="text-white/90 text-sm font-medium uppercase tracking-wider text-shadow">Latest Setlist</span>
+                <span class="text-white/70 text-xs font-medium uppercase tracking-[0.15em] text-shadow">Latest Setlist</span>
               </div>
               <h3 class="font-heading text-xl text-white mb-1 group-hover:text-primary transition-colors text-shadow-lg">
                 {latestSetlist.venue}
               </h3>
-              <p class="text-white/90 text-sm mb-1 text-shadow">{latestSetlist.location}</p>
-              <p class="text-white/80 text-sm flex-1 text-shadow">{latestSetlist.formattedDate}</p>
-              <p class="text-white/90 text-sm mt-2 text-shadow">{latestSetlist.songCount} songs</p>
+              <p class="text-white/70 text-sm mb-1 text-shadow">{latestSetlist.location}</p>
+              <p class="text-white/60 text-sm flex-1 text-shadow">{latestSetlist.formattedDate}</p>
+              <p class="text-white/70 text-sm mt-2 text-shadow">{latestSetlist.songCount} songs</p>
             </div>
           </a>
 
           <!-- Quick Stats Tile -->
           <a href="/stats" class="group">
-            <div class="glass-tile h-full p-6 flex flex-col min-h-[220px]">
+            <div class="glass-tile h-full p-6 flex flex-col min-h-[220px] gothic-corners">
               <div class="flex items-center gap-3 mb-4">
-                <div class="p-2 rounded-lg bg-cyan-500/30 backdrop-blur-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div class="p-2 rounded-sm bg-primary/20 backdrop-blur-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <span class="text-white/80 text-sm font-medium uppercase tracking-wider">Stats</span>
+                <span class="text-white/60 text-xs font-medium uppercase tracking-[0.15em]">Stats</span>
               </div>
               <div class="flex-1 grid grid-cols-2 gap-4 items-center">
                 <div>
-                  <p class="text-4xl font-display text-cyan-400">14</p>
-                  <p class="text-white/70 text-xs">Albums</p>
+                  <p class="text-4xl font-display text-primary">14</p>
+                  <p class="text-white/50 text-xs">Albums</p>
                 </div>
                 <div>
-                  <p class="text-4xl font-display text-cyan-400">200+</p>
-                  <p class="text-white/70 text-xs">Songs</p>
+                  <p class="text-4xl font-display text-primary">200+</p>
+                  <p class="text-white/50 text-xs">Songs</p>
                 </div>
               </div>
             </div>
@@ -170,33 +167,33 @@ const membersForSection: WikiMember[] = members && members.length > 0
       </div>
     </section>
 
-    <!-- ─── 4. STATS BAR ───────────────────────────────────────────── -->
+    <!-- 4. STATS BAR -->
     <StatsSection />
 
-    <!-- ─── 5. IMAGE OF THE DAY ────────────────────────────────────── -->
+    <!-- 5. IMAGE OF THE DAY -->
     <ImageOfTheDaySection photo={photoOfTheDay} />
 
-    <!-- ─── 6. LYRICS QUOTE ───────────────────────────────────────── -->
+    <!-- 6. LYRICS QUOTE -->
     <LyricsQuoteSection song={songOfTheDay} />
 
-    <!-- ─── 7. RECENT SHOWS ───────────────────────────────────────── -->
+    <!-- 7. RECENT SHOWS -->
     <RecentSetlistsSection setlists={setlists} />
 
-    <!-- ─── 8. ALBUM SPOTLIGHT + QUICK LINKS ─────────────────────── -->
+    <!-- 8. ALBUM SPOTLIGHT + QUICK LINKS -->
     <section class="py-16">
       <div class="responsive-container">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Album spotlight — spans 2 cols -->
+          <!-- Album spotlight -->
           <div class="lg:col-span-2">
             <AlbumSpotlightSection />
           </div>
 
-          <!-- Quick nav tiles -->
+          <!-- Quick nav tiles with gothic styling -->
           <div class="grid grid-cols-2 gap-4 content-start">
             <a href="/discography" class="group">
-              <div class="glass-tile p-5 text-center">
-                <div class="p-3 rounded-lg bg-primary/30 w-fit mx-auto mb-3 group-hover:bg-primary/40 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="glass-tile p-5 text-center gothic-corners">
+                <div class="p-3 rounded-sm bg-primary/20 w-fit mx-auto mb-3 group-hover:bg-primary/30 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
                   </svg>
                 </div>
@@ -205,9 +202,9 @@ const membersForSection: WikiMember[] = members && members.length > 0
             </a>
 
             <a href="/lyrics" class="group">
-              <div class="glass-tile p-5 text-center">
-                <div class="p-3 rounded-lg bg-accent/30 w-fit mx-auto mb-3 group-hover:bg-accent/40 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="glass-tile p-5 text-center gothic-corners">
+                <div class="p-3 rounded-sm bg-accent/20 w-fit mx-auto mb-3 group-hover:bg-accent/30 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                   </svg>
                 </div>
@@ -216,9 +213,9 @@ const membersForSection: WikiMember[] = members && members.length > 0
             </a>
 
             <a href="/setlists" class="group">
-              <div class="glass-tile p-5 text-center">
-                <div class="p-3 rounded-lg bg-pink-500/30 w-fit mx-auto mb-3 group-hover:bg-pink-500/40 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="glass-tile p-5 text-center gothic-corners">
+                <div class="p-3 rounded-sm bg-pink-500/20 w-fit mx-auto mb-3 group-hover:bg-pink-500/30 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -227,9 +224,9 @@ const membersForSection: WikiMember[] = members && members.length > 0
             </a>
 
             <a href="/wiki" class="group">
-              <div class="glass-tile p-5 text-center">
-                <div class="p-3 rounded-lg bg-amber-500/30 w-fit mx-auto mb-3 group-hover:bg-amber-500/40 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="glass-tile p-5 text-center gothic-corners">
+                <div class="p-3 rounded-sm bg-amber-500/20 w-fit mx-auto mb-3 group-hover:bg-amber-500/30 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
@@ -238,9 +235,9 @@ const membersForSection: WikiMember[] = members && members.length > 0
             </a>
 
             <a href="/gallery" class="group">
-              <div class="glass-tile p-5 text-center">
-                <div class="p-3 rounded-lg bg-green-500/30 w-fit mx-auto mb-3 group-hover:bg-green-500/40 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="glass-tile p-5 text-center gothic-corners">
+                <div class="p-3 rounded-sm bg-green-500/20 w-fit mx-auto mb-3 group-hover:bg-green-500/30 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -249,9 +246,9 @@ const membersForSection: WikiMember[] = members && members.length > 0
             </a>
 
             <a href="/news" class="group">
-              <div class="glass-tile p-5 text-center">
-                <div class="p-3 rounded-lg bg-blue-500/30 w-fit mx-auto mb-3 group-hover:bg-blue-500/40 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="glass-tile p-5 text-center gothic-corners">
+                <div class="p-3 rounded-sm bg-blue-500/20 w-fit mx-auto mb-3 group-hover:bg-blue-500/30 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                   </svg>
                 </div>
@@ -263,53 +260,53 @@ const membersForSection: WikiMember[] = members && members.length > 0
       </div>
     </section>
 
-    <!-- ─── 9. THE BAND ────────────────────────────────────────────── -->
+    <!-- 9. THE BAND -->
     <BandMembersSection members={membersForSection} />
 
-    <!-- ─── 10. DISCOGRAPHY STRIP ─────────────────────────────────── -->
+    <!-- 10. DISCOGRAPHY STRIP -->
     <DiscographyStripSection />
 
-    <!-- ─── 11. MORE NEWS ─────────────────────────────────────────── -->
+    <!-- 11. MORE NEWS -->
     <NewsGridSection posts={newsPostsForGrid} startIndex={1} />
 
-    <!-- ─── 12. COMMUNITY + NEWSLETTER ───────────────────────────── -->
+    <!-- 12. COMMUNITY + NEWSLETTER -->
     <section class="py-16">
       <div class="responsive-container">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Community -->
-          <div class="glass-tile p-8">
+          <div class="glass-tile p-8 gothic-corners">
             <div class="flex items-center gap-3 mb-6">
-              <div class="p-2 rounded-lg bg-purple-500/30 backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="p-2 rounded-sm bg-purple-500/20 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <h2 class="font-heading text-xl text-white">Join the Community</h2>
             </div>
-            <p class="text-white/80 mb-6">
+            <p class="text-white/60 mb-6">
               Connect with fellow fans, share your memories, discuss albums, and be part of the Cureation community.
             </p>
             <div class="flex flex-wrap gap-3">
-              <a href="/community" class="px-5 py-2 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors text-sm font-medium">
+              <a href="/community" class="px-5 py-2 rounded-sm bg-primary/15 border border-primary/30 text-white hover:bg-primary/25 transition-colors text-sm font-medium">
                 Visit Forums
               </a>
-              <a href="/about#contribute" class="px-5 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:border-primary/40 transition-all text-sm font-medium">
+              <a href="/about#contribute" class="px-5 py-2 rounded-sm bg-white/[0.06] border border-white/15 text-white hover:border-primary/30 transition-all text-sm font-medium">
                 Contribute
               </a>
             </div>
           </div>
 
           <!-- Newsletter -->
-          <div class="glass-tile p-8">
+          <div class="glass-tile p-8 gothic-corners">
             <div class="flex items-center gap-3 mb-6">
-              <div class="p-2 rounded-lg bg-pink-500/30 backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div class="p-2 rounded-sm bg-pink-500/20 backdrop-blur-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <h2 class="font-heading text-xl text-white">Stay Connected</h2>
             </div>
-            <p class="text-white/80 mb-6">
+            <p class="text-white/60 mb-6">
               Get the latest news, new content alerts, and exclusive updates delivered to your inbox.
             </p>
             <form class="flex gap-3" action="/api/newsletter" method="POST">
@@ -318,9 +315,9 @@ const membersForSection: WikiMember[] = members && members.length > 0
                 name="email"
                 placeholder="your@email.com"
                 required
-                class="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:border-primary/50 focus:outline-none text-sm"
+                class="flex-1 px-4 py-2 rounded-sm bg-black/40 border border-white/15 text-white placeholder-white/40 focus:border-primary/40 focus:outline-none text-sm"
               />
-              <button type="submit" class="px-5 py-2 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors text-sm">
+              <button type="submit" class="px-5 py-2 rounded-sm bg-primary/80 text-white font-medium hover:bg-primary/70 transition-colors text-sm">
                 Subscribe
               </button>
             </form>
@@ -329,7 +326,7 @@ const membersForSection: WikiMember[] = members && members.length > 0
       </div>
     </section>
 
-    <!-- ─── 13. ABOUT & SUPPORT ────────────────────────────────────── -->
+    <!-- 13. ABOUT & SUPPORT -->
     <AboutSection />
 
   </div>

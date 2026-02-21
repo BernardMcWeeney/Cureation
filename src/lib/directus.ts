@@ -58,11 +58,16 @@ import type {
 
 const DIRECTUS_URL = 'https://dash.cureation.net';
 const API_BASE = `${DIRECTUS_URL}/items`;
+const DIRECTUS_TOKEN = import.meta.env.DIRECTUS_TOKEN || '5Nm2Y5kslk2m-UAr-DlXH3BcwtV8Vqt3';
 
 // Generic fetch wrapper with error handling
 async function fetchFromDirectus<T>(endpoint: string): Promise<T[]> {
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`);
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      headers: {
+        'Authorization': `Bearer ${DIRECTUS_TOKEN}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }

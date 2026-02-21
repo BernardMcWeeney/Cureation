@@ -12,11 +12,11 @@ const allPosts = propPosts && propPosts.length > 0 ? propPosts : mockNewsPosts;
 const posts = allPosts.slice(startIndex, startIndex + 3);
 
 const categoryColors: Record<string, string> = {
-  news: 'bg-blue-500/20 text-blue-300 border-blue-500/35',
-  reviews: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/35',
-  interviews: 'bg-pink-500/20 text-pink-300 border-pink-500/35',
-  rumors: 'bg-amber-500/20 text-amber-300 border-amber-500/35',
-  editorials: 'bg-purple-500/20 text-purple-300 border-purple-500/35',
+  news: 'bg-blue-500/15 text-blue-300 border-blue-500/25',
+  reviews: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
+  interviews: 'bg-pink-500/15 text-pink-300 border-pink-500/25',
+  rumors: 'bg-amber-500/15 text-amber-300 border-amber-500/25',
+  editorials: 'bg-purple-500/15 text-purple-300 border-purple-500/25',
 };
 ---
 
@@ -24,16 +24,15 @@ const categoryColors: Record<string, string> = {
   <section class="py-16">
     <div class="responsive-container">
       <div class="flex items-center justify-between mb-8">
-        <div class="flex items-center gap-4">
-          <h2 class="font-heading text-2xl text-primary">More From the Archive</h2>
-          <div class="h-px w-20 bg-gradient-to-r from-primary/30 to-transparent"></div>
+        <div class="gothic-heading flex-1">
+          <h2 class="font-heading text-xl md:text-2xl text-primary tracking-wider">More From the Archive</h2>
         </div>
         <a
           href="/news"
-          class="group text-sm text-white/50 hover:text-primary transition-colors flex items-center gap-1.5"
+          class="group text-sm text-white/40 hover:text-primary transition-colors flex items-center gap-1.5 ml-4"
         >
           All news
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
           </svg>
         </a>
@@ -42,7 +41,7 @@ const categoryColors: Record<string, string> = {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         {posts.map((post) => (
           <a href={`/news/${post.slug}`} class="group">
-            <div class="glass-panel overflow-hidden h-full flex flex-col">
+            <div class="glass-panel overflow-hidden h-full flex flex-col gothic-corners">
               <!-- Thumbnail -->
               {post.featuredImage ? (
                 <div class="relative aspect-[16/9] overflow-hidden">
@@ -54,7 +53,7 @@ const categoryColors: Record<string, string> = {
                   />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div
-                    class={`absolute top-3 left-3 px-2 py-0.5 rounded-md text-xs font-medium border backdrop-blur-sm ${categoryColors[post.category] || 'bg-primary/20 text-primary/80 border-primary/35'}`}
+                    class={`absolute top-3 left-3 px-2 py-0.5 rounded-sm text-xs font-medium border backdrop-blur-sm ${categoryColors[post.category] || 'bg-primary/15 text-primary/80 border-primary/25'}`}
                   >
                     {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
                   </div>
@@ -69,9 +68,9 @@ const categoryColors: Record<string, string> = {
                   )}
                 </div>
               ) : (
-                <div class="aspect-[16/9] bg-gradient-to-br from-primary/20 via-black to-accent/10 relative">
+                <div class="aspect-[16/9] bg-gradient-to-br from-primary/15 via-black to-accent/10 relative">
                   <div
-                    class={`absolute top-3 left-3 px-2 py-0.5 rounded-md text-xs font-medium border backdrop-blur-sm ${categoryColors[post.category] || 'bg-primary/20 text-primary/80 border-primary/35'}`}
+                    class={`absolute top-3 left-3 px-2 py-0.5 rounded-sm text-xs font-medium border backdrop-blur-sm ${categoryColors[post.category] || 'bg-primary/15 text-primary/80 border-primary/25'}`}
                   >
                     {post.category.charAt(0).toUpperCase() + post.category.slice(1)}
                   </div>
@@ -83,10 +82,10 @@ const categoryColors: Record<string, string> = {
                 <h3 class="font-heading text-base text-white mb-2 group-hover:text-primary transition-colors duration-300 leading-snug news-title">
                   {post.title}
                 </h3>
-                <p class="text-white/70 text-sm flex-1 leading-relaxed news-excerpt mb-4">
+                <p class="text-white/55 text-sm flex-1 leading-relaxed news-excerpt mb-4">
                   {post.excerpt}
                 </p>
-                <div class="flex items-center justify-between text-xs text-white/60 mt-auto pt-3 border-t border-white/10">
+                <div class="flex items-center justify-between text-xs text-white/40 mt-auto pt-3 border-t border-white/[0.06]">
                   <time datetime={post.publishedDate}>{post.formattedDate}</time>
                   <span>{post.readingTime} min read</span>
                 </div>
