@@ -18,13 +18,18 @@ const typeLabels: Record<string, string> = {
 
 export async function getStaticPaths() {
   try {
-    const albumsResponse = await fetch('https://dash.cureation.net/items/discography?limit=200');
+    const DIRECTUS_URL = 'https://dash.cureation.net';
+    const API_BASE = `${DIRECTUS_URL}/items`;
+    const DIRECTUS_TOKEN = import.meta.env.DIRECTUS_TOKEN || '';
+    const headers = { 'Authorization': `Bearer ${DIRECTUS_TOKEN}` };
+
+    const albumsResponse = await fetch(`${API_BASE}/discography?limit=200`, { headers });
     const albumsData = await albumsResponse.json();
 
-    const songsResponse = await fetch('https://dash.cureation.net/items/songs?limit=500');
+    const songsResponse = await fetch(`${API_BASE}/songs?limit=500`, { headers });
     const songsData = await songsResponse.json();
 
-    const singlesResponse = await fetch('https://dash.cureation.net/items/singles?limit=100');
+    const singlesResponse = await fetch(`${API_BASE}/singles?limit=100`, { headers });
     const singlesData = await singlesResponse.json();
 
     const paths = await Promise.all(albumsData.data.map(async (album: any) => {
@@ -35,7 +40,7 @@ export async function getStaticPaths() {
         title: album.title || 'Unknown Album',
         slug: slug,
         year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
-        coverImage: album.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
+        coverImage: album.cover_art ? `${DIRECTUS_URL}/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
         releaseDate: album.release_date ? new Date(album.release_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown',
         recordLabel: album.label || 'Fiction',
         producer: album.producer || 'Robert Smith & David M. Allen',
@@ -81,7 +86,7 @@ export async function getStaticPaths() {
           title: single.title || 'Unknown Single',
           releaseDate: single.release_date ? new Date(single.release_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '',
           chartPositions: single.chart_position || [],
-          coverImage: single.cover_art ? `https://dash.cureation.net/assets/${single.cover_art}` : null
+          coverImage: single.cover_art ? `${DIRECTUS_URL}/assets/${single.cover_art}` : null
         }));
 
       // Find parent album title if this is a deluxe/reissue

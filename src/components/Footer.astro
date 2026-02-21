@@ -1,11 +1,14 @@
 ---
 import siteConfig, { getFooterLinks } from '../config/site.config';
+import GothicCobweb from './GothicCobweb.astro';
 
 const currentYear = new Date().getFullYear();
 const footerLinks = getFooterLinks();
 ---
 
-<footer class="relative mt-16 pt-8 bg-black/50 backdrop-blur-xl border-t border-white/[0.06]">
+<footer class="relative mt-16 pt-8 bg-black/50 backdrop-blur-xl border-t border-white/[0.06] overflow-hidden">
+  <GothicCobweb position="bottom-left" size="lg" opacity={0.05} />
+  <GothicCobweb position="bottom-right" size="md" opacity={0.04} />
   <!-- Gothic ornamental top line -->
   <div class="absolute top-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 5%, rgba(var(--color-primary-rgb), 0.2) 30%, rgba(var(--color-primary-rgb), 0.35) 50%, rgba(var(--color-primary-rgb), 0.2) 70%, transparent 95%);"></div>
 

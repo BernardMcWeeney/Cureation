@@ -6,6 +6,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Sidebar from '../components/Sidebar.astro';
 import SearchEnhancer from '../components/SearchEnhancer.astro';
+import GothicCobweb from '../components/GothicCobweb.astro';
 import siteConfig from '../config/site.config';
 import { getDefaultTheme } from '../config/theme.config';
 import '../styles/global.css';
@@ -103,6 +104,13 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
           <div class="absolute inset-0" style="background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%);"></div>
         </div>
       )}
+    </div>
+
+    <!-- Cobweb corner decorations -->
+    <div class="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
+      <GothicCobweb position="top-left" size="lg" opacity={0.06} />
+      <GothicCobweb position="top-right" size="md" opacity={0.04} />
+      <GothicCobweb position="bottom-left" size="md" opacity={0.03} />
     </div>
 
     <!-- Content wrapper with z-index above background -->

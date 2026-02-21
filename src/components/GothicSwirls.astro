@@ -1,0 +1,73 @@
+---
+// Gothic swirl decorative elements - white against black
+// Adds ornamental swirl patterns typical of gothic/Victorian design
+interface Props {
+  position?: 'left' | 'right' | 'both' | 'divider';
+  class?: string;
+}
+
+const { position = 'both', class: className = '' } = Astro.props;
+---
+
+{position === 'divider' ? (
+  <div class={`gothic-swirl-divider py-6 ${className}`}>
+    <svg viewBox="0 0 600 40" class="w-full max-w-xl mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left swirl -->
+      <path d="M100 20 C120 20, 130 8, 150 8 C170 8, 170 20, 190 20 C170 20, 170 32, 150 32 C130 32, 120 20, 100 20Z" stroke="white" stroke-width="0.8" opacity="0.3" fill="none" />
+      <path d="M60 20 C80 5, 100 5, 130 10" stroke="white" stroke-width="0.6" opacity="0.25" fill="none" />
+      <path d="M60 20 C80 35, 100 35, 130 30" stroke="white" stroke-width="0.6" opacity="0.25" fill="none" />
+      <path d="M20 20 C40 10, 60 10, 80 15" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+      <path d="M20 20 C40 30, 60 30, 80 25" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+
+      <!-- Center ornament -->
+      <circle cx="300" cy="20" r="3" stroke="white" stroke-width="0.8" opacity="0.4" fill="none" />
+      <circle cx="300" cy="20" r="1" fill="white" opacity="0.3" />
+      <path d="M280 20 L297 20" stroke="white" stroke-width="0.6" opacity="0.3" />
+      <path d="M303 20 L320 20" stroke="white" stroke-width="0.6" opacity="0.3" />
+      <path d="M300 8 L300 17" stroke="white" stroke-width="0.5" opacity="0.2" />
+      <path d="M300 23 L300 32" stroke="white" stroke-width="0.5" opacity="0.2" />
+
+      <!-- Right swirl (mirrored) -->
+      <path d="M500 20 C480 20, 470 8, 450 8 C430 8, 430 20, 410 20 C430 20, 430 32, 450 32 C470 32, 480 20, 500 20Z" stroke="white" stroke-width="0.8" opacity="0.3" fill="none" />
+      <path d="M540 20 C520 5, 500 5, 470 10" stroke="white" stroke-width="0.6" opacity="0.25" fill="none" />
+      <path d="M540 20 C520 35, 500 35, 470 30" stroke="white" stroke-width="0.6" opacity="0.25" fill="none" />
+      <path d="M580 20 C560 10, 540 10, 520 15" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+      <path d="M580 20 C560 30, 540 30, 520 25" stroke="white" stroke-width="0.5" opacity="0.2" fill="none" />
+
+      <!-- Connecting lines -->
+      <path d="M190 20 L410 20" stroke="white" stroke-width="0.4" opacity="0.15" />
+      <path d="M0 20 L20 20" stroke="white" stroke-width="0.3" opacity="0.1" />
+      <path d="M580 20 L600 20" stroke="white" stroke-width="0.3" opacity="0.1" />
+    </svg>
+  </div>
+) : (
+  <div class={`gothic-swirl-decoration relative ${className}`}>
+    {(position === 'left' || position === 'both') && (
+      <div class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none opacity-[0.12]">
+        <svg width="120" height="300" viewBox="0 0 120 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60 0 C60 40, 100 60, 100 100 C100 140, 20 140, 20 180 C20 220, 100 220, 100 260 C100 280, 60 300, 60 300" stroke="white" stroke-width="1" fill="none" />
+          <path d="M50 0 C50 50, 80 70, 80 110 C80 150, 30 150, 30 190 C30 230, 80 240, 80 270" stroke="white" stroke-width="0.6" fill="none" opacity="0.6" />
+          <circle cx="60" cy="100" r="4" stroke="white" stroke-width="0.5" fill="none" opacity="0.4" />
+          <circle cx="60" cy="200" r="4" stroke="white" stroke-width="0.5" fill="none" opacity="0.4" />
+          <path d="M40 50 C55 55, 65 45, 80 50" stroke="white" stroke-width="0.5" fill="none" opacity="0.3" />
+          <path d="M40 150 C55 155, 65 145, 80 150" stroke="white" stroke-width="0.5" fill="none" opacity="0.3" />
+          <path d="M40 250 C55 255, 65 245, 80 250" stroke="white" stroke-width="0.5" fill="none" opacity="0.3" />
+        </svg>
+      </div>
+    )}
+    {(position === 'right' || position === 'both') && (
+      <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-[0.12] -scale-x-100">
+        <svg width="120" height="300" viewBox="0 0 120 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60 0 C60 40, 100 60, 100 100 C100 140, 20 140, 20 180 C20 220, 100 220, 100 260 C100 280, 60 300, 60 300" stroke="white" stroke-width="1" fill="none" />
+          <path d="M50 0 C50 50, 80 70, 80 110 C80 150, 30 150, 30 190 C30 230, 80 240, 80 270" stroke="white" stroke-width="0.6" fill="none" opacity="0.6" />
+          <circle cx="60" cy="100" r="4" stroke="white" stroke-width="0.5" fill="none" opacity="0.4" />
+          <circle cx="60" cy="200" r="4" stroke="white" stroke-width="0.5" fill="none" opacity="0.4" />
+          <path d="M40 50 C55 55, 65 45, 80 50" stroke="white" stroke-width="0.5" fill="none" opacity="0.3" />
+          <path d="M40 150 C55 155, 65 145, 80 150" stroke="white" stroke-width="0.5" fill="none" opacity="0.3" />
+          <path d="M40 250 C55 255, 65 245, 80 250" stroke="white" stroke-width="0.5" fill="none" opacity="0.3" />
+        </svg>
+      </div>
+    )}
+    <slot />
+  </div>
+)}

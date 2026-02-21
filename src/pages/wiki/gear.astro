@@ -1,0 +1,219 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import GothicCobweb from '../../components/GothicCobweb.astro';
+import GothicSwirls from '../../components/GothicSwirls.astro';
+
+// Directus gear collection integration
+const DIRECTUS_URL = 'https://dash.cureation.net';
+const API_BASE = `${DIRECTUS_URL}/items`;
+const DIRECTUS_TOKEN = import.meta.env.DIRECTUS_TOKEN || '';
+
+interface GearItem {
+  id: number;
+  name: string;
+  type: string;
+  brand?: string;
+  model?: string;
+  description?: string;
+  image?: string;
+  used_by?: string;
+  era?: string;
+  albums_used?: string;
+  notable_songs?: string;
+  status?: string;
+}
+
+let gearItems: GearItem[] = [];
+
+try {
+  const headers: Record<string, string> = {};
+  if (DIRECTUS_TOKEN) {
+    headers['Authorization'] = `Bearer ${DIRECTUS_TOKEN}`;
+  }
+
+  const res = await fetch(`${API_BASE}/gear?limit=200&sort=type,name`, { headers });
+  if (res.ok) {
+    const data = await res.json();
+    gearItems = data.data || [];
+  }
+} catch (e) {
+  // Silently fall back to empty
+}
+
+// Group by type
+const gearByType: Record<string, GearItem[]> = {};
+gearItems.forEach(item => {
+  const type = item.type || 'Other';
+  if (!gearByType[type]) gearByType[type] = [];
+  gearByType[type].push(item);
+});
+
+const typeOrder = ['Guitar', 'Bass', 'Keyboards', 'Drums', 'Effects', 'Amplifiers', 'Other'];
+const sortedTypes = typeOrder.filter(t => gearByType[t]?.length > 0);
+// Add any types not in the predefined order
+Object.keys(gearByType).forEach(t => {
+  if (!sortedTypes.includes(t)) sortedTypes.push(t);
+});
+
+const typeIcons: Record<string, string> = {
+  'Guitar': 'M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3',
+  'Bass': 'M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3',
+  'Keyboards': 'M3 8h18v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm2 2v4h2v-4H5zm4 0v4h2v-4H9zm4 0v4h2v-4h-2zm4 0v4h2v-4h-2z',
+  'Drums': 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z',
+  'Effects': 'M13 10V3L4 14h7v7l9-11h-7z',
+  'Amplifiers': 'M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zm7 4a4 4 0 100 8 4 4 0 000-8z',
+};
+---
+
+<MainLayout
+  title="Gear & Equipment"
+  description="The guitars, basses, keyboards, effects, and equipment used by The Cure"
+>
+  <div class="relative">
+    <GothicCobweb position="top-right" size="lg" opacity={0.08} />
+  </div>
+
+  <!-- Breadcrumb -->
+  <nav class="mb-6" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-white/60">
+      <li><a href="/wiki" class="hover:text-primary transition-colors">Wiki</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-white">Gear & Equipment</li>
+    </ol>
+  </nav>
+
+  <!-- Hero -->
+  <section class="mb-12">
+    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
+      <GothicCobweb position="top-left" size="lg" opacity={0.12} />
+
+      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header lipstick-accent">
+        Gear & Equipment
+      </h1>
+      <p class="text-white/60 text-lg max-w-2xl mt-6">
+        The instruments, amplifiers, effects pedals, and equipment that shaped The Cure's iconic sound - from Robert Smith's
+        beloved Fender Bass VI to Simon Gallup's bass rigs.
+      </p>
+
+      {gearItems.length > 0 && (
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <div class="glass-stat p-4 text-center">
+            <p class="text-3xl font-bold text-primary">{gearItems.length}</p>
+            <p class="text-sm text-white/50 mt-1">Items Catalogued</p>
+          </div>
+          <div class="glass-stat p-4 text-center">
+            <p class="text-3xl font-bold text-blue-400">{sortedTypes.length}</p>
+            <p class="text-sm text-white/50 mt-1">Categories</p>
+          </div>
+          <div class="glass-stat p-4 text-center">
+            <p class="text-3xl font-bold text-green-400">
+              {new Set(gearItems.map(g => g.brand).filter(Boolean)).size}
+            </p>
+            <p class="text-sm text-white/50 mt-1">Brands</p>
+          </div>
+          <div class="glass-stat p-4 text-center">
+            <p class="text-3xl font-bold text-amber-400">
+              {new Set(gearItems.map(g => g.used_by).filter(Boolean)).size}
+            </p>
+            <p class="text-sm text-white/50 mt-1">Members</p>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <GothicSwirls position="divider" />
+
+  {gearItems.length > 0 ? (
+    <div class="space-y-12">
+      {sortedTypes.map(type => (
+        <section>
+          <div class="glass-panel p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="p-2 rounded-lg bg-primary/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d={typeIcons[type] || typeIcons['Effects']} />
+                </svg>
+              </div>
+              <h2 class="text-2xl text-white gothic-heading">{type}</h2>
+              <span class="text-white/30 text-sm ml-auto">{gearByType[type].length} items</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {gearByType[type].map(item => (
+                <div class="glass-stat p-5 cure-rose-border hover:bg-white/[0.06] transition-colors">
+                  {item.image && (
+                    <img
+                      src={`${DIRECTUS_URL}/assets/${item.image}`}
+                      alt={item.name}
+                      class="w-full h-40 object-cover rounded-lg mb-4"
+                      loading="lazy"
+                    />
+                  )}
+                  <div class="flex items-start justify-between gap-2 mb-2">
+                    <h3 class="text-white font-medium">{item.name}</h3>
+                    {item.brand && (
+                      <span class="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary shrink-0">{item.brand}</span>
+                    )}
+                  </div>
+                  {item.model && (
+                    <p class="text-white/50 text-sm mb-2">{item.model}</p>
+                  )}
+                  {item.description && (
+                    <p class="text-white/60 text-sm mb-3 line-clamp-3">{item.description}</p>
+                  )}
+                  <div class="flex flex-wrap gap-2 text-xs">
+                    {item.used_by && (
+                      <span class="px-2 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/20">
+                        {item.used_by}
+                      </span>
+                    )}
+                    {item.era && (
+                      <span class="px-2 py-0.5 rounded bg-purple-500/15 text-purple-400 border border-purple-500/20">
+                        {item.era}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))}
+    </div>
+  ) : (
+    <section class="mb-12">
+      <div class="glass-panel p-8 md:p-12 text-center">
+        <div class="p-4 rounded-xl bg-primary/10 w-fit mx-auto mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          </svg>
+        </div>
+        <h2 class="text-2xl text-white mb-3">Gear Database Coming Soon</h2>
+        <p class="text-white/50 max-w-md mx-auto mb-6">
+          We're cataloguing every guitar, bass, keyboard, effects pedal, and piece of equipment
+          The Cure has used across their career. Check back soon!
+        </p>
+        <p class="text-white/30 text-sm">
+          To contribute gear data, add items to the <code class="text-primary/70">gear</code> collection in Directus.
+        </p>
+      </div>
+    </section>
+  )}
+
+  <div class="text-center mt-12">
+    <a href="/wiki" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+      Back to Wiki
+    </a>
+  </div>
+</MainLayout>
+
+<style>
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+</style>
