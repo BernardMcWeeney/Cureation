@@ -29,24 +29,26 @@ const regularPosts = posts.filter(p => !p.featured || !featuredPosts.includes(p)
     />
   </Fragment>
 
-  {/* Hero section */}
-  <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <h1 class="text-4xl md:text-5xl text-white mb-3 section-header">News & Articles</h1>
-          <p class="text-white/60 text-lg max-w-2xl mt-6">
-            The latest news, in-depth reviews, exclusive interviews, and thoughtful editorials about The Cure.
-          </p>
-        </div>
-        <div class="flex gap-4 text-center">
-          <div class="glass-stat p-4 rounded-lg">
-            <p class="text-3xl font-bold text-primary">{posts.length}</p>
-            <p class="text-sm text-white/50">Articles</p>
+  {/* Hero section (full width, in hero slot) */}
+  <section class="mb-10" slot="hero">
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">News & Articles</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          The latest news, in-depth reviews, exclusive interviews, and thoughtful editorials about The Cure.
+        </p>
+
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{posts.length}</span>
+            <span class="text-white/60 text-base font-medium">Articles</span>
           </div>
-          <div class="glass-stat p-4 rounded-lg">
-            <p class="text-3xl font-bold text-primary">{categories.length}</p>
-            <p class="text-sm text-white/50">Categories</p>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{categories.length}</span>
+            <span class="text-white/60 text-base font-medium">Categories</span>
           </div>
         </div>
       </div>

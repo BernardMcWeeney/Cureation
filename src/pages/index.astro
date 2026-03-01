@@ -6,11 +6,9 @@ import Hero from '../components/Hero.astro';
 import LatestNewsSection from '../components/home/LatestNewsSection.astro';
 import ImageOfTheDaySection from '../components/home/ImageOfTheDaySection.astro';
 import AlbumSpotlightSection from '../components/home/AlbumSpotlightSection.astro';
-import StatsSection from '../components/home/StatsSection.astro';
 import LyricsQuoteSection from '../components/home/LyricsQuoteSection.astro';
 import RecentSetlistsSection from '../components/home/RecentSetlistsSection.astro';
 import DiscographyStripSection from '../components/home/DiscographyStripSection.astro';
-import NewsGridSection from '../components/home/NewsGridSection.astro';
 import GothicSwirls from '../components/GothicSwirls.astro';
 import AlbumDecoration from '../components/AlbumDecoration.astro';
 import OnThisDaySection from '../components/home/OnThisDaySection.astro';
@@ -62,8 +60,6 @@ const latestSetlistImage =
   ('coverImage' in latestSetlist && latestSetlist.coverImage)
   || ('venueImage' in latestSetlist && latestSetlist.venueImage)
   || '';
-const lyricsSnippet = songOfTheDay?.lyrics?.[0]?.content?.split('\n')[0] || '';
-
 const newsPostsForGrid: NewsPost[] = allNewsPosts && allNewsPosts.length > 1
   ? allNewsPosts
   : mockNewsPosts;
@@ -83,7 +79,7 @@ const archiveTotals = {
   <div class="relative z-10 bg-gradient-to-b from-black/0 via-[#050505] to-[#050505]">
 
     <!-- 2. FEATURED STORY -->
-    <LatestNewsSection post={featuredNews} />
+    <LatestNewsSection post={featuredNews} additionalPosts={newsPostsForGrid.slice(1, 4)} />
 
     <GothicSwirls position="divider" variant="elaborate" />
 
@@ -127,10 +123,18 @@ const archiveTotals = {
                 <h3 class="font-heading text-2xl text-white mb-2 group-hover:text-primary transition-colors text-shadow-lg">
                   {songOfTheDay.title}
                 </h3>
-                <p class="text-white/70 text-sm mb-3 text-shadow">{songOfTheDay.albumTitle}</p>
-                {lyricsSnippet && (
-                  <p class="text-white/60 text-sm italic flex-1 text-shadow">"{lyricsSnippet}..."</p>
-                )}
+                <div class="flex flex-wrap gap-2 mt-3 flex-1">
+                  <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-sm text-white/60 text-shadow">{songOfTheDay.albumTitle}</span>
+                  {songOfTheDay.year && (
+                    <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-sm text-white/60 text-shadow">{songOfTheDay.year}</span>
+                  )}
+                  {songOfTheDay.duration && (
+                    <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-sm text-white/60 text-shadow">{songOfTheDay.duration}</span>
+                  )}
+                  {songOfTheDay.hasLyrics && (
+                    <span class="px-3 py-1 bg-primary/10 border border-primary/25 rounded-full text-sm text-primary text-shadow">Lyrics available</span>
+                  )}
+                </div>
                 <div class="flex items-center gap-2 mt-4 text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity text-shadow">
                   <span>Read lyrics</span>
                   <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
@@ -193,12 +197,7 @@ const archiveTotals = {
       </div>
     </section>
 
-    <!-- 4. STATS BAR -->
-    <StatsSection />
-
-    <GothicSwirls position="divider" variant="elaborate" />
-
-    <!-- 5. IMAGE OF THE DAY -->
+    <!-- 4. IMAGE OF THE DAY -->
     <ImageOfTheDaySection photo={photoOfTheDay} />
 
     <!-- 6. LYRICS QUOTE -->
@@ -228,14 +227,7 @@ const archiveTotals = {
     <!-- 9. DISCOGRAPHY STRIP -->
     <DiscographyStripSection />
 
-    <GothicSwirls position="divider" variant="elaborate" />
-
-    <!-- 11. MORE NEWS -->
-    <NewsGridSection posts={newsPostsForGrid} startIndex={1} />
-
-    <GothicSwirls position="divider" variant="elaborate" />
-
-    <!-- 12. COMMUNITY + NEWSLETTER -->
+    <!-- COMMUNITY + NEWSLETTER -->
     <section class="py-16">
       <div class="responsive-container">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

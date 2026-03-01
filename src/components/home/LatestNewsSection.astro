@@ -1,13 +1,15 @@
 ---
 import type { NewsPost } from '../../types/directus';
+import NewsCard from '../NewsCard.astro';
 
 import { getMockFeaturedNews, mockNewsPosts } from '../../lib/mockData';
 
 interface Props {
   post: NewsPost | null;
+  additionalPosts?: NewsPost[];
 }
 
-const { post: propPost } = Astro.props;
+const { post: propPost, additionalPosts = [] } = Astro.props;
 const post: NewsPost = propPost || getMockFeaturedNews() || mockNewsPosts[0];
 
 const categoryColors: Record<string, string> = {
@@ -79,6 +81,14 @@ const categoryColors: Record<string, string> = {
         </div>
       </div>
     </a>
+
+    {additionalPosts.length > 0 && (
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        {additionalPosts.map(p => (
+          <NewsCard post={p} compact={true} />
+        ))}
+      </div>
+    )}
   </div>
 </section>
 

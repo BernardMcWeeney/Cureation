@@ -1,7 +1,7 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import AlbumCard from '../../components/AlbumCard.astro';
-import GothicCobweb from '../../components/GothicCobweb.astro';
+import PageFilter from '../../components/PageFilter.astro';
 import GothicSwirls from '../../components/GothicSwirls.astro';
 import { fetchAlbumsGroupedByType, getAlbumEra, eraMetadata } from '../../lib/directus';
 import type { AlbumEra } from '../../types/directus';
@@ -20,7 +20,11 @@ const primaryTypes: { key: string; label: string; icon: string }[] = [
 ];
 
 // Count totals
-const allAlbums = Object.values(albumsByType).flat();
+const allAlbums = Object.values(albumsByType).flat().sort((a, b) => {
+  if (!a.year) return 1;
+  if (!b.year) return -1;
+  return parseInt(a.year) - parseInt(b.year);
+});
 const totalReleases = allAlbums.length;
 
 // Also prepare era-grouped view for studio albums
@@ -47,20 +51,13 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
   description="The complete discography of The Cure — studio albums, compilations, live albums, deluxe editions, EPs, box sets, and more."
   pageClass="bg-black"
 >
-  <!-- Hero Section with gothic styling -->
+  <!-- Hero Section -->
   <section class="mb-10">
-    <div class="glass-panel overflow-hidden relative gothic-corners bg-cobweb">
-      <GothicCobweb position="top-left" size="lg" opacity={0.1} />
-      <GothicCobweb position="bottom-right" size="md" opacity={0.06} />
+    <div class="glass-panel overflow-hidden relative">
       <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="badge">Complete Collection</span>
-          <div class="divider-gradient flex-1 max-w-24"></div>
-        </div>
-
         <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow" transition:animate="slide">
           Discography
         </h1>
@@ -86,31 +83,68 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
     </div>
   </section>
 
-  <!-- Type Tabs -->
-  <nav class="mb-10 overflow-x-auto scrollbar-hide">
-    <div class="flex gap-2 min-w-max pb-2">
-      {primaryTypes.map((tab, idx) => {
-        const count = albumsByType[tab.key]?.length || 0;
-        if (count === 0) return null;
-        return (
-          <button
-            type="button"
-            class={`type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide ${idx === 0 ? 'active' : ''}`}
-            data-tab={tab.key}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d={tab.icon} />
-            </svg>
-            {tab.label}
-            <span class="tab-count px-1.5 py-0.5 rounded-sm text-xs">{count}</span>
-          </button>
-        );
-      })}
+  <!-- Search & Filters -->
+  <section class="mb-8">
+    <div class="mb-4">
+      <PageFilter id="disco" placeholder="Search albums..." />
     </div>
-  </nav>
 
-  <!-- Studio Albums Panel (default, with era grouping) -->
-  <section id="panel-studio" class="type-panel">
+    <!-- Type Tabs -->
+    <nav class="overflow-x-auto scrollbar-hide">
+      <div class="flex gap-2 min-w-max pb-2">
+        <button
+          type="button"
+          class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide active"
+          data-tab="all"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+          All
+          <span class="tab-count px-1.5 py-0.5 rounded-sm text-xs">{totalReleases}</span>
+        </button>
+        {primaryTypes.map((tab) => {
+          const count = albumsByType[tab.key]?.length || 0;
+          if (count === 0) return null;
+          return (
+            <button
+              type="button"
+              class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide"
+              data-tab={tab.key}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d={tab.icon} />
+              </svg>
+              {tab.label}
+              <span class="tab-count px-1.5 py-0.5 rounded-sm text-xs">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  </section>
+
+  <!-- All Albums Panel (default) -->
+  <section id="panel-all" class="type-panel">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+      {allAlbums.map((album, index) => (
+        <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year} ${album.type}`}>
+          <AlbumCard
+            title={album.title}
+            coverImage={album.coverImage}
+            year={album.year}
+            slug={album.slug}
+            featured={album.featured}
+            id={album.id}
+            type={album.type as any}
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Studio Albums Panel (with era grouping) -->
+  <section id="panel-studio" class="type-panel hidden">
     <!-- Sub-toggle: By Era vs Chronological -->
     <div class="flex items-center gap-3 mb-8">
       <div class="flex items-center gap-1 p-1 rounded-sm bg-black/40 border border-white/[0.08]">
@@ -129,7 +163,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
         const colors = eraColors[era];
 
         return (
-          <div class="era-section" data-era={era}>
+          <div class="era-section" data-era={era} data-filter-group>
             <div class="flex items-center gap-4 mb-6">
               <div class="flex items-center gap-3">
                 <div class={`size-9 rounded-sm ${colors.bg} border ${colors.border} flex items-center justify-center`}>
@@ -150,7 +184,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
               {eraAlbums.map((album, index) => (
-                <div style={`--index: ${index + 1}`}>
+                <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year}`}>
                   <AlbumCard
                     title={album.title}
                     coverImage={album.coverImage}
@@ -172,7 +206,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
     <div id="studio-chrono-view" class="hidden">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
         {studioAlbums.map((album, index) => (
-          <div style={`--index: ${index + 1}`}>
+          <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year}`}>
             <AlbumCard
               title={album.title}
               coverImage={album.coverImage}
@@ -197,7 +231,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
       <section id={`panel-${tab.key}`} class="type-panel hidden">
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
           {typeAlbums.map((album, index) => (
-            <div style={`--index: ${index + 1}`}>
+            <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year} ${tab.label}`}>
               <AlbumCard
                 title={album.title}
                 coverImage={album.coverImage}
@@ -230,7 +264,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
         return (
           <button
             type="button"
-            class={`era-quick-nav group p-4 rounded-sm ${colors.bg} border ${colors.border} hover:scale-105 transition-all duration-300 text-left gothic-corners`}
+            class={`era-quick-nav group p-4 rounded-sm ${colors.bg} border ${colors.border} transition-all duration-300 text-left gothic-corners`}
             data-target-era={era}
           >
             <p class={`font-heading text-lg ${colors.text}`}>{meta.name}</p>

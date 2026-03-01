@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../../../layouts/MainLayout.astro';
 import WikiSidebar from '../../../components/sidebar/WikiSidebar.astro';
+import PageFilter from '../../../components/PageFilter.astro';
 import { getWikiMembers } from '../../../lib/directus';
 
 const members = await getWikiMembers();
@@ -35,23 +36,34 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
 
   {/* Hero */}
   <section class="mb-12">
-    <div class="glass-card p-8">
-      <h1 class="text-4xl md:text-5xl text-white mb-4">Band Members</h1>
-      <p class="text-white/60 text-lg max-w-2xl">
-        The Cure has had many talented musicians throughout its history. Meet the current lineup
-        and learn about past members who contributed to the band's legendary sound.
-      </p>
-      <div class="flex gap-6 mt-6">
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{currentMembers.length}</p>
-          <p class="text-sm text-white/50">Current Members</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{pastMembers.length}</p>
-          <p class="text-sm text-white/50">Past Members</p>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">Band Members</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          The Cure has had many talented musicians throughout its history. Meet the current lineup
+          and learn about past members who contributed to the band's legendary sound.
+        </p>
+
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{currentMembers.length}</span>
+            <span class="text-white/60 text-base font-medium">Current Members</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{pastMembers.length}</span>
+            <span class="text-white/60 text-base font-medium">Past Members</span>
+          </div>
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- Search -->
+  <section class="mb-8">
+    <PageFilter id="members" placeholder="Search members..." />
   </section>
 
   {/* Current members */}
@@ -69,6 +81,8 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
             href={`/wiki/members/${member.slug}`}
             class="group"
             style={`--index: ${index}`}
+            data-filter-item
+            data-filter-text={`${member.name} ${member.instruments.join(' ')} ${member.tenure}`}
           >
             <div class="glass-card-hover overflow-hidden animate-fade-in">
               <div class="flex gap-4 p-5">
@@ -117,6 +131,8 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
             href={`/wiki/members/${member.slug}`}
             class="group"
             style={`--index: ${index}`}
+            data-filter-item
+            data-filter-text={`${member.name} ${member.instruments.join(' ')} ${member.tenure}`}
           >
             <div class="glass-card-hover overflow-hidden animate-fade-in">
               <div class="flex gap-4 p-5">
@@ -178,3 +194,4 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
     opacity: 0;
   }
 </style>
+

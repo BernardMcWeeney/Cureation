@@ -29,48 +29,31 @@ const categoryIcons: Record<string, string> = {
 >
   {/* Hero section */}
   <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10">
-      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header">Community Forums</h1>
-      <p class="text-white/60 text-lg max-w-2xl mb-8">
-        Join fellow fans in discussing The Cure's music, sharing concert experiences,
-        trading collectibles, and connecting with the community.
-      </p>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
-      <div class="flex flex-wrap gap-6 mb-8">
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{categories.length}</p>
-          <p class="text-sm text-white/50">Categories</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{totalThreads.toLocaleString()}</p>
-          <p class="text-sm text-white/50">Threads</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{totalPosts.toLocaleString()}</p>
-          <p class="text-sm text-white/50">Posts</p>
-        </div>
-      </div>
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">Community Forums</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          Join fellow fans in discussing The Cure's music, sharing concert experiences,
+          trading collectibles, and connecting with the community.
+        </p>
 
-      {/* CTA buttons */}
-      <div class="flex flex-wrap gap-4">
-        <a
-          href="/community/forums/new"
-          class="glass-button px-6 py-3 rounded-xl text-white hover:text-primary transition-colors inline-flex items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          New Thread
-        </a>
-        <a
-          href="/community/guidelines"
-          class="text-white/60 hover:text-white transition-colors inline-flex items-center gap-2 px-4"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Community Guidelines
-        </a>
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{categories.length}</span>
+            <span class="text-white/60 text-base font-medium">Categories</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{totalThreads.toLocaleString()}</span>
+            <span class="text-white/60 text-base font-medium">Threads</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{totalPosts.toLocaleString()}</span>
+            <span class="text-white/60 text-base font-medium">Posts</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>

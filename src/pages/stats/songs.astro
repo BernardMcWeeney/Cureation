@@ -1,7 +1,5 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import GothicCobweb from '../../components/GothicCobweb.astro';
-import GothicSwirls from '../../components/GothicSwirls.astro';
 import { getSongStatistics, fetchAlbums, formatAlbum } from '../../lib/directus';
 
 const allStats = await getSongStatistics();
@@ -50,11 +48,6 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
   title="Song Statistics"
   description="Detailed song statistics for The Cure - most played, rarest, and never played songs"
 >
-  <!-- Cobweb decorations -->
-  <div class="relative">
-    <GothicCobweb position="top-right" size="lg" opacity={0.08} />
-  </div>
-
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
     <ol class="flex items-center gap-2 text-sm text-white/60">
@@ -66,45 +59,45 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
 
   <!-- Hero -->
   <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
-      <GothicCobweb position="top-left" size="md" opacity={0.12} />
-      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header">Song Statistics</h1>
-      <p class="text-white/60 text-lg max-w-2xl mb-8 mt-6">
-        Deep dive into every song The Cure has performed live - play counts, rarity, and more.
-      </p>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
-      <!-- Quick stats -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary">{allStats.length}</p>
-          <p class="text-sm text-white/50 mt-1">Total Songs</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-green-400">{playedSongs.length}</p>
-          <p class="text-sm text-white/50 mt-1">Played Live</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-purple-400">{neverPlayed.length}</p>
-          <p class="text-sm text-white/50 mt-1">Never Played</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-amber-400">{totalPlays.toLocaleString()}</p>
-          <p class="text-sm text-white/50 mt-1">Total Performances</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-blue-400">{avgPlays}</p>
-          <p class="text-sm text-white/50 mt-1">Avg Plays/Song</p>
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">Song Statistics</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          Deep dive into every song The Cure has performed live — play counts, rarity, and more.
+        </p>
+
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{allStats.length}</span>
+            <span class="text-white/60 text-base font-medium">Total Songs</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{playedSongs.length}</span>
+            <span class="text-white/60 text-base font-medium">Played Live</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{neverPlayed.length}</span>
+            <span class="text-white/60 text-base font-medium">Never Played</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{totalPlays.toLocaleString()}</span>
+            <span class="text-white/60 text-base font-medium">Total Performances</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{avgPlays}</span>
+            <span class="text-white/60 text-base font-medium">Avg Plays/Song</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <GothicSwirls position="divider" />
-
   <!-- Top 50 Most Played -->
   <section class="mb-12">
     <div class="glass-panel p-6 md:p-8 relative overflow-hidden">
-      <GothicCobweb position="top-right" size="sm" opacity={0.06} />
       <h2 class="text-2xl text-white mb-6 flex items-center gap-3 gothic-heading">
         Top 50 Most Played Songs
       </h2>

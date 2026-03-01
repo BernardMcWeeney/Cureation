@@ -2,6 +2,7 @@
 // src/pages/lyrics/index.astro
 import MainLayout from '../../layouts/MainLayout.astro';
 import LyricsSidebar from '../../components/sidebar/LyricsSidebar.astro';
+import PageFilter from '../../components/PageFilter.astro';
 import { ViewTransitions } from 'astro:transitions';
 import { createSongSlug } from '../../lib/lyrics-helpers';
 
@@ -111,98 +112,83 @@ const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
   })).sort((a: any, b: any) => parseInt(b.year || '0', 10) - parseInt(a.year || '0', 10))}
 />
   <ViewTransitions />
-  
-  <!-- Hero Section -->
-  <section class="mb-16">
+
+  <!-- Hero Section (full width, in hero slot) -->
+  <section class="mb-10" slot="hero">
     <div class="glass-panel overflow-hidden relative">
-      <!-- Decorative gradient orb -->
-      <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary/20 blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="badge">Lyrics Archive</span>
-          <div class="divider-gradient flex-1 max-w-24"></div>
-        </div>
-
-        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow">
-          The Cure Lyrics
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
+          Lyrics
         </h1>
-        <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8 leading-relaxed">
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
           Discover the poetic genius behind The Cure's catalog — from early post-punk to atmospheric gothic rock and beyond.
         </p>
 
-        <!-- Enhanced search form -->
-        <form action="/lyrics/search" method="get" class="relative max-w-xl group">
-          <div class="absolute inset-0 rounded-xl bg-primary/10 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
-          <div class="relative flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/40 absolute left-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              name="q"
-              placeholder="Search for lyrics or songs..."
-              class="w-full py-4 px-12 rounded-xl backdrop-blur-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all duration-300"
-            />
-            <button
-              type="submit"
-              class="absolute right-2 px-5 py-2.5 rounded-lg bg-primary/30 border border-primary/40 text-white font-medium hover:bg-primary/50 hover:border-primary/60 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
-            >
-              Search
-            </button>
-          </div>
-        </form>
-
-        <!-- Quick stats -->
-        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/20">
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{songs.length}</span>
-            <span class="text-white/80 text-base font-medium">Songs</span>
+            <span class="text-white/60 text-base font-medium">Songs</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{songsWithLyrics.length}</span>
-            <span class="text-white/80 text-base font-medium">With Lyrics</span>
+            <span class="text-white/60 text-base font-medium">With Lyrics</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{Object.keys(albums).length}</span>
-            <span class="text-white/80 text-base font-medium">Albums</span>
+            <span class="text-white/60 text-base font-medium">Albums</span>
           </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="flex flex-wrap gap-4 mt-6">
-          <a
-            href="/lyrics/a-z"
-            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-primary/20 hover:border-primary/40 transition-all duration-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18M3 12h18M3 18h18"/>
-            </svg>
-            <span class="font-medium">A-Z Index</span>
-          </a>
-          <a
-            href="/lyrics/album"
-            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-primary/20 hover:border-primary/40 transition-all duration-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <span class="font-medium">By Album</span>
-          </a>
-          <button
-            id="random-song-btn"
-            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 hover:border-primary/50 transition-all duration-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
-            </svg>
-            <span class="font-medium">Random Song</span>
-          </button>
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- Search & Filters -->
+  <section class="mb-8" slot="hero">
+    <div class="mb-4">
+      <PageFilter id="lyrics" placeholder="Search songs, albums..." />
+    </div>
+
+    <!-- Type Tabs -->
+    <nav class="overflow-x-auto scrollbar-hide">
+      <div class="flex gap-2 min-w-max pb-2">
+        <a href="/lyrics" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide active">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          By Decade
+        </a>
+        <a href="/lyrics/album" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          By Album
+        </a>
+        <a href="/lyrics/a-z" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M3 12h18M3 18h18"/>
+          </svg>
+          A-Z Index
+        </a>
+        <a href="/lyrics/search" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Search
+        </a>
+        <button
+          id="random-song-btn"
+          class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+          </svg>
+          Random Song
+        </button>
+      </div>
+    </nav>
   </section>
 
   <!-- Random song data for JS -->
@@ -212,6 +198,7 @@ const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
       const randomSlug = songsWithLyricsSlugs[randomIndex];
       window.location.href = `/lyrics/${randomSlug}`;
     });
+
   </script>
 
   <!-- Featured: Lyric of the Day - Full Album Art Background -->
@@ -286,7 +273,7 @@ const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
 
     <div class="space-y-12">
       {sortedDecades.map(decade => (
-        <div class="decade-section" data-decade={decade}>
+        <div class="decade-section" data-decade={decade} data-filter-group>
           <!-- Decade header with visual interest -->
           <div class="flex items-center gap-4 mb-8">
             <div class="flex items-baseline gap-4">
@@ -296,58 +283,37 @@ const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
             <div class="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {songsByDecade[decade].map(song => (
               <a
                 href={`/lyrics/${song.slug}`}
-                class="song-card group"
-                style={`--card-bg: url(${song.albumCover})`}
+                class="song-card group block"
+                data-filter-item
+                data-filter-text={`${song.title} ${song.albumTitle} ${song.year}`}
               >
-                <!-- Album art background with blur -->
-                <div class="absolute inset-0 z-0">
-                  <img
-                    src={song.albumCover}
-                    alt=""
-                    class="w-full h-full object-cover blur-sm scale-110 group-hover:scale-125 group-hover:blur-none transition-all duration-700"
-                    loading="lazy"
-                  />
-                  <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40 group-hover:from-black/70 group-hover:via-black/50 group-hover:to-black/30 transition-all duration-500"></div>
-                </div>
-
-                <!-- Content -->
-                <div class="relative z-10 p-5 flex items-center gap-4">
-                  <!-- Album art thumbnail -->
-                  <div class="size-16 shrink-0 rounded-lg overflow-hidden ring-2 ring-white/20 group-hover:ring-primary/60 shadow-xl transition-all duration-300">
+                <div class="card-inner relative overflow-hidden h-full">
+                  <!-- Album artwork -->
+                  <div class="relative aspect-square overflow-hidden">
                     <img
                       src={song.albumCover}
                       alt={`Album art for ${song.albumTitle}`}
-                      class="size-full object-cover"
+                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       loading="lazy"
                     />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
 
-                  <!-- Song info -->
-                  <div class="flex-1 min-w-0">
-                    <h4 class="text-white font-semibold text-lg truncate group-hover:text-primary transition-colors duration-300 text-shadow">{song.title}</h4>
-                    <p class="text-white/70 text-sm truncate text-shadow">{song.albumTitle}</p>
-                    {song.hasLyrics && (
-                      <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-xs rounded-full bg-primary/30 text-primary/90 border border-primary/40">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M9 18V5l12-2v13"></path>
-                          <circle cx="6" cy="18" r="3"></circle>
-                          <circle cx="18" cy="16" r="3"></circle>
-                        </svg>
-                        Lyrics
-                      </span>
-                    )}
+                  <!-- Content overlay at bottom -->
+                  <div class="absolute bottom-0 left-0 right-0 p-4">
+                    <h4 class="font-display text-xl md:text-2xl text-white mb-1 group-hover:text-glow transition-all duration-300 text-shadow-strong">
+                      {song.title}
+                    </h4>
+                    <span class="text-white/60 text-xs font-medium tracking-wider uppercase text-shadow">{song.albumTitle}</span>
                   </div>
 
-                  <!-- Arrow indicator -->
-                  <div class="shrink-0 size-10 rounded-full bg-white/10 group-hover:bg-primary/30 flex items-center justify-center transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white/60 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
+                  <!-- Border frame -->
+                  <div class="absolute inset-0 border border-white/[0.08] group-hover:border-primary/30 transition-colors duration-500 pointer-events-none"></div>
                 </div>
               </a>
             ))}
@@ -359,21 +325,41 @@ const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
 </MainLayout>
 
 <style>
-  /* Song card with album art background */
+  /* Song card - matching AlbumCard/SetlistCard pattern */
   .song-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 90px;
+    --card-glow: rgba(var(--color-primary-rgb, 137, 176, 201), 0.3);
   }
 
-  .song-card:hover {
-    border-color: rgba(var(--color-primary-rgb), 0.5);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
-                0 0 50px rgba(var(--color-primary-rgb), 0.15);
-    transform: translateY(-4px) scale(1.01);
+  .song-card .card-inner {
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.06) 0%,
+      rgba(0, 0, 0, 0.6) 30%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.5s ease,
+                background 0.5s ease;
+  }
+
+  .song-card:hover .card-inner {
+    transform: translateY(-6px);
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.1) 0%,
+      rgba(0, 0, 0, 0.65) 30%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.6),
+      0 0 50px var(--card-glow),
+      0 4px 20px rgba(var(--color-primary-rgb), 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .song-card:focus-visible {
@@ -381,19 +367,20 @@ const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
     outline-offset: 2px;
   }
 
-  /* Lift effect on hover */
-  .hover-lift {
-    transition: transform 0.3s var(--ease-out);
+  .song-card:hover h4 {
+    text-shadow: 0 0 30px var(--card-glow),
+                 0 3px 8px rgba(0, 0, 0, 0.9);
   }
 
-  .hover-lift:hover {
-    transform: translateY(-4px);
-  }
-
-  /* Text shadow for better readability against album art */
   .text-shadow {
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8),
-                 0 1px 3px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8),
+                 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .text-shadow-strong {
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.95),
+                 0 2px 4px rgba(0, 0, 0, 0.9),
+                 0 1px 2px rgba(0, 0, 0, 0.8);
   }
 
   .text-shadow-lg {
@@ -403,13 +390,28 @@ const sortedDecades = Object.keys(songsByDecade).sort((a, b) => {
       0 0 30px rgba(0, 0, 0, 0.6);
   }
 
-  /* Minimum height for lyric of day container */
-  .min-h-80 {
-    min-height: 20rem;
-  }
-
   /* Decade header styling */
   .decade-section h3 {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
+
+  /* Tab styling - matching discography */
+  .type-tab {
+    color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .type-tab:hover {
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .type-tab.active {
+    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.12);
+    color: var(--color-primary);
+    border-color: rgba(var(--color-primary-rgb, 137, 176, 201), 0.25);
+  }
+
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 </style>

@@ -265,7 +265,6 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1),
                 var(--glow-md);
-    transform: translateY(-2px);
   }
 
   /* ========================================
@@ -312,7 +311,6 @@
 
   .glass-panel:hover {
     border-color: rgba(var(--color-primary-rgb), 0.4);
-    transform: translateY(-2px);
     box-shadow:
       0 16px 48px rgba(0, 0, 0, 0.7),
       0 8px 24px rgba(0, 0, 0, 0.5),
@@ -345,7 +343,6 @@
 
   .glass-tile:hover {
     border-color: rgba(var(--color-primary-rgb), 0.4);
-    transform: translateY(-3px);
     box-shadow:
       0 20px 60px rgba(0, 0, 0, 0.7),
       0 8px 24px rgba(0, 0, 0, 0.5),
@@ -452,7 +449,6 @@
 
   .glass-tile-image:hover {
     border-color: rgba(255, 255, 255, 0.35);
-    transform: translateY(-4px);
     box-shadow:
       0 20px 60px rgba(0, 0, 0, 0.5),
       0 8px 24px rgba(0, 0, 0, 0.3),
@@ -534,7 +530,6 @@
   }
 
   .glass-elevated:hover {
-    transform: translateY(-4px);
     border-color: rgba(var(--color-primary-rgb), 0.4);
     box-shadow:
       0 20px 60px rgba(0, 0, 0, 0.6),
@@ -956,27 +951,12 @@
   }
 
   /* Enhanced hover effects */
-  .hover-lift {
-    transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-smooth);
-  }
-  .hover-lift:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  }
-
   .hover-glow {
     transition: all 0.4s var(--ease-smooth);
   }
   .hover-glow:hover {
     box-shadow: var(--glow-lg);
     border-color: rgba(var(--color-primary-rgb), 0.5);
-  }
-
-  .hover-scale {
-    transition: transform 0.3s var(--ease-spring);
-  }
-  .hover-scale:hover {
-    transform: scale(1.02);
   }
 
   /* Theme-colored background using color-mix */

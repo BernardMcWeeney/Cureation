@@ -2,6 +2,7 @@
 // src/pages/lyrics/a-z.astro - Alphabetical Song Index
 import MainLayout from '../../layouts/MainLayout.astro';
 import LyricsSidebar from '../../components/sidebar/LyricsSidebar.astro';
+import PageFilter from '../../components/PageFilter.astro';
 import { createSongSlug } from '../../lib/lyrics-helpers';
 
 const DIRECTUS_URL = 'https://dash.cureation.net';
@@ -104,40 +105,39 @@ const songsWithLyrics = songs.filter(s => s.hasLyrics).length;
 
   <!-- Hero Section -->
   <section class="mb-12">
-    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
-      <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary/20 blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="badge">Alphabetical Index</span>
-          <div class="divider-gradient flex-1 max-w-24"></div>
-        </div>
-
-        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
           Songs A-Z
         </h1>
-        <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8 leading-relaxed">
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
           Browse the complete collection of The Cure songs alphabetically. Jump to any letter to find your favorite tracks instantly.
         </p>
 
-        <!-- Quick stats -->
-        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/20">
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{songs.length}</span>
-            <span class="text-white/80 text-base font-medium">Total Songs</span>
+            <span class="text-white/60 text-base font-medium">Total Songs</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{songsWithLyrics}</span>
-            <span class="text-white/80 text-base font-medium">With Lyrics</span>
+            <span class="text-white/60 text-base font-medium">With Lyrics</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-3xl font-display text-primary text-glow">{availableLetters.length}</span>
-            <span class="text-white/80 text-base font-medium">Letters</span>
+            <span class="text-white/60 text-base font-medium">Letters</span>
           </div>
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- Search -->
+  <section class="mb-8">
+    <PageFilter id="az" placeholder="Search songs..." />
   </section>
 
   <!-- Alphabet Navigation -->
@@ -168,7 +168,7 @@ const songsWithLyrics = songs.filter(s => s.hasLyrics).length;
   <section>
     <div class="space-y-12">
       {availableLetters.map(letter => (
-        <div id={`letter-${letter}`} class="scroll-mt-40">
+        <div id={`letter-${letter}`} class="scroll-mt-40" data-filter-group>
           <!-- Letter header -->
           <div class="flex items-center gap-4 mb-6">
             <div class="size-16 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center">
@@ -188,6 +188,8 @@ const songsWithLyrics = songs.filter(s => s.hasLyrics).length;
               <a
                 href={`/lyrics/${song.slug}`}
                 class="song-card-az group"
+                data-filter-item
+                data-filter-text={`${song.title} ${song.albumTitle} ${song.year}`}
               >
                 <!-- Album art background -->
                 <div class="absolute inset-0 z-0 overflow-hidden rounded-xl">
@@ -293,3 +295,4 @@ const songsWithLyrics = songs.filter(s => s.hasLyrics).length;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
 </style>
+

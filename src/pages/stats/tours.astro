@@ -1,7 +1,5 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import GothicCobweb from '../../components/GothicCobweb.astro';
-import GothicSwirls from '../../components/GothicSwirls.astro';
 import { getTourStatistics, getSetlistsWithSongs } from '../../lib/directus';
 
 const tourStats = await getTourStatistics();
@@ -61,10 +59,6 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
   title="Tour Statistics"
   description="The Cure tour statistics - concerts, venues, countries, and decades of touring"
 >
-  <div class="relative">
-    <GothicCobweb position="top-right" size="lg" opacity={0.08} />
-  </div>
-
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
     <ol class="flex items-center gap-2 text-sm text-white/60">
@@ -76,35 +70,37 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
 
   <!-- Hero -->
   <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
-      <GothicCobweb position="top-left" size="md" opacity={0.1} />
-      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header">Tour Statistics</h1>
-      <p class="text-white/60 text-lg max-w-2xl mb-8 mt-6">
-        Decades of touring the world - every tour, every venue, every country The Cure has visited.
-      </p>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary">{totalShows.toLocaleString()}</p>
-          <p class="text-sm text-white/50 mt-1">Total Shows</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-blue-400">{totalTours}</p>
-          <p class="text-sm text-white/50 mt-1">Tours</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-green-400">{allCountries.size}</p>
-          <p class="text-sm text-white/50 mt-1">Countries</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-amber-400">{Object.keys(venueCounts).length}</p>
-          <p class="text-sm text-white/50 mt-1">Unique Venues</p>
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">Tour Statistics</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          Decades of touring the world — every tour, every venue, every country The Cure has visited.
+        </p>
+
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{totalShows.toLocaleString()}</span>
+            <span class="text-white/60 text-base font-medium">Total Shows</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{totalTours}</span>
+            <span class="text-white/60 text-base font-medium">Tours</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{allCountries.size}</span>
+            <span class="text-white/60 text-base font-medium">Countries</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{Object.keys(venueCounts).length}</span>
+            <span class="text-white/60 text-base font-medium">Unique Venues</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
-
-  <GothicSwirls position="divider" />
 
   <!-- All Tours Table -->
   <section class="mb-12">

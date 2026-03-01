@@ -131,6 +131,7 @@ export const siteConfig: SiteConfig = {
       { name: "Setlists", path: "/setlists" },
       { name: "Wiki", path: "/wiki" },
       { name: "Stats", path: "/stats" },
+      { name: "Charts", path: "/charts" },
     ],
     footer: {
       explore: [

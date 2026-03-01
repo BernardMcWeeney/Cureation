@@ -129,35 +129,28 @@ const recentPosts = posts.slice(0, 5).map((p: BlogPost) => ({
     totalPosts={posts.length}
   />
 
-  <!-- Hero Section -->
-  <section class="mb-16">
-    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
-      <!-- Decorative gradient orbs -->
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/10 blur-2xl pointer-events-none"></div>
+  <!-- Hero Section (full width, in hero slot) -->
+  <section class="mb-10" slot="hero">
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
-        <div class="flex items-center gap-3 mb-4">
-          <span class="badge">Latest Updates</span>
-          <div class="divider-gradient flex-1 max-w-24"></div>
-        </div>
-
-        <h1 class="font-display text-6xl md:text-7xl lg:text-8xl text-white mb-4 text-glow" transition:animate="slide">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
           Blog
         </h1>
-        <p class="text-white/70 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
           News, history, deep dives, and analysis about The Cure. From album retrospectives to tour announcements.
         </p>
 
-        <!-- Quick stats -->
-        <div class="flex flex-wrap gap-6 mt-8 pt-6 border-t border-white/10">
-          <div class="flex items-center gap-2">
-            <span class="text-2xl font-display text-primary">{posts.length}</span>
-            <span class="text-white/50 text-sm">Articles</span>
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{posts.length}</span>
+            <span class="text-white/60 text-base font-medium">Articles</span>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="text-2xl font-display text-primary">{categories.length}</span>
-            <span class="text-white/50 text-sm">Categories</span>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{categories.length}</span>
+            <span class="text-white/60 text-base font-medium">Categories</span>
           </div>
         </div>
       </div>

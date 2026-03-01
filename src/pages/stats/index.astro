@@ -1,7 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import GothicCobweb from '../../components/GothicCobweb.astro';
-import GothicSwirls from '../../components/GothicSwirls.astro';
+import PageFilter from '../../components/PageFilter.astro';
 import {
   getOverallStats,
   getMostPlayedSongs,
@@ -50,54 +49,83 @@ const compCount = albums.filter(a => a.type === 'compilation').length;
   title="Statistics"
   description="Data and insights about The Cure - most played songs, tour statistics, and more"
 >
-  <!-- Cobweb decorations in corners -->
-  <div class="relative">
-    <GothicCobweb position="top-right" size="lg" opacity={0.1} />
-  </div>
-
   {/* Hero section */}
-  <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
-      <GothicCobweb position="top-left" size="lg" opacity={0.12} />
-      <GothicCobweb position="bottom-right" size="md" opacity={0.06} />
+  <section class="mb-10">
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
-      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header lipstick-accent">Statistics</h1>
-      <p class="text-white/60 text-lg max-w-2xl mb-8 mt-6">
-        Dive into the data behind The Cure's legendary career - song frequencies,
-        tour statistics, chart performance, and more.
-      </p>
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">Statistics</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          Dive into the data behind The Cure's legendary career — song frequencies,
+          tour statistics, chart performance, and more.
+        </p>
 
-      {/* Overview stats */}
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary stat-count-animated">{overallStats.yearsActive}</p>
-          <p class="text-sm text-white/50 mt-1">Years Active</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary stat-count-animated">{overallStats.totalAlbums}</p>
-          <p class="text-sm text-white/50 mt-1">Albums</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary stat-count-animated">{overallStats.totalSongs}</p>
-          <p class="text-sm text-white/50 mt-1">Songs</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary stat-count-animated">{overallStats.totalShows.toLocaleString()}</p>
-          <p class="text-sm text-white/50 mt-1">Live Shows</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary stat-count-animated">{overallStats.countriesVisited}</p>
-          <p class="text-sm text-white/50 mt-1">Countries</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary stat-count-animated">{overallStats.averageSongsPerShow}</p>
-          <p class="text-sm text-white/50 mt-1">Avg Songs/Show</p>
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{overallStats.yearsActive}</span>
+            <span class="text-white/60 text-base font-medium">Years Active</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{overallStats.totalShows.toLocaleString()}</span>
+            <span class="text-white/60 text-base font-medium">Live Shows</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{overallStats.totalSongs}</span>
+            <span class="text-white/60 text-base font-medium">Songs</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{overallStats.countriesVisited}</span>
+            <span class="text-white/60 text-base font-medium">Countries</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <GothicSwirls position="divider" />
+  <!-- Search & Filters -->
+  <section class="mb-8">
+    <div class="mb-4">
+      <PageFilter id="stats" placeholder="Search statistics..." />
+    </div>
+
+    <!-- Type Tabs -->
+    <nav class="overflow-x-auto scrollbar-hide">
+      <div class="flex gap-2 min-w-max pb-2">
+      <a href="/stats" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide active">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+        Overview
+      </a>
+      <a href="/stats/songs" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+        Song Stats
+      </a>
+      <a href="/stats/tours" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Tour Stats
+      </a>
+      <a href="/stats/charts" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Charts
+      </a>
+      <a href="/stats/trends" class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+        Trends
+      </a>
+    </div>
+    </nav>
+  </section>
 
   {/* Key Insights Row */}
   <section class="mb-12">
@@ -164,7 +192,6 @@ const compCount = albums.filter(a => a.type === 'compilation').length;
   {/* Most played songs */}
   <section class="mb-12">
     <div class="glass-panel p-6 md:p-8 relative overflow-hidden">
-      <GothicCobweb position="top-right" size="sm" opacity={0.06} />
       <h2 class="text-2xl text-white mb-6 flex items-center gap-3 gothic-heading">
         Most Played Songs
       </h2>
@@ -172,7 +199,7 @@ const compCount = albums.filter(a => a.type === 'compilation').length;
       {mostPlayed.length > 0 ? (
         <div class="space-y-4">
           {mostPlayed.map((song, index) => (
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4" data-filter-item data-filter-text={`${song.songTitle} ${song.albumTitle}`}>
               <span class={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                 index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
                 index === 1 ? 'bg-gray-400/20 text-gray-300' :
@@ -221,7 +248,6 @@ const compCount = albums.filter(a => a.type === 'compilation').length;
     {/* Rarest songs */}
     <section>
       <div class="glass-panel p-6 h-full relative overflow-hidden">
-        <GothicCobweb position="bottom-right" size="sm" opacity={0.05} />
         <h2 class="text-2xl text-white mb-6 flex items-center gap-3 gothic-heading">
           Rarest Songs
         </h2>
@@ -229,7 +255,7 @@ const compCount = albums.filter(a => a.type === 'compilation').length;
         {rarestSongs.length > 0 ? (
           <ul class="space-y-3">
             {rarestSongs.map((song, index) => (
-              <li class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+              <li class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors" data-filter-item data-filter-text={`${song.songTitle} ${song.albumTitle}`}>
                 <div class="flex items-center gap-3 min-w-0">
                   <span class="text-white/40 text-sm w-5">{index + 1}.</span>
                   <div class="min-w-0">
@@ -299,68 +325,29 @@ const compCount = albums.filter(a => a.type === 'compilation').length;
     </section>
   </div>
 
-  <GothicSwirls position="divider" />
-
-  {/* Quick navigation to sub-pages */}
-  <section>
-    <h2 class="text-2xl text-white mb-6 section-header">Explore Statistics</h2>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-      <a href="/stats/songs" class="group">
-        <div class="glass-elevated p-5 text-center gothic-corners relative overflow-hidden">
-          <GothicCobweb position="top-left" size="sm" opacity={0.08} />
-          <div class="p-3 rounded-xl bg-green-500/20 w-fit mx-auto mb-3 group-hover:bg-green-500/30 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
-          </div>
-          <h3 class="text-white group-hover:text-green-400 transition-colors">Song Stats</h3>
-          <p class="text-white/50 text-sm mt-1">Every song ranked</p>
-        </div>
-      </a>
-
-      <a href="/stats/tours" class="group">
-        <div class="glass-elevated p-5 text-center gothic-corners relative overflow-hidden">
-          <GothicCobweb position="top-right" size="sm" opacity={0.08} />
-          <div class="p-3 rounded-xl bg-blue-500/20 w-fit mx-auto mb-3 group-hover:bg-blue-500/30 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-white group-hover:text-blue-400 transition-colors">Tour Stats</h3>
-          <p class="text-white/50 text-sm mt-1">Tours & venues</p>
-        </div>
-      </a>
-
-      <a href="/stats/charts" class="group">
-        <div class="glass-elevated p-5 text-center gothic-corners relative overflow-hidden">
-          <div class="p-3 rounded-xl bg-amber-500/20 w-fit mx-auto mb-3 group-hover:bg-amber-500/30 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <h3 class="text-white group-hover:text-amber-400 transition-colors">Chart History</h3>
-          <p class="text-white/50 text-sm mt-1">Chart positions</p>
-        </div>
-      </a>
-
-      <a href="/stats/trends" class="group">
-        <div class="glass-elevated p-5 text-center gothic-corners relative overflow-hidden">
-          <GothicCobweb position="bottom-right" size="sm" opacity={0.08} />
-          <div class="p-3 rounded-xl bg-purple-500/20 w-fit mx-auto mb-3 group-hover:bg-purple-500/30 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
-          </div>
-          <h3 class="text-white group-hover:text-purple-400 transition-colors">Trends</h3>
-          <p class="text-white/50 text-sm mt-1">Historical analysis</p>
-        </div>
-      </a>
-    </div>
-  </section>
 </MainLayout>
 
 <style>
   section li {
     transition: all 0.3s ease;
   }
+
+  .type-tab {
+    color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .type-tab:hover {
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .type-tab.active {
+    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.12);
+    color: var(--color-primary);
+    border-color: rgba(var(--color-primary-rgb, 137, 176, 201), 0.25);
+  }
+
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 </style>

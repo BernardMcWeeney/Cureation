@@ -144,8 +144,9 @@ const durationDisplay = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
 
   <!-- Album Header -->
   <section class="mb-12">
-    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
-      <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
         <div class="flex flex-col sm:flex-row gap-6 md:gap-10">
@@ -209,19 +210,19 @@ const durationDisplay = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
             )}
 
             <!-- Stats -->
-            <div class="flex flex-wrap gap-6 pt-6 border-t border-white/10">
-              <div class="flex items-center gap-2">
-                <span class="text-2xl font-display text-primary">{album.tracks?.length || 0}</span>
-                <span class="text-white/70 text-sm">Tracks</span>
+            <div class="flex flex-wrap gap-8 pt-6 border-t border-white/[0.08]">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl font-display text-primary text-glow">{album.tracks?.length || 0}</span>
+                <span class="text-white/60 text-base font-medium">Tracks</span>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="text-2xl font-display text-primary">{durationDisplay}</span>
-                <span class="text-white/70 text-sm">Duration</span>
+              <div class="flex items-center gap-3">
+                <span class="text-3xl font-display text-primary text-glow">{durationDisplay}</span>
+                <span class="text-white/60 text-base font-medium">Duration</span>
               </div>
               {album.singles?.length > 0 && (
-                <div class="flex items-center gap-2">
-                  <span class="text-2xl font-display text-primary">{album.singles.length}</span>
-                  <span class="text-white/70 text-sm">Singles</span>
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl font-display text-primary text-glow">{album.singles.length}</span>
+                  <span class="text-white/60 text-base font-medium">Singles</span>
                 </div>
               )}
             </div>

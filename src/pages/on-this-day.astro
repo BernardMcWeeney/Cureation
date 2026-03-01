@@ -1,7 +1,5 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import GothicCobweb from '../components/GothicCobweb.astro';
-import GothicSwirls from '../components/GothicSwirls.astro';
 import {
   getSetlistsWithSongs,
   getTimelineEvents,
@@ -62,46 +60,38 @@ const dateString = today.toLocaleDateString('en-US', { month: 'long', day: 'nume
   title={`On This Day - ${dateString}`}
   description={`What happened in The Cure's history on ${dateString}? Shows, events, and milestones.`}
 >
-  <div class="relative">
-    <GothicCobweb position="top-right" size="lg" opacity={0.1} />
-  </div>
-
   <!-- Hero -->
   <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
-      <GothicCobweb position="top-left" size="lg" opacity={0.12} />
-      <GothicCobweb position="bottom-right" size="md" opacity={0.06} />
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
-      <div class="flex items-center gap-3 mb-4">
-        <span class="badge">Daily Feature</span>
-      </div>
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
+          On This Day
+        </h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          {dateString} — What happened in The Cure's history on this date?
+        </p>
 
-      <h1 class="text-4xl md:text-6xl text-white mb-4 section-header lipstick-accent">
-        On This Day
-      </h1>
-      <p class="text-white/70 text-2xl mt-6 font-heading">{dateString}</p>
-      <p class="text-white/50 text-lg mt-2">
-        What happened in The Cure's history on this date?
-      </p>
-
-      <div class="grid grid-cols-3 gap-4 mt-8">
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-primary">{onThisDaySetlists.length}</p>
-          <p class="text-sm text-white/50 mt-1">Shows on This Day</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-purple-400">{onThisDayEvents.length}</p>
-          <p class="text-sm text-white/50 mt-1">Events on This Day</p>
-        </div>
-        <div class="glass-stat p-4 text-center">
-          <p class="text-3xl font-bold text-blue-400">{thisMonthSetlists.length}</p>
-          <p class="text-sm text-white/50 mt-1">Shows in {monthName}</p>
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{onThisDaySetlists.length}</span>
+            <span class="text-white/60 text-base font-medium">Shows on This Day</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{onThisDayEvents.length}</span>
+            <span class="text-white/60 text-base font-medium">Events on This Day</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{thisMonthSetlists.length}</span>
+            <span class="text-white/60 text-base font-medium">Shows in {monthName}</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <GothicSwirls position="divider" />
 
   <!-- Shows on This Day -->
   {onThisDaySetlists.length > 0 && (
@@ -176,7 +166,6 @@ const dateString = today.toLocaleDateString('en-US', { month: 'long', day: 'nume
     </section>
   )}
 
-  <GothicSwirls position="divider" />
 
   <!-- This Month in History -->
   {thisMonthEvents.length > 0 && (

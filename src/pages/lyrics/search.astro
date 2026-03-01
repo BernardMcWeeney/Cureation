@@ -34,13 +34,16 @@ const albums = rawAlbums.map((album) => ({
   <ViewTransitions />
 
   <section class="mb-12">
-    <div class="glass-card rounded-xl overflow-hidden border border-white/20">
-      <div class="p-6 md:p-8">
-        <h1 class="font-display text-4xl md:text-5xl text-white mb-4">
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
           Search
         </h1>
-        <p class="text-white/70 mb-8 max-w-2xl">
-          Search through The Cure's complete catalog - find songs, albums, and lyrics.
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed mb-8">
+          Search through The Cure's complete catalog — find songs, albums, and lyrics.
         </p>
 
         <!-- Pagefind Search -->

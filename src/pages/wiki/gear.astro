@@ -1,8 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import GothicCobweb from '../../components/GothicCobweb.astro';
-import GothicSwirls from '../../components/GothicSwirls.astro';
-
+import PageFilter from '../../components/PageFilter.astro';
 // Directus gear collection integration
 const DIRECTUS_URL = 'https://dash.cureation.net';
 const API_BASE = `${DIRECTUS_URL}/items`;
@@ -69,10 +67,6 @@ const typeIcons: Record<string, string> = {
   title="Gear & Equipment"
   description="The guitars, basses, keyboards, effects, and equipment used by The Cure"
 >
-  <div class="relative">
-    <GothicCobweb position="top-right" size="lg" opacity={0.08} />
-  </div>
-
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
     <ol class="flex items-center gap-2 text-sm text-white/60">
@@ -84,50 +78,56 @@ const typeIcons: Record<string, string> = {
 
   <!-- Hero -->
   <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
-      <GothicCobweb position="top-left" size="lg" opacity={0.12} />
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
-      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header lipstick-accent">
-        Gear & Equipment
-      </h1>
-      <p class="text-white/60 text-lg max-w-2xl mt-6">
-        The instruments, amplifiers, effects pedals, and equipment that shaped The Cure's iconic sound - from Robert Smith's
-        beloved Fender Bass VI to Simon Gallup's bass rigs.
-      </p>
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
+          Gear & Equipment
+        </h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          The instruments, amplifiers, effects pedals, and equipment that shaped The Cure's iconic sound — from Robert Smith's
+          beloved Fender Bass VI to Simon Gallup's bass rigs.
+        </p>
 
-      {gearItems.length > 0 && (
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-          <div class="glass-stat p-4 text-center">
-            <p class="text-3xl font-bold text-primary">{gearItems.length}</p>
-            <p class="text-sm text-white/50 mt-1">Items Catalogued</p>
+        {gearItems.length > 0 && (
+          <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl font-display text-primary text-glow">{gearItems.length}</span>
+              <span class="text-white/60 text-base font-medium">Items Catalogued</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-3xl font-display text-primary text-glow">{sortedTypes.length}</span>
+              <span class="text-white/60 text-base font-medium">Categories</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-3xl font-display text-primary text-glow">
+                {new Set(gearItems.map(g => g.brand).filter(Boolean)).size}
+              </span>
+              <span class="text-white/60 text-base font-medium">Brands</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-3xl font-display text-primary text-glow">
+                {new Set(gearItems.map(g => g.used_by).filter(Boolean)).size}
+              </span>
+              <span class="text-white/60 text-base font-medium">Members</span>
+            </div>
           </div>
-          <div class="glass-stat p-4 text-center">
-            <p class="text-3xl font-bold text-blue-400">{sortedTypes.length}</p>
-            <p class="text-sm text-white/50 mt-1">Categories</p>
-          </div>
-          <div class="glass-stat p-4 text-center">
-            <p class="text-3xl font-bold text-green-400">
-              {new Set(gearItems.map(g => g.brand).filter(Boolean)).size}
-            </p>
-            <p class="text-sm text-white/50 mt-1">Brands</p>
-          </div>
-          <div class="glass-stat p-4 text-center">
-            <p class="text-3xl font-bold text-amber-400">
-              {new Set(gearItems.map(g => g.used_by).filter(Boolean)).size}
-            </p>
-            <p class="text-sm text-white/50 mt-1">Members</p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   </section>
 
-  <GothicSwirls position="divider" />
+  <!-- Search -->
+  <section class="mb-8">
+    <PageFilter id="gear" placeholder="Search gear..." />
+  </section>
 
   {gearItems.length > 0 ? (
     <div class="space-y-12">
       {sortedTypes.map(type => (
-        <section>
+        <section data-filter-group>
           <div class="glass-panel p-6 md:p-8">
             <div class="flex items-center gap-3 mb-6">
               <div class="p-2 rounded-lg bg-primary/20">
@@ -141,7 +141,7 @@ const typeIcons: Record<string, string> = {
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {gearByType[type].map(item => (
-                <div class="glass-stat p-5 cure-rose-border hover:bg-white/[0.06] transition-colors">
+                <div class="glass-stat p-5 cure-rose-border hover:bg-white/[0.06] transition-colors" data-filter-item data-filter-text={`${item.name} ${item.brand || ''} ${item.model || ''} ${item.used_by || ''} ${item.era || ''} ${type}`}>
                   {item.image && (
                     <img
                       src={`${DIRECTUS_URL}/assets/${item.image}`}
@@ -217,3 +217,4 @@ const typeIcons: Record<string, string> = {
     -webkit-line-clamp: 3;
   }
 </style>
+

@@ -1,7 +1,5 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import GothicCobweb from '../../components/GothicCobweb.astro';
-import GothicSwirls from '../../components/GothicSwirls.astro';
 import {
   getSongStatistics,
   getSetlistsWithSongs,
@@ -118,10 +116,6 @@ const songYearSpan = playedSongs
   title="Trends & Analysis"
   description="Historical trends and analysis of The Cure's live performances over the decades"
 >
-  <div class="relative">
-    <GothicCobweb position="top-right" size="lg" opacity={0.08} />
-  </div>
-
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
     <ol class="flex items-center gap-2 text-sm text-white/60">
@@ -133,16 +127,18 @@ const songYearSpan = playedSongs
 
   <!-- Hero -->
   <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10 relative overflow-hidden gothic-corners bg-cobweb">
-      <GothicCobweb position="top-left" size="md" opacity={0.1} />
-      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header">Trends & Analysis</h1>
-      <p class="text-white/60 text-lg max-w-2xl mt-6">
-        How The Cure's live show has evolved over the decades - setlist length, song selection, and era representation.
-      </p>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">Trends & Analysis</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          How The Cure's live show has evolved over the decades — setlist length, song selection, and era representation.
+        </p>
+      </div>
     </div>
   </section>
-
-  <GothicSwirls position="divider" />
 
   <!-- Setlist Length Trend -->
   <section class="mb-12">

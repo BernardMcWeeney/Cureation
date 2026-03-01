@@ -296,8 +296,9 @@ const sourceLinks = buildSourceLinks(setlist.source);
 
   <!-- Event Header -->
   <section class="mb-12">
-    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
         <!-- Tour badge -->
@@ -331,27 +332,27 @@ const sourceLinks = buildSourceLinks(setlist.source);
         </div>
 
         <!-- Stats -->
-        <div class="flex flex-wrap gap-6 pt-6 border-t border-white/10">
-          <div class="flex items-center gap-2">
-            <span class="text-2xl font-display text-primary">{setlist.songs.length || setlist.songCount}</span>
-            <span class="text-white/50 text-sm">Songs</span>
+        <div class="flex flex-wrap gap-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{setlist.songs.length || setlist.songCount}</span>
+            <span class="text-white/60 text-base font-medium">Songs</span>
           </div>
           {mainSet.length > 0 && (
-            <div class="flex items-center gap-2">
-              <span class="text-2xl font-display text-primary">{mainSet.length}</span>
-              <span class="text-white/50 text-sm">Main Set</span>
+            <div class="flex items-center gap-3">
+              <span class="text-3xl font-display text-primary text-glow">{mainSet.length}</span>
+              <span class="text-white/60 text-base font-medium">Main Set</span>
             </div>
           )}
           {encoreSongCount > 0 && (
-            <div class="flex items-center gap-2">
-              <span class="text-2xl font-display text-primary">{encoreSongCount}</span>
-              <span class="text-white/50 text-sm">Encore</span>
+            <div class="flex items-center gap-3">
+              <span class="text-3xl font-display text-primary text-glow">{encoreSongCount}</span>
+              <span class="text-white/60 text-base font-medium">Encore</span>
             </div>
           )}
         </div>
 
         {(setlist.notes || sourceLinks.length > 0) && (
-          <div class="mt-6 pt-6 border-t border-white/10">
+          <div class="mt-6 pt-6 border-t border-white/[0.08]">
             {setlist.notes && <p class="text-white/70">{setlist.notes}</p>}
             {sourceLinks.length > 0 && (
               <div class={setlist.notes ? 'mt-4' : ''}>

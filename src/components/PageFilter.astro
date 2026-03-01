@@ -1,0 +1,64 @@
+---
+// In-page filter bar for list pages.
+// Usage:
+//   <PageFilter id="disco" placeholder="Search albums..." />
+//
+// Then mark filterable items with:
+//   data-filter-item           — item to show/hide
+//   data-filter-text="..."     — text to match against (optional; falls back to textContent)
+//
+// Optionally mark group containers with:
+//   data-filter-group          — hidden when all child [data-filter-item] are hidden
+
+interface Props {
+  id: string;
+  placeholder?: string;
+}
+
+const { id, placeholder = 'Search...' } = Astro.props;
+---
+
+<div class="relative">
+  <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"></circle>
+    <path d="m21 21-4.3-4.3"></path>
+  </svg>
+  <input
+    type="text"
+    id={`${id}-filter`}
+    data-page-filter
+    placeholder={placeholder}
+    class="w-full pl-12 pr-4 py-2.5 rounded-sm bg-white/5 border border-white/10 text-white placeholder-white/40 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors text-sm font-medium tracking-wide"
+  />
+</div>
+
+<script is:inline>
+  function initPageFilters() {
+    document.querySelectorAll('input[data-page-filter]').forEach(function(input) {
+      if (input.hasAttribute('data-filter-ready')) return;
+      input.setAttribute('data-filter-ready', '');
+
+      var timeout;
+      input.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+          var query = input.value.toLowerCase().trim();
+          var items = document.querySelectorAll('[data-filter-item]');
+
+          items.forEach(function(item) {
+            var text = (item.getAttribute('data-filter-text') || item.textContent || '').toLowerCase();
+            item.style.display = (!query || text.indexOf(query) !== -1) ? '' : 'none';
+          });
+
+          document.querySelectorAll('[data-filter-group]').forEach(function(group) {
+            var hasVisible = group.querySelector('[data-filter-item]:not([style*="display: none"])');
+            group.style.display = hasVisible ? '' : 'none';
+          });
+        }, 150);
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initPageFilters);
+  document.addEventListener('astro:page-load', initPageFilters);
+</script>

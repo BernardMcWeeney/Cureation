@@ -148,8 +148,9 @@ const wordCount = song.lyrics
 
   <!-- Song Header -->
   <section class="mb-12">
-    <div class="glass-card-glow rounded-2xl overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/15 blur-3xl pointer-events-none"></div>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
         <div class="flex flex-col sm:flex-row gap-6 md:gap-8">
@@ -165,7 +166,7 @@ const wordCount = song.lyrics
           <!-- Song Info -->
           <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2 mb-3">
-              <span class="badge">Track {song.trackNumber}</span>
+              <span class="text-primary text-sm font-medium">Track {song.trackNumber}</span>
               <span class="text-white/30">·</span>
               <a href={`/discography/${album.slug}`} class="text-primary text-sm hover:opacity-80 transition-opacity">{album.title}</a>
             </div>
@@ -174,26 +175,26 @@ const wordCount = song.lyrics
               {song.title}
             </h1>
 
-            <p class="text-white/70 mb-6">The Cure · {album.year}</p>
+            <p class="text-white/75 mb-6">The Cure · {album.year}</p>
 
             <!-- Stats -->
-            <div class="flex flex-wrap gap-6 pt-6 border-t border-white/10">
-              <div class="flex items-center gap-2">
-                <span class="text-2xl font-display text-primary">{song.duration}</span>
-                <span class="text-white/70 text-sm">Duration</span>
+            <div class="flex flex-wrap gap-8 pt-6 border-t border-white/[0.08]">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl font-display text-primary text-glow">{song.duration}</span>
+                <span class="text-white/60 text-base font-medium">Duration</span>
               </div>
               {song.hasLyrics && (
-                <div class="flex items-center gap-2">
-                  <span class="text-2xl font-display text-primary">{wordCount}</span>
-                  <span class="text-white/70 text-sm">Words</span>
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl font-display text-primary text-glow">{wordCount}</span>
+                  <span class="text-white/60 text-base font-medium">Words</span>
                 </div>
               )}
               {song.credits && (
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <span class="text-white/70 text-sm">{song.credits}</span>
+                  <span class="text-white/60 text-base font-medium">{song.credits}</span>
                 </div>
               )}
             </div>

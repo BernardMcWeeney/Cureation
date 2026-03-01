@@ -121,7 +121,9 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
       <Header />
     <div class="h-6"></div>
     <main id="main-content" class="grow pt-20">
-      <div class="responsive-container flex flex-col md:flex-row gap-8">
+      <div class="responsive-container">
+        <slot name="hero" />
+        <div class="flex flex-col md:flex-row gap-8">
         <div class={showSidebar ? 'md:w-3/4 lg:w-4/5' : 'w-full'}>
           <slot />
         </div>
@@ -177,6 +179,7 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
             </aside>
           </>
         )}
+        </div>
       </div>
     </main>
     <Footer />

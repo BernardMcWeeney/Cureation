@@ -19,24 +19,30 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
 >
   {/* Hero section */}
   <section class="mb-12">
-    <div class="glass-panel p-8 md:p-10">
-      <h1 class="text-4xl md:text-5xl text-white mb-4 section-header">Photo Gallery</h1>
-      <p class="text-white/60 text-lg max-w-2xl mb-6">
-        Visual history of The Cure through the decades - live performances, studio sessions,
-        promotional shoots, and candid moments.
-      </p>
-      <div class="flex flex-wrap gap-6">
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{photos.length}</p>
-          <p class="text-sm text-white/50">Photos</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{tours.length}</p>
-          <p class="text-sm text-white/50">Tours</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-primary">{albums.length}</p>
-          <p class="text-sm text-white/50">Album Eras</p>
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">Photo Gallery</h1>
+        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
+          Visual history of The Cure through the decades — live performances, studio sessions,
+          promotional shoots, and candid moments.
+        </p>
+
+        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{photos.length}</span>
+            <span class="text-white/60 text-base font-medium">Photos</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{tours.length}</span>
+            <span class="text-white/60 text-base font-medium">Tours</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{albums.length}</span>
+            <span class="text-white/60 text-base font-medium">Album Eras</span>
+          </div>
         </div>
       </div>
     </div>
