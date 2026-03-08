@@ -11,6 +11,14 @@ interface SongData {
   hasLyrics: boolean;
   songMeaning: string | null;
   credits: string | null;
+  writer: string | null;
+  isSingle: boolean;
+  timesPlayedLive: number | null;
+  firstPlayedLive: string | null;
+  lastPlayedLive: string | null;
+  musicalKey: string | null;
+  bpm: number | null;
+  musicVideoUrl: string | null;
 }
 
 interface AlbumData {
@@ -104,6 +112,14 @@ export async function getStaticPaths() {
             hasLyrics: !!lyrics && lyrics.length > 0,
             songMeaning: song.song_meaning || null,
             credits: song.credits || null,
+            writer: song.writer || null,
+            isSingle: song.is_single || false,
+            timesPlayedLive: song.times_played_live || null,
+            firstPlayedLive: song.first_played_live || null,
+            lastPlayedLive: song.last_played_live || null,
+            musicalKey: song.musical_key || null,
+            bpm: song.bpm || null,
+            musicVideoUrl: song.music_video_url || null,
           },
           album: { ...album, tracks: albumTracks },
           prevTrack,
@@ -169,16 +185,25 @@ const wordCount = song.lyrics
               <span class="text-primary text-sm font-medium">Track {song.trackNumber}</span>
               <span class="text-white/30">·</span>
               <a href={`/discography/${album.slug}`} class="text-primary text-sm hover:opacity-80 transition-opacity">{album.title}</a>
+              {song.isSingle && (
+                <>
+                  <span class="text-white/30">·</span>
+                  <span class="badge badge-sm bg-amber-500/20 text-amber-400 border-amber-500/40">Single</span>
+                </>
+              )}
             </div>
 
             <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-3 text-glow">
               {song.title}
             </h1>
 
-            <p class="text-white/75 mb-6">The Cure · {album.year}</p>
+            <p class="text-white/75 mb-2">The Cure · {album.year}</p>
+            {song.writer && (
+              <p class="text-white/50 text-sm mb-6">Written by {song.writer}</p>
+            )}
 
             <!-- Stats -->
-            <div class="flex flex-wrap gap-8 pt-6 border-t border-white/[0.08]">
+            <div class="flex flex-wrap gap-8 pt-6 border-t border-white/8">
               <div class="flex items-center gap-3">
                 <span class="text-3xl font-display text-primary text-glow">{song.duration}</span>
                 <span class="text-white/60 text-base font-medium">Duration</span>
@@ -189,15 +214,55 @@ const wordCount = song.lyrics
                   <span class="text-white/60 text-base font-medium">Words</span>
                 </div>
               )}
-              {song.credits && (
+              {song.timesPlayedLive && (
                 <div class="flex items-center gap-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span class="text-white/60 text-base font-medium">{song.credits}</span>
+                  <span class="text-3xl font-display text-primary text-glow">{song.timesPlayedLive}</span>
+                  <span class="text-white/60 text-base font-medium">Times Played Live</span>
+                </div>
+              )}
+              {song.musicalKey && (
+                <div class="flex items-center gap-3">
+                  <span class="text-xl font-display text-primary">{song.musicalKey}</span>
+                  <span class="text-white/60 text-base font-medium">Key</span>
+                </div>
+              )}
+              {song.bpm && (
+                <div class="flex items-center gap-3">
+                  <span class="text-xl font-display text-primary">{song.bpm}</span>
+                  <span class="text-white/60 text-base font-medium">BPM</span>
                 </div>
               )}
             </div>
+
+            <!-- Live performance dates & music video -->
+            {(song.firstPlayedLive || song.lastPlayedLive || song.musicVideoUrl) && (
+              <div class="flex flex-wrap gap-6 mt-4 pt-4 border-t border-white/8 text-sm">
+                {song.firstPlayedLive && (
+                  <div class="text-white/50">
+                    First played: <span class="text-white/80">{new Date(song.firstPlayedLive).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                )}
+                {song.lastPlayedLive && (
+                  <div class="text-white/50">
+                    Last played: <span class="text-white/80">{new Date(song.lastPlayedLive).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                )}
+                {song.musicVideoUrl && (
+                  <a href={song.musicVideoUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Watch Music Video
+                  </a>
+                )}
+              </div>
+            )}
+
+            {song.credits && (
+              <div class="mt-4 pt-4 border-t border-white/8">
+                <p class="text-white/50 text-sm">Credits: <span class="text-white/70">{song.credits}</span></p>
+              </div>
+            )}
           </div>
         </div>
       </div>

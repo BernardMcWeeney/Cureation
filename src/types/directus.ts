@@ -25,11 +25,15 @@ export interface DirectusAlbum {
   spotify_url?: string;
   apple_music_url?: string;
   bandcamp_url?: string;
+  amazon_url?: string;
+  official_store_url?: string;
   disc_count?: number;
   track_count?: number;
   catalog_number?: string;
   genre_tags?: string[];
   credits?: string;
+  source?: number;
+  source_url?: string;
 }
 
 // =============================================================================
@@ -52,6 +56,7 @@ export interface LyricStructuredSection {
 export interface DirectusSong {
   id: number;
   title: string;
+  slug?: string;
   album: number;
   track_number?: number;
   duration?: string;
@@ -60,6 +65,18 @@ export interface DirectusSong {
   song_meaning?: string;
   listen_links?: ListenLink[];
   credits?: string;
+  source?: number;
+  source_url?: string;
+  writer?: string;
+  composer?: string;
+  bpm?: number;
+  musical_key?: string;
+  first_played_live?: string;
+  last_played_live?: string;
+  times_played_live?: number;
+  guitar_tuning?: string;
+  is_single?: boolean;
+  music_video_url?: string;
 }
 
 export interface DirectusSingle {
@@ -99,6 +116,9 @@ export interface Album {
   parentAlbumId?: number;
   spotifyUrl?: string;
   appleMusicUrl?: string;
+  bandcampUrl?: string;
+  amazonUrl?: string;
+  officialStoreUrl?: string;
   discCount: number;
   trackCount: number;
   catalogNumber?: string;
@@ -106,6 +126,8 @@ export interface Album {
   credits?: string;
   tracks?: Track[];
   singles?: Single[];
+  sourceName?: string;
+  sourceUrl?: string;
 }
 
 export interface Track {
@@ -131,6 +153,16 @@ export interface Song {
   listenLinks: ListenLink[];
   credits?: string;
   hasLyrics: boolean;
+  writer?: string;
+  composer?: string;
+  bpm?: number;
+  musicalKey?: string;
+  firstPlayedLive?: string;
+  lastPlayedLive?: string;
+  timesPlayedLive?: number;
+  guitarTuning?: string;
+  isSingle?: boolean;
+  musicVideoUrl?: string;
 }
 
 export interface LyricPart {
@@ -190,6 +222,7 @@ export interface DirectusWikiMember {
   slug?: string;
   bio?: string;
   photo?: string;
+  photo_file?: string;
   birth_date?: string;
   instruments?: string[];
   tenure_start?: string;
@@ -197,6 +230,8 @@ export interface DirectusWikiMember {
   is_current_member?: boolean;
   side_projects?: string[];
   status?: 'draft' | 'published';
+  source?: number;
+  source_url?: string;
 }
 
 export interface WikiMember {
@@ -224,8 +259,12 @@ export interface DirectusTimelineEvent {
   event_type: TimelineEventType;
   related_album?: number;
   related_member?: string;
+  related_album_id?: number;
+  related_member_id?: number;
   image?: string;
   importance?: number;
+  source?: number;
+  source_url?: string;
 }
 
 export interface TimelineEvent {
@@ -248,14 +287,18 @@ export interface TimelineEvent {
 
 export type PhotoTag = 'live' | 'studio' | 'candid' | 'promotional' | 'fan' | 'press' | 'backstage';
 
+export type PhotoLicense = 'arr' | 'cc' | 'fair_use' | 'public_domain' | 'press' | 'fan';
+
 export interface DirectusPhoto {
   id: number | string;
   image: string;
+  image_file?: string;
   title?: string;
   description?: string;
   date_taken?: string;
   photographer?: string;
-  source?: string;
+  source?: number;
+  source_url?: string;
   location?: string;
   tags?: PhotoTag[];
   album?: number;
@@ -266,6 +309,8 @@ export interface DirectusPhoto {
   submitted_by?: string;
   status?: 'pending' | 'approved' | 'rejected';
   date_uploaded?: string;
+  license?: PhotoLicense;
+  copyright_holder?: string;
 }
 
 export interface Photo {
@@ -460,6 +505,7 @@ export interface DirectusNews {
   excerpt: string;
   content: string;
   featured_image?: string;
+  featured_image_file?: string;
   featured?: boolean;
   category: NewsCategory;
   tags?: string[];
@@ -470,6 +516,9 @@ export interface DirectusNews {
   status?: string;
   rating?: number; // 1-5 for reviews
   is_featured?: boolean;
+  source?: number;
+  source_url?: string;
+  image_credit?: string;
 }
 
 export interface NewsPost {
@@ -488,4 +537,308 @@ export interface NewsPost {
   formattedDate: string;
   readingTime: number;
   rating?: number;
+  sourceUrl?: string;
+  imageCredit?: string;
 }
+
+// =============================================================================
+// SOURCES & ATTRIBUTION
+// =============================================================================
+
+export type SourceType = 'website' | 'book' | 'magazine' | 'interview' | 'documentary' | 'official' | 'fan' | 'archive' | 'api' | 'other';
+
+export interface DirectusSource {
+  id: number;
+  name: string;
+  type?: SourceType;
+  url?: string;
+  author?: string;
+  description?: string;
+  logo?: string;
+  is_official?: boolean;
+  reliability?: number; // 1-5
+}
+
+export interface Source {
+  id: number;
+  name: string;
+  type: SourceType;
+  url?: string;
+  author?: string;
+  description?: string;
+  logoUrl?: string;
+  isOfficial: boolean;
+  reliability: number;
+}
+
+// =============================================================================
+// VIDEO TYPES
+// =============================================================================
+
+export type VideoType = 'music_video' | 'live' | 'interview' | 'documentary' | 'tv' | 'fan' | 'bts' | 'lyric_video' | 'other';
+
+export interface DirectusVideo {
+  id: number;
+  title: string;
+  slug?: string;
+  video_url: string;
+  embed_id?: string;
+  thumbnail?: string;
+  type?: VideoType;
+  description?: string;
+  date?: string;
+  duration?: string;
+  song?: number;
+  album?: number;
+  setlist?: number;
+  director?: string;
+  is_featured?: boolean;
+  view_count?: number;
+  source?: number;
+  source_url?: string;
+}
+
+export interface Video {
+  id: number;
+  title: string;
+  slug: string;
+  videoUrl: string;
+  embedId?: string;
+  thumbnailUrl?: string;
+  type: VideoType;
+  description?: string;
+  date?: string;
+  formattedDate?: string;
+  duration?: string;
+  songId?: number;
+  albumId?: number;
+  setlistId?: number;
+  director?: string;
+  isFeatured: boolean;
+  viewCount?: number;
+  sourceName?: string;
+  sourceUrl?: string;
+}
+
+// =============================================================================
+// POLL TYPES
+// =============================================================================
+
+export type PollType = 'single' | 'multiple' | 'ranking';
+export type PollStatus = 'draft' | 'active' | 'closed' | 'featured';
+export type PollCategory = 'albums' | 'songs' | 'tours' | 'members' | 'general' | 'versus';
+
+export interface DirectusPoll {
+  id: number;
+  question: string;
+  slug?: string;
+  description?: string;
+  type?: PollType;
+  status?: PollStatus;
+  start_date?: string;
+  end_date?: string;
+  total_votes?: number;
+  category?: PollCategory;
+}
+
+export interface DirectusPollOption {
+  id: number;
+  poll: number;
+  label: string;
+  image?: string;
+  vote_count?: number;
+  sort_order?: number;
+}
+
+export interface Poll {
+  id: number;
+  question: string;
+  slug: string;
+  description?: string;
+  type: PollType;
+  status: PollStatus;
+  startDate?: string;
+  endDate?: string;
+  totalVotes: number;
+  category?: PollCategory;
+  options: PollOption[];
+}
+
+export interface PollOption {
+  id: number;
+  label: string;
+  imageUrl?: string;
+  voteCount: number;
+  percentage: number;
+}
+
+// =============================================================================
+// DID YOU KNOW / TRIVIA
+// =============================================================================
+
+export type FactCategory = 'recording' | 'live' | 'members' | 'albums' | 'songs' | 'history' | 'pop_culture' | 'equipment';
+
+export interface DirectusDidYouKnow {
+  id: number;
+  fact: string;
+  category?: FactCategory;
+  related_album?: number;
+  related_song?: number;
+  related_member?: number;
+  source?: number;
+  source_detail?: string;
+  is_verified?: boolean;
+  is_featured?: boolean;
+}
+
+export interface DidYouKnow {
+  id: number;
+  fact: string;
+  category?: FactCategory;
+  relatedAlbumTitle?: string;
+  relatedSongTitle?: string;
+  relatedMemberName?: string;
+  sourceName?: string;
+  sourceDetail?: string;
+  isVerified: boolean;
+}
+
+// =============================================================================
+// ALBUM PERSONNEL
+// =============================================================================
+
+export interface DirectusAlbumPersonnel {
+  id: number;
+  album: number;
+  member?: number;
+  musician_name?: string;
+  role?: string;
+  is_guest?: boolean;
+}
+
+export interface AlbumPersonnel {
+  id: number;
+  name: string;
+  role: string;
+  isGuest: boolean;
+  memberSlug?: string;
+}
+
+// =============================================================================
+// SITE STATS (Visitor Tracking)
+// =============================================================================
+
+export interface SiteStats {
+  totalVisits: number;
+  todayVisits: number;
+  todayPeak: number;
+  currentlyOnline: number;
+}
+
+// =============================================================================
+// VENUE TYPES
+// =============================================================================
+
+export interface DirectusVenue {
+  id: number;
+  name: string;
+  slug?: string;
+  city?: string;
+  state_province?: string;
+  country?: string;
+  country_code?: string;
+  location?: string;
+  capacity?: number;
+  opened_year?: number;
+  venue_type?: string;
+  latitude?: number;
+  longitude?: number;
+  wikipedia_url?: string;
+  official_website?: string;
+  description?: string;
+  famous_moment?: string;
+  first_cure_show?: string;
+  latest_cure_show?: string;
+  cure_show_count?: number;
+  source_notes?: string;
+}
+
+export interface Venue {
+  id: number;
+  name: string;
+  slug: string;
+  city: string;
+  stateProvince?: string;
+  country: string;
+  countryCode?: string;
+  location: string;
+  capacity?: number;
+  openedYear?: number;
+  venueType?: string;
+  latitude?: number;
+  longitude?: number;
+  wikipediaUrl?: string;
+  officialWebsite?: string;
+  description?: string;
+  famousMoment?: string;
+  firstCureShow?: string;
+  latestCureShow?: string;
+  cureShowCount?: number;
+}
+
+// =============================================================================
+// TOUR TYPES
+// =============================================================================
+
+export interface DirectusTour {
+  id: number;
+  name: string;
+  slug?: string;
+  start_date?: string;
+  end_date?: string;
+  description?: string;
+  associated_album?: number;
+  total_shows?: number;
+  source?: string;
+  image?: string;
+  countries_visited?: string[];
+  support_acts?: string[];
+  lineup?: string[];
+}
+
+export interface Tour {
+  id: number;
+  name: string;
+  slug: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+  associatedAlbumId?: number;
+  associatedAlbumTitle?: string;
+  associatedAlbumSlug?: string;
+  associatedAlbumCover?: string;
+  totalShows: number;
+  imageUrl?: string;
+  countriesVisited: string[];
+  supportActs: string[];
+  lineup: string[];
+  year: number;
+}
+
+// =============================================================================
+// COUNTRY FLAG HELPER
+// =============================================================================
+
+export const countryCodeToFlag: Record<string, string> = {
+  US: '🇺🇸', GB: '🇬🇧', DE: '🇩🇪', FR: '🇫🇷', IT: '🇮🇹', ES: '🇪🇸',
+  NL: '🇳🇱', BE: '🇧🇪', CH: '🇨🇭', AT: '🇦🇹', SE: '🇸🇪', NO: '🇳🇴',
+  DK: '🇩🇰', FI: '🇫🇮', IE: '🇮🇪', PT: '🇵🇹', PL: '🇵🇱', CZ: '🇨🇿',
+  HU: '🇭🇺', RO: '🇷🇴', BG: '🇧🇬', HR: '🇭🇷', RS: '🇷🇸', SI: '🇸🇮',
+  GR: '🇬🇷', TR: '🇹🇷', RU: '🇷🇺', CA: '🇨🇦', MX: '🇲🇽', BR: '🇧🇷',
+  AR: '🇦🇷', CL: '🇨🇱', CO: '🇨🇴', AU: '🇦🇺', NZ: '🇳🇿', JP: '🇯🇵',
+  KR: '🇰🇷', CN: '🇨🇳', IN: '🇮🇳', SG: '🇸🇬', MY: '🇲🇾', TH: '🇹🇭',
+  ID: '🇮🇩', PH: '🇵🇭', ZA: '🇿🇦', IL: '🇮🇱', LV: '🇱🇻', LT: '🇱🇹',
+  EE: '🇪🇪', LU: '🇱🇺', IS: '🇮🇸', MT: '🇲🇹', SK: '🇸🇰', UA: '🇺🇦',
+  PE: '🇵🇪', UY: '🇺🇾', PY: '🇵🇾', CR: '🇨🇷', PA: '🇵🇦', PR: '🇵🇷',
+  TW: '🇹🇼', HK: '🇭🇰', AE: '🇦🇪', SA: '🇸🇦', MA: '🇲🇦', EG: '🇪🇬',
+};

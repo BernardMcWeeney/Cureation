@@ -92,7 +92,7 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
           <a
             href={`/gallery/photo/${photo.id}`}
             class="photo-card group block mb-4 break-inside-avoid"
-            data-tags={photo.tags.join(',')}
+            data-tags={Array.isArray(photo.tags) ? photo.tags.join(',') : (photo.tags || '')}
             style={`--index: ${index}`}
           >
             <div class="relative overflow-hidden rounded-xl glass-tile animate-fade-in">
@@ -123,7 +123,7 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
               )}
 
               {/* Tags */}
-              {photo.tags.length > 0 && (
+              {Array.isArray(photo.tags) && photo.tags.length > 0 && (
                 <div class="absolute top-3 left-3 flex gap-1">
                   {photo.tags.slice(0, 2).map(tag => (
                     <span class="px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white/80 text-xs capitalize">

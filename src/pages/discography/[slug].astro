@@ -2,6 +2,9 @@
 import MainLayout from "../../layouts/MainLayout.astro";
 import TrackList from "../../components/TrackList.astro";
 import AlbumCard from "../../components/AlbumCard.astro";
+import PurchaseLinks from "../../components/PurchaseLinks.astro";
+import ShareButtons from "../../components/ShareButtons.astro";
+import SourceCredit from "../../components/SourceCredit.astro";
 
 const typeLabels: Record<string, string> = {
   studio: 'Studio Album',
@@ -52,6 +55,11 @@ export async function getStaticPaths() {
         parentAlbumTitle: null as string | null,
         spotifyUrl: album.spotify_url || null,
         appleMusicUrl: album.apple_music_url || null,
+        bandcampUrl: album.bandcamp_url || null,
+        amazonUrl: album.amazon_url || null,
+        officialStoreUrl: album.official_store_url || null,
+        sourceName: null as string | null,
+        sourceUrl: album.source_url || null,
         discCount: album.disc_count || 1,
         trackCount: album.track_count || 0,
         catalogNumber: album.catalog_number || null,
@@ -468,6 +476,25 @@ const durationDisplay = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
       </div>
     </section>
   )}
+
+  <!-- Purchase Links -->
+  <section class="mb-12">
+    <PurchaseLinks
+      spotifyUrl={album.spotifyUrl}
+      appleMusicUrl={album.appleMusicUrl}
+      bandcampUrl={album.bandcampUrl}
+      amazonUrl={album.amazonUrl}
+      officialStoreUrl={album.officialStoreUrl}
+    />
+  </section>
+
+  <!-- Share & Attribution -->
+  <section class="mb-12">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <ShareButtons title={`${album.title} by The Cure`} />
+      <SourceCredit sourceName={album.sourceName} sourceUrl={album.sourceUrl} />
+    </div>
+  </section>
 
   <!-- Back to Discography -->
   <div class="text-center">

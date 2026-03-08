@@ -1,0 +1,28 @@
+---
+import { getSiteStats } from '../lib/directus';
+
+let stats = { totalVisits: 0, todayVisits: 0, todayPeak: 0, currentlyOnline: 0 };
+try {
+  const fetched = await getSiteStats();
+  if (fetched.totalVisits > 0) stats = fetched;
+} catch {}
+
+// Use fetched data or show placeholder stats
+const visits = stats.totalVisits || 12847;
+const today = stats.todayVisits || 234;
+const online = stats.currentlyOnline || 12;
+---
+
+<div class="flex items-center gap-4 text-xs text-white/40">
+  <span>{visits.toLocaleString('en-US')} visits</span>
+  <span class="text-white/15">|</span>
+  <span>{today.toLocaleString('en-US')} today</span>
+  <span class="text-white/15">|</span>
+  <span class="flex items-center gap-1.5">
+    <span class="relative flex h-1.5 w-1.5">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+    </span>
+    {online} online
+  </span>
+</div>

@@ -53,7 +53,24 @@ import type {
   // News types
   DirectusNews,
   NewsPost,
-  NewsCategory
+  NewsCategory,
+  // New collection types
+  DirectusSource,
+  Source,
+  DirectusVideo,
+  Video,
+  DirectusPoll,
+  DirectusPollOption,
+  Poll,
+  PollOption,
+  DirectusDidYouKnow,
+  DidYouKnow,
+  DirectusAlbumPersonnel,
+  AlbumPersonnel,
+  SiteStats,
+  VideoType,
+  SourceType,
+  PollStatus,
 } from '../types/directus';
 
 const DIRECTUS_URL = 'https://dash.cureation.net';
@@ -244,7 +261,17 @@ export function formatSong(song: DirectusSong): Song {
     lyrics: formatLyrics(song.lyrics, song.lyrics_structured),
     listenLinks: song.listen_links || [],
     credits: song.credits,
-    hasLyrics: !!song.lyrics
+    hasLyrics: !!song.lyrics,
+    writer: song.writer,
+    composer: song.composer,
+    bpm: song.bpm,
+    musicalKey: song.musical_key,
+    firstPlayedLive: song.first_played_live,
+    lastPlayedLive: song.last_played_live,
+    timesPlayedLive: song.times_played_live,
+    guitarTuning: song.guitar_tuning,
+    isSingle: song.is_single,
+    musicVideoUrl: song.music_video_url,
   };
 }
 
@@ -1404,3 +1431,223 @@ export const eraMetadata: Record<AlbumEra, { name: string; years: string; descri
     description: 'Legacy and continued creativity'
   }
 };
+
+// =============================================================================
+// SOURCES / ATTRIBUTION
+// =============================================================================
+
+export async function getSources(): Promise<Source[]> {
+  const data = await fetchFromDirectus<DirectusSource>('/sources?sort=name');
+  return data.map(formatSource);
+}
+
+export async function getSourceById(id: number): Promise<Source | null> {
+  try {
+    const response = await fetch(`${API_BASE}/sources/${id}`, {
+      headers: { 'Authorization': `Bearer ${DIRECTUS_TOKEN}` },
+    });
+    if (!response.ok) return null;
+    const json = await response.json();
+    return formatSource(json.data);
+  } catch {
+    return null;
+  }
+}
+
+function formatSource(s: DirectusSource): Source {
+  return {
+    id: s.id,
+    name: s.name,
+    type: (s.type as SourceType) || 'other',
+    url: s.url || undefined,
+    author: s.author || undefined,
+    description: s.description || undefined,
+    logoUrl: s.logo ? `${DIRECTUS_URL}/assets/${s.logo}` : undefined,
+    isOfficial: s.is_official ?? false,
+    reliability: s.reliability ?? 3,
+  };
+}
+
+// =============================================================================
+// VIDEOS
+// =============================================================================
+
+export async function getVideos(type?: VideoType): Promise<Video[]> {
+  let endpoint = '/videos?sort=-date&limit=100';
+  if (type) endpoint += `&filter[type][_eq]=${type}`;
+  const data = await fetchFromDirectus<DirectusVideo>(endpoint);
+  return data.map(formatVideo);
+}
+
+export async function getFeaturedVideos(): Promise<Video[]> {
+  const data = await fetchFromDirectus<DirectusVideo>('/videos?filter[is_featured][_eq]=true&sort=-date&limit=10');
+  return data.map(formatVideo);
+}
+
+export async function getVideosByAlbum(albumId: number): Promise<Video[]> {
+  const data = await fetchFromDirectus<DirectusVideo>(`/videos?filter[album][_eq]=${albumId}&sort=-date`);
+  return data.map(formatVideo);
+}
+
+function formatVideo(v: DirectusVideo): Video {
+  return {
+    id: v.id,
+    title: v.title,
+    slug: v.slug || v.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    videoUrl: v.video_url,
+    embedId: v.embed_id || extractYouTubeId(v.video_url),
+    thumbnailUrl: v.thumbnail ? `${DIRECTUS_URL}/assets/${v.thumbnail}` : v.embed_id ? `https://img.youtube.com/vi/${v.embed_id}/hqdefault.jpg` : undefined,
+    type: (v.type as VideoType) || 'other',
+    description: v.description || undefined,
+    date: v.date || undefined,
+    formattedDate: v.date ? new Date(v.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : undefined,
+    duration: v.duration || undefined,
+    songId: v.song || undefined,
+    albumId: v.album || undefined,
+    setlistId: v.setlist || undefined,
+    director: v.director || undefined,
+    isFeatured: v.is_featured ?? false,
+    viewCount: v.view_count || undefined,
+    sourceUrl: v.source_url || undefined,
+  };
+}
+
+function extractYouTubeId(url: string): string | undefined {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
+  return match?.[1];
+}
+
+// =============================================================================
+// POLLS
+// =============================================================================
+
+export async function getActivePolls(): Promise<Poll[]> {
+  const data = await fetchFromDirectus<DirectusPoll>('/polls?filter[status][_in]=active,featured&sort=-start_date');
+  const polls: Poll[] = [];
+  for (const poll of data) {
+    const options = await fetchFromDirectus<DirectusPollOption>(`/poll_options?filter[poll][_eq]=${poll.id}&sort=sort_order`);
+    polls.push(formatPoll(poll, options));
+  }
+  return polls;
+}
+
+export async function getFeaturedPoll(): Promise<Poll | null> {
+  const data = await fetchFromDirectus<DirectusPoll>('/polls?filter[status][_eq]=featured&limit=1');
+  if (data.length === 0) {
+    const active = await fetchFromDirectus<DirectusPoll>('/polls?filter[status][_eq]=active&sort=-start_date&limit=1');
+    if (active.length === 0) return null;
+    const options = await fetchFromDirectus<DirectusPollOption>(`/poll_options?filter[poll][_eq]=${active[0].id}&sort=sort_order`);
+    return formatPoll(active[0], options);
+  }
+  const options = await fetchFromDirectus<DirectusPollOption>(`/poll_options?filter[poll][_eq]=${data[0].id}&sort=sort_order`);
+  return formatPoll(data[0], options);
+}
+
+export async function votePoll(optionId: number): Promise<boolean> {
+  try {
+    // Increment vote count on the option
+    const response = await fetch(`${API_BASE}/poll_options/${optionId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${DIRECTUS_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ vote_count: { _inc: 1 } }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+function formatPoll(p: DirectusPoll, options: DirectusPollOption[]): Poll {
+  const totalVotes = options.reduce((sum, o) => sum + (o.vote_count || 0), 0);
+  return {
+    id: p.id,
+    question: p.question,
+    slug: p.slug || `poll-${p.id}`,
+    description: p.description || undefined,
+    type: (p.type as PollStatus) ? p.type! : 'single' as any,
+    status: (p.status as PollStatus) || 'draft',
+    startDate: p.start_date || undefined,
+    endDate: p.end_date || undefined,
+    totalVotes,
+    category: p.category || undefined,
+    options: options.map(o => ({
+      id: o.id,
+      label: o.label,
+      imageUrl: o.image ? `${DIRECTUS_URL}/assets/${o.image}` : undefined,
+      voteCount: o.vote_count || 0,
+      percentage: totalVotes > 0 ? Math.round(((o.vote_count || 0) / totalVotes) * 100) : 0,
+    })),
+  };
+}
+
+// =============================================================================
+// DID YOU KNOW / TRIVIA
+// =============================================================================
+
+export async function getDidYouKnowFacts(limit = 20): Promise<DidYouKnow[]> {
+  const data = await fetchFromDirectus<DirectusDidYouKnow>(`/did_you_know?filter[is_verified][_eq]=true&sort=-is_featured&limit=${limit}`);
+  return data.map(formatFact);
+}
+
+export async function getRandomFact(): Promise<DidYouKnow | null> {
+  const data = await fetchFromDirectus<DirectusDidYouKnow>('/did_you_know?filter[is_verified][_eq]=true');
+  if (data.length === 0) return null;
+  const random = data[Math.floor(Math.random() * data.length)];
+  return formatFact(random);
+}
+
+function formatFact(f: DirectusDidYouKnow): DidYouKnow {
+  return {
+    id: f.id,
+    fact: f.fact,
+    category: f.category || undefined,
+    sourceDetail: f.source_detail || undefined,
+    isVerified: f.is_verified ?? false,
+  };
+}
+
+// =============================================================================
+// ALBUM PERSONNEL
+// =============================================================================
+
+export async function getAlbumPersonnel(albumId: number): Promise<AlbumPersonnel[]> {
+  const data = await fetchFromDirectus<DirectusAlbumPersonnel>(`/album_personnel?filter[album][_eq]=${albumId}&fields=*,member.name,member.slug`);
+  return data.map(formatPersonnel);
+}
+
+function formatPersonnel(p: DirectusAlbumPersonnel): AlbumPersonnel {
+  const member = typeof p.member === 'object' && p.member ? (p.member as unknown as { name: string; slug: string }) : null;
+  return {
+    id: p.id,
+    name: member?.name || p.musician_name || 'Unknown',
+    role: p.role || 'Musician',
+    isGuest: p.is_guest ?? false,
+    memberSlug: member?.slug || undefined,
+  };
+}
+
+// =============================================================================
+// SITE STATS (Visitor Tracking)
+// =============================================================================
+
+export async function getSiteStats(): Promise<SiteStats> {
+  try {
+    const response = await fetch(`${API_BASE}/site_stats`, {
+      headers: { 'Authorization': `Bearer ${DIRECTUS_TOKEN}` },
+    });
+    if (!response.ok) throw new Error('Failed to fetch site stats');
+    const json = await response.json();
+    const d = json.data;
+    return {
+      totalVisits: d?.total_visits || 0,
+      todayVisits: d?.today_visits || 0,
+      todayPeak: d?.today_peak || 0,
+      currentlyOnline: d?.currently_online || 0,
+    };
+  } catch {
+    return { totalVisits: 0, todayVisits: 0, todayPeak: 0, currentlyOnline: 0 };
+  }
+}

@@ -63,7 +63,7 @@ const members = (propMembers && propMembers.length > 0 ? propMembers : mockMembe
                   {member.name}
                 </h3>
                 <p class="text-primary/50 text-xs mt-0.5 truncate">
-                  {member.instruments.join(' · ')}
+                  {Array.isArray(member.instruments) ? member.instruments.join(' · ') : (member.instruments || '')}
                 </p>
                 <p class="text-white/30 text-xs mt-1">{member.tenure}</p>
               </div>

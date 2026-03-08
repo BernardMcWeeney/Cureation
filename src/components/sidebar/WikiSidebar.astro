@@ -102,7 +102,7 @@ const icons: Record<string, string> = {
                   {member.name}
                 </p>
                 <p class="text-white/40 text-xs truncate">
-                  {member.instruments.join(', ')}
+                  {Array.isArray(member.instruments) ? member.instruments.join(', ') : (member.instruments || '')}
                 </p>
               </div>
             </a>

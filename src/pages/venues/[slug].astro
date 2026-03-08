@@ -1,0 +1,291 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+import { countryCodeToFlag } from '../../types/directus';
+
+interface VenueData {
+  id: number;
+  name: string;
+  slug: string;
+  city: string;
+  stateProvince?: string;
+  country: string;
+  countryCode?: string;
+  capacity?: number;
+  openedYear?: number;
+  venueType?: string;
+  latitude?: number;
+  longitude?: number;
+  wikipediaUrl?: string;
+  officialWebsite?: string;
+  description?: string;
+  famousMoment?: string;
+  firstCureShow?: string;
+  latestCureShow?: string;
+  cureShowCount?: number;
+}
+
+interface SetlistPreview {
+  slug: string;
+  date: string;
+  formattedDate: string;
+  tourName?: string;
+  songCount: number;
+  countryCode?: string;
+}
+
+export async function getStaticPaths() {
+  const DIRECTUS_URL = 'https://dash.cureation.net';
+
+  const venuesRes = await fetch(`${DIRECTUS_URL}/items/venues?limit=-1`);
+  const venuesData = await venuesRes.json();
+
+  const setlistsRes = await fetch(`${DIRECTUS_URL}/items/setlists?limit=-1&fields=id,venue,venue_link,city,country,country_code,date,tour_name,slug,song_count&sort=-date`);
+  const setlistsData = await setlistsRes.json();
+
+  if (!venuesData.data) return [];
+
+  // Group setlists by venue_link
+  const setlistsByVenue = new Map<number, any[]>();
+  if (setlistsData.data) {
+    for (const s of setlistsData.data) {
+      if (s.venue_link) {
+        const existing = setlistsByVenue.get(s.venue_link) || [];
+        existing.push(s);
+        setlistsByVenue.set(s.venue_link, existing);
+      }
+    }
+  }
+
+  return venuesData.data
+    .filter((v: any) => v.slug)
+    .map((v: any) => {
+      const venueSetlists = (setlistsByVenue.get(v.id) || []).map((s: any) => ({
+        slug: s.slug,
+        date: s.date,
+        formattedDate: s.date ? new Date(s.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown',
+        tourName: s.tour_name,
+        songCount: s.song_count || 0,
+        countryCode: s.country_code,
+      }));
+
+      return {
+        params: { slug: v.slug },
+        props: {
+          venue: {
+            id: v.id,
+            name: v.name,
+            slug: v.slug,
+            city: v.city || '',
+            stateProvince: v.state_province,
+            country: v.country || '',
+            countryCode: v.country_code,
+            capacity: v.capacity,
+            openedYear: v.opened_year,
+            venueType: v.venue_type,
+            latitude: v.latitude,
+            longitude: v.longitude,
+            wikipediaUrl: v.wikipedia_url,
+            officialWebsite: v.official_website,
+            description: v.description,
+            famousMoment: v.famous_moment,
+            firstCureShow: v.first_cure_show,
+            latestCureShow: v.latest_cure_show,
+            cureShowCount: v.cure_show_count,
+          },
+          setlists: venueSetlists,
+        }
+      };
+    });
+}
+
+const { venue, setlists } = Astro.props as { venue: VenueData; setlists: SetlistPreview[] };
+const flag = venue.countryCode ? countryCodeToFlag[venue.countryCode] || '' : '';
+const location = venue.stateProvince
+  ? `${venue.city}, ${venue.stateProvince}, ${venue.country}`
+  : `${venue.city}, ${venue.country}`;
+
+function formatVenueDate(dateStr?: string): string {
+  if (!dateStr) return 'Unknown';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+---
+
+<MainLayout
+  title={`${venue.name} - Venue`}
+  description={`The Cure at ${venue.name} in ${location}. ${venue.cureShowCount || setlists.length} shows performed.`}
+  showSidebar={false}
+  pageClass="bg-black"
+>
+  <!-- Breadcrumb -->
+  <nav class="mb-8" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-white/60">
+      <li><a href="/setlists" class="hover:text-primary transition-colors">Setlists</a></li>
+      <li aria-hidden="true">/</li>
+      <li><span class="text-white/40">Venues</span></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-white truncate max-w-[200px]">{venue.name}</li>
+    </ol>
+  </nav>
+
+  <!-- Venue Header -->
+  <section class="mb-12">
+    <div class="glass-panel overflow-hidden relative">
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/6 blur-2xl pointer-events-none"></div>
+
+      <div class="relative p-8 md:p-12">
+        {venue.venueType && (
+          <span class="badge bg-white/10 text-white/60 border-white/20 mb-4">{venue.venueType}</span>
+        )}
+
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
+          {venue.name}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-4 text-white/70 mb-6">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            {flag && <span class="text-lg">{flag}</span>}
+            <span>{location}</span>
+          </div>
+          {venue.capacity && (
+            <div class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Capacity: {venue.capacity.toLocaleString()}</span>
+            </div>
+          )}
+          {venue.openedYear && (
+            <div class="flex items-center gap-2 text-white/50">
+              <span>Opened {venue.openedYear}</span>
+            </div>
+          )}
+        </div>
+
+        <!-- Stats -->
+        <div class="flex flex-wrap gap-8 pt-6 border-t border-white/8">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl font-display text-primary text-glow">{venue.cureShowCount || setlists.length}</span>
+            <span class="text-white/60 text-base font-medium">Cure Shows</span>
+          </div>
+          {venue.firstCureShow && (
+            <div class="flex items-center gap-3">
+              <span class="text-white/60 text-sm">First: <span class="text-white">{formatVenueDate(venue.firstCureShow)}</span></span>
+            </div>
+          )}
+          {venue.latestCureShow && (
+            <div class="flex items-center gap-3">
+              <span class="text-white/60 text-sm">Latest: <span class="text-white">{formatVenueDate(venue.latestCureShow)}</span></span>
+            </div>
+          )}
+        </div>
+
+        <!-- External links -->
+        {(venue.wikipediaUrl || venue.officialWebsite) && (
+          <div class="flex flex-wrap gap-3 mt-6 pt-6 border-t border-white/8">
+            {venue.officialWebsite && (
+              <a href={venue.officialWebsite} target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-primary/40 transition-all text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+                </svg>
+                Official Website
+              </a>
+            )}
+            {venue.wikipediaUrl && (
+              <a href={venue.wikipediaUrl} target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-primary/40 transition-all text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                </svg>
+                Wikipedia
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Description -->
+  {venue.description && (
+    <section class="mb-12">
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/20">
+        <h2 class="font-heading text-2xl text-primary mb-4">About This Venue</h2>
+        <p class="text-white/80 leading-relaxed whitespace-pre-line">{venue.description}</p>
+      </div>
+    </section>
+  )}
+
+  <!-- Famous Moment -->
+  {venue.famousMoment && (
+    <section class="mb-12">
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-primary/30 bg-primary/5">
+        <h2 class="font-heading text-2xl text-primary mb-4">Notable Moment</h2>
+        <p class="text-white/80 leading-relaxed whitespace-pre-line">{venue.famousMoment}</p>
+      </div>
+    </section>
+  )}
+
+  <!-- Setlists at this venue -->
+  <section class="mb-12">
+    <h2 class="font-heading text-2xl text-primary mb-6">
+      The Cure at {venue.name}
+      <span class="text-white/40 text-lg ml-2">({setlists.length} {setlists.length === 1 ? 'show' : 'shows'})</span>
+    </h2>
+
+    {setlists.length > 0 ? (
+      <div class="space-y-3">
+        {setlists.map((show) => (
+          <a
+            href={`/setlists/${show.slug}`}
+            class="flex items-center justify-between p-4 glass-card rounded-xl border border-white/10 hover:border-primary/40 transition-all group"
+          >
+            <div class="flex items-center gap-4">
+              <div class="text-center min-w-[60px]">
+                <div class="text-2xl font-display text-primary">{new Date(show.date).getDate()}</div>
+                <div class="text-white/50 text-xs uppercase">{new Date(show.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>
+              </div>
+              <div>
+                <div class="text-white group-hover:text-primary transition-colors">
+                  {show.formattedDate}
+                </div>
+                {show.tourName && (
+                  <div class="text-white/50 text-sm">{show.tourName}</div>
+                )}
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-white/40 text-sm">{show.songCount} songs</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="glass-card rounded-2xl p-8 text-center">
+        <p class="text-white/60">No setlists linked to this venue yet.</p>
+      </div>
+    )}
+  </section>
+
+  <!-- Back -->
+  <div class="text-center">
+    <a href="/setlists" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      Back to Setlists
+    </a>
+  </div>
+</MainLayout>

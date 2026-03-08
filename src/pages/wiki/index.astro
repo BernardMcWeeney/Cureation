@@ -116,7 +116,7 @@ const recentEvents = timelineEvents.slice(0, 5);
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {currentMembers.map(member => (
-          <a href={`/wiki/members/${member.slug}`} class="group" data-filter-item data-filter-text={`${member.name} ${member.instruments.join(' ')} ${member.tenure}`}>
+          <a href={`/wiki/members/${member.slug}`} class="group" data-filter-item data-filter-text={`${member.name} ${Array.isArray(member.instruments) ? member.instruments.join(' ') : (member.instruments || '')} ${member.tenure}`}>
             <div class="glass-elevated p-4 text-center">
               {member.photo ? (
                 <img
@@ -132,7 +132,7 @@ const recentEvents = timelineEvents.slice(0, 5);
               <h3 class="font-heading text-white group-hover:text-primary transition-colors">
                 {member.name}
               </h3>
-              <p class="text-white/50 text-sm mt-1">{member.instruments.slice(0, 2).join(', ')}</p>
+              <p class="text-white/50 text-sm mt-1">{Array.isArray(member.instruments) ? member.instruments.slice(0, 2).join(', ') : (member.instruments || '')}</p>
               <p class="text-white/40 text-xs mt-1">{member.tenure}</p>
             </div>
           </a>

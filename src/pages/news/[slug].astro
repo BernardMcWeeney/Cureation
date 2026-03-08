@@ -155,7 +155,7 @@ const categoryClass = categoryColors[post.category] || 'bg-primary/20 text-prima
     </div>
 
     {/* Tags */}
-    {post.tags && post.tags.length > 0 && (
+    {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
       <div class="mt-12 pt-6 border-t border-white/10">
         <h3 class="text-sm text-white/50 mb-3">Tags</h3>
         <div class="flex flex-wrap gap-2">

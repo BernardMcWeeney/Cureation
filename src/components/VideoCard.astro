@@ -1,0 +1,84 @@
+---
+import type { Video } from '../types/directus';
+
+interface Props {
+  video: Video;
+}
+
+const { video } = Astro.props;
+const thumbnail = video.thumbnailUrl || (video.embedId ? `https://img.youtube.com/vi/${video.embedId}/mqdefault.jpg` : '');
+
+const typeColors: Record<string, string> = {
+  music_video: 'text-primary bg-primary/10 border-primary/25',
+  live: 'text-blue-400 bg-blue-400/10 border-blue-400/25',
+  interview: 'text-purple-400 bg-purple-400/10 border-purple-400/25',
+  documentary: 'text-amber-400 bg-amber-400/10 border-amber-400/25',
+  tv: 'text-pink-400 bg-pink-400/10 border-pink-400/25',
+  fan: 'text-green-400 bg-green-400/10 border-green-400/25',
+  bts: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/25',
+  lyric_video: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/25',
+  other: 'text-white/60 bg-white/5 border-white/15',
+};
+---
+
+<a
+  href={video.videoUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="glass-tile overflow-hidden group block"
+>
+  <!-- Thumbnail -->
+  <div class="relative aspect-video overflow-hidden bg-black/40">
+    {thumbnail ? (
+      <img
+        src={thumbnail}
+        alt={video.title}
+        loading="lazy"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+    ) : (
+      <div class="w-full h-full flex items-center justify-center bg-white/[0.03]">
+        <svg class="size-12 text-white/20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+    )}
+
+    <!-- Play overlay -->
+    <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div class="w-14 h-14 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center">
+        <svg class="size-6 text-white ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+    </div>
+
+    <!-- Duration badge -->
+    {video.duration && (
+      <span class="absolute bottom-2 right-2 px-1.5 py-0.5 text-[10px] bg-black/70 text-white rounded-sm backdrop-blur-sm">
+        {video.duration}
+      </span>
+    )}
+  </div>
+
+  <!-- Info -->
+  <div class="p-4">
+    <div class="flex items-center gap-2 mb-2">
+      <span class={`px-2 py-0.5 text-[10px] uppercase tracking-wider border rounded-sm ${typeColors[video.type] || typeColors.other}`}>
+        {video.type.replace('_', ' ')}
+      </span>
+      {video.formattedDate && (
+        <span class="text-xs text-white/35">{video.formattedDate}</span>
+      )}
+    </div>
+    <h3 class="text-white text-sm font-medium group-hover:text-primary transition-colors line-clamp-2">{video.title}</h3>
+    {video.director && (
+      <p class="text-white/40 text-xs mt-1">Dir. {video.director}</p>
+    )}
+  </div>
+</a>
+
+<style>
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+</style>

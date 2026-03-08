@@ -1,10 +1,13 @@
 ---
+import { countryCodeToFlag } from '../types/directus';
+
 interface Props {
   date: string;
   formattedDate: string;
   venue: string;
   city: string;
   country: string;
+  countryCode?: string;
   tourName?: string;
   slug: string;
   songCount: number;
@@ -18,6 +21,7 @@ const {
   venue,
   city,
   country,
+  countryCode,
   tourName,
   slug,
   songCount,
@@ -25,6 +29,7 @@ const {
   coverImage
 } = Astro.props;
 
+const flag = countryCode ? countryCodeToFlag[countryCode] || '' : '';
 const location = `${city}, ${country}`;
 const fallbackImage = '/images/placeholder-concert.jpg';
 ---
@@ -74,7 +79,7 @@ const fallbackImage = '/images/placeholder-concert.jpg';
       </h3>
 
       <p class="text-white/70 text-sm mb-3">
-        {location}
+        {flag && <span class="mr-1">{flag}</span>}{location}
       </p>
 
       <div class="flex items-center justify-between">

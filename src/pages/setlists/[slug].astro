@@ -1,7 +1,7 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 import SetlistSongItem from "../../components/SetlistSongItem.astro";
-
+import { countryCodeToFlag } from '../../types/directus';
 import { createSongSlug } from '../../lib/lyrics-helpers';
 
 interface SongDisplay {
@@ -22,8 +22,11 @@ interface SetlistData {
   venue: string;
   city: string;
   country: string;
+  countryCode?: string;
   stateProvince?: string;
   tourName?: string;
+  tourSlug?: string;
+  venueSlug?: string;
   slug: string;
   notes?: string;
   source?: string;
@@ -58,7 +61,27 @@ export async function getStaticPaths() {
 
   try {
     // Fetch all setlists
-    const setlistsResponse = await fetch(`${DIRECTUS_URL}/items/setlists?sort=-date&limit=-1&fields=id,date,venue,city,country,state_province,tour_name,slug,song_count,venue_image,notes,source`);
+    const setlistsResponse = await fetch(`${DIRECTUS_URL}/items/setlists?sort=-date&limit=-1&fields=id,date,venue,city,country,country_code,state_province,tour_name,tour,slug,song_count,venue_image,venue_link,notes,source`);
+
+    // Fetch venues for linking
+    const venuesResponse = await fetch(`${DIRECTUS_URL}/items/venues?limit=-1&fields=id,name,slug`);
+    const venuesData = await venuesResponse.json();
+    const venueMap = new Map<number, { name: string; slug: string }>();
+    if (venuesData.data) {
+      for (const v of venuesData.data) {
+        venueMap.set(v.id, { name: v.name, slug: v.slug || '' });
+      }
+    }
+
+    // Fetch tours for linking
+    const toursResponse = await fetch(`${DIRECTUS_URL}/items/tours?limit=-1&fields=id,name,slug`);
+    const toursData = await toursResponse.json();
+    const tourMap = new Map<number, { name: string; slug: string }>();
+    if (toursData.data) {
+      for (const t of toursData.data) {
+        tourMap.set(t.id, { name: t.name, slug: t.slug || '' });
+      }
+    }
     const setlistsData = await setlistsResponse.json();
 
     if (!setlistsData.data || !Array.isArray(setlistsData.data)) {
@@ -115,6 +138,10 @@ export async function getStaticPaths() {
         ? (setlist.venue_image.startsWith('http') ? setlist.venue_image : `${DIRECTUS_URL}/assets/${setlist.venue_image}`)
         : undefined;
 
+      // Resolve venue and tour slugs for linking
+      const venueInfo = setlist.venue_link ? venueMap.get(setlist.venue_link) : undefined;
+      const tourInfo = setlist.tour ? tourMap.get(setlist.tour) : undefined;
+
       return {
         id: slId,
         date: eventDate,
@@ -123,8 +150,11 @@ export async function getStaticPaths() {
         venue: setlist.venue || 'Unknown Venue',
         city: setlist.city || 'Unknown City',
         country: setlist.country || '',
+        countryCode: setlist.country_code || undefined,
         stateProvince: setlist.state_province,
-        tourName: setlist.tour_name,
+        tourName: setlist.tour_name || tourInfo?.name,
+        tourSlug: tourInfo?.slug || undefined,
+        venueSlug: venueInfo?.slug || undefined,
         slug,
         notes: setlist.notes,
         source: setlist.source,
@@ -220,6 +250,8 @@ const location = setlist.stateProvince
   ? `${setlist.city}, ${setlist.stateProvince}, ${setlist.country}`
   : `${setlist.city}, ${setlist.country}`;
 
+const flag = setlist.countryCode ? countryCodeToFlag[setlist.countryCode] || '' : '';
+
 interface SourceLink {
   href: string;
   label: string;
@@ -304,12 +336,20 @@ const sourceLinks = buildSourceLinks(setlist.source);
         <!-- Tour badge -->
         {setlist.tourName && (
           <div class="inline-flex items-center gap-2 mb-4">
-            <span class="badge bg-primary/20 text-primary border-primary/40">{setlist.tourName}</span>
+            {setlist.tourSlug ? (
+              <a href={`/tours/${setlist.tourSlug}`} class="badge bg-primary/20 text-primary border-primary/40 hover:bg-primary/30 transition-colors">
+                {setlist.tourName}
+              </a>
+            ) : (
+              <span class="badge bg-primary/20 text-primary border-primary/40">{setlist.tourName}</span>
+            )}
           </div>
         )}
 
         <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
-          {setlist.venue}
+          {setlist.venueSlug ? (
+            <a href={`/venues/${setlist.venueSlug}`} class="hover:text-primary transition-colors">{setlist.venue}</a>
+          ) : setlist.venue}
         </h1>
 
         <div class="flex flex-wrap items-center gap-4 text-white/70 mb-6">
@@ -318,6 +358,7 @@ const sourceLinks = buildSourceLinks(setlist.source);
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
+            {flag && <span class="text-lg">{flag}</span>}
             <span>{location}</span>
           </div>
           <div class="flex items-center gap-2">
@@ -465,7 +506,10 @@ const sourceLinks = buildSourceLinks(setlist.source);
             class="glass-card rounded-xl p-4 border border-white/20 hover:border-primary/40 transition-colors group"
           >
             <h3 class="text-white group-hover:text-primary transition-colors truncate">{show.venue}</h3>
-            <p class="text-white/60 text-sm">{show.city}, {show.country}</p>
+            <p class="text-white/60 text-sm">
+              {show.countryCode && countryCodeToFlag[show.countryCode] && <span class="mr-1">{countryCodeToFlag[show.countryCode]}</span>}
+              {show.city}, {show.country}
+            </p>
             <p class="text-white/40 text-xs mt-1">{show.formattedDate}</p>
             <div class="flex items-center justify-between mt-2">
               <span class="text-white/30 text-xs">{show.songCount} songs</span>

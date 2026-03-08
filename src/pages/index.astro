@@ -12,6 +12,11 @@ import DiscographyStripSection from '../components/home/DiscographyStripSection.
 import GothicSwirls from '../components/GothicSwirls.astro';
 import AlbumDecoration from '../components/AlbumDecoration.astro';
 import OnThisDaySection from '../components/home/OnThisDaySection.astro';
+import PollWidget from '../components/home/PollWidget.astro';
+import DidYouKnowWidget from '../components/home/DidYouKnowWidget.astro';
+import UpcomingAnniversaries from '../components/home/UpcomingAnniversaries.astro';
+import FeaturedVideoSection from '../components/home/FeaturedVideoSection.astro';
+import ShareButtons from '../components/ShareButtons.astro';
 
 // Data fetching
 import {
@@ -206,10 +211,16 @@ const archiveTotals = {
       <LyricsQuoteSection song={songOfTheDay} />
     </div>
 
+    <!-- FEATURED VIDEO -->
+    <FeaturedVideoSection />
+
     <GothicSwirls position="divider" variant="elaborate" />
 
     <!-- 7. ON THIS DAY -->
     <OnThisDaySection />
+
+    <!-- UPCOMING ANNIVERSARIES -->
+    <UpcomingAnniversaries />
 
     <!-- 8. RECENT SHOWS -->
     <RecentSetlistsSection setlists={setlists} />
@@ -226,6 +237,22 @@ const archiveTotals = {
 
     <!-- 9. DISCOGRAPHY STRIP -->
     <DiscographyStripSection />
+
+    <!-- POLL -->
+    <section class="py-16">
+      <div class="responsive-container">
+        <PollWidget />
+      </div>
+    </section>
+
+    <!-- DID YOU KNOW -->
+    <section class="py-8">
+      <div class="responsive-container max-w-2xl mx-auto">
+        <DidYouKnowWidget />
+      </div>
+    </section>
+
+    <GothicSwirls position="divider" variant="elaborate" />
 
     <!-- COMMUNITY + NEWSLETTER -->
     <section class="py-16">
@@ -281,6 +308,13 @@ const archiveTotals = {
             </form>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- SHARE -->
+    <section class="pb-8">
+      <div class="responsive-container flex justify-center">
+        <ShareButtons title="Cureation - The Cure Fan Archive" />
       </div>
     </section>
 

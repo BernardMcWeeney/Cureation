@@ -1,0 +1,128 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import VideoCard from '../../components/VideoCard.astro';
+import GothicSwirls from '../../components/GothicSwirls.astro';
+import { getVideos, getFeaturedVideos } from '../../lib/directus';
+
+let allVideos: any[] = [];
+let featuredVideo = null;
+try {
+  allVideos = await getVideos();
+  const featured = await getFeaturedVideos();
+  featuredVideo = featured[0] || null;
+} catch {}
+
+const videoTypes = [...new Set(allVideos.map(v => v.type))].sort();
+---
+
+<Layout title="Videos" description="Watch The Cure music videos, live performances, interviews, and documentaries.">
+  <div class="pt-24 pb-16 relative">
+    <div class="responsive-container">
+      <!-- Header -->
+      <div class="mb-10">
+        <nav class="mb-4" aria-label="Breadcrumb">
+          <ol class="flex items-center gap-2 text-sm text-white/60">
+            <li><a href="/" class="hover:text-primary transition-colors">Home</a></li>
+            <li aria-hidden="true">/</li>
+            <li class="text-white">Videos</li>
+          </ol>
+        </nav>
+        <h1 class="font-display text-5xl md:text-6xl text-white text-glow mb-3">Videos</h1>
+        <p class="text-white/60 max-w-2xl">Music videos, live performances, interviews, documentaries, and more from The Cure's visual archive.</p>
+      </div>
+
+      <!-- Featured Video -->
+      {featuredVideo && (
+        <div class="mb-12 glass-panel overflow-hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-0">
+            <div class="lg:col-span-3 relative aspect-video">
+              {featuredVideo.embedId ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${featuredVideo.embedId}`}
+                  class="absolute inset-0 w-full h-full"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              ) : (
+                <a href={featuredVideo.videoUrl} target="_blank" rel="noopener noreferrer" class="block relative w-full h-full group">
+                  <img src={featuredVideo.thumbnailUrl || `https://img.youtube.com/vi/${featuredVideo.embedId}/maxresdefault.jpg`} alt={featuredVideo.title} class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
+                    <svg class="size-16 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  </div>
+                </a>
+              )}
+            </div>
+            <div class="lg:col-span-2 p-6 md:p-8 flex flex-col">
+              <span class="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-primary bg-primary/10 border border-primary/[0.35] w-fit mb-3">Featured</span>
+              <h2 class="font-heading text-xl text-white mb-3">{featuredVideo.title}</h2>
+              {featuredVideo.description && <p class="text-white/60 text-sm leading-relaxed flex-1">{featuredVideo.description}</p>}
+              {featuredVideo.director && <p class="text-white/40 text-xs mt-3">Directed by {featuredVideo.director}</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <GothicSwirls position="divider" variant="elaborate" />
+
+      <!-- Filter -->
+      {videoTypes.length > 1 && (
+        <div class="flex flex-wrap gap-2 my-8" id="video-filters">
+          <button class="filter-btn active px-3 py-1.5 text-xs uppercase tracking-wider rounded-sm bg-primary/15 border border-primary/30 text-primary transition-all" data-type="all">
+            All
+          </button>
+          {videoTypes.map(type => (
+            <button class="filter-btn px-3 py-1.5 text-xs uppercase tracking-wider rounded-sm bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:border-white/20 transition-all" data-type={type}>
+              {type.replace('_', ' ')}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <!-- Video Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="video-grid">
+        {allVideos.map(video => (
+          <div class="video-item" data-type={video.type}>
+            <VideoCard video={video} />
+          </div>
+        ))}
+      </div>
+
+      {allVideos.length === 0 && (
+        <div class="glass-tile p-12 text-center">
+          <p class="text-white/50 text-lg">No videos available yet. Check back soon!</p>
+        </div>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<script>
+  function setupFilters() {
+    const buttons = document.querySelectorAll('.filter-btn');
+    const items = document.querySelectorAll('.video-item');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => {
+          b.classList.remove('active', 'bg-primary/15', 'border-primary/30', 'text-primary');
+          b.classList.add('bg-white/[0.04]', 'border-white/10', 'text-white/50');
+        });
+        btn.classList.add('active', 'bg-primary/15', 'border-primary/30', 'text-primary');
+        btn.classList.remove('bg-white/[0.04]', 'border-white/10', 'text-white/50');
+
+        const type = btn.getAttribute('data-type');
+        items.forEach(item => {
+          if (type === 'all' || item.getAttribute('data-type') === type) {
+            (item as HTMLElement).style.display = '';
+          } else {
+            (item as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    });
+  }
+  setupFilters();
+  document.addEventListener('astro:page-load', setupFilters);
+</script>

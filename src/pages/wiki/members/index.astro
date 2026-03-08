@@ -82,7 +82,7 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
             class="group"
             style={`--index: ${index}`}
             data-filter-item
-            data-filter-text={`${member.name} ${member.instruments.join(' ')} ${member.tenure}`}
+            data-filter-text={`${member.name} ${(Array.isArray(member.instruments) ? member.instruments.join(' ') : (member.instruments || ''))} ${member.tenure}`}
           >
             <div class="glass-card-hover overflow-hidden animate-fade-in">
               <div class="flex gap-4 p-5">
@@ -102,7 +102,7 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
                     {member.name}
                   </h3>
                   <p class="text-white/60 text-sm mt-1">
-                    {member.instruments.join(', ')}
+                    {Array.isArray(member.instruments) ? member.instruments.join(', ') : (member.instruments || '')}
                   </p>
                   <p class="text-white/40 text-sm mt-2">
                     {member.tenure}
@@ -132,7 +132,7 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
             class="group"
             style={`--index: ${index}`}
             data-filter-item
-            data-filter-text={`${member.name} ${member.instruments.join(' ')} ${member.tenure}`}
+            data-filter-text={`${member.name} ${(Array.isArray(member.instruments) ? member.instruments.join(' ') : (member.instruments || ''))} ${member.tenure}`}
           >
             <div class="glass-card-hover overflow-hidden animate-fade-in">
               <div class="flex gap-4 p-5">
@@ -152,7 +152,7 @@ const pastMembers = members.filter(m => !m.isCurrentMember);
                     {member.name}
                   </h3>
                   <p class="text-white/50 text-sm mt-1">
-                    {member.instruments.join(', ')}
+                    {Array.isArray(member.instruments) ? member.instruments.join(', ') : (member.instruments || '')}
                   </p>
                   <p class="text-white/40 text-xs mt-2">
                     {member.tenure}

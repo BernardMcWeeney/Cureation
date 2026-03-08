@@ -13,6 +13,7 @@ interface SetlistItem {
   venue: string;
   city: string;
   country: string;
+  countryCode?: string;
   tourName?: string;
   slug: string;
   songCount: number;
@@ -44,7 +45,7 @@ let countries: string[] = [];
 let totalCountries = 0;
 
 try {
-  const response = await fetch(`${DIRECTUS_URL}/items/setlists?sort=-date&limit=-1&fields=id,date,venue,city,country,tour_name,slug,song_count,venue_image,state_province`);
+  const response = await fetch(`${DIRECTUS_URL}/items/setlists?sort=-date&limit=-1&fields=id,date,venue,city,country,country_code,tour_name,slug,song_count,venue_image,state_province`);
   const data = await response.json();
 
   if (data.data && Array.isArray(data.data)) {
@@ -63,6 +64,7 @@ try {
         venue: s.venue || 'Unknown Venue',
         city: s.city || 'Unknown City',
         country: s.country || '',
+        countryCode: s.country_code || undefined,
         tourName: s.tour_name || undefined,
         slug: s.slug || generateSlug(s.venue || '', s.city || '', date),
         songCount: s.song_count || 0,
@@ -247,6 +249,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
               venue={setlist.venue}
               city={setlist.city}
               country={setlist.country}
+              countryCode={setlist.countryCode}
               tourName={setlist.tourName}
               slug={setlist.slug}
               songCount={setlist.songCount}
