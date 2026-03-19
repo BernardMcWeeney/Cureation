@@ -2,6 +2,8 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import SetlistCard from '../../components/SetlistCard.astro';
 
+import { formatDate, generateSetlistSlug } from '../../lib/directus';
+
 const DIRECTUS_URL = 'https://dash.cureation.net';
 const PER_PAGE = 36;
 
@@ -20,22 +22,7 @@ interface SetlistItem {
   coverImage?: string;
 }
 
-// Format date helper
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
-
-function generateSlug(venue: string, city: string, date: string): string {
-  const dateSlug = date.split('T')[0];
-  return `${venue}-${city}-${dateSlug}`
-    .toLowerCase()
-    .replace(/[^\w\s-]/gi, '')
-    .replace(/\s+/g, '-');
-}
+const generateSlug = generateSetlistSlug;
 
 // Fetch all setlists
 let setlists: SetlistItem[] = [];
@@ -109,7 +96,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
   <!-- Hero Section -->
   <section class="mb-10">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -122,20 +109,20 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{setlists.length.toLocaleString()}</span>
-            <span class="text-white/60 text-base font-medium">Shows</span>
+            <span class="text-3xl font-display text-white text-glow">{setlists.length.toLocaleString()}</span>
+            <span class="text-white/85 text-base font-medium">Shows</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalSongs.toLocaleString()}</span>
-            <span class="text-white/60 text-base font-medium">Performances</span>
+            <span class="text-3xl font-display text-white text-glow">{totalSongs.toLocaleString()}</span>
+            <span class="text-white/85 text-base font-medium">Performances</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalCountries}</span>
-            <span class="text-white/60 text-base font-medium">Countries</span>
+            <span class="text-3xl font-display text-white text-glow">{totalCountries}</span>
+            <span class="text-white/85 text-base font-medium">Countries</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{tours.length}</span>
-            <span class="text-white/60 text-base font-medium">Tours</span>
+            <span class="text-3xl font-display text-white text-glow">{tours.length}</span>
+            <span class="text-white/85 text-base font-medium">Tours</span>
           </div>
         </div>
       </div>
@@ -146,7 +133,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
   <section class="mb-8">
     <!-- Search bar - matching lyrics page -->
     <div class="relative mb-4">
-      <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/80 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
         <path d="m21 21-4.3-4.3"></path>
       </svg>
@@ -222,7 +209,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
 
     <!-- Results count -->
     <div class="mt-4">
-      <div id="results-count" class="text-white/50 text-sm">
+      <div id="results-count" class="text-white/80 text-sm">
         Showing {Math.min(PER_PAGE, setlists.length)} of {setlists.length} shows
       </div>
     </div>
@@ -261,7 +248,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
     ) : (
       <div class="glass-card rounded-2xl p-12 text-center">
         <h3 class="font-heading text-2xl text-white mb-2">No Setlists Yet</h3>
-        <p class="text-white/60 max-w-md mx-auto">
+        <p class="text-white/85 max-w-md mx-auto">
           The setlist archive is being built. Check back soon for concert data.
         </p>
       </div>
@@ -270,7 +257,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
     <!-- No results message -->
     <div id="no-results" class="hidden glass-card rounded-2xl p-12 text-center">
       <h3 class="font-heading text-2xl text-white mb-2">No Matching Shows</h3>
-      <p class="text-white/60 max-w-md mx-auto">
+      <p class="text-white/85 max-w-md mx-auto">
         Try adjusting your search or filters.
       </p>
     </div>
@@ -279,11 +266,11 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
     <div id="pagination" class="mt-10 flex flex-col items-center gap-4">
       <button
         id="load-more"
-        class="px-8 py-3 rounded-xl bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors font-medium"
+        class="px-8 py-3 rounded-xl bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors font-medium"
       >
         Load More Shows
       </button>
-      <div id="page-info" class="text-white/40 text-sm"></div>
+      <div id="page-info" class="text-white/80 text-sm"></div>
     </div>
   </section>
 </MainLayout>

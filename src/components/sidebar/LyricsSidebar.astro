@@ -44,8 +44,8 @@ const decadeFilters = [
               href={item.path}
               class={`block px-4 py-2 rounded-lg transition-all duration-300 ${
                 activeFilter === item.title
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-white hover:bg-white/10 hover:text-primary'
+                  ? 'bg-white/10 text-primary'
+                  : 'text-white hover:bg-white/10 hover:text-white'
               }`}
             >
               {item.title}
@@ -68,7 +68,7 @@ const decadeFilters = [
           data-decade={decade.id}
           data-start={decade.startYear}
           data-end={decade.endYear}
-          class="decade-filter-btn w-full text-left px-3 py-2 glass-inset hover:bg-white/10 hover:border-primary/30 rounded-lg text-white transition-all duration-300"
+          class="decade-filter-btn w-full text-left px-3 py-2 glass-inset hover:bg-white/10 hover:border-white/15 rounded-lg text-white transition-all duration-300"
         >
           {decade.name}
         </button>
@@ -76,7 +76,7 @@ const decadeFilters = [
       <button
         type="button"
         id="clear-decade-filter"
-        class="hidden w-full text-center px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/70 hover:text-white text-sm transition-all duration-300 mt-2"
+        class="hidden w-full text-center px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/90 hover:text-white text-sm transition-all duration-300 mt-2"
       >
         Show All
       </button>
@@ -95,7 +95,7 @@ const decadeFilters = [
             <li>
               <a
                 href={`/discography/${album.slug}`}
-                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 hover:text-primary transition-all duration-300"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 hover:text-white transition-all duration-300"
               >
                 <img
                   src={album.coverImage}
@@ -104,7 +104,7 @@ const decadeFilters = [
                   loading="lazy"
                 />
                 <span class="flex-1 truncate">{album.title}</span>
-                <span class="text-white/50 text-xs">{album.year}</span>
+                <span class="text-white/80 text-xs">{album.year}</span>
               </a>
             </li>
           ))}

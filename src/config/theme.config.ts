@@ -7,7 +7,7 @@ export interface ThemeConfig {
 }
 
 export const themeConfig: ThemeConfig = {
-  defaultTheme: 'disintegration',
+  defaultTheme: 'songs-of-a-lost-world',
   albumThemeMap: {
     'three-imaginary-boys': 'three-imaginary-boys',
     'seventeen-seconds': 'seventeen-seconds',
@@ -22,6 +22,7 @@ export const themeConfig: ThemeConfig = {
     'bloodflowers': 'bloodflowers',
     'the-cure': 'the-cure',
     '4-13-dream': '4-13-dream',
+    'songs-of-a-lost-world': 'songs-of-a-lost-world',
   }
 };
 

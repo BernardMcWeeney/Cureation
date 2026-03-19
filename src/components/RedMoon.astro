@@ -1,0 +1,150 @@
+---
+---
+
+<div class="red-moon-wrapper" aria-hidden="true">
+  <div class="red-moon-sphere">
+    <div class="red-moon-glow"></div>
+    <div class="red-moon-core"></div>
+    <div class="red-moon-highlight"></div>
+  </div>
+</div>
+
+<style>
+  .red-moon-wrapper {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .red-moon-sphere {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    right: -180px;
+    top: 50%;
+    transform: translateY(-50%);
+    will-change: transform, right, opacity;
+  }
+
+  .red-moon-core {
+    position: absolute;
+    inset: 80px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 35% 35%,
+      #60A5FA 0%,
+      #2563EB 30%,
+      #1E40AF 60%,
+      #1E3A8A 80%,
+      #172554 100%
+    );
+    box-shadow:
+      0 0 60px rgba(37, 99, 235, 0.3),
+      0 0 120px rgba(37, 99, 235, 0.15),
+      inset -20px -20px 60px rgba(0, 0, 0, 0.4);
+  }
+
+  .red-moon-highlight {
+    position: absolute;
+    inset: 80px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 20%,
+      transparent 50%
+    );
+  }
+
+  .red-moon-glow {
+    position: absolute;
+    inset: -40px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at center,
+      rgba(37, 99, 235, 0.2) 0%,
+      rgba(37, 99, 235, 0.08) 40%,
+      rgba(37, 99, 235, 0.02) 65%,
+      transparent 80%
+    );
+    filter: blur(30px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .red-moon-sphere {
+      right: -200px;
+      opacity: 0.6;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .red-moon-sphere {
+      width: 500px;
+      height: 500px;
+      right: -200px;
+    }
+    .red-moon-core,
+    .red-moon-highlight {
+      inset: 60px;
+    }
+  }
+</style>
+
+<script>
+  function initRedMoon() {
+    const sphere = document.querySelector('.red-moon-sphere') as HTMLElement;
+    if (!sphere) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    let ticking = false;
+
+    function updateMoon() {
+      const scrollY = window.scrollY;
+      const viewportH = window.innerHeight;
+      const viewportW = window.innerWidth;
+
+      // Normalize scroll over first 2 viewport heights
+      const progress = Math.min(scrollY / (viewportH * 2), 1);
+
+      // Ease-in-out for smooth feel
+      const eased = progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+      // Scale: 1 → 5 (fills viewport as it grows)
+      const scale = 1 + eased * 4;
+
+      // Move from right edge toward center
+      const startRight = -180;
+      const endRight = viewportW * 0.5 + 180;
+      const currentRight = startRight + eased * endRight;
+
+      // Opacity dims as it becomes ambient background
+      const opacity = 1 - eased * 0.6;
+
+      sphere.style.transform = `translateY(-50%) scale(${scale})`;
+      sphere.style.right = `${currentRight}px`;
+      sphere.style.opacity = String(opacity);
+
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(updateMoon);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => { ticking = false; updateMoon(); }, { passive: true });
+    updateMoon();
+  }
+
+  initRedMoon();
+  document.addEventListener('astro:page-load', initRedMoon);
+</script>

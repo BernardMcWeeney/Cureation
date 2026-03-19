@@ -9,7 +9,7 @@ const { video } = Astro.props;
 const thumbnail = video.thumbnailUrl || (video.embedId ? `https://img.youtube.com/vi/${video.embedId}/mqdefault.jpg` : '');
 
 const typeColors: Record<string, string> = {
-  music_video: 'text-primary bg-primary/10 border-primary/25',
+  music_video: 'text-primary bg-white/[0.06] border-white/15',
   live: 'text-blue-400 bg-blue-400/10 border-blue-400/25',
   interview: 'text-purple-400 bg-purple-400/10 border-purple-400/25',
   documentary: 'text-amber-400 bg-amber-400/10 border-amber-400/25',
@@ -17,7 +17,7 @@ const typeColors: Record<string, string> = {
   fan: 'text-green-400 bg-green-400/10 border-green-400/25',
   bts: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/25',
   lyric_video: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/25',
-  other: 'text-white/60 bg-white/5 border-white/15',
+  other: 'text-white/85 bg-white/5 border-white/15',
 };
 ---
 
@@ -43,7 +43,7 @@ const typeColors: Record<string, string> = {
     )}
 
     <!-- Play overlay -->
-    <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+    <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-80 group-hover:opacity-100 transition-opacity duration-300">
       <div class="w-14 h-14 rounded-full bg-primary/80 backdrop-blur-sm flex items-center justify-center">
         <svg class="size-6 text-white ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </div>
@@ -64,21 +64,12 @@ const typeColors: Record<string, string> = {
         {video.type.replace('_', ' ')}
       </span>
       {video.formattedDate && (
-        <span class="text-xs text-white/35">{video.formattedDate}</span>
+        <span class="text-xs text-white/75">{video.formattedDate}</span>
       )}
     </div>
-    <h3 class="text-white text-sm font-medium group-hover:text-primary transition-colors line-clamp-2">{video.title}</h3>
+    <h3 class="text-white text-sm font-medium group-hover:text-white transition-colors line-clamp-2">{video.title}</h3>
     {video.director && (
-      <p class="text-white/40 text-xs mt-1">Dir. {video.director}</p>
+      <p class="text-white/80 text-xs mt-1">Dir. {video.director}</p>
     )}
   </div>
 </a>
-
-<style>
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-</style>

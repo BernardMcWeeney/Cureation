@@ -57,8 +57,8 @@ quotes.forEach(q => {
 >
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/60">
-      <li><a href="/wiki" class="hover:text-primary transition-colors">Wiki</a></li>
+    <ol class="flex items-center gap-2 text-sm text-white/85">
+      <li><a href="/wiki" class="hover:text-white transition-colors">Wiki</a></li>
       <li aria-hidden="true">/</li>
       <li class="text-white">Quotes</li>
     </ol>
@@ -67,7 +67,7 @@ quotes.forEach(q => {
   <!-- Hero -->
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -81,16 +81,16 @@ quotes.forEach(q => {
         {quotes.length > 0 && (
           <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
             <div class="flex items-center gap-3">
-              <span class="text-3xl font-display text-primary text-glow">{quotes.length}</span>
-              <span class="text-white/60 text-base font-medium">Quotes</span>
+              <span class="text-3xl font-display text-white text-glow">{quotes.length}</span>
+              <span class="text-white/85 text-base font-medium">Quotes</span>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-3xl font-display text-primary text-glow">{Object.keys(quotesBySpeaker).length}</span>
-              <span class="text-white/60 text-base font-medium">Speakers</span>
+              <span class="text-3xl font-display text-white text-glow">{Object.keys(quotesBySpeaker).length}</span>
+              <span class="text-white/85 text-base font-medium">Speakers</span>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-3xl font-display text-primary text-glow">{Object.keys(quotesByTopic).length}</span>
-              <span class="text-white/60 text-base font-medium">Topics</span>
+              <span class="text-3xl font-display text-white text-glow">{Object.keys(quotesByTopic).length}</span>
+              <span class="text-white/85 text-base font-medium">Topics</span>
             </div>
           </div>
         )}
@@ -114,20 +114,20 @@ quotes.forEach(q => {
 
           <div class="flex items-center justify-between flex-wrap gap-3 pt-4 border-t border-white/10">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+              <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                 <span class="text-primary text-sm font-bold">{(quote.speaker || '?')[0]}</span>
               </div>
               <div>
                 <p class="text-white font-medium text-sm">{quote.speaker || 'Unknown'}</p>
-                {quote.source && <p class="text-white/40 text-xs">{quote.source}</p>}
+                {quote.source && <p class="text-white/80 text-xs">{quote.source}</p>}
               </div>
             </div>
             <div class="flex items-center gap-2">
               {quote.topic && (
-                <span class="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary">{quote.topic}</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-white/10 text-primary">{quote.topic}</span>
               )}
               {quote.date && (
-                <span class="text-white/30 text-xs">{new Date(quote.date).getFullYear()}</span>
+                <span class="text-white/75 text-xs">{new Date(quote.date).getFullYear()}</span>
               )}
             </div>
           </div>
@@ -137,17 +137,17 @@ quotes.forEach(q => {
   ) : (
     <section>
       <div class="glass-panel p-8 md:p-12 text-center">
-        <div class="p-4 rounded-xl bg-primary/10 w-fit mx-auto mb-6">
+        <div class="p-4 rounded-xl bg-white/[0.06] w-fit mx-auto mb-6">
           <svg xmlns="http://www.w3.org/2000/svg" class="size-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
           </svg>
         </div>
         <h2 class="text-2xl text-white mb-3">Quotes Archive Coming Soon</h2>
-        <p class="text-white/50 max-w-md mx-auto mb-6">
+        <p class="text-white/80 max-w-md mx-auto mb-6">
           We're compiling decades of interviews, press quotes, and memorable words from
           The Cure and their contemporaries.
         </p>
-        <p class="text-white/30 text-sm">
+        <p class="text-white/75 text-sm">
           To contribute quotes, add items to the <code class="text-primary/70">quotes</code> collection in Directus.
         </p>
 
@@ -157,19 +157,19 @@ quotes.forEach(q => {
             <blockquote class="text-white/90 text-lg italic mb-3">
               "I've never thought of The Cure as a goth band. We're far too happy for that."
             </blockquote>
-            <p class="text-white/50 text-sm">- Robert Smith</p>
+            <p class="text-white/80 text-sm">- Robert Smith</p>
           </div>
           <div class="glass-tile p-6">
             <blockquote class="text-white/90 text-lg italic mb-3">
               "The only way I can describe the music we make is that it's like a beautiful sadness."
             </blockquote>
-            <p class="text-white/50 text-sm">- Robert Smith</p>
+            <p class="text-white/80 text-sm">- Robert Smith</p>
           </div>
           <div class="glass-tile p-6">
             <blockquote class="text-white/90 text-lg italic mb-3">
               "I don't think of us as gloomy. I think we make music that acknowledges the full spectrum of human emotion."
             </blockquote>
-            <p class="text-white/50 text-sm">- Robert Smith</p>
+            <p class="text-white/80 text-sm">- Robert Smith</p>
           </div>
         </div>
       </div>
@@ -177,7 +177,7 @@ quotes.forEach(q => {
   )}
 
   <div class="text-center mt-12">
-    <a href="/wiki" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+    <a href="/wiki" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
       Back to Wiki
     </a>

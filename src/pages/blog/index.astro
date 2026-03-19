@@ -35,27 +35,7 @@ interface BlogPost {
   readingTime: number;
 }
 
-// Helper functions
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s]/gi, '')
-    .replace(/\s+/g, '-');
-}
-
-function estimateReadingTime(content: string): number {
-  const wordsPerMinute = 200;
-  const wordCount = content?.split(/\s+/).length || 0;
-  return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
-}
+import { formatDate, generateSlug, estimateReadingTime } from '../../lib/directus';
 
 // Fetch blog data from the CMS
 let posts: BlogPost[] = [];
@@ -132,7 +112,7 @@ const recentPosts = posts.slice(0, 5).map((p: BlogPost) => ({
   <!-- Hero Section (full width, in hero slot) -->
   <section class="mb-10" slot="hero">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -145,12 +125,12 @@ const recentPosts = posts.slice(0, 5).map((p: BlogPost) => ({
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{posts.length}</span>
-            <span class="text-white/60 text-base font-medium">Articles</span>
+            <span class="text-3xl font-display text-white text-glow">{posts.length}</span>
+            <span class="text-white/85 text-base font-medium">Articles</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{categories.length}</span>
-            <span class="text-white/60 text-base font-medium">Categories</span>
+            <span class="text-3xl font-display text-white text-glow">{categories.length}</span>
+            <span class="text-white/85 text-base font-medium">Categories</span>
           </div>
         </div>
       </div>
@@ -213,7 +193,7 @@ const recentPosts = posts.slice(0, 5).map((p: BlogPost) => ({
       <div class="glass-card rounded-2xl p-12 text-center">
         <div class="text-6xl mb-4">📝</div>
         <h3 class="font-heading text-2xl text-white mb-2">No Posts Yet</h3>
-        <p class="text-white/60 max-w-md mx-auto">
+        <p class="text-white/85 max-w-md mx-auto">
           The blog is being set up. Check back soon for news, articles, and deep dives about The Cure.
         </p>
       </div>

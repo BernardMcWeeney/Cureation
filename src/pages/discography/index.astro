@@ -2,7 +2,6 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import AlbumCard from '../../components/AlbumCard.astro';
 import PageFilter from '../../components/PageFilter.astro';
-import GothicSwirls from '../../components/GothicSwirls.astro';
 import { fetchAlbumsGroupedByType, getAlbumEra, eraMetadata } from '../../lib/directus';
 import type { AlbumEra } from '../../types/directus';
 
@@ -54,7 +53,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
   <!-- Hero Section -->
   <section class="mb-10">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -67,16 +66,16 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalReleases}</span>
-            <span class="text-white/60 text-base font-medium">Releases</span>
+            <span class="text-3xl font-display text-white text-glow">{totalReleases}</span>
+            <span class="text-white/85 text-base font-medium">Releases</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{studioAlbums.length}</span>
-            <span class="text-white/60 text-base font-medium">Studio Albums</span>
+            <span class="text-3xl font-display text-white text-glow">{studioAlbums.length}</span>
+            <span class="text-white/85 text-base font-medium">Studio Albums</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">45+</span>
-            <span class="text-white/60 text-base font-medium">Years</span>
+            <span class="text-3xl font-display text-white text-glow">45+</span>
+            <span class="text-white/85 text-base font-medium">Years</span>
           </div>
         </div>
       </div>
@@ -151,7 +150,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
         <button type="button" id="studio-era-btn" class="studio-view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all active">By Era</button>
         <button type="button" id="studio-chrono-btn" class="studio-view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all">Chronological</button>
       </div>
-      <span class="text-sm text-white/35">{studioAlbums.length} studio albums</span>
+      <span class="text-sm text-white/75">{studioAlbums.length} studio albums</span>
     </div>
 
     <!-- Era View -->
@@ -173,7 +172,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
                 </div>
                 <div>
                   <h2 class={`font-heading text-xl md:text-2xl ${colors.text}`}>{meta.name}</h2>
-                  <p class="text-white/45 text-xs tracking-wide">{meta.years} · {meta.description}</p>
+                  <p class="text-white/80 text-xs tracking-wide">{meta.years} · {meta.description}</p>
                 </div>
               </div>
               <div class="flex-1 h-px bg-gradient-to-r from-white/15 to-transparent"></div>
@@ -248,12 +247,10 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
     );
   })}
 
-  <GothicSwirls position="divider" class="mt-12" />
-
   <!-- Era Timeline (always visible at bottom) -->
   <section class="mt-16 pt-8 border-t border-white/[0.08]">
     <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-xl md:text-2xl text-primary tracking-wider">The Cure Through the Eras</h2>
+      <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">The Cure Through the Eras</h2>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
       {eraOrder.map(era => {
@@ -268,8 +265,8 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
             data-target-era={era}
           >
             <p class={`font-heading text-lg ${colors.text}`}>{meta.name}</p>
-            <p class="text-white/45 text-xs mb-2 tracking-wide">{meta.years}</p>
-            <p class="text-white/60 text-sm">{count} albums</p>
+            <p class="text-white/80 text-xs mb-2 tracking-wide">{meta.years}</p>
+            <p class="text-white/85 text-sm">{count} albums</p>
           </button>
         );
       })}

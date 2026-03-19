@@ -118,8 +118,8 @@ const songYearSpan = playedSongs
 >
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/60">
-      <li><a href="/stats" class="hover:text-primary transition-colors">Statistics</a></li>
+    <ol class="flex items-center gap-2 text-sm text-white/85">
+      <li><a href="/stats" class="hover:text-white transition-colors">Statistics</a></li>
       <li aria-hidden="true">/</li>
       <li class="text-white">Trends</li>
     </ol>
@@ -128,7 +128,7 @@ const songYearSpan = playedSongs
   <!-- Hero -->
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -144,11 +144,11 @@ const songYearSpan = playedSongs
   <section class="mb-12">
     <div class="glass-panel p-6 md:p-8">
       <h2 class="text-2xl text-white mb-2 gothic-heading">Average Setlist Length by Year</h2>
-      <p class="text-white/40 text-sm mb-6">How many songs per show on average</p>
+      <p class="text-white/80 text-sm mb-6">How many songs per show on average</p>
       <div class="space-y-2">
         {setlistLengthTrend.map(year => (
           <div class="flex items-center gap-3">
-            <span class="text-white/60 text-sm w-12 shrink-0 font-mono">{year.year}</span>
+            <span class="text-white/85 text-sm w-12 shrink-0 font-mono">{year.year}</span>
             <div class="flex-1 h-7 bg-white/5 rounded overflow-hidden relative">
               <div
                 class="h-full bg-gradient-to-r from-green-500/70 to-emerald-400/50 rounded stat-bar-animated"
@@ -156,7 +156,7 @@ const songYearSpan = playedSongs
               ></div>
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-white font-mono font-bold">{year.avgSongs} songs</span>
             </div>
-            <span class="text-white/30 text-xs w-16 text-right shrink-0">{year.shows} shows</span>
+            <span class="text-white/75 text-xs w-16 text-right shrink-0">{year.shows} shows</span>
           </div>
         ))}
       </div>
@@ -167,20 +167,20 @@ const songYearSpan = playedSongs
   <section class="mb-12">
     <div class="glass-panel p-6 md:p-8">
       <h2 class="text-2xl text-white mb-2 gothic-heading">Most Enduring Songs</h2>
-      <p class="text-white/40 text-sm mb-6">Songs performed across the most years</p>
+      <p class="text-white/80 text-sm mb-6">Songs performed across the most years</p>
       <div class="space-y-3">
         {songYearSpan.map((song, idx) => (
           <div class="flex items-center gap-4 p-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
             <span class={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
-              idx < 3 ? 'bg-amber-500/20 text-amber-400' : 'bg-white/5 text-white/40'
+              idx < 3 ? 'bg-amber-500/20 text-amber-400' : 'bg-white/5 text-white/80'
             }`}>{idx + 1}</span>
             <div class="flex-1 min-w-0">
               <p class="text-white font-medium truncate">{song.title}</p>
-              <p class="text-white/40 text-xs">{song.album}</p>
+              <p class="text-white/80 text-xs">{song.album}</p>
             </div>
             <div class="text-right shrink-0">
               <p class="text-amber-400 font-bold">{song.yearsActive} years</p>
-              <p class="text-white/30 text-xs">{song.firstYear}-{song.lastYear}</p>
+              <p class="text-white/75 text-xs">{song.firstYear}-{song.lastYear}</p>
             </div>
           </div>
         ))}
@@ -194,11 +194,11 @@ const songYearSpan = playedSongs
     <section>
       <div class="glass-panel p-6 h-full">
         <h2 class="text-2xl text-white mb-2 gothic-heading">New Songs Debuted per Year</h2>
-        <p class="text-white/40 text-sm mb-6">First-time live performances</p>
+        <p class="text-white/80 text-sm mb-6">First-time live performances</p>
         <div class="space-y-2">
           {introductionTrend.map(year => (
             <div class="flex items-center gap-3">
-              <span class="text-white/60 text-xs w-10 shrink-0 font-mono">{year.year}</span>
+              <span class="text-white/85 text-xs w-10 shrink-0 font-mono">{year.year}</span>
               <div class="flex-1 h-5 bg-white/5 rounded overflow-hidden relative">
                 <div
                   class="h-full bg-gradient-to-r from-purple-500/70 to-pink-400/50 rounded"
@@ -216,24 +216,24 @@ const songYearSpan = playedSongs
     <section>
       <div class="glass-panel p-6 h-full">
         <h2 class="text-2xl text-white mb-2 gothic-heading">Retired Setlist Staples</h2>
-        <p class="text-white/40 text-sm mb-6">Popular songs not played in 5+ years</p>
+        <p class="text-white/80 text-sm mb-6">Popular songs not played in 5+ years</p>
         {recentlyRetired.length > 0 ? (
           <div class="space-y-2">
             {recentlyRetired.map(song => (
               <div class="flex items-center justify-between p-3 rounded-lg bg-white/[0.03]">
                 <div class="min-w-0">
                   <p class="text-white truncate text-sm">{song.songTitle}</p>
-                  <p class="text-white/40 text-xs">{song.albumTitle}</p>
+                  <p class="text-white/80 text-xs">{song.albumTitle}</p>
                 </div>
                 <div class="text-right shrink-0 ml-3">
                   <p class="text-red-400/80 text-xs">Last: {song.lastPlayed ? new Date(song.lastPlayed).getFullYear() : '?'}</p>
-                  <p class="text-white/30 text-xs">{song.totalPlays} plays total</p>
+                  <p class="text-white/75 text-xs">{song.totalPlays} plays total</p>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p class="text-white/40 text-center py-8">No retired songs data available</p>
+          <p class="text-white/80 text-center py-8">No retired songs data available</p>
         )}
       </div>
     </section>
@@ -251,7 +251,7 @@ const songYearSpan = playedSongs
                 <span class="text-green-400/60 text-sm w-5 shrink-0">{idx + 1}.</span>
                 <div class="min-w-0">
                   <p class="text-white truncate text-sm">{setlist.venue}</p>
-                  <p class="text-white/40 text-xs">{setlist.location} · {setlist.formattedDate}</p>
+                  <p class="text-white/80 text-xs">{setlist.location} · {setlist.formattedDate}</p>
                 </div>
               </div>
               <span class="text-green-400 font-bold shrink-0 ml-3">{setlist.songCount || setlist.songs.length} songs</span>
@@ -271,7 +271,7 @@ const songYearSpan = playedSongs
                 <span class="text-red-400/60 text-sm w-5 shrink-0">{idx + 1}.</span>
                 <div class="min-w-0">
                   <p class="text-white truncate text-sm">{setlist.venue}</p>
-                  <p class="text-white/40 text-xs">{setlist.location} · {setlist.formattedDate}</p>
+                  <p class="text-white/80 text-xs">{setlist.location} · {setlist.formattedDate}</p>
                 </div>
               </div>
               <span class="text-red-400 font-bold shrink-0 ml-3">{setlist.songCount || setlist.songs.length} songs</span>
@@ -283,7 +283,7 @@ const songYearSpan = playedSongs
   </div>
 
   <div class="text-center">
-    <a href="/stats" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+    <a href="/stats" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
       Back to Statistics
     </a>

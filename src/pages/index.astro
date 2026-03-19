@@ -1,22 +1,14 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
+import NewsCard from '../components/NewsCard.astro';
 
 // Homepage sections
-import LatestNewsSection from '../components/home/LatestNewsSection.astro';
-import ImageOfTheDaySection from '../components/home/ImageOfTheDaySection.astro';
-import AlbumSpotlightSection from '../components/home/AlbumSpotlightSection.astro';
-import LyricsQuoteSection from '../components/home/LyricsQuoteSection.astro';
-import RecentSetlistsSection from '../components/home/RecentSetlistsSection.astro';
+import HeroSlider from '../components/home/HeroSlider.astro';
 import DiscographyStripSection from '../components/home/DiscographyStripSection.astro';
-import GothicSwirls from '../components/GothicSwirls.astro';
-import AlbumDecoration from '../components/AlbumDecoration.astro';
-import OnThisDaySection from '../components/home/OnThisDaySection.astro';
-import PollWidget from '../components/home/PollWidget.astro';
-import DidYouKnowWidget from '../components/home/DidYouKnowWidget.astro';
-import UpcomingAnniversaries from '../components/home/UpcomingAnniversaries.astro';
-import FeaturedVideoSection from '../components/home/FeaturedVideoSection.astro';
-import ShareButtons from '../components/ShareButtons.astro';
+import CompactStatsStrip from '../components/home/CompactStatsStrip.astro';
+import NewsletterCTASection from '../components/home/NewsletterCTASection.astro';
 
 // Data fetching
 import {
@@ -24,299 +16,229 @@ import {
   getSetlistsWithSongs,
   getSongsWithAlbums,
   getSongOfTheDay,
-  getPhotoOfTheDay,
   getNewsPosts,
   getOverallStats,
+  getTimelineEvents,
+  getRandomFact,
+  fetchAlbums,
+  formatAlbum,
 } from '../lib/directus';
 
 import {
   getMockSongOfTheDay,
-  getMockLatestSetlist,
   mockSongsWithAlbums,
-  mockSetlists,
   mockNewsPosts,
-  type MockSetlist,
 } from '../lib/mockData';
 
-import type { SongWithAlbum, NewsPost } from '../types/directus';
-import type { Setlist } from '../lib/directus';
+import siteConfig from '../config/site.config';
+import type { SongWithAlbum, NewsPost, Album } from '../types/directus';
 
-// Fetch all data for homepage sections
+// Fetch all data for homepage in parallel
 const [
   featuredNews,
   setlists,
   songs,
-  photoOfTheDay,
   allNewsPosts,
   overallStats,
+  timelineEvents,
+  randomFact,
+  rawAlbums,
 ] = await Promise.all([
   getFeaturedNews(),
   getSetlistsWithSongs(),
   getSongsWithAlbums(),
-  getPhotoOfTheDay(),
   getNewsPosts(),
   getOverallStats(),
+  getTimelineEvents(),
+  getRandomFact(),
+  fetchAlbums(),
 ]);
 
-// Derived values with fallbacks
+// --- Derived values ---
+
+// Song of the Day
 const songOfTheDay: SongWithAlbum = getSongOfTheDay(songs) || getMockSongOfTheDay() || mockSongsWithAlbums[0];
-const latestSetlist: Setlist | MockSetlist = setlists[0] || getMockLatestSetlist() || mockSetlists[0];
-const latestSetlistImage =
-  ('coverImage' in latestSetlist && latestSetlist.coverImage)
-  || ('venueImage' in latestSetlist && latestSetlist.venueImage)
-  || '';
+
+// News
 const newsPostsForGrid: NewsPost[] = allNewsPosts && allNewsPosts.length > 1
   ? allNewsPosts
   : mockNewsPosts;
 
+// Archive stats
 const archiveTotals = {
   albums: overallStats.totalAlbums || 14,
   songs: overallStats.totalSongs || songs.length || 200,
   shows: overallStats.totalShows || setlists.length || 1000,
   countries: overallStats.countriesVisited || 5,
 };
+
+// --- On This Day computation (lifted from OnThisDaySection) ---
+const today = new Date();
+const currentMonth = today.getMonth() + 1;
+const currentDay = today.getDate();
+const dateString = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+const uniqueShows = new Map<string, (typeof setlists)[number]>();
+setlists
+  .filter((setlist) => {
+    if (!setlist.date) return false;
+    const eventDate = new Date(setlist.date);
+    return eventDate.getMonth() + 1 === currentMonth && eventDate.getDate() === currentDay;
+  })
+  .forEach((setlist) => {
+    const key = `${setlist.year}-${setlist.venue}-${setlist.city}-${setlist.country}`.toLowerCase();
+    const existing = uniqueShows.get(key);
+    if (!existing || (setlist.songCount || 0) > (existing.songCount || 0)) {
+      uniqueShows.set(key, setlist);
+    }
+  });
+
+const todaySetlists = Array.from(uniqueShows.values()).sort((a, b) => b.year - a.year);
+
+const uniqueEvents = new Map<string, (typeof timelineEvents)[number]>();
+timelineEvents
+  .filter((event) => {
+    if (!event.date) return false;
+    const eventDate = new Date(event.date);
+    return eventDate.getMonth() + 1 === currentMonth && eventDate.getDate() === currentDay;
+  })
+  .forEach((event) => {
+    const key = `${event.year}-${event.title}`.toLowerCase();
+    if (!uniqueEvents.has(key)) uniqueEvents.set(key, event);
+  });
+
+const todayEvents = Array.from(uniqueEvents.values()).sort((a, b) => b.year - a.year);
+const otdHasEntries = todaySetlists.length > 0 || todayEvents.length > 0;
+
+const otdShows = todaySetlists.slice(0, 3).map(s => ({
+  venue: s.venue,
+  city: s.city || '',
+  country: s.country || '',
+  year: s.year,
+}));
+
+// --- Album spotlight ---
+const featuredSlug = siteConfig.featured?.album || 'disintegration';
+const allAlbums = rawAlbums.map(formatAlbum);
+const spotlightAlbum: Album =
+  allAlbums.find(a => a.slug === featuredSlug) ||
+  allAlbums.filter(a => (a.type || 'studio') === 'studio').sort((a, b) => parseInt(b.year || '0') - parseInt(a.year || '0'))[0] ||
+  allAlbums[0];
+
+const albumTypeLabel = (() => {
+  switch (spotlightAlbum?.type) {
+    case 'studio': return 'Studio Album';
+    case 'live': return 'Live Album';
+    case 'compilation': return 'Compilation';
+    case 'ep': return 'EP';
+    default: return 'Release';
+  }
+})();
+
+// --- Build slider slides ---
+const navigationTiles = [
+  { title: 'News', path: '/news', icon: 'newspaper' },
+  { title: 'Discography', path: '/discography', icon: 'music' },
+  { title: 'Setlists', path: '/setlists', icon: 'list-music' },
+  { title: 'Lyrics', path: '/lyrics', icon: 'text' },
+  { title: 'Videos', path: '/videos', icon: 'video' },
+  { title: 'Stats', path: '/stats', icon: 'stats' },
+];
+
+const slides: Array<{
+  id: string;
+  type: 'welcome' | 'news' | 'song' | 'on-this-day' | 'album';
+  backgroundImage?: string;
+  backgroundGradient?: string;
+  label: string;
+}> = [
+  {
+    id: 'welcome',
+    type: 'welcome',
+    backgroundImage: '/images/hero-background.jpg',
+    label: 'Welcome to Cureation',
+  },
+];
+
+// News slide
+if (featuredNews) {
+  slides.push({
+    id: 'news',
+    type: 'news',
+    backgroundImage: featuredNews.featuredImage || '/images/hero-background.jpg',
+    label: `Latest News: ${featuredNews.title}`,
+  });
+}
+
+// Song of the Day slide
+slides.push({
+  id: 'song',
+  type: 'song',
+  backgroundImage: songOfTheDay.albumCover || '/images/hero-background.jpg',
+  label: `Song of the Day: ${songOfTheDay.title}`,
+});
+
+// On This Day slide — include if we have entries or a fallback fact
+if (otdHasEntries || randomFact) {
+  slides.push({
+    id: 'on-this-day',
+    type: 'on-this-day',
+    backgroundGradient: 'linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.12) 0%, #060608 60%)',
+    label: `On This Day: ${dateString}`,
+  });
+}
+
+// Album spotlight slide
+if (spotlightAlbum) {
+  slides.push({
+    id: 'album',
+    type: 'album',
+    backgroundImage: spotlightAlbum.coverImage || '/images/hero-background.jpg',
+    label: `Album Spotlight: ${spotlightAlbum.title}`,
+  });
+}
 ---
 
 <Layout>
-  <!-- 1. HERO -->
-  <Hero />
+  <!-- BLOCK 1: Hero Slider -->
+  <HeroSlider
+    slides={slides}
+    welcomeData={{ navigationTiles }}
+    newsData={featuredNews ? { post: featuredNews } : undefined}
+    songData={{ song: songOfTheDay }}
+    onThisDayData={{
+      dateString,
+      showCount: todaySetlists.length,
+      milestoneCount: todayEvents.length,
+      shows: otdShows,
+      hasEntries: otdHasEntries,
+      fallbackFact: randomFact?.fact || undefined,
+    }}
+    albumData={spotlightAlbum ? { album: spotlightAlbum, albumTypeLabel } : undefined}
+  />
 
-  <div class="relative z-10 bg-gradient-to-b from-black/0 via-[#050505] to-[#050505]">
-
-    <!-- 2. FEATURED STORY -->
-    <LatestNewsSection post={featuredNews} additionalPosts={newsPostsForGrid.slice(1, 4)} />
-
-    <GothicSwirls position="divider" variant="elaborate" />
-
-    <!-- 3. TODAY ON CUREATION -->
-    <section class="py-16 relative overflow-hidden">
-      <AlbumDecoration album="seventeen-seconds" position="left" opacity={0.03} />
-      <AlbumDecoration album="pornography" position="right" opacity={0.03} />
-      <div class="responsive-container relative z-10">
-        <div class="glass-panel p-6 md:p-8 relative overflow-hidden bg-cobweb">
-          <div class="absolute -top-24 -left-24 w-56 h-56 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
-          <div class="absolute -bottom-20 -right-20 w-48 h-48 rounded-full bg-accent/[0.08] blur-2xl pointer-events-none"></div>
-
-          <div class="flex items-center gap-3 mb-2">
-            <span class="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-primary bg-primary/10 border border-primary/[0.35]">
-              Today on Cureation
-            </span>
-            <div class="divider-gradient flex-1"></div>
-          </div>
-          <p class="text-white/60 text-sm mb-6 md:mb-8 max-w-2xl">
-            Daily essentials from the archive: song highlights, latest setlist data, and archive totals.
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Song of the Day -->
-            <a
-              href={`/lyrics/${songOfTheDay.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')}`}
-              class="today-card-link group lg:col-span-2"
-            >
-              <div
-                class="glass-tile-image glass-tile-image-clear today-card today-card-image h-full p-6 flex flex-col min-h-[240px]"
-                style={songOfTheDay.albumCover ? `--tile-bg-image: url('${songOfTheDay.albumCover}')` : ''}
-              >
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="p-2 rounded-sm bg-white/15 backdrop-blur-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                    </svg>
-                  </div>
-                  <span class="text-white/70 text-xs font-medium uppercase tracking-[0.15em] text-shadow">Song of the Day</span>
-                </div>
-                <h3 class="font-heading text-2xl text-white mb-2 group-hover:text-primary transition-colors text-shadow-lg">
-                  {songOfTheDay.title}
-                </h3>
-                <div class="flex flex-wrap gap-2 mt-3 flex-1">
-                  <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-sm text-white/60 text-shadow">{songOfTheDay.albumTitle}</span>
-                  {songOfTheDay.year && (
-                    <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-sm text-white/60 text-shadow">{songOfTheDay.year}</span>
-                  )}
-                  {songOfTheDay.duration && (
-                    <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-sm text-white/60 text-shadow">{songOfTheDay.duration}</span>
-                  )}
-                  {songOfTheDay.hasLyrics && (
-                    <span class="px-3 py-1 bg-primary/10 border border-primary/25 rounded-full text-sm text-primary text-shadow">Lyrics available</span>
-                  )}
-                </div>
-                <div class="flex items-center gap-2 mt-4 text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity text-shadow">
-                  <span>Read lyrics</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-                </div>
-              </div>
-            </a>
-
-            <!-- Latest Setlist -->
-            <a href={`/setlists/${latestSetlist.slug}`} class="today-card-link group">
-              <div
-                class="glass-tile-image glass-tile-image-clear today-card today-card-image h-full p-6 flex flex-col min-h-[240px]"
-                style={latestSetlistImage ? `--tile-bg-image: url('${latestSetlistImage}')` : ''}
-              >
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="p-2 rounded-sm bg-white/15 backdrop-blur-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span class="text-white/70 text-xs font-medium uppercase tracking-[0.15em] text-shadow">Latest Setlist</span>
-                </div>
-                <h3 class="font-heading text-xl text-white mb-1 group-hover:text-primary transition-colors text-shadow-lg">
-                  {latestSetlist.venue}
-                </h3>
-                <p class="text-white/70 text-sm mb-1 text-shadow">{latestSetlist.location}</p>
-                <p class="text-white/60 text-sm flex-1 text-shadow">{latestSetlist.formattedDate}</p>
-                <p class="text-white/70 text-sm mt-2 text-shadow">{latestSetlist.songCount} songs</p>
-              </div>
-            </a>
-
-            <!-- Quick Stats Tile -->
-            <a href="/stats" class="today-card-link group">
-              <div class="glass-tile today-card h-full p-6 flex flex-col min-h-[240px]">
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="p-2 rounded-sm bg-primary/20 border border-primary/[0.35]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <span class="text-white/60 text-xs font-medium uppercase tracking-[0.15em]">Archive Stats</span>
-                </div>
-                <div class="flex-1 grid grid-cols-2 gap-4 items-center mb-3">
-                  <div>
-                    <p class="text-4xl font-display text-primary">{archiveTotals.albums}</p>
-                    <p class="text-white/50 text-xs">Albums</p>
-                  </div>
-                  <div>
-                    <p class="text-4xl font-display text-primary">{archiveTotals.songs.toLocaleString('en-US')}</p>
-                    <p class="text-white/50 text-xs">Songs</p>
-                  </div>
-                </div>
-                <div class="pt-3 border-t border-white/10 text-xs text-white/60 flex items-center justify-between">
-                  <span>{archiveTotals.shows.toLocaleString('en-US')} shows</span>
-                  <span>{archiveTotals.countries} countries</span>
-                </div>
-              </div>
-            </a>
-          </div>
+  <div class="relative z-10">
+    <!-- BLOCK 2: Latest Content -->
+    <section class="py-12">
+      <div class="responsive-container">
+        <div class="gothic-heading mb-6">
+          <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Latest</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {newsPostsForGrid.slice(1, 4).map(post => (
+            <NewsCard post={post} compact={true} />
+          ))}
         </div>
       </div>
     </section>
 
-    <!-- 4. IMAGE OF THE DAY -->
-    <ImageOfTheDaySection photo={photoOfTheDay} />
-
-    <!-- 6. LYRICS QUOTE -->
-    <div class="relative overflow-hidden">
-      <AlbumDecoration album="disintegration" position="right" opacity={0.04} />
-      <LyricsQuoteSection song={songOfTheDay} />
-    </div>
-
-    <!-- FEATURED VIDEO -->
-    <FeaturedVideoSection />
-
-    <GothicSwirls position="divider" variant="elaborate" />
-
-    <!-- 7. ON THIS DAY -->
-    <OnThisDaySection />
-
-    <!-- UPCOMING ANNIVERSARIES -->
-    <UpcomingAnniversaries />
-
-    <!-- 8. RECENT SHOWS -->
-    <RecentSetlistsSection setlists={setlists} />
-
-    <GothicSwirls position="divider" variant="elaborate" />
-
-    <!-- 9. ALBUM SPOTLIGHT -->
-    <section class="py-16 relative overflow-hidden">
-      <AlbumDecoration album="faith" position="left" opacity={0.035} />
-      <div class="responsive-container relative z-10">
-        <AlbumSpotlightSection />
-      </div>
-    </section>
-
-    <!-- 9. DISCOGRAPHY STRIP -->
+    <!-- BLOCK 3: Discography Strip -->
     <DiscographyStripSection />
 
-    <!-- POLL -->
-    <section class="py-16">
-      <div class="responsive-container">
-        <PollWidget />
-      </div>
-    </section>
+    <!-- BLOCK 4: Stats + Community -->
+    <CompactStatsStrip stats={archiveTotals} />
 
-    <!-- DID YOU KNOW -->
-    <section class="py-8">
-      <div class="responsive-container max-w-2xl mx-auto">
-        <DidYouKnowWidget />
-      </div>
-    </section>
-
-    <GothicSwirls position="divider" variant="elaborate" />
-
-    <!-- COMMUNITY + NEWSLETTER -->
-    <section class="py-16">
-      <div class="responsive-container">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Community -->
-          <div class="glass-tile p-8 gothic-corners">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="p-2 rounded-sm bg-purple-500/20 backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h2 class="font-heading text-xl text-white">Join the Community</h2>
-            </div>
-            <p class="text-white/60 mb-6">
-              Connect with fellow fans, share your memories, discuss albums, and be part of the Cureation community.
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <a href="/community" class="px-5 py-2 rounded-sm bg-primary/15 border border-primary/30 text-white hover:bg-primary/25 transition-colors text-sm font-medium">
-                Visit Forums
-              </a>
-              <a href="/about#contribute" class="px-5 py-2 rounded-sm bg-white/[0.06] border border-white/15 text-white hover:border-primary/30 transition-all text-sm font-medium">
-                Contribute
-              </a>
-            </div>
-          </div>
-
-          <!-- Newsletter -->
-          <div class="glass-tile p-8 gothic-corners">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="p-2 rounded-sm bg-pink-500/20 backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h2 class="font-heading text-xl text-white">Stay Connected</h2>
-            </div>
-            <p class="text-white/60 mb-6">
-              Get the latest news, new content alerts, and exclusive updates delivered to your inbox.
-            </p>
-            <form class="flex gap-3" action="/api/newsletter" method="POST">
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                required
-                class="flex-1 px-4 py-2 rounded-sm bg-black/40 border border-white/15 text-white placeholder-white/40 focus:border-primary/40 focus:outline-none text-sm"
-              />
-              <button type="submit" class="px-5 py-2 rounded-sm bg-primary/80 text-white font-medium hover:bg-primary/70 transition-colors text-sm">
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SHARE -->
-    <section class="pb-8">
-      <div class="responsive-container flex justify-center">
-        <ShareButtons title="Cureation - The Cure Fan Archive" />
-      </div>
-    </section>
-
+    <!-- BLOCK 5: Newsletter + Contribute -->
+    <NewsletterCTASection />
   </div>
 </Layout>

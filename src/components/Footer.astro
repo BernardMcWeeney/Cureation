@@ -1,27 +1,13 @@
 ---
 import siteConfig, { getFooterLinks } from '../config/site.config';
-import GothicCobweb from './GothicCobweb.astro';
 import VisitorCounter from './VisitorCounter.astro';
 
 const currentYear = new Date().getFullYear();
 const footerLinks = getFooterLinks();
 ---
 
-<footer class="relative mt-12 pt-6 bg-black/55 backdrop-blur-xl border-t border-white/[0.06] overflow-hidden">
-  <GothicCobweb position="bottom-left" size="lg" opacity={0.05} />
-  <GothicCobweb position="bottom-right" size="md" opacity={0.04} />
-  <!-- Gothic ornamental top line -->
-  <div class="absolute top-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 5%, rgba(var(--color-primary-rgb), 0.2) 30%, rgba(var(--color-primary-rgb), 0.35) 50%, rgba(var(--color-primary-rgb), 0.2) 70%, transparent 95%);"></div>
-
+<footer class="relative mt-12 pt-6 bg-black/90 backdrop-blur-xl border-t border-white/10 overflow-hidden">
   <div class="responsive-container py-10 md:py-12">
-    <!-- Gothic divider at top -->
-    <div class="flex items-center justify-center gap-3 mb-8">
-      <div class="h-[1px] flex-1 max-w-32 bg-gradient-to-r from-transparent to-primary/20"></div>
-      <div class="w-1.5 h-1.5 bg-primary/30 rotate-45"></div>
-      <div class="w-2 h-2 border border-primary/20 rotate-45"></div>
-      <div class="w-1.5 h-1.5 bg-primary/30 rotate-45"></div>
-      <div class="h-[1px] flex-1 max-w-32 bg-gradient-to-l from-transparent to-primary/20"></div>
-    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10">
       <!-- Brand Section -->
@@ -34,22 +20,22 @@ const footerLinks = getFooterLinks();
               class="w-6 h-6 rounded-sm object-contain"
             />
           </div>
-          <h3 class="m-0 font-display text-5xl text-primary group-hover:text-primary/80 transition-colors duration-300">
+          <h3 class="m-0 font-display text-5xl text-primary group-hover:text-white/80 transition-colors duration-300">
             {siteConfig.logo.text}
           </h3>
         </a>
 
         <div class="mb-6 max-w-md">
-          <p class="text-white/70">{siteConfig.description}</p>
+          <p class="text-white/90">{siteConfig.description}</p>
         </div>
 
         <div class="mb-6 space-y-2">
-          <p class="text-white/50 text-xs uppercase tracking-[0.16em]">Contact</p>
+          <p class="text-white/90 text-xs uppercase tracking-[0.16em]">Contact</p>
           <div class="flex flex-wrap gap-x-4 gap-y-1">
             {Object.values(siteConfig.contact).map((item) => (
               <a
                 href={`mailto:${item.email}`}
-                class="text-white/60 hover:text-primary transition-colors duration-300 text-sm"
+                class="text-white/85 hover:text-white transition-colors duration-300 text-sm"
               >
                 {item.label}
               </a>
@@ -63,7 +49,7 @@ const footerLinks = getFooterLinks();
               href={siteConfig.social.twitter}
               target="_blank"
               rel="noopener noreferrer"
-              class="p-3 rounded-sm border border-white/10 backdrop-blur-md bg-black/30 hover:bg-black/40 hover:border-primary/30 transition-all duration-300"
+              class="p-3 rounded-sm border border-white/10 backdrop-blur-md bg-black/30 hover:bg-black/40 hover:border-white/15 transition-all duration-300"
               aria-label="Twitter"
             >
               <svg
@@ -95,7 +81,7 @@ const footerLinks = getFooterLinks();
                 <li>
                   <a
                     href={link.path}
-                    class="text-white/60 hover:text-primary transition-colors duration-300 flex items-center gap-2 text-sm"
+                    class="text-white/85 hover:text-white transition-colors duration-300 flex items-center gap-2 text-sm"
                     target={link.external ? '_blank' : undefined}
                     rel={link.external ? 'noopener noreferrer' : undefined}
                   >
@@ -115,7 +101,7 @@ const footerLinks = getFooterLinks();
                 <li>
                   <a
                     href={link.path}
-                    class="text-white/60 hover:text-primary transition-colors duration-300 flex items-center gap-2 text-sm"
+                    class="text-white/85 hover:text-white transition-colors duration-300 flex items-center gap-2 text-sm"
                     target={link.external ? '_blank' : undefined}
                     rel={link.external ? 'noopener noreferrer' : undefined}
                   >
@@ -139,13 +125,13 @@ const footerLinks = getFooterLinks();
       </div>
 
       <div class="flex flex-col md:flex-row justify-between items-center gap-3">
-        <p class="text-sm text-white/50">
+        <p class="text-sm text-white/90">
           &copy; {currentYear} {siteConfig.name}. All rights reserved.
         </p>
 
         <div class="flex flex-col items-center gap-2">
           <VisitorCounter />
-          <p class="text-xs text-white/40 text-center max-w-lg leading-relaxed">
+          <p class="text-xs text-white/85 text-center max-w-lg leading-relaxed">
             Cureation is a fan project not affiliated with The Cure or their representatives.
             All media remain property of their respective owners.
           </p>
@@ -155,7 +141,7 @@ const footerLinks = getFooterLinks();
           {footerLinks.legal.map((link) => (
             <a
               href={link.path}
-              class="text-xs text-white/50 hover:text-primary transition-colors duration-300"
+              class="text-xs text-white/90 hover:text-white transition-colors duration-300"
               target={link.external ? '_blank' : undefined}
               rel={link.external ? 'noopener noreferrer' : undefined}
             >

@@ -9,12 +9,12 @@ const pageUrl = url || Astro.url.href;
 ---
 
 <div class="share-buttons flex items-center gap-2" data-title={title} data-url={pageUrl}>
-  <span class="text-white/40 text-xs uppercase tracking-[0.15em] mr-1">Share</span>
+  <span class="text-white/80 text-xs uppercase tracking-[0.15em] mr-1">Share</span>
 
   <!-- Twitter/X -->
   <button
     data-share="twitter"
-    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:border-primary/30 hover:bg-primary/10 transition-all duration-300"
+    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/80 hover:text-white hover:border-white/15 hover:bg-white/[0.06] transition-all duration-300"
     aria-label="Share on Twitter"
   >
     <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
@@ -25,7 +25,7 @@ const pageUrl = url || Astro.url.href;
   <!-- Facebook -->
   <button
     data-share="facebook"
-    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:border-primary/30 hover:bg-primary/10 transition-all duration-300"
+    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/80 hover:text-white hover:border-white/15 hover:bg-white/[0.06] transition-all duration-300"
     aria-label="Share on Facebook"
   >
     <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
@@ -36,7 +36,7 @@ const pageUrl = url || Astro.url.href;
   <!-- Reddit -->
   <button
     data-share="reddit"
-    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:border-primary/30 hover:bg-primary/10 transition-all duration-300"
+    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/80 hover:text-white hover:border-white/15 hover:bg-white/[0.06] transition-all duration-300"
     aria-label="Share on Reddit"
   >
     <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
@@ -47,7 +47,7 @@ const pageUrl = url || Astro.url.href;
   <!-- Copy Link -->
   <button
     data-share="copy"
-    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/50 hover:text-white hover:border-primary/30 hover:bg-primary/10 transition-all duration-300 relative"
+    class="p-2 rounded-sm bg-white/[0.04] border border-white/10 text-white/80 hover:text-white hover:border-white/15 hover:bg-white/[0.06] transition-all duration-300 relative"
     aria-label="Copy link"
   >
     <svg class="size-4 copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

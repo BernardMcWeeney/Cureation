@@ -61,8 +61,8 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
 >
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/60">
-      <li><a href="/stats" class="hover:text-primary transition-colors">Statistics</a></li>
+    <ol class="flex items-center gap-2 text-sm text-white/85">
+      <li><a href="/stats" class="hover:text-white transition-colors">Statistics</a></li>
       <li aria-hidden="true">/</li>
       <li class="text-white">Tour Stats</li>
     </ol>
@@ -71,7 +71,7 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
   <!-- Hero -->
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -82,20 +82,20 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalShows.toLocaleString()}</span>
-            <span class="text-white/60 text-base font-medium">Total Shows</span>
+            <span class="text-3xl font-display text-white text-glow">{totalShows.toLocaleString()}</span>
+            <span class="text-white/85 text-base font-medium">Total Shows</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalTours}</span>
-            <span class="text-white/60 text-base font-medium">Tours</span>
+            <span class="text-3xl font-display text-white text-glow">{totalTours}</span>
+            <span class="text-white/85 text-base font-medium">Tours</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{allCountries.size}</span>
-            <span class="text-white/60 text-base font-medium">Countries</span>
+            <span class="text-3xl font-display text-white text-glow">{allCountries.size}</span>
+            <span class="text-white/85 text-base font-medium">Countries</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{Object.keys(venueCounts).length}</span>
-            <span class="text-white/60 text-base font-medium">Unique Venues</span>
+            <span class="text-3xl font-display text-white text-glow">{Object.keys(venueCounts).length}</span>
+            <span class="text-white/85 text-base font-medium">Unique Venues</span>
           </div>
         </div>
       </div>
@@ -111,12 +111,12 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
           {tourStats.map((tour, idx) => (
             <div class="flex items-center gap-4 p-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-colors cure-rose-border">
               <span class={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
-                idx < 3 ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-white/40'
+                idx < 3 ? 'bg-blue-500/20 text-blue-400' : 'bg-white/5 text-white/80'
               }`}>{idx + 1}</span>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between mb-1">
                   <h3 class="text-white font-medium truncate">{tour.name}</h3>
-                  <span class="text-white/50 text-sm ml-4 shrink-0">{tour.year}</span>
+                  <span class="text-white/80 text-sm ml-4 shrink-0">{tour.year}</span>
                 </div>
                 <div class="h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
                   <div
@@ -124,7 +124,7 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
                     style={`width: ${(tour.totalShows / maxTourShows) * 100}%`}
                   ></div>
                 </div>
-                <div class="flex flex-wrap gap-4 text-xs text-white/50">
+                <div class="flex flex-wrap gap-4 text-xs text-white/80">
                   <span>{tour.totalShows} shows</span>
                   <span>{tour.countries.length} countries</span>
                   <span>{tour.uniqueSongs} unique songs</span>
@@ -135,7 +135,7 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
           ))}
         </div>
       ) : (
-        <p class="text-white/60 text-center py-8">No tour data available.</p>
+        <p class="text-white/85 text-center py-8">No tour data available.</p>
       )}
     </div>
   </section>
@@ -147,15 +147,15 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
       <div class="space-y-2">
         {yearlyData.map(year => (
           <div class="flex items-center gap-3">
-            <span class="text-white/60 text-sm w-12 shrink-0 font-mono">{year.year}</span>
+            <span class="text-white/85 text-sm w-12 shrink-0 font-mono">{year.year}</span>
             <div class="flex-1 h-6 bg-white/5 rounded overflow-hidden relative">
               <div
                 class="h-full bg-gradient-to-r from-primary/80 to-accent/60 rounded stat-bar-animated"
                 style={`width: ${(year.shows / maxShowsInYear) * 100}%`}
               ></div>
-              <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white/70 font-mono">{year.shows}</span>
+              <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white/90 font-mono">{year.shows}</span>
             </div>
-            <span class="text-white/40 text-xs w-20 text-right shrink-0">{year.countries} countries</span>
+            <span class="text-white/80 text-xs w-20 text-right shrink-0">{year.countries} countries</span>
           </div>
         ))}
       </div>
@@ -195,10 +195,10 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
           {topVenues.map((venue, idx) => (
             <div class="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
               <div class="flex items-center gap-3 min-w-0">
-                <span class="text-white/40 text-sm w-5 shrink-0">{idx + 1}.</span>
+                <span class="text-white/80 text-sm w-5 shrink-0">{idx + 1}.</span>
                 <div class="min-w-0">
                   <p class="text-white truncate text-sm">{venue.venue}</p>
-                  <p class="text-white/40 text-xs">{venue.city}, {venue.country}</p>
+                  <p class="text-white/80 text-xs">{venue.city}, {venue.country}</p>
                 </div>
               </div>
               <span class="text-primary font-bold shrink-0 ml-3">{venue.count}</span>
@@ -215,7 +215,7 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
       <h2 class="text-2xl text-white mb-6 gothic-heading">Countries Visited ({allCountries.size})</h2>
       <div class="flex flex-wrap gap-2">
         {countriesSorted.map(country => (
-          <span class="px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.08] text-white/70 text-sm hover:bg-white/[0.08] hover:text-white transition-colors">
+          <span class="px-3 py-1.5 rounded bg-white/[0.04] border border-white/[0.08] text-white/90 text-sm hover:bg-white/[0.08] hover:text-white transition-colors">
             {country}
           </span>
         ))}
@@ -224,7 +224,7 @@ const maxTourShows = tourStats[0]?.totalShows || 1;
   </section>
 
   <div class="text-center">
-    <a href="/stats" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+    <a href="/stats" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
       Back to Statistics
     </a>

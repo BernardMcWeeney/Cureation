@@ -22,7 +22,7 @@ const hasLinks = links.length > 0;
 
 {hasLinks && (
   <div class="glass-tile p-6">
-    <h3 class="text-xs uppercase tracking-[0.16em] text-white/50 mb-4">Listen & Buy</h3>
+    <h3 class="text-xs uppercase tracking-[0.16em] text-white/80 mb-4">Listen & Buy</h3>
     <div class="flex flex-wrap gap-3">
       {links.map(link => (
         <a
@@ -44,7 +44,7 @@ const hasLinks = links.length > 0;
             <svg class="size-4" style={`color: ${link.color}`} viewBox="0 0 24 24" fill="currentColor"><path d="M.045 18.02c.072-.116.187-.124.348-.064 2.729 1.353 5.706 2.008 8.876 2.008 2.17 0 4.406-.41 6.676-1.29.076-.03.152-.063.228-.063.076 0 .151.015.227.063.151.076.212.197.151.348-.06.152-.182.272-.348.348-2.353.939-4.712 1.408-7.076 1.408-3.37 0-6.465-.772-9.276-2.317-.151-.076-.227-.197-.227-.348 0-.076.076-.152.152-.197l.269-.096zM23.004 17.27c-.152-.227-.348-.348-.697-.348-.227 0-.5.06-.818.152-1.97.575-3.483.863-4.545.863-.878 0-1.408-.227-1.56-.697-.076-.227-.038-.5.076-.818.038-.076.076-.152.076-.227 0-.152-.076-.227-.227-.227-.076 0-.152.038-.227.076-.818.575-1.257 1.257-1.257 2.008 0 .424.167.818.5 1.105.348.303.863.454 1.56.454 2.037 0 4.47-.621 7.3-1.863.076-.038.152-.076.227-.152.151-.076.227-.197.227-.348.036-.134-.037-.252-.108-.378l-.527.4z"/></svg>
           )}
           {link.icon === 'store' && (
-            <svg class="size-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
+            <svg class="size-4 text-white/85" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
           )}
           {link.name}
         </a>

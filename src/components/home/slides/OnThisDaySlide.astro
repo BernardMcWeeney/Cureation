@@ -1,0 +1,77 @@
+---
+interface ShowEntry {
+  venue: string;
+  city: string;
+  country: string;
+  year: number;
+}
+
+interface Props {
+  dateString: string;
+  showCount: number;
+  milestoneCount: number;
+  shows: ShowEntry[];
+  hasEntries: boolean;
+  fallbackFact?: string;
+}
+
+const { dateString, showCount, milestoneCount, shows, hasEntries, fallbackFact } = Astro.props;
+---
+
+<a href="/on-this-day" class="flex flex-col items-start justify-end h-full w-full p-8 md:p-12 group">
+  <div class="max-w-2xl">
+    <span class="text-text-muted text-xs font-medium uppercase tracking-[0.15em] mb-4 block">
+      {hasEntries ? 'On This Day' : 'From the Archive'}
+    </span>
+
+    <h2 class="font-heading text-4xl md:text-5xl lg:text-6xl text-white mb-4 text-shadow-lg leading-tight">
+      {dateString}
+    </h2>
+
+    {hasEntries ? (
+      <div class="space-y-4 mb-6">
+        <div class="flex gap-6">
+          <div>
+            <p class="text-3xl font-display text-white">{showCount}</p>
+            <p class="text-text-muted text-xs uppercase tracking-wider">Shows</p>
+          </div>
+          {milestoneCount > 0 && (
+            <div>
+              <p class="text-3xl font-display text-purple-300">{milestoneCount}</p>
+              <p class="text-text-muted text-xs uppercase tracking-wider">Milestones</p>
+            </div>
+          )}
+        </div>
+
+        {shows.length > 0 && (
+          <div class="space-y-2">
+            {shows.slice(0, 3).map(show => (
+              <div class="flex items-center justify-between gap-4 py-2 border-b border-border-subtle last:border-b-0">
+                <div>
+                  <p class="text-text-secondary text-sm">{show.venue}</p>
+                  <p class="text-text-muted text-xs">{show.city}, {show.country}</p>
+                </div>
+                <span class="text-primary font-semibold text-lg shrink-0">{show.year}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ) : fallbackFact ? (
+      <p class="text-text-secondary text-base mb-6 text-shadow max-w-xl">
+        {fallbackFact}
+      </p>
+    ) : (
+      <p class="text-text-muted text-base mb-6 text-shadow">
+        Explore the full archive of shows, milestones, and history.
+      </p>
+    )}
+
+    <div class="flex items-center gap-2 text-primary text-sm opacity-80 group-hover:opacity-100 transition-all duration-300">
+      <span>{hasEntries ? 'Explore this day' : 'Open timeline archive'}</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+      </svg>
+    </div>
+  </div>
+</a>

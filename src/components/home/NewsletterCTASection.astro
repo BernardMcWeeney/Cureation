@@ -1,0 +1,51 @@
+---
+// No props needed — self-contained CTA section
+---
+
+<section class="py-16">
+  <div class="responsive-container">
+    <div class="glass-panel p-8 md:p-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        {/* Newsletter */}
+        <div>
+          <h2 class="font-heading text-xl text-white mb-3">Stay Connected</h2>
+          <p class="text-text-secondary text-sm mb-6">
+            Get the latest news, new content alerts, and exclusive updates delivered to your inbox.
+          </p>
+          <form class="flex gap-3" action="/api/newsletter" method="POST">
+            <input
+              type="email"
+              name="email"
+              placeholder="your@email.com"
+              required
+              class="flex-1 px-4 py-2.5 bg-surface-subtle border border-border-default text-white placeholder-text-subtle focus:border-primary/50 focus:outline-none text-sm"
+            />
+            <button
+              type="submit"
+              class="px-6 py-2.5 bg-primary text-white font-medium hover:bg-primary/90 transition-colors text-sm whitespace-nowrap"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+
+        {/* Contribute */}
+        <div class="md:border-l md:border-border-subtle md:pl-12">
+          <h2 class="font-heading text-xl text-white mb-3">Contribute</h2>
+          <p class="text-text-secondary text-sm mb-6">
+            Cureation is built by fans, for fans. Help us grow the archive with setlists, photos, corrections, and more.
+          </p>
+          <a
+            href="/about#contribute"
+            class="inline-flex items-center gap-2 px-6 py-2.5 border border-border-default text-text-secondary text-sm font-medium hover:border-primary/40 hover:text-white transition-all"
+          >
+            Learn how to contribute
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

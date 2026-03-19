@@ -128,10 +128,10 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
 >
   <!-- Breadcrumb -->
   <nav class="mb-8" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/60">
-      <li><a href="/setlists" class="hover:text-primary transition-colors">Setlists</a></li>
+    <ol class="flex items-center gap-2 text-sm text-white/85">
+      <li><a href="/setlists" class="hover:text-white transition-colors">Setlists</a></li>
       <li aria-hidden="true">/</li>
-      <li><span class="text-white/40">Tours</span></li>
+      <li><span class="text-white/80">Tours</span></li>
       <li aria-hidden="true">/</li>
       <li class="text-white truncate max-w-[200px]">{tour.name}</li>
     </ol>
@@ -140,7 +140,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
   <!-- Tour Header -->
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
         <!-- Associated album badge -->
@@ -149,7 +149,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
             {tour.associatedAlbumCover && (
               <img src={tour.associatedAlbumCover} alt={tour.associatedAlbumTitle} class="w-10 h-10 rounded object-cover" />
             )}
-            <a href={`/discography/${tour.associatedAlbumSlug}`} class="badge bg-primary/20 text-primary border-primary/40 hover:bg-primary/30 transition-colors">
+            <a href={`/discography/${tour.associatedAlbumSlug}`} class="badge bg-white/10 text-primary border-primary/40 hover:bg-primary/30 transition-colors">
               {tour.associatedAlbumTitle} era
             </a>
           </div>
@@ -159,7 +159,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
           {tour.name}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-4 text-white/70 mb-6">
+        <div class="flex flex-wrap items-center gap-4 text-white/90 mb-6">
           {tour.startDate && (
             <div class="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -176,20 +176,20 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
         <!-- Stats row -->
         <div class="flex flex-wrap gap-8 pt-6 border-t border-white/8">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{setlists.length || tour.totalShows}</span>
-            <span class="text-white/60 text-base font-medium">Shows</span>
+            <span class="text-3xl font-display text-white text-glow">{setlists.length || tour.totalShows}</span>
+            <span class="text-white/85 text-base font-medium">Shows</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{uniqueCountries.length}</span>
-            <span class="text-white/60 text-base font-medium">Countries</span>
+            <span class="text-3xl font-display text-white text-glow">{uniqueCountries.length}</span>
+            <span class="text-white/85 text-base font-medium">Countries</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{uniqueCities.length}</span>
-            <span class="text-white/60 text-base font-medium">Cities</span>
+            <span class="text-3xl font-display text-white text-glow">{uniqueCities.length}</span>
+            <span class="text-white/85 text-base font-medium">Cities</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalSongs.toLocaleString()}</span>
-            <span class="text-white/60 text-base font-medium">Performances</span>
+            <span class="text-3xl font-display text-white text-glow">{totalSongs.toLocaleString()}</span>
+            <span class="text-white/85 text-base font-medium">Performances</span>
           </div>
         </div>
 
@@ -199,7 +199,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
             {uniqueCountries.map(code => (
               <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm">
                 <span class="text-base">{countryCodeToFlag[code as string] || ''}</span>
-                <span class="text-white/70">{code}</span>
+                <span class="text-white/90">{code}</span>
               </span>
             ))}
           </div>
@@ -240,7 +240,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
   <section class="mb-12">
     <h2 class="font-heading text-2xl text-primary mb-6">
       All Shows
-      <span class="text-white/40 text-lg ml-2">({setlists.length})</span>
+      <span class="text-white/80 text-lg ml-2">({setlists.length})</span>
     </h2>
 
     {setlists.length > 0 ? (
@@ -248,27 +248,27 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
         {setlists.map((show, index) => (
           <a
             href={`/setlists/${show.slug}`}
-            class="flex items-center justify-between p-4 glass-card rounded-xl border border-white/10 hover:border-primary/40 transition-all group"
+            class="flex items-center justify-between p-4 glass-card rounded-xl border border-white/10 hover:border-white/20/40 transition-all group"
           >
             <div class="flex items-center gap-4">
-              <div class="text-white/30 text-sm font-mono min-w-[24px] text-right">{index + 1}</div>
+              <div class="text-white/75 text-sm font-mono min-w-[24px] text-right">{index + 1}</div>
               <div class="text-center min-w-[50px]">
-                <div class="text-xl font-display text-primary">{new Date(show.date).getDate()}</div>
-                <div class="text-white/50 text-[10px] uppercase">{new Date(show.date).toLocaleDateString('en-US', { month: 'short' })}</div>
+                <div class="text-xl font-display text-white">{new Date(show.date).getDate()}</div>
+                <div class="text-white/80 text-[10px] uppercase">{new Date(show.date).toLocaleDateString('en-US', { month: 'short' })}</div>
               </div>
               <div>
-                <div class="text-white group-hover:text-primary transition-colors flex items-center gap-2">
+                <div class="text-white group-hover:text-white transition-colors flex items-center gap-2">
                   {show.countryCode && countryCodeToFlag[show.countryCode] && (
                     <span>{countryCodeToFlag[show.countryCode]}</span>
                   )}
                   {show.venue}
                 </div>
-                <div class="text-white/50 text-sm">{show.city}, {show.country}</div>
+                <div class="text-white/80 text-sm">{show.city}, {show.country}</div>
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-white/40 text-sm hidden sm:inline">{show.songCount} songs</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <span class="text-white/80 text-sm hidden sm:inline">{show.songCount} songs</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary opacity-80 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m9 18 6-6-6-6"></path>
               </svg>
             </div>
@@ -277,14 +277,14 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
       </div>
     ) : (
       <div class="glass-card rounded-2xl p-8 text-center">
-        <p class="text-white/60">No setlists linked to this tour yet. Check the <a href="/setlists" class="text-primary hover:underline">setlists page</a> for more.</p>
+        <p class="text-white/85">No setlists linked to this tour yet. Check the <a href="/setlists" class="text-primary hover:underline">setlists page</a> for more.</p>
       </div>
     )}
   </section>
 
   <!-- Back -->
   <div class="text-center">
-    <a href="/setlists" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+    <a href="/setlists" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="m15 18-6-6 6-6"></path>
       </svg>

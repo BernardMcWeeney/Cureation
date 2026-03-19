@@ -34,19 +34,19 @@ const icons: Record<string, string> = {
     <h3 class="text-lg font-heading text-white mb-4">The Cure</h3>
     <dl class="space-y-2 text-sm">
       <div class="glass-stat p-2 rounded-lg flex justify-between">
-        <dt class="text-white/50">Founded</dt>
+        <dt class="text-white/80">Founded</dt>
         <dd class="text-white">1976</dd>
       </div>
       <div class="glass-stat p-2 rounded-lg flex justify-between">
-        <dt class="text-white/50">Origin</dt>
+        <dt class="text-white/80">Origin</dt>
         <dd class="text-white">Crawley, England</dd>
       </div>
       <div class="glass-stat p-2 rounded-lg flex justify-between">
-        <dt class="text-white/50">Genre</dt>
+        <dt class="text-white/80">Genre</dt>
         <dd class="text-white">Rock, Post-Punk, Gothic</dd>
       </div>
       <div class="glass-stat p-2 rounded-lg flex justify-between">
-        <dt class="text-white/50">Years Active</dt>
+        <dt class="text-white/80">Years Active</dt>
         <dd class="text-white">1976 - Present</dd>
       </div>
     </dl>
@@ -63,8 +63,8 @@ const icons: Record<string, string> = {
               href={item.path}
               class={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
                 activePage === item.path
-                  ? 'bg-primary/20 text-primary border border-primary/40'
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
+                  ? 'bg-white/10 text-primary border border-primary/40'
+                  : 'text-white/90 hover:text-white hover:bg-white/5'
               }`}
             >
               <span set:html={icons[item.icon]} />
@@ -91,17 +91,17 @@ const icons: Record<string, string> = {
                   class="w-10 h-10 rounded-full object-cover border border-white/10"
                 />
               ) : (
-                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
                   <span class="text-primary text-sm font-medium">
                     {member.name.charAt(0)}
                   </span>
                 </div>
               )}
               <div class="flex-1 min-w-0">
-                <p class="text-white/90 text-sm group-hover:text-primary transition-colors truncate">
+                <p class="text-white/90 text-sm group-hover:text-white transition-colors truncate">
                   {member.name}
                 </p>
-                <p class="text-white/40 text-xs truncate">
+                <p class="text-white/80 text-xs truncate">
                   {Array.isArray(member.instruments) ? member.instruments.join(', ') : (member.instruments || '')}
                 </p>
               </div>
@@ -121,7 +121,7 @@ const icons: Record<string, string> = {
           href="https://www.thecure.com"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-2 text-white/70 hover:text-primary transition-colors text-sm"
+          class="flex items-center gap-2 text-white/90 hover:text-white transition-colors text-sm"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -137,7 +137,7 @@ const icons: Record<string, string> = {
           href="https://en.wikipedia.org/wiki/The_Cure"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-2 text-white/70 hover:text-primary transition-colors text-sm"
+          class="flex items-center gap-2 text-white/90 hover:text-white transition-colors text-sm"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />

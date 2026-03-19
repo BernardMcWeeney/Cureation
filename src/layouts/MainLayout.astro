@@ -6,7 +6,6 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Sidebar from '../components/Sidebar.astro';
 import SearchEnhancer from '../components/SearchEnhancer.astro';
-import GothicCobweb from '../components/GothicCobweb.astro';
 import siteConfig from '../config/site.config';
 import { getDefaultTheme } from '../config/theme.config';
 import '../styles/global.css';
@@ -80,38 +79,27 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
 
   <body class={`min-h-screen flex flex-col noise-overlay ${pageClass}`}>
     <!-- Background layer - always present, shows album art when ogImage provided -->
-    <div class={`fixed inset-0 z-0 overflow-hidden ${ogImage ? 'bg-black' : 'theme-gradient-bg'}`}>
+    <div class={`fixed inset-0 z-0 overflow-hidden ${ogImage ? '' : 'theme-gradient-bg'}`} style="background-color: #000000;">
       {ogImage ? (
         <>
           <!-- Album artwork background -->
           <div
             class="absolute -inset-8 bg-cover bg-center bg-no-repeat"
-            style={`background-image: url(${ogImage}); filter: blur(20px) saturate(1.2); opacity: 0.75; transform: scale(1.1);`}
+            style={`background-image: url(${ogImage}); filter: blur(20px) saturate(1.2); opacity: 0.5; transform: scale(1.1);`}
           ></div>
-          <!-- Darker overlay for gothic depth -->
-          <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
+          <!-- Overlay for readability -->
+          <div class="absolute inset-0 bg-gradient-to-b from-[#000000]/70 via-[#000000]/60 to-[#000000]/80"></div>
           <!-- Theme color wash -->
-          <div class="absolute inset-0" style="background: radial-gradient(ellipse at top, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 60%);"></div>
-          <!-- Gothic vignette -->
-          <div class="absolute inset-0" style="background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%);"></div>
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at top, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 60%);"></div>
         </>
       ) : (
         <!-- Gothic gradient background when no image -->
         <div class="absolute inset-0">
-          <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 50%);"></div>
-          <div class="absolute inset-0" style="background: radial-gradient(ellipse at bottom right, rgba(var(--color-primary-rgb), 0.05) 0%, transparent 50%);"></div>
-          <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 70%, rgba(var(--color-primary-rgb), 0.03) 0%, transparent 40%);"></div>
-          <div class="absolute inset-0" style="background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%);"></div>
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, rgba(var(--color-primary-rgb), 0.1) 0%, transparent 50%);"></div>
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at bottom right, rgba(var(--color-primary-rgb), 0.06) 0%, transparent 50%);"></div>
+          <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 70%, rgba(var(--color-primary-rgb), 0.04) 0%, transparent 40%);"></div>
         </div>
       )}
-    </div>
-
-    <!-- Cobweb corner decorations -->
-    <div class="fixed inset-0 pointer-events-none z-[1] overflow-hidden">
-      <GothicCobweb position="top-left" size="lg" variant="corner-frilly" opacity={0.08} />
-      <GothicCobweb position="top-right" size="lg" variant="corner" opacity={0.06} />
-      <GothicCobweb position="bottom-left" size="md" variant="corner" opacity={0.04} />
-      <GothicCobweb position="bottom-right" size="sm" variant="corner" opacity={0.03} />
     </div>
 
     <!-- Content wrapper with z-index above background -->
@@ -152,11 +140,11 @@ const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
               <div class="md:hidden absolute inset-0 bg-black/70 backdrop-blur-md sidebar-backdrop hidden" />
 
               {/* Sidebar content */}
-              <div class="absolute md:relative right-0 top-0 bottom-0 w-80 md:w-full overflow-y-auto bg-black/90 backdrop-blur-xl md:bg-transparent p-4 md:p-0">
+              <div class="absolute md:relative right-0 top-0 bottom-0 w-80 md:w-full overflow-y-auto bg-black/95 backdrop-blur-xl md:bg-transparent p-4 md:p-0">
                 {/* Mobile close button */}
                 <button
                   type="button"
-                  class="md:hidden absolute top-4 right-4 p-2 text-white/70 hover:text-white"
+                  class="md:hidden absolute top-4 right-4 p-2 text-white/90 hover:text-white"
                   aria-label="Close sidebar"
                   id="sidebar-close"
                 >

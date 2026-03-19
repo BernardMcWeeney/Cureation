@@ -49,8 +49,8 @@ const categoryIcons: Record<string, string> = {
               href={category.path}
               class={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-300 ${
                 activeCategory === category.title
-                  ? 'bg-primary/20 text-primary'
-                  : 'text-white hover:bg-white/10 hover:text-primary'
+                  ? 'bg-white/10 text-primary'
+                  : 'text-white hover:bg-white/10 hover:text-white'
               }`}
             >
               <span set:html={categoryIcons[category.title] || categoryIcons['Studio Albums']} />
@@ -75,13 +75,13 @@ const categoryIcons: Record<string, string> = {
           class={`era-filter-btn w-full text-left px-3 py-2 bg-${era.color}-500/10 hover:bg-${era.color}-500/20 border border-${era.color}-500/20 hover:border-${era.color}-500/40 rounded-lg text-white transition-all duration-300 flex items-center justify-between group`}
         >
           <span class={`text-${era.color}-400 font-medium`}>{era.name}</span>
-          <span class="text-xs text-white/50 group-hover:text-white/70">{era.years}</span>
+          <span class="text-xs text-white/80 group-hover:text-white/90">{era.years}</span>
         </button>
       ))}
       <button
         type="button"
         id="clear-era-filter"
-        class="hidden w-full text-center px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/70 hover:text-white text-sm transition-all duration-300 mt-2"
+        class="hidden w-full text-center px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/90 hover:text-white text-sm transition-all duration-300 mt-2"
       >
         Clear Filter
       </button>
@@ -93,15 +93,15 @@ const categoryIcons: Record<string, string> = {
     <h3 class="font-heading text-lg text-primary mb-3">Quick Stats</h3>
     <div class="space-y-2 text-sm">
       <div class="glass-stat p-2 rounded-lg flex justify-between">
-        <span class="text-white/60">Years Active</span>
+        <span class="text-white/85">Years Active</span>
         <span class="text-white">1976 - Present</span>
       </div>
       <div class="glass-stat p-2 rounded-lg flex justify-between">
-        <span class="text-white/60">Studio Albums</span>
+        <span class="text-white/85">Studio Albums</span>
         <span class="text-white">13</span>
       </div>
       <div class="glass-stat p-2 rounded-lg flex justify-between">
-        <span class="text-white/60">Singles</span>
+        <span class="text-white/85">Singles</span>
         <span class="text-white">40+</span>
       </div>
     </div>
@@ -113,19 +113,19 @@ const categoryIcons: Record<string, string> = {
     <div class="space-y-2">
       <a
         href="/lyrics"
-        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-white/15 text-white text-sm transition-all duration-300"
       >
         Browse Lyrics
       </a>
       <a
         href="/setlists"
-        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-white/15 text-white text-sm transition-all duration-300"
       >
         View Setlists
       </a>
       <a
         href="/stats"
-        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-primary/30 text-white text-sm transition-all duration-300"
+        class="block px-3 py-2 rounded-lg glass-inset hover:bg-white/10 hover:border-white/15 text-white text-sm transition-all duration-300"
       >
         Statistics
       </a>

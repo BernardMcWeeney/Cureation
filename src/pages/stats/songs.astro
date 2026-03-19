@@ -50,8 +50,8 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
 >
   <!-- Breadcrumb -->
   <nav class="mb-6" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/60">
-      <li><a href="/stats" class="hover:text-primary transition-colors">Statistics</a></li>
+    <ol class="flex items-center gap-2 text-sm text-white/85">
+      <li><a href="/stats" class="hover:text-white transition-colors">Statistics</a></li>
       <li aria-hidden="true">/</li>
       <li class="text-white">Song Stats</li>
     </ol>
@@ -60,7 +60,7 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
   <!-- Hero -->
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -71,24 +71,24 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{allStats.length}</span>
-            <span class="text-white/60 text-base font-medium">Total Songs</span>
+            <span class="text-3xl font-display text-white text-glow">{allStats.length}</span>
+            <span class="text-white/85 text-base font-medium">Total Songs</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{playedSongs.length}</span>
-            <span class="text-white/60 text-base font-medium">Played Live</span>
+            <span class="text-3xl font-display text-white text-glow">{playedSongs.length}</span>
+            <span class="text-white/85 text-base font-medium">Played Live</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{neverPlayed.length}</span>
-            <span class="text-white/60 text-base font-medium">Never Played</span>
+            <span class="text-3xl font-display text-white text-glow">{neverPlayed.length}</span>
+            <span class="text-white/85 text-base font-medium">Never Played</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalPlays.toLocaleString()}</span>
-            <span class="text-white/60 text-base font-medium">Total Performances</span>
+            <span class="text-3xl font-display text-white text-glow">{totalPlays.toLocaleString()}</span>
+            <span class="text-white/85 text-base font-medium">Total Performances</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{avgPlays}</span>
-            <span class="text-white/60 text-base font-medium">Avg Plays/Song</span>
+            <span class="text-3xl font-display text-white text-glow">{avgPlays}</span>
+            <span class="text-white/85 text-base font-medium">Avg Plays/Song</span>
           </div>
         </div>
       </div>
@@ -109,17 +109,17 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
               index === 0 ? 'bg-yellow-500/20 text-yellow-400 ring-1 ring-yellow-500/30' :
               index === 1 ? 'bg-gray-400/20 text-gray-300 ring-1 ring-gray-400/30' :
               index === 2 ? 'bg-amber-600/20 text-amber-500 ring-1 ring-amber-600/30' :
-              index < 10 ? 'bg-primary/10 text-primary' :
-              'bg-white/5 text-white/40'
+              index < 10 ? 'bg-white/[0.06] text-primary' :
+              'bg-white/5 text-white/80'
             }`}>
               {index + 1}
             </span>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between mb-1">
-                <a href={`/lyrics/search?q=${encodeURIComponent(song.songTitle)}`} class="text-white hover:text-primary transition-colors truncate font-medium">
+                <a href={`/lyrics/search?q=${encodeURIComponent(song.songTitle)}`} class="text-white hover:text-white transition-colors truncate font-medium">
                   {song.songTitle}
                 </a>
-                <span class="text-white/60 text-sm ml-4 shrink-0 font-mono">
+                <span class="text-white/85 text-sm ml-4 shrink-0 font-mono">
                   {song.totalPlays.toLocaleString()}
                 </span>
               </div>
@@ -130,12 +130,12 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
                 ></div>
               </div>
               <div class="flex items-center gap-4 mt-1">
-                <p class="text-white/40 text-xs">{song.albumTitle}</p>
+                <p class="text-white/80 text-xs">{song.albumTitle}</p>
                 {song.firstPlayed && (
-                  <p class="text-white/30 text-xs">First: {new Date(song.firstPlayed).getFullYear()}</p>
+                  <p class="text-white/75 text-xs">First: {new Date(song.firstPlayed).getFullYear()}</p>
                 )}
                 {song.lastPlayed && (
-                  <p class="text-white/30 text-xs">Last: {new Date(song.lastPlayed).getFullYear()}</p>
+                  <p class="text-white/75 text-xs">Last: {new Date(song.lastPlayed).getFullYear()}</p>
                 )}
               </div>
             </div>
@@ -153,11 +153,11 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
         {albumPlayCounts.filter(a => a.totalPlays > 0).map((album, idx) => (
           <div class="glass-stat p-4 flex items-center gap-4">
             <span class={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-              idx < 3 ? 'bg-primary/20 text-primary' : 'bg-white/5 text-white/40'
+              idx < 3 ? 'bg-white/10 text-primary' : 'bg-white/5 text-white/80'
             }`}>{idx + 1}</span>
             <div class="flex-1 min-w-0">
               <p class="text-white font-medium truncate">{album.album}</p>
-              <div class="flex items-center gap-3 text-xs text-white/50 mt-1">
+              <div class="flex items-center gap-3 text-xs text-white/80 mt-1">
                 <span>{album.totalPlays.toLocaleString()} total plays</span>
                 <span>{album.playedCount}/{album.songCount} songs played</span>
               </div>
@@ -179,7 +179,7 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
               <span class="text-purple-400/60 text-sm w-5 shrink-0">{index + 1}.</span>
               <div class="min-w-0">
                 <p class="text-white truncate text-sm">{song.songTitle}</p>
-                <p class="text-white/40 text-xs">{song.albumTitle}</p>
+                <p class="text-white/80 text-xs">{song.albumTitle}</p>
               </div>
             </div>
             <div class="text-right shrink-0 ml-3">
@@ -196,12 +196,12 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
     <section class="mb-12">
       <div class="glass-panel p-6 md:p-8">
         <h2 class="text-2xl text-white mb-2 gothic-heading">Never Played Live</h2>
-        <p class="text-white/50 text-sm mb-6">{neverPlayed.length} songs from the catalog have never been performed live</p>
+        <p class="text-white/80 text-sm mb-6">{neverPlayed.length} songs from the catalog have never been performed live</p>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {neverPlayed.map(song => (
             <div class="p-2 rounded bg-white/[0.02] text-sm">
-              <p class="text-white/60 truncate">{song.songTitle}</p>
-              <p class="text-white/30 text-xs truncate">{song.albumTitle}</p>
+              <p class="text-white/85 truncate">{song.songTitle}</p>
+              <p class="text-white/75 text-xs truncate">{song.albumTitle}</p>
             </div>
           ))}
         </div>
@@ -211,7 +211,7 @@ const avgPlays = playedSongs.length > 0 ? Math.round(totalPlays / playedSongs.le
 
   <!-- Back navigation -->
   <div class="text-center">
-    <a href="/stats" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
+    <a href="/stats" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
       Back to Statistics
     </a>

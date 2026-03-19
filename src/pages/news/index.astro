@@ -32,7 +32,7 @@ const regularPosts = posts.filter(p => !p.featured || !featuredPosts.includes(p)
   {/* Hero section (full width, in hero slot) */}
   <section class="mb-10" slot="hero">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -43,12 +43,12 @@ const regularPosts = posts.filter(p => !p.featured || !featuredPosts.includes(p)
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{posts.length}</span>
-            <span class="text-white/60 text-base font-medium">Articles</span>
+            <span class="text-3xl font-display text-white text-glow">{posts.length}</span>
+            <span class="text-white/85 text-base font-medium">Articles</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{categories.length}</span>
-            <span class="text-white/60 text-base font-medium">Categories</span>
+            <span class="text-3xl font-display text-white text-glow">{categories.length}</span>
+            <span class="text-white/85 text-base font-medium">Categories</span>
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@ const regularPosts = posts.filter(p => !p.featured || !featuredPosts.includes(p)
       </div>
     ) : (
       <div class="glass-panel p-12 text-center">
-        <p class="text-white/60">No articles available yet.</p>
+        <p class="text-white/85">No articles available yet.</p>
       </div>
     )}
   </section>

@@ -217,9 +217,9 @@ function formatSetLabel(setType: string): string {
 }
 
 function setBadgeClass(setType: string): string {
-  if (setType === 'main') return 'bg-white/10 text-white/60';
+  if (setType === 'main') return 'bg-white/10 text-white/85';
   if (setType === 'acoustic') return 'bg-green-500/20 text-green-400';
-  if (setType === 'encore') return 'bg-primary/20 text-primary';
+  if (setType === 'encore') return 'bg-white/10 text-primary';
   if (setType === 'encore2') return 'bg-accent/20 text-accent';
   if (setType.startsWith('encore')) return 'bg-amber-500/20 text-amber-400';
   return 'bg-blue-500/20 text-blue-300';
@@ -315,11 +315,11 @@ const sourceLinks = buildSourceLinks(setlist.source);
 
   <!-- Breadcrumb -->
   <nav class="mb-8" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/60">
-      <li><a href="/setlists" class="hover:text-primary transition-colors">Setlists</a></li>
+    <ol class="flex items-center gap-2 text-sm text-white/85">
+      <li><a href="/setlists" class="hover:text-white transition-colors">Setlists</a></li>
       <li aria-hidden="true">/</li>
       {setlist.year > 0 && (
-        <li><span class="text-white/40">{setlist.year}</span></li>
+        <li><span class="text-white/80">{setlist.year}</span></li>
         <li aria-hidden="true">/</li>
       )}
       <li class="text-white truncate max-w-[200px]">{setlist.venue}</li>
@@ -329,7 +329,7 @@ const sourceLinks = buildSourceLinks(setlist.source);
   <!-- Event Header -->
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -337,22 +337,22 @@ const sourceLinks = buildSourceLinks(setlist.source);
         {setlist.tourName && (
           <div class="inline-flex items-center gap-2 mb-4">
             {setlist.tourSlug ? (
-              <a href={`/tours/${setlist.tourSlug}`} class="badge bg-primary/20 text-primary border-primary/40 hover:bg-primary/30 transition-colors">
+              <a href={`/tours/${setlist.tourSlug}`} class="badge bg-white/10 text-primary border-primary/40 hover:bg-primary/30 transition-colors">
                 {setlist.tourName}
               </a>
             ) : (
-              <span class="badge bg-primary/20 text-primary border-primary/40">{setlist.tourName}</span>
+              <span class="badge bg-white/10 text-primary border-primary/40">{setlist.tourName}</span>
             )}
           </div>
         )}
 
         <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
           {setlist.venueSlug ? (
-            <a href={`/venues/${setlist.venueSlug}`} class="hover:text-primary transition-colors">{setlist.venue}</a>
+            <a href={`/venues/${setlist.venueSlug}`} class="hover:text-white transition-colors">{setlist.venue}</a>
           ) : setlist.venue}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-4 text-white/70 mb-6">
+        <div class="flex flex-wrap items-center gap-4 text-white/90 mb-6">
           <div class="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
@@ -375,36 +375,36 @@ const sourceLinks = buildSourceLinks(setlist.source);
         <!-- Stats -->
         <div class="flex flex-wrap gap-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{setlist.songs.length || setlist.songCount}</span>
-            <span class="text-white/60 text-base font-medium">Songs</span>
+            <span class="text-3xl font-display text-white text-glow">{setlist.songs.length || setlist.songCount}</span>
+            <span class="text-white/85 text-base font-medium">Songs</span>
           </div>
           {mainSet.length > 0 && (
             <div class="flex items-center gap-3">
-              <span class="text-3xl font-display text-primary text-glow">{mainSet.length}</span>
-              <span class="text-white/60 text-base font-medium">Main Set</span>
+              <span class="text-3xl font-display text-white text-glow">{mainSet.length}</span>
+              <span class="text-white/85 text-base font-medium">Main Set</span>
             </div>
           )}
           {encoreSongCount > 0 && (
             <div class="flex items-center gap-3">
-              <span class="text-3xl font-display text-primary text-glow">{encoreSongCount}</span>
-              <span class="text-white/60 text-base font-medium">Encore</span>
+              <span class="text-3xl font-display text-white text-glow">{encoreSongCount}</span>
+              <span class="text-white/85 text-base font-medium">Encore</span>
             </div>
           )}
         </div>
 
         {(setlist.notes || sourceLinks.length > 0) && (
           <div class="mt-6 pt-6 border-t border-white/[0.08]">
-            {setlist.notes && <p class="text-white/70">{setlist.notes}</p>}
+            {setlist.notes && <p class="text-white/90">{setlist.notes}</p>}
             {sourceLinks.length > 0 && (
               <div class={setlist.notes ? 'mt-4' : ''}>
-                <p class="text-white/50 text-sm uppercase tracking-wider mb-2">Source</p>
+                <p class="text-white/80 text-sm uppercase tracking-wider mb-2">Source</p>
                 <div class="space-y-1.5">
                   {sourceLinks.map((link) => (
                     <a
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors break-all text-sm"
+                      class="inline-flex items-center gap-2 text-primary hover:text-white/80 transition-colors break-all text-sm"
                     >
                       <span>{link.label}</span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -429,7 +429,7 @@ const sourceLinks = buildSourceLinks(setlist.source);
 
       {setGroups.map((group, index) => (
         <div class={index < setGroups.length - 1 ? 'mb-8' : ''}>
-          <h3 class="text-white/60 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 class="text-white/85 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
             <span>{group.label}</span>
             <span class={`px-2 py-0.5 text-xs rounded ${group.badgeClass}`}>{group.songs.length} songs</span>
           </h3>
@@ -450,7 +450,7 @@ const sourceLinks = buildSourceLinks(setlist.source);
       ))}
 
       {setlist.songs.length === 0 && (
-        <p class="text-white/60 text-center py-8">
+        <p class="text-white/85 text-center py-8">
           Setlist details not available for this show.
         </p>
       )}
@@ -463,31 +463,31 @@ const sourceLinks = buildSourceLinks(setlist.source);
       {prevSetlist && (
         <a
           href={`/setlists/${prevSetlist.slug}`}
-          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-primary/40 transition-colors group"
+          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-white/20/40 transition-colors group"
         >
-          <span class="text-white/50 text-sm">Previous Show</span>
+          <span class="text-white/80 text-sm">Previous Show</span>
           <div class="flex items-center gap-2 mt-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m15 18-6-6 6-6"></path>
             </svg>
-            <span class="text-white group-hover:text-primary transition-colors truncate">{prevSetlist.venue}</span>
+            <span class="text-white group-hover:text-white transition-colors truncate">{prevSetlist.venue}</span>
           </div>
-          <span class="text-white/40 text-xs">{prevSetlist.formattedDate}</span>
+          <span class="text-white/80 text-xs">{prevSetlist.formattedDate}</span>
         </a>
       )}
       {nextSetlist && (
         <a
           href={`/setlists/${nextSetlist.slug}`}
-          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-primary/40 transition-colors group text-right"
+          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-white/20/40 transition-colors group text-right"
         >
-          <span class="text-white/50 text-sm">Next Show</span>
+          <span class="text-white/80 text-sm">Next Show</span>
           <div class="flex items-center justify-end gap-2 mt-1">
-            <span class="text-white group-hover:text-primary transition-colors truncate">{nextSetlist.venue}</span>
+            <span class="text-white group-hover:text-white transition-colors truncate">{nextSetlist.venue}</span>
             <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m9 18 6-6-6-6"></path>
             </svg>
           </div>
-          <span class="text-white/40 text-xs">{nextSetlist.formattedDate}</span>
+          <span class="text-white/80 text-xs">{nextSetlist.formattedDate}</span>
         </a>
       )}
     </div>
@@ -503,16 +503,16 @@ const sourceLinks = buildSourceLinks(setlist.source);
         {relatedShows.map((show: any) => (
           <a
             href={`/setlists/${show.slug}`}
-            class="glass-card rounded-xl p-4 border border-white/20 hover:border-primary/40 transition-colors group"
+            class="glass-card rounded-xl p-4 border border-white/20 hover:border-white/20/40 transition-colors group"
           >
-            <h3 class="text-white group-hover:text-primary transition-colors truncate">{show.venue}</h3>
-            <p class="text-white/60 text-sm">
+            <h3 class="text-white group-hover:text-white transition-colors truncate">{show.venue}</h3>
+            <p class="text-white/85 text-sm">
               {show.countryCode && countryCodeToFlag[show.countryCode] && <span class="mr-1">{countryCodeToFlag[show.countryCode]}</span>}
               {show.city}, {show.country}
             </p>
-            <p class="text-white/40 text-xs mt-1">{show.formattedDate}</p>
+            <p class="text-white/80 text-xs mt-1">{show.formattedDate}</p>
             <div class="flex items-center justify-between mt-2">
-              <span class="text-white/30 text-xs">{show.songCount} songs</span>
+              <span class="text-white/75 text-xs">{show.songCount} songs</span>
             </div>
           </a>
         ))}
@@ -524,7 +524,7 @@ const sourceLinks = buildSourceLinks(setlist.source);
   <div class="text-center">
     <a
       href="/setlists"
-      class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+      class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="m15 18-6-6 6-6"></path>

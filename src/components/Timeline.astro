@@ -25,7 +25,7 @@ const sortedDecades = Object.keys(eventsByDecade).sort((a, b) => parseInt(b) - p
 const eventTypeStyles: Record<string, { icon: string; color: string }> = {
   release: {
     icon: `<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>`,
-    color: 'bg-primary/20 text-primary border-primary/40'
+    color: 'bg-white/10 text-primary border-primary/40'
   },
   tour: {
     icon: `<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
@@ -45,7 +45,7 @@ const eventTypeStyles: Record<string, { icon: string; color: string }> = {
   },
   other: {
     icon: `<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`,
-    color: 'bg-white/10 text-white/70 border-white/20'
+    color: 'bg-white/10 text-white/90 border-white/20'
   }
 };
 ---
@@ -89,7 +89,7 @@ const eventTypeStyles: Record<string, { icon: string; color: string }> = {
                     <div class="flex-1 min-w-0">
                       {/* Date and type */}
                       <div class="flex flex-wrap items-center gap-2 mb-2">
-                        <time datetime={event.date} class="text-sm text-white/60">
+                        <time datetime={event.date} class="text-sm text-white/85">
                           {event.formattedDate}
                         </time>
                         <span class={`px-2 py-0.5 rounded-full text-xs border ${typeStyle.color}`}>
@@ -104,7 +104,7 @@ const eventTypeStyles: Record<string, { icon: string; color: string }> = {
 
                       {/* Description */}
                       {event.description && (
-                        <p class="text-white/60 text-sm line-clamp-2">
+                        <p class="text-white/85 text-sm line-clamp-2">
                           {event.description}
                         </p>
                       )}
@@ -146,7 +146,7 @@ const eventTypeStyles: Record<string, { icon: string; color: string }> = {
       <svg xmlns="http://www.w3.org/2000/svg" class="size-16 text-white/20 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-      <p class="text-white/60">No timeline events available yet.</p>
+      <p class="text-white/85">No timeline events available yet.</p>
     </div>
   )}
 </div>
@@ -167,12 +167,5 @@ const eventTypeStyles: Record<string, { icon: string; color: string }> = {
     animation: fadeIn 0.5s ease forwards;
     animation-delay: calc(var(--index, 0) * 100ms);
     opacity: 0;
-  }
-
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
   }
 </style>

@@ -30,21 +30,21 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, ini
       </button>
       <button
         type="button"
-        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-primary/30 transition-all duration-300"
+        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-white/15 transition-all duration-300"
         data-filter="song"
       >
         Songs
       </button>
       <button
         type="button"
-        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-primary/30 transition-all duration-300"
+        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-white/15 transition-all duration-300"
         data-filter="album"
       >
         Albums
       </button>
       <button
         type="button"
-        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-primary/30 transition-all duration-300"
+        class="filter-btn px-3 py-1.5 rounded-lg bg-black/40 border border-white/15 text-white/80 text-sm hover:bg-black/50 hover:border-white/15 transition-all duration-300"
         data-filter="lyrics"
       >
         Lyrics
@@ -220,7 +220,7 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, ini
           />
           <button
             type="submit"
-            class="px-5 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+            class="px-5 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
           >
             Search
           </button>
@@ -240,7 +240,7 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, ini
     if (!trimmed) {
       container.innerHTML = `
         ${renderFallbackForm('')}
-        <div class="text-center py-8 text-white/60">
+        <div class="text-center py-8 text-white/85">
           <p class="text-lg mb-2">Type a search term to begin.</p>
           <p class="text-sm">Search checks songs and albums directly from Directus.</p>
         </div>
@@ -249,7 +249,7 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, ini
     }
 
     container.innerHTML = `${renderFallbackForm(trimmed)}
-      <div class="text-center py-6 text-white/60">
+      <div class="text-center py-6 text-white/85">
         Searching for "${escapeHtml(trimmed)}"...
       </div>`;
 
@@ -295,7 +295,7 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, ini
       if (combined.length === 0) {
         container.innerHTML = `
           ${renderFallbackForm(trimmed)}
-          <div class="text-center py-8 text-white/60">
+          <div class="text-center py-8 text-white/85">
             <p class="text-lg mb-2">No results found for "${escapeHtml(trimmed)}".</p>
             <p class="text-sm">Try a broader term.</p>
           </div>
@@ -317,13 +317,13 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, ini
 
       container.innerHTML = `
         ${renderFallbackForm(trimmed)}
-        <div class="text-white/50 text-sm mb-4">${combined.length} fallback results for "${escapeHtml(trimmed)}"</div>
+        <div class="text-white/80 text-sm mb-4">${combined.length} fallback results for "${escapeHtml(trimmed)}"</div>
         <div class="pagefind-ui__results-area">${resultItems}</div>
       `;
     } catch (error) {
       container.innerHTML = `
         ${renderFallbackForm(trimmed)}
-        <div class="text-center py-8 text-white/60">
+        <div class="text-center py-8 text-white/85">
           <p class="text-lg mb-2">Search is temporarily unavailable.</p>
           <p class="text-sm">Please try again in a moment.</p>
         </div>
@@ -358,7 +358,7 @@ const { placeholder = 'Search lyrics, songs, albums...', showFilters = true, ini
     let emptyNode = container.querySelector('.search-filter-empty');
     if (!emptyNode) {
       emptyNode = document.createElement('p');
-      emptyNode.className = 'search-filter-empty text-white/60 text-center py-4 hidden';
+      emptyNode.className = 'search-filter-empty text-white/85 text-center py-4 hidden';
       emptyNode.textContent = 'No results match this filter.';
       const resultsArea = container.querySelector('.pagefind-ui__results-area');
       resultsArea?.appendChild(emptyNode);

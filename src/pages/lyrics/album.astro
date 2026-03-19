@@ -103,7 +103,7 @@ const albumsWithLyrics = albums.filter(album => album.songs?.some(song => song.h
   <!-- Hero Section -->
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -116,16 +116,16 @@ const albumsWithLyrics = albums.filter(album => album.songs?.some(song => song.h
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{albums.length}</span>
-            <span class="text-white/60 text-base font-medium">Albums</span>
+            <span class="text-3xl font-display text-white text-glow">{albums.length}</span>
+            <span class="text-white/85 text-base font-medium">Albums</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{totalSongs}</span>
-            <span class="text-white/60 text-base font-medium">Total Songs</span>
+            <span class="text-3xl font-display text-white text-glow">{totalSongs}</span>
+            <span class="text-white/85 text-base font-medium">Total Songs</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{albumsWithLyrics}</span>
-            <span class="text-white/60 text-base font-medium">With Lyrics</span>
+            <span class="text-3xl font-display text-white text-glow">{albumsWithLyrics}</span>
+            <span class="text-white/85 text-base font-medium">With Lyrics</span>
           </div>
         </div>
       </div>
@@ -174,7 +174,7 @@ const albumsWithLyrics = albums.filter(album => album.songs?.some(song => song.h
                   <span class="inline-block px-3 py-1 mb-3 text-sm font-medium rounded-full bg-primary/30 text-white border border-primary/40">{album.year}</span>
                   <a
                     href={`/discography/${album.slug}`}
-                    class="block font-display text-4xl md:text-5xl text-white hover:text-primary transition-colors duration-300 mb-3 text-shadow-lg"
+                    class="block font-display text-4xl md:text-5xl text-white hover:text-white transition-colors duration-300 mb-3 text-shadow-lg"
                   >
                     {album.title}
                   </a>
@@ -182,7 +182,7 @@ const albumsWithLyrics = albums.filter(album => album.songs?.some(song => song.h
 
                   <a
                     href={`/discography/${album.slug}`}
-                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-primary/20 hover:border-primary/40 transition-all duration-300"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/10 hover:border-white/20/40 transition-all duration-300"
                   >
                     <span>View Album Details</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -216,9 +216,9 @@ const albumsWithLyrics = albums.filter(album => album.songs?.some(song => song.h
 
                   <!-- Song info -->
                   <div class="flex-1 min-w-0">
-                    <h4 class="text-white font-semibold text-base truncate group-hover:text-primary transition-colors duration-300">{song.title}</h4>
+                    <h4 class="text-white font-semibold text-base truncate group-hover:text-white transition-colors duration-300">{song.title}</h4>
                     <div class="flex items-center gap-2 mt-0.5">
-                      <span class="text-white/60 text-sm">{song.duration}</span>
+                      <span class="text-white/85 text-sm">{song.duration}</span>
                       {song.hasLyrics && (
                         <span class="px-2 py-0.5 text-xs rounded-full bg-primary/30 text-primary border border-primary/40">Lyrics</span>
                       )}
@@ -226,7 +226,7 @@ const albumsWithLyrics = albums.filter(album => album.songs?.some(song => song.h
                   </div>
 
                   <!-- Arrow -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white/40 group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white/80 group-hover:text-white group-hover:translate-x-1 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M5 12h14"></path>
                     <path d="m12 5 7 7-7 7"></path>
                   </svg>

@@ -22,8 +22,8 @@ const {
 const normalizedSetType = (setType || 'main').toLowerCase().trim();
 
 const badgeClasses: Record<string, string> = {
-  main: 'bg-white/10 text-white/70',
-  encore: 'bg-primary/20 text-primary',
+  main: 'bg-white/10 text-white/90',
+  encore: 'bg-white/10 text-primary',
   encore2: 'bg-accent/20 text-accent',
   acoustic: 'bg-green-500/20 text-green-400'
 };
@@ -56,7 +56,7 @@ const setLabel = getSetLabel(normalizedSetType);
 
 <li class="setlist-song-item group flex items-center gap-4 py-3 px-4 rounded-lg hover:bg-white/5 transition-colors duration-200">
   <!-- Position number -->
-  <span class="w-8 text-center text-white/40 text-sm font-mono tabular-nums" aria-hidden="true">
+  <span class="w-8 text-center text-white/80 text-sm font-mono tabular-nums" aria-hidden="true">
     {position.toString().padStart(2, '0')}
   </span>
 
@@ -66,7 +66,7 @@ const setLabel = getSetLabel(normalizedSetType);
       {songSlug ? (
         <a
           href={`/lyrics/${songSlug}`}
-          class="text-white hover:text-primary transition-colors duration-200 truncate"
+          class="text-white hover:text-white transition-colors duration-200 truncate"
         >
           {title}
         </a>
@@ -82,13 +82,13 @@ const setLabel = getSetLabel(normalizedSetType);
     </div>
 
     {notes && (
-      <p class="text-white/50 text-sm mt-1 line-clamp-1">{notes}</p>
+      <p class="text-white/80 text-sm mt-1 line-clamp-1">{notes}</p>
     )}
   </div>
 
   <!-- Duration if available -->
   {duration && (
-    <span class="text-white/40 text-sm font-mono tabular-nums hidden sm:block">
+    <span class="text-white/80 text-sm font-mono tabular-nums hidden sm:block">
       {duration}
     </span>
   )}
@@ -104,7 +104,7 @@ const setLabel = getSetLabel(normalizedSetType);
   {songSlug && (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="size-4 text-white/30 group-hover:text-primary transition-colors duration-200"
+      class="size-4 text-white/75 group-hover:text-white transition-colors duration-200"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

@@ -117,11 +117,22 @@
   --color-accent: #6633cc;            /* purple haze */
 }
 
-/* Fallback (Disintegration vibes) */
+/* Songs of a Lost World (2024) */
+[data-theme="songs-of-a-lost-world"] {
+  --color-primary: #2563EB;           /* Cureation logo blue */
+  --color-primary-rgb: 37, 99, 235;   /* RGB equivalent */
+  --color-primary-content: #DBEAFE;   /* cool blue-white */
+  --color-secondary: #1E293B;         /* slate charcoal */
+  --color-accent: #3B82F6;            /* stage blue — the cool blue accent from live shows */
+  --color-accent-rgb: 59, 130, 246;   /* RGB for accent */
+}
+
+/* Fallback (Songs of a Lost World) */
 :root:not([data-theme]) {
-  --color-primary: #2c2c5a;
-  --color-primary-rgb: 44, 44, 90;    /* RGB equivalent */
-  --color-primary-content: #d1f1f9;
-  --color-secondary: #4a3c61;
-  --color-accent: #5f7f9f;
+  --color-primary: #2563EB;
+  --color-primary-rgb: 37, 99, 235;
+  --color-primary-content: #DBEAFE;
+  --color-secondary: #1E293B;
+  --color-accent: #3B82F6;
+  --color-accent-rgb: 59, 130, 246;
 }

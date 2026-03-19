@@ -1,5 +1,6 @@
 ---
 // Sidebar for song/lyrics pages - shows album tracklist with current highlighted
+import { generateSlug } from '../../lib/directus';
 
 interface Track {
   number: number;
@@ -24,15 +25,14 @@ interface Props {
 
 const { currentSong, album, albumTracks } = Astro.props;
 
-// Generate slug for comparison
-const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+const currentSlug = generateSlug(currentSong.title);
 ---
 
 <aside class="sticky top-24 w-full space-y-6">
   <!-- Album Card -->
   <a
     href={`/discography/${album.slug}`}
-    class="block glass-surface rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-300 group"
+    class="block glass-surface rounded-xl overflow-hidden hover:border-white/15 transition-all duration-300 group"
   >
     <div class="relative aspect-square">
       <img
@@ -42,8 +42,8 @@ const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').rep
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
       <div class="absolute bottom-0 left-0 right-0 p-4">
-        <p class="text-white font-medium group-hover:text-primary transition-colors">{album.title}</p>
-        <p class="text-white/60 text-sm">{album.year}</p>
+        <p class="text-white font-medium group-hover:text-white transition-colors">{album.title}</p>
+        <p class="text-white/85 text-sm">{album.year}</p>
       </div>
     </div>
   </a>
@@ -56,7 +56,7 @@ const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').rep
     <nav class="p-2 max-h-96 overflow-y-auto">
       <ul class="space-y-1">
         {albumTracks.map((track) => {
-          const trackSlug = track.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
+          const trackSlug = generateSlug(track.title);
           const isCurrent = trackSlug === currentSlug;
           return (
             <li>
@@ -64,16 +64,16 @@ const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').rep
                 href={`/lyrics/${trackSlug}`}
                 class={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-300 ${
                   isCurrent
-                    ? 'bg-primary/20 text-primary'
-                    : 'text-white hover:bg-white/10 hover:text-primary'
+                    ? 'bg-white/10 text-primary'
+                    : 'text-white hover:bg-white/10 hover:text-white'
                 }`}
                 aria-current={isCurrent ? 'page' : undefined}
               >
-                <span class={`w-5 text-right ${isCurrent ? 'text-primary' : 'text-white/50'}`}>
+                <span class={`w-5 text-right ${isCurrent ? 'text-primary' : 'text-white/80'}`}>
                   {track.number}
                 </span>
                 <span class="flex-1 truncate">{track.title}</span>
-                <span class={`text-xs ${isCurrent ? 'text-primary/70' : 'text-white/50'}`}>
+                <span class={`text-xs ${isCurrent ? 'text-primary/70' : 'text-white/80'}`}>
                   {track.duration}
                 </span>
               </a>
@@ -89,7 +89,7 @@ const currentSlug = currentSong.title.toLowerCase().replace(/[^\w\s]/gi, '').rep
     <div class="flex gap-2">
       <a
         href={`/discography/${album.slug}#tracks`}
-        class="flex-1 text-center px-3 py-2 rounded-lg glass-elevated hover:bg-primary/20 text-white text-sm transition-colors duration-300"
+        class="flex-1 text-center px-3 py-2 rounded-lg glass-elevated hover:bg-white/10 text-white text-sm transition-colors duration-300"
       >
         View Album
       </a>

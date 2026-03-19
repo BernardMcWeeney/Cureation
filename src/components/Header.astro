@@ -7,221 +7,530 @@ const navItems = getNavigation();
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="fixed w-full z-50 backdrop-blur-xl bg-black/60 border-b border-white/[0.06]">
-  <!-- Gothic ornamental top line -->
-  <div class="absolute top-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 5%, rgba(var(--color-primary-rgb), 0.3) 30%, rgba(var(--color-primary-rgb), 0.5) 50%, rgba(var(--color-primary-rgb), 0.3) 70%, transparent 95%);"></div>
+<header class="header" id="site-header">
+  <div class="header-inner responsive-container">
+    <!-- Logo -->
+    <a href="/" class="header-logo">
+      <img src="/logo.png" alt="" class="header-logo-img" />
+      <span class="header-logo-text">{siteConfig.logo.text}</span>
+    </a>
 
-  <div class="responsive-container">
-    <div class="flex items-center justify-between h-16 md:h-20">
-      <!-- Logo -->
-      <a href="/" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 bg-black/40 backdrop-blur-md rounded-sm border border-white/15 flex items-center justify-center">
-          <img src="/logo.png" alt="Logo" class="w-6 h-6 rounded-sm object-contain" />
-        </div>
-        <span class="font-display text-5xl text-white group-hover:text-primary/90 transition-colors duration-300">
-          {siteConfig.logo.text}
-        </span>
-      </a>
-
-      <!-- Desktop Nav with gothic separators -->
-      <nav class="hidden md:flex" aria-label="Main navigation">
-        <ul class="flex items-center gap-1">
-          {navItems.map((item, index) => (
-            <li class="flex items-center">
-              <a
-                href={item.path}
-                class={`px-4 py-2 relative text-sm tracking-widest uppercase transition-all duration-300
-                  ${currentPath === item.path
-                    ? 'text-primary font-medium'
-                    : 'text-white/80 hover:text-primary'}
-                `}
-              >
-                {item.name}
-                {currentPath === item.path && (
-                  <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-[1px] bg-primary"></span>
-                )}
-              </a>
-              {index < navItems.length - 1 && (
-                <span class="text-white/10 text-xs mx-1" aria-hidden="true">&#9670;</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <!-- Controls -->
-      <div class="flex items-center gap-3">
-        <!-- Search -->
-        <button
-          id="search-button"
-          class="text-primary/80 w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/40 rounded-sm border border-white/10 hover:border-primary/30 hover:bg-black/50 hover:text-primary transition-all duration-300"
-          aria-label="Open search"
+    <!-- Desktop Nav -->
+    <nav class="header-nav" aria-label="Main navigation">
+      {navItems.map(item => (
+        <a
+          href={item.path}
+          class:list={['header-nav-link', { active: currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path)) }]}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <span class="sr-only">Search</span>
-        </button>
+          {item.name}
+        </a>
+      ))}
+    </nav>
 
-        <!-- Mobile Toggle -->
-        <button
-          id="mobile-menu-toggle"
-          class="text-primary/80 md:hidden w-10 h-10 flex items-center justify-center backdrop-blur-md bg-black/40 rounded-sm border border-white/10 hover:border-primary/30 hover:bg-black/50 hover:text-primary transition-all duration-300"
-          aria-label="Open main menu"
-          aria-expanded="false"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Gothic ornamental bottom line -->
-  <div class="absolute bottom-0 left-0 right-0 h-[1px]" style="background: linear-gradient(90deg, transparent 10%, rgba(var(--color-primary-rgb), 0.15) 30%, rgba(var(--color-primary-rgb), 0.2) 50%, rgba(var(--color-primary-rgb), 0.15) 70%, transparent 90%);"></div>
-</header>
-
-<!-- Search Overlay -->
-<div
-  id="search-overlay"
-  class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-40 flex items-center justify-center p-4"
-  role="dialog" aria-modal="true"
->
-  <div class="relative w-full max-w-md">
-    <div class="gothic-corners p-6 glass-panel">
-      <button
-        id="close-search"
-        class="absolute top-3 right-3 text-white/60 hover:text-white transition-colors"
-        aria-label="Close search"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-            d="M6 18L18 6M6 6l12 12" />
+    <!-- Controls -->
+    <div class="header-controls">
+      <button id="search-button" class="header-btn" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </button>
 
-      <p class="font-heading text-sm text-primary/60 uppercase tracking-[0.2em] mb-4">Search the Archive</p>
-
-      <form id="search-form" action="/lyrics/search" method="get">
-        <input
-          id="search-input"
-          name="q"
-          type="search"
-          placeholder="Search lyrics, albums, setlists..."
-          class="w-full p-3 rounded-sm bg-black/50 backdrop-blur-lg text-white placeholder-white/40 border border-white/15 focus:ring-1 focus:ring-primary/50 focus:border-primary/30 transition-all"
-        />
-        <button type="submit" class="sr-only">Search</button>
-      </form>
+      <button id="mobile-menu-toggle" class="header-btn header-btn--mobile" aria-label="Menu" aria-expanded="false">
+        <svg class="icon-menu" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
+  </div>
+
+</header>
+
+<!-- Search Overlay -->
+<div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="search-overlay-backdrop"></div>
+  <div class="search-dialog">
+    <p class="search-label">Search the Archive</p>
+    <form id="search-form" action="/lyrics/search" method="get" class="search-form">
+      <input
+        id="search-input"
+        name="q"
+        type="search"
+        placeholder="Lyrics, albums, setlists..."
+        class="search-input"
+        autocomplete="off"
+      />
+      <button type="submit" class="search-submit" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+    </form>
+    <button id="close-search" class="search-close" aria-label="Close search">Esc</button>
   </div>
 </div>
 
 <!-- Mobile Nav -->
-<nav
-  id="mobile-menu"
-  class="hidden fixed inset-0 bg-black/95 backdrop-blur-lg z-30 md:hidden"
-  aria-label="Mobile navigation"
->
-  <div class="flex flex-col h-full justify-center px-8">
-    <!-- Gothic ornamental top -->
-    <div class="gothic-divider mb-8">
-      <span class="gothic-diamond"></span>
-    </div>
-
-    <ul class="flex flex-col gap-2">
+<nav id="mobile-menu" class="mobile-nav" aria-label="Mobile navigation" aria-hidden="true">
+  <div class="mobile-nav-inner">
+    <div class="mobile-nav-links">
       {navItems.map(item => (
-        <li>
-          <a
-            href={item.path}
-            class={`block px-6 py-3 text-center text-lg tracking-[0.15em] uppercase transition-all duration-300 border-b border-white/5
-              ${currentPath === item.path
-                ? 'text-primary font-medium'
-                : 'text-white/70 hover:text-primary'}
-            `}
-          >
-            {item.name}
-          </a>
-        </li>
+        <a
+          href={item.path}
+          class:list={['mobile-nav-link', { active: currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path)) }]}
+        >
+          {item.name}
+        </a>
       ))}
-    </ul>
-
-    <!-- Gothic ornamental bottom -->
-    <div class="gothic-divider mt-8">
-      <span class="gothic-diamond"></span>
+    </div>
+    <div class="mobile-nav-footer">
+      <span class="font-display text-3xl text-white/20">{siteConfig.logo.text}</span>
     </div>
   </div>
 </nav>
 
+<style>
+  /* ─── Header ─── */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .header.scrolled {
+    background: rgba(0, 0, 0, 0.97);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 4rem;
+  }
+
+  /* ─── Logo ─── */
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .header-logo-img {
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+    border-radius: 2px;
+    opacity: 0.9;
+  }
+
+  .header-logo-text {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    line-height: 1;
+    color: white;
+    transition: color 0.3s ease;
+  }
+
+  .header-logo:hover .header-logo-text {
+    color: rgba(var(--color-primary-rgb), 0.9);
+  }
+
+  /* ─── Desktop Nav ─── */
+  .header-nav {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .header-nav {
+      display: flex;
+    }
+
+    .header-inner {
+      height: 4.5rem;
+    }
+  }
+
+  .header-nav-link {
+    position: relative;
+    padding: 0.5rem 0.875rem;
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .header-nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 1px;
+    background: rgba(var(--color-primary-rgb), 0.8);
+    transition: width 0.3s ease, left 0.3s ease;
+  }
+
+  .header-nav-link:hover {
+    color: white;
+  }
+
+  .header-nav-link:hover::after {
+    width: 60%;
+    left: 20%;
+  }
+
+  .header-nav-link.active {
+    color: rgba(var(--color-primary-rgb), 1);
+  }
+
+  .header-nav-link.active::after {
+    width: 40%;
+    left: 30%;
+    background: rgba(var(--color-primary-rgb), 0.6);
+  }
+
+  /* ─── Controls ─── */
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .header-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    color: rgba(255, 255, 255, 0.8);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .header-btn:hover {
+    color: rgba(var(--color-primary-rgb), 1);
+    border-color: rgba(var(--color-primary-rgb), 0.3);
+    background: rgba(var(--color-primary-rgb), 0.05);
+  }
+
+  .header-btn--mobile {
+    display: flex;
+  }
+
+  @media (min-width: 768px) {
+    .header-btn--mobile {
+      display: none;
+    }
+  }
+
+  .header-btn--mobile .icon-close {
+    display: none;
+  }
+
+  .header-btn--mobile[aria-expanded="true"] .icon-menu {
+    display: none;
+  }
+
+  .header-btn--mobile[aria-expanded="true"] .icon-close {
+    display: block;
+  }
+
+  /* ─── Search Overlay ─── */
+  .search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 20vh;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .search-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .search-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.94);
+    backdrop-filter: blur(12px);
+  }
+
+  .search-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 28rem;
+    padding: 0 1.5rem;
+    transform: translateY(-10px);
+    transition: transform 0.3s ease;
+  }
+
+  .search-overlay.open .search-dialog {
+    transform: translateY(0);
+  }
+
+  .search-label {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(var(--color-primary-rgb), 0.9);
+    margin-bottom: 0.75rem;
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+
+  .search-form:focus-within {
+    border-color: rgba(var(--color-primary-rgb), 0.4);
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+  }
+
+  .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .search-submit {
+    padding: 0.875rem 1rem;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .search-submit:hover {
+    color: rgba(var(--color-primary-rgb), 1);
+  }
+
+  .search-close {
+    position: absolute;
+    top: -2rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .search-close:hover {
+    color: white;
+  }
+
+  /* ─── Mobile Nav ─── */
+  .mobile-nav {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+
+  .mobile-nav.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-nav-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 5rem 2rem 2rem;
+  }
+
+  .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .mobile-nav-link {
+    display: block;
+    padding: 0.75rem 2rem;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+
+  .mobile-nav-link:hover {
+    color: white;
+    transform: translateX(4px);
+  }
+
+  .mobile-nav-link.active {
+    color: rgba(var(--color-primary-rgb), 1);
+  }
+
+  .mobile-nav-footer {
+    margin-top: auto;
+    padding-bottom: 1rem;
+  }
+
+  /* ─── Animations for mobile links ─── */
+  .mobile-nav.open .mobile-nav-link {
+    animation: fadeSlideIn 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  .mobile-nav-link:nth-child(1) { animation-delay: 0.05s; }
+  .mobile-nav-link:nth-child(2) { animation-delay: 0.08s; }
+  .mobile-nav-link:nth-child(3) { animation-delay: 0.11s; }
+  .mobile-nav-link:nth-child(4) { animation-delay: 0.14s; }
+  .mobile-nav-link:nth-child(5) { animation-delay: 0.17s; }
+  .mobile-nav-link:nth-child(6) { animation-delay: 0.20s; }
+  .mobile-nav-link:nth-child(7) { animation-delay: 0.23s; }
+  .mobile-nav-link:nth-child(8) { animation-delay: 0.26s; }
+
+  @keyframes fadeSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
 <script>
-  function bindControls() {
+  function initHeader() {
+    const header = document.getElementById('site-header');
     const searchBtn = document.getElementById('search-button');
     const closeSearch = document.getElementById('close-search');
     const overlay = document.getElementById('search-overlay');
     const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
     const searchForm = document.getElementById('search-form');
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
 
-    if (searchBtn && overlay && searchInput) {
-      searchBtn.onclick = () => {
-        overlay.classList.toggle('hidden');
-        if (!overlay.classList.contains('hidden')) {
-          searchInput.focus();
-        }
+    // Scroll effect
+    if (header) {
+      const onScroll = () => {
+        header.classList.toggle('scrolled', window.scrollY > 20);
       };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
     }
 
-    if (closeSearch && overlay) {
-      closeSearch.onclick = () => overlay.classList.add('hidden');
-      overlay.onclick = (e) => {
-        if (e.target === overlay) {
-          overlay.classList.add('hidden');
-        }
-      };
-    }
+    // Search
+    const openSearch = () => {
+      if (!overlay || !searchInput) return;
+      overlay.classList.add('open');
+      overlay.setAttribute('aria-hidden', 'false');
+      searchInput.focus();
+    };
+
+    const closeSearchFn = () => {
+      if (!overlay) return;
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+    };
+
+    searchBtn?.addEventListener('click', openSearch);
+    closeSearch?.addEventListener('click', closeSearchFn);
+
+    overlay?.querySelector('.search-overlay-backdrop')?.addEventListener('click', closeSearchFn);
 
     if (searchForm && searchInput) {
       searchForm.addEventListener('submit', (e) => {
-        const query = searchInput.value.trim();
-        if (!query) {
-          e.preventDefault();
-        }
+        if (!searchInput.value.trim()) e.preventDefault();
       });
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) {
-        overlay.classList.add('hidden');
-      }
+    // Mobile menu
+    const openMobile = () => {
+      if (!mobileMenu || !mobileToggle) return;
+      mobileMenu.classList.add('open');
+      mobileMenu.setAttribute('aria-hidden', 'false');
+      mobileToggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeMobile = () => {
+      if (!mobileMenu || !mobileToggle) return;
+      mobileMenu.classList.remove('open');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+      mobileToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    };
+
+    mobileToggle?.addEventListener('click', () => {
+      const isOpen = mobileToggle.getAttribute('aria-expanded') === 'true';
+      isOpen ? closeMobile() : openMobile();
     });
 
-    const mobileToggle = document.getElementById('mobile-menu-toggle');
-    const mobileMenu   = document.getElementById('mobile-menu');
-
-    if (mobileToggle && mobileMenu) {
-      mobileToggle.onclick = () => {
-        const isOpen = mobileToggle.getAttribute('aria-expanded') === 'true';
-        mobileToggle.setAttribute('aria-expanded', String(!isOpen));
-        mobileMenu.classList.toggle('hidden');
-      };
-
-      mobileMenu.onclick = (e) => {
-        if (e.target === mobileMenu) {
-          mobileMenu.classList.add('hidden');
-          mobileToggle.setAttribute('aria-expanded', 'false');
-        }
-      };
-    }
-
+    // Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && mobileMenu && !mobileMenu.classList.contains('hidden')) {
-        mobileMenu.classList.add('hidden');
-        mobileToggle?.setAttribute('aria-expanded', 'false');
+      if (e.key !== 'Escape') return;
+      if (overlay && overlay.classList.contains('open')) {
+        closeSearchFn();
+      } else if (mobileMenu && mobileMenu.classList.contains('open')) {
+        closeMobile();
       }
     });
   }
 
-  document.addEventListener('DOMContentLoaded', bindControls);
-  document.addEventListener('astro:page-load', bindControls);
+  document.addEventListener('DOMContentLoaded', initHeader);
+  document.addEventListener('astro:page-load', initHeader);
 </script>

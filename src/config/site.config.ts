@@ -170,7 +170,7 @@ export const siteConfig: SiteConfig = {
     blogCount: 2,
   },
 
-  defaultTheme: "disintegration",
+  defaultTheme: "songs-of-a-lost-world",
   enableThemeSwitcher: true,
   availableThemes: [
     { id: "three-imaginary-boys", name: "Three Imaginary Boys", year: 1979 },
@@ -185,7 +185,8 @@ export const siteConfig: SiteConfig = {
     { id: "wild-mood-swings", name: "Wild Mood Swings", year: 1996 },
     { id: "bloodflowers", name: "Bloodflowers", year: 2000 },
     { id: "the-cure", name: "The Cure", year: 2004 },
-    { id: "4:13-dream", name: "4:13 Dream", year: 2008 }
+    { id: "4:13-dream", name: "4:13 Dream", year: 2008 },
+    { id: "songs-of-a-lost-world", name: "Songs of a Lost World", year: 2024 }
   ]
 };
 

@@ -1,5 +1,6 @@
 ---
 // Sidebar for album detail pages - shows tracklist, album stats, related albums
+import { generateSlug } from '../../lib/directus';
 
 interface Track {
   number: number;
@@ -45,15 +46,15 @@ const formattedDuration = `${Math.floor(totalMinutes)} min`;
     </div>
     <div class="p-4 grid grid-cols-2 gap-3 text-sm">
       <div class="glass-stat p-3 rounded-lg">
-        <p class="text-white/60 text-xs">Tracks</p>
+        <p class="text-white/85 text-xs">Tracks</p>
         <p class="text-white font-medium">{tracks.length}</p>
       </div>
       <div class="glass-stat p-3 rounded-lg">
-        <p class="text-white/60 text-xs">Duration</p>
+        <p class="text-white/85 text-xs">Duration</p>
         <p class="text-white font-medium">{formattedDuration}</p>
       </div>
       <div class="glass-stat p-3 rounded-lg col-span-2">
-        <p class="text-white/60 text-xs">Year</p>
+        <p class="text-white/85 text-xs">Year</p>
         <p class="text-white font-medium">{album.year}</p>
       </div>
     </div>
@@ -69,12 +70,12 @@ const formattedDuration = `${Math.floor(totalMinutes)} min`;
         {tracks.map((track) => (
           <li>
             <a
-              href={`/lyrics/${track.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-')}`}
-              class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 hover:text-primary transition-all duration-300"
+              href={`/lyrics/${generateSlug(track.title)}`}
+              class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 hover:text-white transition-all duration-300"
             >
-              <span class="text-white/50 w-5 text-right">{track.number}</span>
+              <span class="text-white/80 w-5 text-right">{track.number}</span>
               <span class="flex-1 truncate">{track.title}</span>
-              <span class="text-white/50 text-xs">{track.duration}</span>
+              <span class="text-white/80 text-xs">{track.duration}</span>
             </a>
           </li>
         ))}
@@ -101,8 +102,8 @@ const formattedDuration = `${Math.floor(totalMinutes)} min`;
               loading="lazy"
             />
             <div class="flex-1 min-w-0">
-              <p class="text-white text-sm truncate group-hover:text-primary transition-colors">{related.title}</p>
-              <p class="text-white/50 text-xs">{related.year}</p>
+              <p class="text-white text-sm truncate group-hover:text-white transition-colors">{related.title}</p>
+              <p class="text-white/80 text-xs">{related.year}</p>
             </div>
           </a>
         ))}

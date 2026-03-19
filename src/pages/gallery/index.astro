@@ -20,7 +20,7 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
   {/* Hero section */}
   <section class="mb-12">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -32,16 +32,16 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{photos.length}</span>
-            <span class="text-white/60 text-base font-medium">Photos</span>
+            <span class="text-3xl font-display text-white text-glow">{photos.length}</span>
+            <span class="text-white/85 text-base font-medium">Photos</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{tours.length}</span>
-            <span class="text-white/60 text-base font-medium">Tours</span>
+            <span class="text-3xl font-display text-white text-glow">{tours.length}</span>
+            <span class="text-white/85 text-base font-medium">Tours</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{albums.length}</span>
-            <span class="text-white/60 text-base font-medium">Album Eras</span>
+            <span class="text-3xl font-display text-white text-glow">{albums.length}</span>
+            <span class="text-white/85 text-base font-medium">Album Eras</span>
           </div>
         </div>
       </div>
@@ -104,11 +104,11 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
               />
 
               {/* Overlay */}
-              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300">
                 <div class="absolute bottom-0 left-0 right-0 p-4">
                   <h3 class="text-white font-medium text-sm line-clamp-1">{photo.title}</h3>
                   {photo.formattedDate && (
-                    <p class="text-white/60 text-xs mt-1">{photo.formattedDate}</p>
+                    <p class="text-white/85 text-xs mt-1">{photo.formattedDate}</p>
                   )}
                 </div>
               </div>
@@ -141,8 +141,8 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
         <svg xmlns="http://www.w3.org/2000/svg" class="size-16 text-white/20 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <p class="text-white/60 mb-4">No photos available yet.</p>
-        <p class="text-white/40 text-sm">Check back soon for gallery content.</p>
+        <p class="text-white/85 mb-4">No photos available yet.</p>
+        <p class="text-white/80 text-sm">Check back soon for gallery content.</p>
       </div>
     )}
   </section>
@@ -155,7 +155,7 @@ const featuredPhotos = photos.filter(p => p.isFeatured);
         {tours.map(tour => (
           <a
             href={`/gallery/tour/${tour.toLowerCase().replace(/\s+/g, '-')}`}
-            class="px-4 py-2 rounded-lg glass-button text-sm text-white/70 hover:text-primary transition-colors"
+            class="px-4 py-2 rounded-lg glass-button text-sm text-white/90 hover:text-white transition-colors"
           >
             {tour}
           </a>

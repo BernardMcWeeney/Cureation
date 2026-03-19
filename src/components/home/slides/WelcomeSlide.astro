@@ -1,14 +1,17 @@
 ---
-const navigationTiles = [
-  { title: 'News', path: '/news', icon: 'newspaper' },
-  { title: 'Discography', path: '/discography', icon: 'music' },
-  { title: 'Setlists', path: '/setlists', icon: 'list-music' },
-  { title: 'Lyrics', path: '/lyrics', icon: 'text' },
-  { title: 'Videos', path: '/videos', icon: 'video' },
-  { title: 'Stats', path: '/stats', icon: 'stats' },
-];
+interface NavTile {
+  title: string;
+  path: string;
+  icon: string;
+}
 
-const getIconElement = (iconName: string) => {
+interface Props {
+  navigationTiles: NavTile[];
+}
+
+const { navigationTiles } = Astro.props;
+
+const getIconSvg = (iconName: string) => {
   switch (iconName) {
     case 'music':
       return '<svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v12M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>';
@@ -28,47 +31,31 @@ const getIconElement = (iconName: string) => {
 };
 ---
 
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-  <!-- Background image -->
-  <img
-    src="/images/hero-background.jpg"
-    alt="The Cure live performance"
-    class="absolute inset-0 w-full h-full object-cover object-center z-0"
-  />
-
-  <!-- Overlays -->
-  <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/80 z-10"></div>
-  <div class="absolute inset-0 z-10" style="background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.5) 100%);"></div>
-
-  <!-- Content -->
-  <div class="relative z-20 w-full flex flex-col items-center justify-between min-h-screen">
-    <!-- Title -->
-    <div class="flex-1 flex items-center justify-center">
-      <div class="text-center px-4">
-        <h1 class="font-display text-8xl md:text-9xl lg:text-10xl text-white text-shadow-lg mb-2">
-          Cureation
-        </h1>
-        <p class="text-white/80 text-sm md:text-base tracking-widest uppercase text-shadow">The Cure Fan Archive</p>
-      </div>
+<div class="flex flex-col items-center justify-between h-full w-full py-16">
+  <div class="flex-1 flex items-center justify-center">
+    <div class="text-center px-4">
+      <h1 class="font-display text-8xl md:text-9xl lg:text-10xl text-white text-shadow-lg mb-2">
+        Cureation
+      </h1>
+      <p class="text-text-muted text-sm md:text-base tracking-widest uppercase text-shadow">The Cure Fan Archive</p>
     </div>
+  </div>
 
-    <!-- Navigation tiles -->
-    <div class="w-full px-4 pb-12 md:pb-16">
-      <div class="max-w-4xl mx-auto">
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
-          {navigationTiles.map(tile => (
-            <a
-              href={tile.path}
-              class="group p-3 flex flex-col items-center gap-2 border border-white/10 backdrop-blur-lg bg-black/40 hover:bg-black/50 hover:border-white/15 transition-all duration-300"
-            >
-              <div class="text-white/80 group-hover:text-white transition-colors duration-300" set:html={getIconElement(tile.icon)} />
-              <span class="text-xs tracking-widest uppercase text-white/90 font-medium group-hover:text-white transition-colors duration-300">
-                {tile.title}
-              </span>
-            </a>
-          ))}
-        </div>
+  <div class="w-full px-4 pb-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+        {navigationTiles.map(tile => (
+          <a
+            href={tile.path}
+            class="group p-3 flex flex-col items-center gap-2 border border-border-default backdrop-blur-lg bg-black/40 hover:bg-black/50 hover:border-border-strong transition-all duration-300"
+          >
+            <div class="text-text-muted group-hover:text-white transition-colors duration-300" set:html={getIconSvg(tile.icon)} />
+            <span class="text-xs tracking-widest uppercase text-text-secondary font-medium group-hover:text-white transition-colors duration-300">
+              {tile.title}
+            </span>
+          </a>
+        ))}
       </div>
     </div>
   </div>
-</section>
+</div>

@@ -20,7 +20,8 @@ interface DirectusBlog {
   related_album?: number;
 }
 
-// Helper functions
+import { generateSlug, estimateReadingTime } from '../../lib/directus';
+
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     weekday: 'long',
@@ -28,19 +29,6 @@ function formatDate(dateString: string): string {
     day: 'numeric',
     year: 'numeric'
   });
-}
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s]/gi, '')
-    .replace(/\s+/g, '-');
-}
-
-function estimateReadingTime(content: string): number {
-  const wordsPerMinute = 200;
-  const wordCount = content?.split(/\s+/).length || 0;
-  return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
 }
 
 // Category colors
@@ -115,7 +103,7 @@ export async function getStaticPaths() {
 
 const { post, relatedPosts } = Astro.props;
 
-const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary/20 text-primary border-primary/40';
+const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-white/10 text-primary border-primary/40';
 ---
 
 <MainLayout
@@ -140,11 +128,11 @@ const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary
   <article class="max-w-4xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="mb-8" aria-label="Breadcrumb">
-      <ol class="flex items-center gap-2 text-sm text-white/60">
-        <li><a href="/blog" class="hover:text-primary transition-colors">Blog</a></li>
+      <ol class="flex items-center gap-2 text-sm text-white/85">
+        <li><a href="/blog" class="hover:text-white transition-colors">Blog</a></li>
         <li aria-hidden="true">/</li>
         <li>
-          <a href={`/blog/category/${post.category.toLowerCase()}`} class="hover:text-primary transition-colors capitalize">
+          <a href={`/blog/category/${post.category.toLowerCase()}`} class="hover:text-white transition-colors capitalize">
             {post.category}
           </a>
         </li>
@@ -170,7 +158,7 @@ const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary
       </h1>
 
       <!-- Meta info -->
-      <div class="flex flex-wrap items-center gap-4 text-white/60 mb-8">
+      <div class="flex flex-wrap items-center gap-4 text-white/85 mb-8">
         {post.authorName && (
           <div class="flex items-center gap-2">
             {post.authorAvatar ? (
@@ -180,7 +168,7 @@ const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary
                 class="w-8 h-8 rounded-full object-cover"
               />
             ) : (
-              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+              <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                 <span class="text-primary text-sm font-medium">
                   {post.authorName.charAt(0).toUpperCase()}
                 </span>
@@ -229,7 +217,7 @@ const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary
     <!-- Tags -->
     {post.tags && post.tags.length > 0 && (
       <div class="mb-12">
-        <h3 class="text-white/60 text-sm uppercase tracking-wider mb-4">Tags</h3>
+        <h3 class="text-white/85 text-sm uppercase tracking-wider mb-4">Tags</h3>
         <div class="flex flex-wrap gap-2">
           {post.tags.map((tag: string) => (
             <span class="px-3 py-1 rounded-md bg-white/15 border border-white/20 text-white/80 text-sm hover:bg-white/20 hover:border-white/30 transition-colors">
@@ -242,7 +230,7 @@ const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary
 
     <!-- Share -->
     <div class="mb-12 flex items-center gap-4">
-      <span class="text-white/60 text-sm">Share:</span>
+      <span class="text-white/85 text-sm">Share:</span>
       <a
         href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://cureation.net/blog/${post.slug}`)}`}
         target="_blank"
@@ -278,10 +266,10 @@ const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary
               )}
               <div class="p-4">
                 <span class="text-xs text-primary uppercase tracking-wider">{related.category}</span>
-                <h3 class="text-white group-hover:text-primary transition-colors line-clamp-2 mt-1">
+                <h3 class="text-white group-hover:text-white transition-colors line-clamp-2 mt-1">
                   {related.title}
                 </h3>
-                <span class="text-white/50 text-xs mt-2 block">{related.formattedDate}</span>
+                <span class="text-white/80 text-xs mt-2 block">{related.formattedDate}</span>
               </div>
             </a>
           ))}
@@ -293,7 +281,7 @@ const categoryClass = categoryColors[post.category.toLowerCase()] || 'bg-primary
     <div class="text-center">
       <a
         href="/blog"
-        class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary/20 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="m15 18-6-6 6-6"></path>

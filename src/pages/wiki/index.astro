@@ -37,7 +37,7 @@ const recentEvents = timelineEvents.slice(0, 5);
   {/* Hero section (full width, in hero slot) */}
   <section class="mb-10" slot="hero">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -49,20 +49,20 @@ const recentEvents = timelineEvents.slice(0, 5);
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{new Date().getFullYear() - 1976}</span>
-            <span class="text-white/60 text-base font-medium">Years Active</span>
+            <span class="text-3xl font-display text-white text-glow">{new Date().getFullYear() - 1976}</span>
+            <span class="text-white/85 text-base font-medium">Years Active</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{members.length}</span>
-            <span class="text-white/60 text-base font-medium">Band Members</span>
+            <span class="text-3xl font-display text-white text-glow">{members.length}</span>
+            <span class="text-white/85 text-base font-medium">Band Members</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{timelineEvents.length}</span>
-            <span class="text-white/60 text-base font-medium">Timeline Events</span>
+            <span class="text-3xl font-display text-white text-glow">{timelineEvents.length}</span>
+            <span class="text-white/85 text-base font-medium">Timeline Events</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{articles.length}</span>
-            <span class="text-white/60 text-base font-medium">Wiki Articles</span>
+            <span class="text-3xl font-display text-white text-glow">{articles.length}</span>
+            <span class="text-white/85 text-base font-medium">Wiki Articles</span>
           </div>
         </div>
       </div>
@@ -122,18 +122,18 @@ const recentEvents = timelineEvents.slice(0, 5);
                 <img
                   src={member.photo}
                   alt={member.name}
-                  class="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-white/10 group-hover:border-primary/40 transition-colors"
+                  class="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-white/10 group-hover:border-white/20/40 transition-colors"
                 />
               ) : (
-                <div class="w-20 h-20 rounded-full bg-primary/20 mx-auto mb-3 flex items-center justify-center border-2 border-white/10">
+                <div class="w-20 h-20 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center border-2 border-white/10">
                   <span class="text-2xl text-primary font-medium">{member.name.charAt(0)}</span>
                 </div>
               )}
-              <h3 class="font-heading text-white group-hover:text-primary transition-colors">
+              <h3 class="font-heading text-white group-hover:text-white transition-colors">
                 {member.name}
               </h3>
-              <p class="text-white/50 text-sm mt-1">{Array.isArray(member.instruments) ? member.instruments.slice(0, 2).join(', ') : (member.instruments || '')}</p>
-              <p class="text-white/40 text-xs mt-1">{member.tenure}</p>
+              <p class="text-white/80 text-sm mt-1">{Array.isArray(member.instruments) ? member.instruments.slice(0, 2).join(', ') : (member.instruments || '')}</p>
+              <p class="text-white/80 text-xs mt-1">{member.tenure}</p>
             </div>
           </a>
         ))}

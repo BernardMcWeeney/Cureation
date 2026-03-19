@@ -67,7 +67,7 @@ const tabs = [
   <!-- Hero Section -->
   <section class="mb-10">
     <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
 
       <div class="relative p-8 md:p-12">
@@ -80,20 +80,20 @@ const tabs = [
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{singlesWithCharts.length}</span>
-            <span class="text-white/60 text-base font-medium">Charting Singles</span>
+            <span class="text-3xl font-display text-white text-glow">{singlesWithCharts.length}</span>
+            <span class="text-white/85 text-base font-medium">Charting Singles</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{ukNumberOnes.length}</span>
-            <span class="text-white/60 text-base font-medium">UK #1 Singles</span>
+            <span class="text-3xl font-display text-white text-glow">{ukNumberOnes.length}</span>
+            <span class="text-white/85 text-base font-medium">UK #1 Singles</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{top10Hits.length}</span>
-            <span class="text-white/60 text-base font-medium">Top 10 Hits</span>
+            <span class="text-3xl font-display text-white text-glow">{top10Hits.length}</span>
+            <span class="text-white/85 text-base font-medium">Top 10 Hits</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-primary text-glow">{sortedCountries.length}</span>
-            <span class="text-white/60 text-base font-medium">Countries Charted</span>
+            <span class="text-3xl font-display text-white text-glow">{sortedCountries.length}</span>
+            <span class="text-white/85 text-base font-medium">Countries Charted</span>
           </div>
         </div>
       </div>
@@ -139,20 +139,20 @@ const tabs = [
                   bestPosition <= 5 ? 'bg-green-500/20 text-green-400' :
                   bestPosition <= 10 ? 'bg-blue-500/20 text-blue-400' :
                   bestPosition <= 20 ? 'bg-purple-500/20 text-purple-400' :
-                  'bg-white/5 text-white/50'
+                  'bg-white/5 text-white/80'
                 }`}>
                   #{bestPosition}
                 </div>
                 <div class="flex-1 min-w-0">
                   <h3 class="text-white font-medium truncate">{single.title}</h3>
-                  <p class="text-white/50 text-xs mt-0.5">{single.releaseDate} · {single.albumTitle}</p>
+                  <p class="text-white/80 text-xs mt-0.5">{single.releaseDate} · {single.albumTitle}</p>
                   <div class="flex flex-wrap gap-1.5 mt-2">
                     {single.chartPositions.map(pos => (
                       <span class={`text-xs px-2 py-0.5 rounded-full ${
                         pos.chart_position <= 5 ? 'bg-green-500/15 text-green-400 border border-green-500/20' :
                         pos.chart_position <= 10 ? 'bg-blue-500/15 text-blue-400 border border-blue-500/20' :
                         pos.chart_position <= 20 ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20' :
-                        'bg-white/5 text-white/50 border border-white/10'
+                        'bg-white/5 text-white/80 border border-white/10'
                       }`}>
                         #{pos.chart_position} {pos.country}
                       </span>
@@ -165,8 +165,8 @@ const tabs = [
         </div>
       ) : (
         <div class="text-center py-12">
-          <p class="text-white/50 text-lg mb-2">Chart data not yet available</p>
-          <p class="text-white/30 text-sm">Chart positions will appear here once added to the database</p>
+          <p class="text-white/80 text-lg mb-2">Chart data not yet available</p>
+          <p class="text-white/75 text-sm">Chart positions will appear here once added to the database</p>
         </div>
       )}
     </div>
@@ -181,18 +181,18 @@ const tabs = [
         <div class="space-y-6">
           {studioAlbums.map((album) => (
             <div class="flex gap-6 items-start relative" data-filter-item data-filter-text={`${album.title} ${album.year} ${album.releaseDate}`}>
-              <div class="w-12 h-12 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0 z-10">
+              <div class="w-12 h-12 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0 z-10">
                 <span class="text-primary font-bold text-sm">{album.year}</span>
               </div>
               <div class="glass-panel p-4 flex-1">
-                <a href={`/discography/${album.slug}`} class="text-white font-medium hover:text-primary transition-colors">
+                <a href={`/discography/${album.slug}`} class="text-white font-medium hover:text-white transition-colors">
                   {album.title}
                 </a>
-                <p class="text-white/50 text-xs mt-1">{album.releaseDate} · {album.recordLabel}</p>
+                <p class="text-white/80 text-xs mt-1">{album.releaseDate} · {album.recordLabel}</p>
                 {album.genreTags.length > 0 && (
                   <div class="flex flex-wrap gap-1 mt-2">
                     {album.genreTags.slice(0, 4).map(tag => (
-                      <span class="text-xs px-2 py-0.5 rounded bg-white/5 text-white/50">{tag}</span>
+                      <span class="text-xs px-2 py-0.5 rounded bg-white/5 text-white/80">{tag}</span>
                     ))}
                   </div>
                 )}
@@ -219,16 +219,16 @@ const tabs = [
               <div class="space-y-1">
                 {entries.sort((a, b) => a.position - b.position).slice(0, 5).map(entry => (
                   <div class="flex items-center justify-between text-sm">
-                    <span class="text-white/60 truncate">{entry.title}</span>
+                    <span class="text-white/85 truncate">{entry.title}</span>
                     <span class={`shrink-0 ml-2 font-mono ${
                       entry.position <= 5 ? 'text-green-400' :
                       entry.position <= 10 ? 'text-blue-400' :
-                      'text-white/40'
+                      'text-white/80'
                     }`}>#{entry.position}</span>
                   </div>
                 ))}
                 {entries.length > 5 && (
-                  <p class="text-white/30 text-xs mt-1">+{entries.length - 5} more</p>
+                  <p class="text-white/75 text-xs mt-1">+{entries.length - 5} more</p>
                 )}
               </div>
             </div>
@@ -237,8 +237,8 @@ const tabs = [
       </div>
     ) : (
       <div class="glass-panel p-12 text-center">
-        <p class="text-white/50 text-lg mb-2">Country chart data not yet available</p>
-        <p class="text-white/30 text-sm">Chart data by country will appear here once added</p>
+        <p class="text-white/80 text-lg mb-2">Country chart data not yet available</p>
+        <p class="text-white/75 text-sm">Chart data by country will appear here once added</p>
       </div>
     )}
   </section>

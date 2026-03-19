@@ -1,0 +1,48 @@
+---
+import type { Album } from '../../../types/directus';
+
+interface Props {
+  album: Album;
+  albumTypeLabel: string;
+}
+
+const { album, albumTypeLabel } = Astro.props;
+const releaseYear = album.year ? parseInt(album.year, 10) : null;
+---
+
+<a href={`/discography/${album.slug}`} class="flex flex-col items-start justify-end h-full w-full p-8 md:p-12 group">
+  <div class="max-w-xl">
+    <div class="flex items-center gap-3 mb-4">
+      <span class="text-text-muted text-xs font-medium uppercase tracking-[0.15em]">Album Spotlight</span>
+      <span class="px-2.5 py-0.5 bg-primary/15 text-primary border border-primary/30 text-xs font-medium">
+        {albumTypeLabel}
+      </span>
+    </div>
+
+    <h2 class="font-heading text-4xl md:text-5xl lg:text-6xl text-white mb-3 text-shadow-lg leading-tight">
+      {album.title}
+    </h2>
+
+    {releaseYear && (
+      <p class="text-text-secondary text-lg mb-2 text-shadow">{releaseYear}</p>
+    )}
+
+    {album.description && (
+      <p class="text-text-secondary text-base mb-6 text-shadow line-clamp-2 max-w-lg">
+        {album.description}
+      </p>
+    )}
+
+    <div class="flex items-center gap-4">
+      {album.trackCount && (
+        <span class="text-text-muted text-sm">{album.trackCount} tracks</span>
+      )}
+      <div class="flex items-center gap-2 text-primary text-sm opacity-80 group-hover:opacity-100 transition-all duration-300">
+        <span>Explore album</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</a>
