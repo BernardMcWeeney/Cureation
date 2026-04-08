@@ -973,9 +973,9 @@ export async function getTours(): Promise<Tour[]> {
       associatedAlbumCover: album?.cover_art ? `${DIRECTUS_URL}/assets/${album.cover_art}` : undefined,
       totalShows: t.total_shows || 0,
       imageUrl: t.image ? `${DIRECTUS_URL}/assets/${t.image}` : undefined,
-      countriesVisited: t.countries_visited || [],
-      supportActs: t.support_acts || [],
-      lineup: t.lineup || [],
+      countriesVisited: parseJsonArray(t.countries_visited),
+      supportActs: parseJsonArray(t.support_acts),
+      lineup: parseJsonArray(t.lineup),
       year: startYear,
     };
   });

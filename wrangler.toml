@@ -1,6 +1,13 @@
 name = "cureation"
 compatibility_date = "2026-03-17"
 compatibility_flags = ["nodejs_compat"]
+main = "./dist/server/entry.mjs"
+no_bundle = true
+
+[assets]
+directory = "./dist/client/"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 [observability]
 enabled = true
