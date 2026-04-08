@@ -7,7 +7,8 @@ import {
   fetchAlbums,
   formatAlbum,
   getAlbumEra,
-  eraMetadata
+  eraMetadata,
+  filterPastSetlists
 } from '../../lib/directus';
 import type { AlbumEra } from '../../types/directus';
 
@@ -20,10 +21,11 @@ const [allStats, setlists, tourStats, rawAlbums] = await Promise.all([
 
 const albums = rawAlbums.map(formatAlbum);
 const playedSongs = allStats.filter(s => s.totalPlays > 0);
+const historicalSetlists = filterPastSetlists(setlists);
 
 // Setlist length trends over time (avg songs per show per year)
 const yearlySetlistLength: Record<number, { totalSongs: number; shows: number }> = {};
-setlists.forEach(s => {
+historicalSetlists.forEach(s => {
   if (s.year > 0) {
     if (!yearlySetlistLength[s.year]) yearlySetlistLength[s.year] = { totalSongs: 0, shows: 0 };
     yearlySetlistLength[s.year].totalSongs += s.songCount || s.songs.length;
@@ -75,7 +77,7 @@ albums.forEach(a => {
   albumEraMap.set(a.title, getAlbumEra(a.releaseDate !== 'Unknown' ? a.releaseDate : undefined));
 });
 
-setlists.forEach(s => {
+historicalSetlists.forEach(s => {
   if (s.year > 0) {
     if (!eraInSetlists[s.year]) eraInSetlists[s.year] = {};
     s.songs.forEach(song => {
@@ -89,7 +91,7 @@ setlists.forEach(s => {
 });
 
 // Longest and shortest setlists
-const sortedByLength = [...setlists].sort((a, b) => {
+const sortedByLength = [...historicalSetlists].sort((a, b) => {
   const lenA = a.songCount || a.songs.length;
   const lenB = b.songCount || b.songs.length;
   return lenB - lenA;

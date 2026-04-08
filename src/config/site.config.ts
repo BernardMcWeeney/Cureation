@@ -39,10 +39,17 @@ export interface SiteConfig {
 
   social: {
     twitter: string | null;
+    bluesky: string | null;
     instagram: string | null;
     facebook: string | null;
+    threads: string | null;
+    youtube: string | null;
     discord: string | null;
     github: string | null;
+  };
+
+  rssFeeds: {
+    official: string | null;
   };
 
   contact: {
@@ -94,11 +101,18 @@ export const siteConfig: SiteConfig = {
   },
 
   social: {
-    twitter: "https://twitter.com/cureationx",
-    instagram: null,
-    facebook: null,
+    twitter: "https://x.com/cureationx",
+    bluesky: "thecure.com",
+    instagram: "https://instagram.com/cureation.net",
+    facebook: "https://facebook.com/cureation",
+    threads: "https://threads.net/@cureation.net",
+    youtube: "https://youtube.com/@cureation",
     discord: null,
     github: null,
+  },
+
+  rssFeeds: {
+    official: "https://www.thecure.com/feed/",
   },
 
   contact: {
@@ -126,35 +140,31 @@ export const siteConfig: SiteConfig = {
   navigation: {
     main: [
       { name: "News", path: "/news" },
+      { name: "Band", path: "/band" },
       { name: "Discography", path: "/discography" },
       { name: "Lyrics", path: "/lyrics" },
+      { name: "Tours", path: "/tours" },
       { name: "Setlists", path: "/setlists" },
-      { name: "Wiki", path: "/wiki" },
+      { name: "Curiosities", path: "/curiosities" },
       { name: "Videos", path: "/videos" },
-      { name: "Stats", path: "/stats" },
-      { name: "Charts", path: "/charts" },
     ],
     footer: {
       explore: [
+        { name: "The Band", path: "/band" },
         { name: "Discography", path: "/discography" },
         { name: "Lyrics", path: "/lyrics" },
+        { name: "Tours", path: "/tours" },
         { name: "Setlists", path: "/setlists" },
-        { name: "News", path: "/news" },
-        { name: "Gallery", path: "/gallery" },
+        { name: "Curiosities", path: "/curiosities" },
         { name: "Videos", path: "/videos" },
-        { name: "Statistics", path: "/stats" },
-        { name: "On This Day", path: "/on-this-day" },
+        { name: "Gallery", path: "/gallery" },
       ],
       community: [
         { name: "Forums", path: "/community" },
         { name: "Wiki & History", path: "/wiki" },
         { name: "About the Project", path: "/about" },
         { name: "Contribute", path: "/about#contribute" },
-        {
-          name: "Twitter",
-          path: "https://twitter.com/cureationx",
-          external: true,
-        },
+        { name: "On This Day", path: "/on-this-day" },
       ],
       legal: [
         { name: "Disclaimer", path: "/about/disclaimer" },

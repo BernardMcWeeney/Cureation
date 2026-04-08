@@ -108,6 +108,7 @@ export async function getStaticPaths() {
 }
 
 const { tour, setlists } = Astro.props as { tour: TourData; setlists: TourSetlist[] };
+const todayIso = new Date().toISOString().split('T')[0];
 
 function formatTourDate(dateStr?: string): string {
   if (!dateStr) return 'Unknown';
@@ -267,7 +268,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-white/80 text-sm hidden sm:inline">{show.songCount} songs</span>
+              <span class="text-white/80 text-sm hidden sm:inline">{show.date > todayIso && show.songCount === 0 ? 'Setlist pending' : `${show.songCount} songs`}</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary opacity-80 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m9 18 6-6-6-6"></path>
               </svg>

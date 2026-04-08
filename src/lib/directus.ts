@@ -34,6 +34,9 @@ import type {
   WikiArticle,
   WikiMember,
   TimelineEvent,
+  // Member stint types
+  DirectusMemberStint,
+  MemberStint,
   // Photo types
   DirectusPhoto,
   Photo,
@@ -54,6 +57,9 @@ import type {
   DirectusNews,
   NewsPost,
   NewsCategory,
+  // Tour types
+  DirectusTour,
+  Tour,
   // New collection types
   DirectusSource,
   Source,
@@ -100,6 +106,20 @@ async function fetchFromDirectus<T>(endpoint: string): Promise<T[]> {
 export function getAssetUrl(assetId: string | undefined): string {
   if (!assetId) return '/images/placeholder-album.jpg';
   return `${DIRECTUS_URL}/assets/${assetId}`;
+}
+
+// Parse a value that may be a JSON string array, an actual array, or a plain string
+function parseJsonArray(value: unknown): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('[')) {
+      try { return JSON.parse(trimmed); } catch { return [trimmed]; }
+    }
+    return trimmed ? [trimmed] : [];
+  }
+  return [];
 }
 
 // Slug generator
@@ -446,6 +466,35 @@ export async function fetchSetlists(): Promise<DirectusSetlist[]> {
   return fetchFromDirectus<DirectusSetlist>('/setlists?sort=-date&limit=-1');
 }
 
+// Fetch the next upcoming concert (setlist with a future date)
+export interface NextConcert {
+  venue: string;
+  city: string;
+  country: string;
+  date: string;
+  tourName?: string;
+}
+
+export async function getNextConcert(): Promise<NextConcert | null> {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const results = await fetchFromDirectus<DirectusSetlist>(
+      `/setlists?filter[date][_gte]=${today}&sort=date&limit=1`
+    );
+    if (results.length === 0) return null;
+    const s = results[0];
+    return {
+      venue: s.venue || 'TBA',
+      city: s.city || '',
+      country: s.country || '',
+      date: s.date,
+      tourName: s.tour_name || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function fetchAllSetlistSongs(): Promise<Map<string, SetlistSong[]>> {
   const rows = await fetchFromDirectus<any>(
     '/setlist_songs?fields=setlist,song,song_title,position,set_type,notes,is_cover&sort=setlist,position&limit=-1'
@@ -489,6 +538,19 @@ export function formatDate(dateString: string, options?: Intl.DateTimeFormatOpti
     year: 'numeric'
   };
   return new Date(dateString).toLocaleDateString('en-US', options || defaultOptions);
+}
+
+function getTodayIsoDate(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+export function isUpcomingSetlistDate(date?: string): boolean {
+  return Boolean(date && date > getTodayIsoDate());
+}
+
+export function filterPastSetlists<T extends { date?: string }>(setlists: T[]): T[] {
+  const todayIso = getTodayIsoDate();
+  return setlists.filter((setlist) => Boolean(setlist.date && setlist.date <= todayIso));
 }
 
 // Format a setlist
@@ -838,11 +900,11 @@ export function formatWikiMember(member: DirectusWikiMember): WikiMember {
     bio: member.bio || '',
     photo,
     birthDate: member.birth_date,
-    instruments: member.instruments || [],
+    instruments: parseJsonArray(member.instruments),
     tenureStart: member.tenure_start,
     tenureEnd: member.tenure_end || undefined,
     isCurrentMember: member.is_current_member || false,
-    sideProjects: member.side_projects || [],
+    sideProjects: parseJsonArray(member.side_projects),
     tenure: (member as any).tenure || tenure
   };
 }
@@ -851,6 +913,81 @@ export function formatWikiMember(member: DirectusWikiMember): WikiMember {
 export async function getWikiMembers(): Promise<WikiMember[]> {
   const members = await fetchWikiMembers();
   return members.map(formatWikiMember);
+}
+
+// =============================================================================
+// MEMBER STINTS (Band Timeline)
+// =============================================================================
+
+export async function getMemberStints(): Promise<MemberStint[]> {
+  const [stints, members] = await Promise.all([
+    fetchFromDirectus<DirectusMemberStint>('/member_stints?sort=start_year'),
+    fetchWikiMembers(),
+  ]);
+
+  const memberMap = new Map(members.map(m => [typeof m.id === 'string' ? parseInt(m.id) : m.id, m]));
+
+  return stints.map(s => {
+    const member = memberMap.get(s.member);
+    const formatted = member ? formatWikiMember(member) : null;
+    return {
+      id: s.id,
+      memberId: s.member,
+      memberName: formatted?.name || 'Unknown',
+      memberSlug: formatted?.slug || 'unknown',
+      memberPhoto: formatted?.photo,
+      startYear: s.start_year,
+      endYear: s.end_year,
+      role: s.role,
+      stintNumber: s.stint_number || 1,
+      notes: s.notes || undefined,
+    };
+  });
+}
+
+// =============================================================================
+// TOURS (Index page)
+// =============================================================================
+
+export async function getTours(): Promise<Tour[]> {
+  const [tours, albums] = await Promise.all([
+    fetchFromDirectus<DirectusTour>('/tours?sort=-start_date&limit=-1'),
+    fetchAlbums(),
+  ]);
+
+  const albumMap = new Map(albums.map(a => [a.id, a]));
+
+  return tours.map(t => {
+    const album = t.associated_album ? albumMap.get(t.associated_album) : null;
+    const startYear = t.start_date ? new Date(t.start_date).getFullYear() : 0;
+    return {
+      id: t.id,
+      name: t.name,
+      slug: t.slug || generateSlug(t.name),
+      startDate: t.start_date,
+      endDate: t.end_date,
+      description: t.description,
+      associatedAlbumId: t.associated_album,
+      associatedAlbumTitle: album ? (album.title || undefined) : undefined,
+      associatedAlbumSlug: album ? (album.slug || generateSlug(album.title)) : undefined,
+      associatedAlbumCover: album?.cover_art ? `${DIRECTUS_URL}/assets/${album.cover_art}` : undefined,
+      totalShows: t.total_shows || 0,
+      imageUrl: t.image ? `${DIRECTUS_URL}/assets/${t.image}` : undefined,
+      countriesVisited: t.countries_visited || [],
+      supportActs: t.support_acts || [],
+      lineup: t.lineup || [],
+      year: startYear,
+    };
+  });
+}
+
+// =============================================================================
+// SONG STATISTICS (for Curiosities page)
+// =============================================================================
+
+export async function getTopSongs(limit = 20): Promise<SongStats[]> {
+  const stats = await getSongStatistics();
+  return stats.slice(0, limit);
 }
 
 // Fetch timeline events
@@ -1280,7 +1417,7 @@ export async function getRarestSongs(limit: number = 10): Promise<SongStats[]> {
 
 // Get tour statistics
 export async function getTourStatistics(): Promise<TourStats[]> {
-  const setlists = await getSetlistsWithSongs();
+  const setlists = filterPastSetlists(await getSetlistsWithSongs());
 
   const tourMap = new Map<string, {
     year: number;
@@ -1334,10 +1471,12 @@ export async function getOverallStats(): Promise<OverallStats> {
     getSongStatistics()
   ]);
 
+  const historicalSetlists = filterPastSetlists(setlists);
+
   const countries = new Set<string>();
   let totalSongsPlayed = 0;
 
-  setlists.forEach(setlist => {
+  historicalSetlists.forEach(setlist => {
     if (setlist.country) {
       countries.add(setlist.country);
     }
@@ -1359,10 +1498,10 @@ export async function getOverallStats(): Promise<OverallStats> {
   return {
     totalAlbums: albums.length,
     totalSongs: songs.length,
-    totalShows: setlists.length,
+    totalShows: historicalSetlists.length,
     countriesVisited: countries.size,
     yearsActive: new Date().getFullYear() - 1976 + 1,
-    averageSongsPerShow: setlists.length > 0 ? Math.round(totalSongsPlayed / setlists.length) : 0,
+    averageSongsPerShow: historicalSetlists.length > 0 ? Math.round(totalSongsPlayed / historicalSetlists.length) : 0,
     mostPlayedSong: mostPlayed,
     rarestSong: rarest
   };

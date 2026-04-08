@@ -2,7 +2,7 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import SetlistCard from '../../components/SetlistCard.astro';
 
-import { formatDate, generateSetlistSlug } from '../../lib/directus';
+import { filterPastSetlists, formatDate, generateSetlistSlug } from '../../lib/directus';
 
 const DIRECTUS_URL = 'https://dash.cureation.net';
 const PER_PAGE = 36;
@@ -84,7 +84,23 @@ try {
 }
 
 const decades = [...new Set(years.map(y => Math.floor(y / 10) * 10))].sort((a, b) => b - a);
-const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
+const historicalSetlists = filterPastSetlists(setlists);
+const historicalCountries = [...new Set(historicalSetlists.map(s => s.country).filter(Boolean))];
+const totalSongs = historicalSetlists.reduce((sum, s) => sum + s.songCount, 0);
+
+// Bento widget data
+const latestShow = historicalSetlists[0];
+const historicalYears = [...new Set(historicalSetlists.map(s => s.year).filter(y => y > 0))].sort((a, b) => b - a);
+const firstYear = historicalYears.length > 0 ? historicalYears[historicalYears.length - 1] : 1976;
+const latestYear = historicalYears.length > 0 ? historicalYears[0] : new Date().getFullYear();
+
+// Most visited country
+const countryCounts: Record<string, number> = {};
+historicalSetlists.forEach(s => { if (s.country) countryCounts[s.country] = (countryCounts[s.country] || 0) + 1; });
+const topCountry = Object.entries(countryCounts).sort(([,a], [,b]) => b - a)[0];
+
+// Biggest tour
+const biggestTour = tours[0];
 ---
 
 <MainLayout
@@ -109,7 +125,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
 
         <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{setlists.length.toLocaleString()}</span>
+            <span class="text-3xl font-display text-white text-glow">{historicalSetlists.length.toLocaleString()}</span>
             <span class="text-white/85 text-base font-medium">Shows</span>
           </div>
           <div class="flex items-center gap-3">
@@ -117,7 +133,7 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
             <span class="text-white/85 text-base font-medium">Performances</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{totalCountries}</span>
+            <span class="text-3xl font-display text-white text-glow">{historicalCountries.length}</span>
             <span class="text-white/85 text-base font-medium">Countries</span>
           </div>
           <div class="flex items-center gap-3">
@@ -125,6 +141,38 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
             <span class="text-white/85 text-base font-medium">Tours</span>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Insights Bento -->
+  <section class="mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {latestShow && (
+        <a href={`/setlists/${latestShow.slug}`} class="glass-tile p-4 group block">
+          <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Latest Show</p>
+          <p class="text-white font-heading text-sm group-hover:text-primary transition-colors truncate">{latestShow.venue}</p>
+          <p class="text-white/60 text-xs">{latestShow.formattedDate}</p>
+        </a>
+      )}
+      {topCountry && (
+        <div class="glass-tile p-4">
+          <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Most Visited</p>
+          <p class="text-white font-heading text-sm">{topCountry[0]}</p>
+          <p class="text-primary text-xs font-medium">{topCountry[1]} shows</p>
+        </div>
+      )}
+      {biggestTour && (
+        <div class="glass-tile p-4">
+          <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Biggest Tour</p>
+          <p class="text-white font-heading text-sm truncate">{biggestTour.name}</p>
+          <p class="text-primary text-xs font-medium">{biggestTour.count} shows</p>
+        </div>
+      )}
+      <div class="glass-tile p-4">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Spanning</p>
+        <p class="text-white font-heading text-sm">{firstYear} — {latestYear}</p>
+        <p class="text-primary text-xs font-medium">{latestYear - firstYear} years of touring</p>
       </div>
     </div>
   </section>
@@ -207,10 +255,20 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
       </button>
     </div>
 
-    <!-- Results count -->
-    <div class="mt-4">
+    <!-- Results count + View Toggle -->
+    <div class="mt-4 flex items-center justify-between">
       <div id="results-count" class="text-white/80 text-sm">
         Showing {Math.min(PER_PAGE, setlists.length)} of {setlists.length} shows
+      </div>
+      <div class="flex items-center gap-1 p-1 rounded-sm bg-black/40 border border-white/[0.08]">
+        <button type="button" id="view-grid-btn" class="view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all active flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Grid
+        </button>
+        <button type="button" id="view-timeline-btn" class="view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><circle cx="12" cy="6" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="18" r="2"/></svg>
+          Timeline
+        </button>
       </div>
     </div>
   </section>
@@ -253,6 +311,77 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
         </p>
       </div>
     )}
+
+    <!-- Timeline View (hidden by default) -->
+    <div id="timeline-view" class="hidden">
+      {years.map(year => {
+        const yearSetlists = setlists.filter(s => s.year === year);
+        if (yearSetlists.length === 0) return null;
+        return (
+          <div class="timeline-year mb-8" data-timeline-year={year}>
+            <div class="flex items-center gap-4 mb-4 sticky top-0 z-10 py-2 bg-black/80 backdrop-blur-sm">
+              <span class="font-display text-2xl text-primary">{year}</span>
+              <div class="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent"></div>
+              <span class="text-white/40 text-sm">{yearSetlists.length} shows</span>
+            </div>
+            <div class="relative pl-8 border-l-2 border-white/10 ml-4 space-y-1">
+              {yearSetlists.map(show => (
+                <a
+                  href={`/setlists/${show.slug}`}
+                  class="timeline-item group flex items-center gap-4 p-3 rounded-lg hover:bg-white/[0.03] transition-colors relative"
+                  data-venue={show.venue.toLowerCase()}
+                  data-city={show.city.toLowerCase()}
+                  data-country={show.country.toLowerCase()}
+                  data-year={show.year}
+                  data-tour={show.tourName?.toLowerCase() || ''}
+                >
+                  {/* Dot on timeline */}
+                  <div class="absolute -left-[calc(2rem+5px)] w-2.5 h-2.5 rounded-full bg-primary/60 border-2 border-black group-hover:bg-primary transition-colors"></div>
+
+                  {/* Date */}
+                  <div class="text-center min-w-[50px] shrink-0">
+                    <div class="text-lg font-display text-white leading-tight">
+                      {new Date(show.date).getDate()}
+                    </div>
+                    <div class="text-white/50 text-[10px] uppercase">
+                      {new Date(show.date).toLocaleDateString('en-US', { month: 'short' })}
+                    </div>
+                  </div>
+
+                  {/* Venue image */}
+                  {show.coverImage && (
+                    <img
+                      src={show.coverImage}
+                      alt={show.venue}
+                      class="w-12 h-12 rounded-lg object-cover shrink-0 border border-white/10 hidden sm:block"
+                      loading="lazy"
+                    />
+                  )}
+
+                  {/* Info */}
+                  <div class="flex-1 min-w-0">
+                    <div class="text-white text-sm font-medium group-hover:text-primary transition-colors truncate">
+                      {show.venue}
+                    </div>
+                    <div class="text-white/50 text-xs truncate">
+                      {show.city}{show.country ? `, ${show.country}` : ''}
+                      {show.tourName && <span class="text-white/30"> &middot; {show.tourName}</span>}
+                    </div>
+                  </div>
+
+                  {/* Song count */}
+                  {show.songCount > 0 && (
+                    <span class="text-white/30 text-xs shrink-0 hidden sm:inline">{show.songCount} songs</span>
+                  )}
+
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-primary opacity-0 group-hover:opacity-70 transition-opacity shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
 
     <!-- No results message -->
     <div id="no-results" class="hidden glass-card rounded-2xl p-12 text-center">
@@ -328,6 +457,19 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
     color: rgba(255, 255, 255, 0.85);
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* View toggle */
+  .view-btn {
+    color: rgba(255, 255, 255, 0.45);
+  }
+  .view-btn:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .view-btn.active {
+    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.15);
+    color: var(--color-primary);
   }
 
   .setlist-item {
@@ -426,9 +568,37 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
       if (noResults) {
         noResults.classList.toggle('hidden', matchingItems.length > 0);
       }
-      if (grid) {
-        grid.classList.toggle('hidden', matchingItems.length === 0);
+      if (grid && !grid.classList.contains('hidden')) {
+        // Grid view is active - don't re-hide
       }
+
+      // Also update timeline view
+      updateTimelineFilters(filters);
+    }
+
+    function updateTimelineFilters(filters) {
+      const tv = document.getElementById('timeline-view');
+      if (!tv) return;
+      const tItems = tv.querySelectorAll('.timeline-item');
+      let count = 0;
+      tItems.forEach((item) => {
+        const venue = item.dataset.venue || '';
+        const city = item.dataset.city || '';
+        const country = item.dataset.country || '';
+        const year = parseInt(item.dataset.year || '0');
+        const tour = item.dataset.tour || '';
+        let ok = true;
+        if (filters.search) { ok = `${venue} ${city} ${country} ${tour}`.includes(filters.search); }
+        if (ok && filters.decade) { const d = parseInt(filters.decade); ok = year >= d && year <= d + 9; }
+        if (ok && filters.year) ok = year === parseInt(filters.year);
+        if (ok && filters.tour) ok = tour === filters.tour;
+        if (ok && filters.country) ok = country === filters.country;
+        item.style.display = ok ? '' : 'none';
+        if (ok) count++;
+      });
+      tv.querySelectorAll('.timeline-year').forEach((yg) => {
+        yg.style.display = yg.querySelectorAll('.timeline-item:not([style*="display: none"])').length > 0 ? '' : 'none';
+      });
     }
 
     function renderPage() {
@@ -503,6 +673,30 @@ const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
     loadMoreBtn?.addEventListener('click', () => {
       currentPage++;
       renderPage();
+    });
+
+    // View toggle (Grid vs Timeline)
+    const gridBtn = document.getElementById('view-grid-btn');
+    const timelineBtn = document.getElementById('view-timeline-btn');
+    const timelineView = document.getElementById('timeline-view');
+    const pagination = document.getElementById('pagination');
+
+    gridBtn?.addEventListener('click', () => {
+      gridBtn.classList.add('active');
+      timelineBtn?.classList.remove('active');
+      grid?.classList.remove('hidden');
+      timelineView?.classList.add('hidden');
+      if (pagination) pagination.style.display = '';
+      renderPage();
+    });
+
+    timelineBtn?.addEventListener('click', () => {
+      timelineBtn.classList.add('active');
+      gridBtn?.classList.remove('active');
+      grid?.classList.add('hidden');
+      timelineView?.classList.remove('hidden');
+      if (pagination) pagination.style.display = 'none';
+      updateTimelineFilters(getFilters());
     });
   }
 

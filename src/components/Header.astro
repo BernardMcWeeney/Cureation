@@ -1,10 +1,53 @@
 ---
 // src/components/Header.astro
+import siteConfig from '../config/site.config';
 
-import siteConfig, { getNavigation } from '../config/site.config';
-
-const navItems = getNavigation();
 const currentPath = Astro.url.pathname;
+
+// Mega menu structure - grouped navigation
+const megaMenuGroups = [
+  {
+    label: 'Music',
+    items: [
+      { name: 'Discography', path: '/discography', desc: 'Albums, singles & EPs', icon: 'disc' },
+      { name: 'Lyrics', path: '/lyrics', desc: 'Complete song lyrics', icon: 'text' },
+      { name: 'Videos', path: '/videos', desc: 'Music videos & live clips', icon: 'video' },
+      { name: 'Charts', path: '/charts', desc: 'Chart performance', icon: 'trending' },
+    ]
+  },
+  {
+    label: 'Live',
+    items: [
+      { name: 'Tours', path: '/tours', desc: 'Every tour since 1979', icon: 'map' },
+      { name: 'Setlists', path: '/setlists', desc: 'Concert setlists archive', icon: 'list' },
+      { name: 'Curiosities', path: '/curiosities', desc: 'Stats, polls & trivia', icon: 'chart' },
+      { name: 'Statistics', path: '/stats', desc: 'Data & insights', icon: 'bar' },
+    ]
+  },
+  {
+    label: 'Explore',
+    items: [
+      { name: 'News', path: '/news', desc: 'Latest articles & reviews', icon: 'newspaper' },
+      { name: 'The Band', path: '/band', desc: 'Timeline, members & history', icon: 'users' },
+      { name: 'Gallery', path: '/gallery', desc: 'Photos & artwork', icon: 'image' },
+      { name: 'Wiki & History', path: '/wiki', desc: 'Articles & deep dives', icon: 'book' },
+    ]
+  },
+];
+
+// Flat nav items for the top bar (visible on desktop)
+const topNavItems = [
+  { name: 'News', path: '/news' },
+  { name: 'Band', path: '/band' },
+  { name: 'Discography', path: '/discography' },
+  { name: 'Lyrics', path: '/lyrics' },
+  { name: 'Tours', path: '/tours' },
+  { name: 'Setlists', path: '/setlists' },
+  { name: 'Curiosities', path: '/curiosities' },
+  { name: 'Videos', path: '/videos' },
+];
+
+const isActive = (path: string) => currentPath === path || (path !== '/' && currentPath.startsWith(path));
 ---
 
 <header class="header" id="site-header">
@@ -17,14 +60,21 @@ const currentPath = Astro.url.pathname;
 
     <!-- Desktop Nav -->
     <nav class="header-nav" aria-label="Main navigation">
-      {navItems.map(item => (
+      {topNavItems.map(item => (
         <a
           href={item.path}
-          class:list={['header-nav-link', { active: currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path)) }]}
+          class:list={['header-nav-link', { active: isActive(item.path) }]}
         >
           {item.name}
         </a>
       ))}
+      <!-- Mega menu trigger -->
+      <button class="header-nav-link mega-trigger" id="mega-menu-trigger" aria-expanded="false" aria-controls="mega-menu-panel">
+        <span>More</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-3 ml-1 mega-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
     </nav>
 
     <!-- Controls -->
@@ -46,6 +96,45 @@ const currentPath = Astro.url.pathname;
     </div>
   </div>
 
+  <!-- Mega Menu Panel (Desktop) -->
+  <div id="mega-menu-panel" class="mega-panel" aria-hidden="true">
+    <div class="responsive-container">
+      <div class="mega-panel-inner">
+        {megaMenuGroups.map(group => (
+          <div class="mega-group">
+            <p class="mega-group-label">{group.label}</p>
+            <div class="mega-group-items">
+              {group.items.map(item => (
+                <a href={item.path} class:list={['mega-item', { active: isActive(item.path) }]}>
+                  <span class="mega-item-name">{item.name}</span>
+                  <span class="mega-item-desc">{item.desc}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <!-- Quick links column -->
+        <div class="mega-group mega-quick">
+          <p class="mega-group-label">Quick Links</p>
+          <div class="mega-group-items">
+            <a href="/on-this-day" class="mega-item">
+              <span class="mega-item-name">On This Day</span>
+              <span class="mega-item-desc">History for today's date</span>
+            </a>
+            <a href="/community" class="mega-item">
+              <span class="mega-item-name">Community</span>
+              <span class="mega-item-desc">Forums & discussions</span>
+            </a>
+            <a href="/about" class="mega-item">
+              <span class="mega-item-name">About</span>
+              <span class="mega-item-desc">About the project</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <!-- Search Overlay -->
@@ -72,21 +161,48 @@ const currentPath = Astro.url.pathname;
   </div>
 </div>
 
-<!-- Mobile Nav -->
+<!-- Mobile Nav (Full-screen with mega menu groups) -->
 <nav id="mobile-menu" class="mobile-nav" aria-label="Mobile navigation" aria-hidden="true">
   <div class="mobile-nav-inner">
+    <!-- Primary links -->
     <div class="mobile-nav-links">
-      {navItems.map(item => (
-        <a
-          href={item.path}
-          class:list={['mobile-nav-link', { active: currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path)) }]}
-        >
-          {item.name}
-        </a>
+      <a href="/" class:list={['mobile-nav-link mobile-nav-link--home', { active: currentPath === '/' }]}>Home</a>
+
+      {megaMenuGroups.map(group => (
+        <div class="mobile-group">
+          <p class="mobile-group-label">{group.label}</p>
+          {group.items.map(item => (
+            <a
+              href={item.path}
+              class:list={['mobile-nav-link', { active: isActive(item.path) }]}
+            >
+              <span>{item.name}</span>
+              <span class="mobile-nav-desc">{item.desc}</span>
+            </a>
+          ))}
+        </div>
       ))}
+
+      <!-- Extra links -->
+      <div class="mobile-group">
+        <p class="mobile-group-label">More</p>
+        <a href="/wiki" class:list={['mobile-nav-link', { active: isActive('/wiki') }]}>
+          <span>Wiki & History</span>
+        </a>
+        <a href="/on-this-day" class:list={['mobile-nav-link', { active: isActive('/on-this-day') }]}>
+          <span>On This Day</span>
+        </a>
+        <a href="/community" class:list={['mobile-nav-link', { active: isActive('/community') }]}>
+          <span>Community</span>
+        </a>
+        <a href="/about" class:list={['mobile-nav-link', { active: isActive('/about') }]}>
+          <span>About</span>
+        </a>
+      </div>
     </div>
+
     <div class="mobile-nav-footer">
-      <span class="font-display text-3xl text-white/20">{siteConfig.logo.text}</span>
+      <span class="font-display text-3xl text-white/15">{siteConfig.logo.text}</span>
     </div>
   </div>
 </nav>
@@ -99,14 +215,16 @@ const currentPath = Astro.url.pathname;
     left: 0;
     right: 0;
     z-index: 50;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(24px) saturate(1.2);
-    -webkit-backdrop-filter: blur(24px) saturate(1.2);
-    transition: background 0.4s ease, box-shadow 0.4s ease;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease;
   }
 
   .header.scrolled {
-    background: rgba(0, 0, 0, 0.97);
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
   }
 
@@ -150,14 +268,13 @@ const currentPath = Astro.url.pathname;
   .header-nav {
     display: none;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.125rem;
   }
 
   @media (min-width: 768px) {
     .header-nav {
       display: flex;
     }
-
     .header-inner {
       height: 4.5rem;
     }
@@ -165,15 +282,20 @@ const currentPath = Astro.url.pathname;
 
   .header-nav-link {
     position: relative;
-    padding: 0.5rem 0.875rem;
+    padding: 0.5rem 0.75rem;
     font-family: var(--font-heading);
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
     transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
   }
 
   .header-nav-link::after {
@@ -204,6 +326,113 @@ const currentPath = Astro.url.pathname;
     width: 40%;
     left: 30%;
     background: rgba(var(--color-primary-rgb), 0.6);
+  }
+
+  /* Mega trigger chevron */
+  .mega-chevron {
+    transition: transform 0.2s ease;
+  }
+  .mega-trigger[aria-expanded="true"] .mega-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ─── Mega Menu Panel ─── */
+  .mega-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(6, 6, 8, 0.97);
+    backdrop-filter: blur(30px) saturate(1.3);
+    -webkit-backdrop-filter: blur(30px) saturate(1.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+  }
+
+  .mega-panel.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .mega-panel-inner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    padding: 2rem 0;
+  }
+
+  .mega-group-label {
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(var(--color-primary-rgb), 0.7);
+    margin-bottom: 0.75rem;
+    padding-left: 0.75rem;
+  }
+
+  .mega-group-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .mega-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0.625rem 0.75rem;
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .mega-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-left-color: rgba(var(--color-primary-rgb), 0.5);
+  }
+
+  .mega-item.active {
+    border-left-color: rgba(var(--color-primary-rgb), 0.8);
+    background: rgba(var(--color-primary-rgb), 0.05);
+  }
+
+  .mega-item-name {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+    transition: color 0.2s ease;
+  }
+
+  .mega-item:hover .mega-item-name {
+    color: white;
+  }
+
+  .mega-item.active .mega-item-name {
+    color: rgba(var(--color-primary-rgb), 1);
+  }
+
+  .mega-item-desc {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 0.125rem;
+  }
+
+  /* Hide mega menu on mobile */
+  @media (max-width: 767px) {
+    .mega-panel {
+      display: none;
+    }
   }
 
   /* ─── Controls ─── */
@@ -370,11 +599,13 @@ const currentPath = Astro.url.pathname;
     position: fixed;
     inset: 0;
     z-index: 40;
-    background: rgba(0, 0, 0, 0.98);
+    background: rgba(6, 6, 8, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     opacity: 0;
     visibility: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     transition: opacity 0.35s ease, visibility 0.35s ease;
   }
 
@@ -386,60 +617,124 @@ const currentPath = Astro.url.pathname;
   .mobile-nav-inner {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    padding: 5rem 2rem 2rem;
+    min-height: 100%;
+    padding: 5rem 1.5rem 2rem;
   }
 
   .mobile-nav-links {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
+    gap: 0;
+  }
+
+  .mobile-group {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .mobile-group:first-of-type {
+    border-top: none;
+    padding-top: 0.5rem;
+  }
+
+  .mobile-group-label {
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(var(--color-primary-rgb), 0.6);
+    padding: 0.5rem 0;
+    margin-bottom: 0;
   }
 
   .mobile-nav-link {
-    display: block;
-    padding: 0.75rem 2rem;
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0;
     text-decoration: none;
-    transition: color 0.3s ease, transform 0.3s ease;
+    transition: all 0.3s ease;
+    border-left: 2px solid transparent;
+    padding-left: 0.75rem;
   }
 
-  .mobile-nav-link:hover {
+  .mobile-nav-link span:first-child {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    transition: color 0.3s ease;
+  }
+
+  .mobile-nav-link:hover span:first-child {
     color: white;
-    transform: translateX(4px);
   }
 
   .mobile-nav-link.active {
+    border-left-color: rgba(var(--color-primary-rgb), 0.8);
+  }
+
+  .mobile-nav-link.active span:first-child {
     color: rgba(var(--color-primary-rgb), 1);
+  }
+
+  .mobile-nav-link--home {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.75rem 0;
+    padding-left: 0.75rem;
+    border-left: 2px solid transparent;
+    margin-bottom: 0.25rem;
+  }
+
+  .mobile-nav-link--home.active {
+    color: rgba(var(--color-primary-rgb), 1);
+    border-left-color: rgba(var(--color-primary-rgb), 0.8);
+  }
+
+  .mobile-nav-desc {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 0.125rem;
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: inherit;
+    font-weight: 400;
   }
 
   .mobile-nav-footer {
     margin-top: auto;
+    padding-top: 2rem;
     padding-bottom: 1rem;
+    text-align: center;
   }
 
   /* ─── Animations for mobile links ─── */
-  .mobile-nav.open .mobile-nav-link {
+  .mobile-nav.open .mobile-nav-link,
+  .mobile-nav.open .mobile-nav-link--home {
     animation: fadeSlideIn 0.4s ease forwards;
     opacity: 0;
   }
 
-  .mobile-nav-link:nth-child(1) { animation-delay: 0.05s; }
-  .mobile-nav-link:nth-child(2) { animation-delay: 0.08s; }
-  .mobile-nav-link:nth-child(3) { animation-delay: 0.11s; }
-  .mobile-nav-link:nth-child(4) { animation-delay: 0.14s; }
-  .mobile-nav-link:nth-child(5) { animation-delay: 0.17s; }
-  .mobile-nav-link:nth-child(6) { animation-delay: 0.20s; }
-  .mobile-nav-link:nth-child(7) { animation-delay: 0.23s; }
-  .mobile-nav-link:nth-child(8) { animation-delay: 0.26s; }
+  .mobile-nav-link:nth-child(1) { animation-delay: 0.03s; }
+  .mobile-nav-link:nth-child(2) { animation-delay: 0.06s; }
+  .mobile-nav-link:nth-child(3) { animation-delay: 0.09s; }
+  .mobile-nav-link:nth-child(4) { animation-delay: 0.12s; }
+
+  .mobile-group:nth-child(2) .mobile-nav-link:nth-child(1) { animation-delay: 0.06s; }
+  .mobile-group:nth-child(2) .mobile-nav-link:nth-child(2) { animation-delay: 0.09s; }
+  .mobile-group:nth-child(2) .mobile-nav-link:nth-child(3) { animation-delay: 0.12s; }
+  .mobile-group:nth-child(3) .mobile-nav-link:nth-child(1) { animation-delay: 0.12s; }
+  .mobile-group:nth-child(3) .mobile-nav-link:nth-child(2) { animation-delay: 0.15s; }
+  .mobile-group:nth-child(3) .mobile-nav-link:nth-child(3) { animation-delay: 0.18s; }
+  .mobile-group:nth-child(4) .mobile-nav-link:nth-child(1) { animation-delay: 0.18s; }
+  .mobile-group:nth-child(4) .mobile-nav-link:nth-child(2) { animation-delay: 0.21s; }
+  .mobile-group:nth-child(4) .mobile-nav-link:nth-child(3) { animation-delay: 0.24s; }
 
   @keyframes fadeSlideIn {
     from {
@@ -463,6 +758,8 @@ const currentPath = Astro.url.pathname;
     const searchForm = document.getElementById('search-form');
     const mobileToggle = document.getElementById('mobile-menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
+    const megaTrigger = document.getElementById('mega-menu-trigger');
+    const megaPanel = document.getElementById('mega-menu-panel');
 
     // Scroll effect
     if (header) {
@@ -473,7 +770,49 @@ const currentPath = Astro.url.pathname;
       onScroll();
     }
 
-    // Search
+    // --- Mega menu ---
+    let megaCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const openMega = () => {
+      if (!megaPanel || !megaTrigger) return;
+      if (megaCloseTimer) { clearTimeout(megaCloseTimer); megaCloseTimer = null; }
+      megaPanel.classList.add('open');
+      megaPanel.setAttribute('aria-hidden', 'false');
+      megaTrigger.setAttribute('aria-expanded', 'true');
+    };
+
+    const closeMega = () => {
+      if (!megaPanel || !megaTrigger) return;
+      megaPanel.classList.remove('open');
+      megaPanel.setAttribute('aria-hidden', 'true');
+      megaTrigger.setAttribute('aria-expanded', 'false');
+    };
+
+    const delayedCloseMega = () => {
+      megaCloseTimer = setTimeout(closeMega, 200);
+    };
+
+    // Toggle on click
+    megaTrigger?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isOpen = megaTrigger.getAttribute('aria-expanded') === 'true';
+      isOpen ? closeMega() : openMega();
+    });
+
+    // Hover to open/close on desktop
+    megaTrigger?.addEventListener('mouseenter', openMega);
+    megaTrigger?.addEventListener('mouseleave', delayedCloseMega);
+    megaPanel?.addEventListener('mouseenter', () => {
+      if (megaCloseTimer) { clearTimeout(megaCloseTimer); megaCloseTimer = null; }
+    });
+    megaPanel?.addEventListener('mouseleave', delayedCloseMega);
+
+    // Close mega on link click
+    megaPanel?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMega);
+    });
+
+    // --- Search ---
     const openSearch = () => {
       if (!overlay || !searchInput) return;
       overlay.classList.add('open');
@@ -489,7 +828,6 @@ const currentPath = Astro.url.pathname;
 
     searchBtn?.addEventListener('click', openSearch);
     closeSearch?.addEventListener('click', closeSearchFn);
-
     overlay?.querySelector('.search-overlay-backdrop')?.addEventListener('click', closeSearchFn);
 
     if (searchForm && searchInput) {
@@ -498,7 +836,7 @@ const currentPath = Astro.url.pathname;
       });
     }
 
-    // Mobile menu
+    // --- Mobile menu ---
     const openMobile = () => {
       if (!mobileMenu || !mobileToggle) return;
       mobileMenu.classList.add('open');
@@ -507,7 +845,7 @@ const currentPath = Astro.url.pathname;
       document.body.style.overflow = 'hidden';
     };
 
-    const closeMobile = () => {
+    const closeMobileMenu = () => {
       if (!mobileMenu || !mobileToggle) return;
       mobileMenu.classList.remove('open');
       mobileMenu.setAttribute('aria-hidden', 'true');
@@ -517,7 +855,12 @@ const currentPath = Astro.url.pathname;
 
     mobileToggle?.addEventListener('click', () => {
       const isOpen = mobileToggle.getAttribute('aria-expanded') === 'true';
-      isOpen ? closeMobile() : openMobile();
+      isOpen ? closeMobileMenu() : openMobile();
+    });
+
+    // Close mobile nav on link click
+    mobileMenu?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMobileMenu);
     });
 
     // Escape key
@@ -525,8 +868,10 @@ const currentPath = Astro.url.pathname;
       if (e.key !== 'Escape') return;
       if (overlay && overlay.classList.contains('open')) {
         closeSearchFn();
+      } else if (megaPanel && megaPanel.classList.contains('open')) {
+        closeMega();
       } else if (mobileMenu && mobileMenu.classList.contains('open')) {
-        closeMobile();
+        closeMobileMenu();
       }
     });
   }

@@ -4,6 +4,7 @@ import {
   getSetlistsWithSongs,
   getTimelineEvents,
   formatDate,
+  filterPastSetlists,
 } from '../lib/directus';
 
 const today = new Date();
@@ -15,9 +16,10 @@ const [setlists, timelineEvents] = await Promise.all([
   getSetlistsWithSongs(),
   getTimelineEvents(),
 ]);
+const historicalSetlists = filterPastSetlists(setlists);
 
 // Find setlists on this day in history
-const onThisDaySetlists = setlists.filter(s => {
+const onThisDaySetlists = historicalSetlists.filter(s => {
   if (!s.date) return false;
   const d = new Date(s.date);
   return d.getMonth() + 1 === currentMonth && d.getDate() === currentDay;
@@ -42,7 +44,7 @@ const thisMonthEvents = timelineEvents.filter(e => {
 });
 
 // Also find setlists this month (for the "this month in history" section)
-const thisMonthSetlists = setlists.filter(s => {
+const thisMonthSetlists = historicalSetlists.filter(s => {
   if (!s.date) return false;
   const d = new Date(s.date);
   return d.getMonth() + 1 === currentMonth;

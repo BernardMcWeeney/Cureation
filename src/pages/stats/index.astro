@@ -10,6 +10,7 @@ import {
   getSongStatistics,
   fetchAlbums,
   formatAlbum,
+  filterPastSetlists,
 } from '../../lib/directus';
 
 // Fetch all stats data
@@ -25,13 +26,11 @@ const [overallStats, mostPlayed, rarestSongs, tourStats, setlists, songStats, ra
 
 const albums = rawAlbums.map(formatAlbum);
 const maxPlays = mostPlayed[0]?.totalPlays || 1;
-
-// Recently played songs (from latest setlists)
-const recentSetlists = setlists.slice(0, 5);
+const historicalSetlists = filterPastSetlists(setlists);
 
 // Year with most shows
 const showsByYear: Record<number, number> = {};
-setlists.forEach(s => { if (s.year > 0) showsByYear[s.year] = (showsByYear[s.year] || 0) + 1; });
+historicalSetlists.forEach(s => { if (s.year > 0) showsByYear[s.year] = (showsByYear[s.year] || 0) + 1; });
 const busiestYear = Object.entries(showsByYear).sort(([,a], [,b]) => b - a)[0];
 
 // Song stats insights
@@ -167,24 +166,28 @@ const compCount = albums.filter(a => a.type === 'compilation').length;
     </div>
   </section>
 
-  {/* More Key Numbers */}
+  {/* More Key Numbers - Bento style */}
   <section class="mb-12">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="glass-stat p-5 text-center stained-glass">
-        <p class="text-2xl font-bold text-white">{totalPerformances.toLocaleString()}</p>
-        <p class="text-xs text-white/80 mt-1">Total Song Performances</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="glass-tile p-5">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-2">Total Performances</p>
+        <p class="text-2xl md:text-3xl font-display text-white text-glow">{totalPerformances.toLocaleString()}</p>
+        <p class="text-primary/70 text-xs mt-1">Songs played across all shows</p>
       </div>
-      <div class="glass-stat p-5 text-center stained-glass">
-        <p class="text-2xl font-bold text-white">{playedSongs.length}</p>
-        <p class="text-xs text-white/80 mt-1">Songs Played Live</p>
+      <div class="glass-tile p-5">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-2">Played Live</p>
+        <p class="text-2xl md:text-3xl font-display text-white text-glow">{playedSongs.length}</p>
+        <p class="text-primary/70 text-xs mt-1">Unique songs performed</p>
       </div>
-      <div class="glass-stat p-5 text-center stained-glass">
-        <p class="text-2xl font-bold text-white">{neverPlayed.length}</p>
-        <p class="text-xs text-white/80 mt-1">Never Played Live</p>
+      <div class="glass-tile p-5">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-2">Never Played</p>
+        <p class="text-2xl md:text-3xl font-display text-white text-glow">{neverPlayed.length}</p>
+        <p class="text-white/40 text-xs mt-1">Studio-only tracks</p>
       </div>
-      <div class="glass-stat p-5 text-center stained-glass">
-        <p class="text-2xl font-bold text-white">{studioCount} / {liveCount} / {compCount}</p>
-        <p class="text-xs text-white/80 mt-1">Studio / Live / Compilations</p>
+      <div class="glass-tile p-5">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-2">Releases</p>
+        <p class="text-2xl md:text-3xl font-display text-white text-glow">{studioCount + liveCount + compCount}</p>
+        <p class="text-white/40 text-xs mt-1">{studioCount} studio · {liveCount} live · {compCount} comp.</p>
       </div>
     </div>
   </section>

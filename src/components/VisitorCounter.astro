@@ -7,22 +7,83 @@ try {
   if (fetched.totalVisits > 0) stats = fetched;
 } catch {}
 
-// Use fetched data or show placeholder stats
-const visits = stats.totalVisits || 12847;
-const today = stats.todayVisits || 234;
-const online = stats.currentlyOnline || 12;
+const visits = stats.totalVisits;
+const today = stats.todayVisits;
+const online = stats.currentlyOnline;
+
+const apiBase = import.meta.env.PUBLIC_DIRECTUS_URL || 'https://dash.cureation.net';
 ---
 
-<div class="flex items-center gap-4 text-xs text-white/80">
-  <span>{visits.toLocaleString('en-US')} visits</span>
+<div class="visitor-counter flex items-center gap-4 text-xs text-white/80" data-api-base={apiBase}>
+  <span class="vc-total">{visits > 0 ? visits.toLocaleString('en-US') : '--'} visits</span>
   <span class="text-white/15">|</span>
-  <span>{today.toLocaleString('en-US')} today</span>
+  <span class="vc-today">{today > 0 ? today.toLocaleString('en-US') : '--'} today</span>
   <span class="text-white/15">|</span>
   <span class="flex items-center gap-1.5">
     <span class="relative flex h-1.5 w-1.5">
       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
       <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
     </span>
-    {online} online
+    <span class="vc-online">{online > 0 ? online : '--'} online</span>
   </span>
 </div>
+
+<script>
+  function initVisitorCounter() {
+    const counter = document.querySelector('.visitor-counter') as HTMLElement;
+    if (!counter) return;
+
+    const apiBase = counter.dataset.apiBase || 'https://dash.cureation.net';
+    const sessionKey = 'cureation-visit-tracked';
+
+    // Only track once per session
+    if (sessionStorage.getItem(sessionKey)) return;
+    sessionStorage.setItem(sessionKey, '1');
+
+    // Record the visit by incrementing the counter
+    (async () => {
+      try {
+        // Try to increment total_visits and today_visits
+        await fetch(`${apiBase}/items/site_stats`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            total_visits: { _inc: 1 },
+            today_visits: { _inc: 1 },
+            currently_online: { _inc: 1 },
+          }),
+        });
+
+        // Update the displayed count
+        const totalEl = counter.querySelector('.vc-total');
+        if (totalEl) {
+          const current = parseInt(totalEl.textContent?.replace(/[^0-9]/g, '') || '0');
+          if (current > 0) {
+            totalEl.textContent = `${(current + 1).toLocaleString('en-US')} visits`;
+          }
+        }
+
+        const todayEl = counter.querySelector('.vc-today');
+        if (todayEl) {
+          const current = parseInt(todayEl.textContent?.replace(/[^0-9]/g, '') || '0');
+          if (current > 0) {
+            todayEl.textContent = `${(current + 1).toLocaleString('en-US')} today`;
+          }
+        }
+
+        // Decrement online count when leaving
+        window.addEventListener('beforeunload', () => {
+          navigator.sendBeacon(
+            `${apiBase}/items/site_stats`,
+            new Blob([JSON.stringify({ currently_online: { _inc: -1 } })], { type: 'application/json' })
+          );
+        });
+      } catch {
+        // Silently fail - visitor tracking should never break the site
+      }
+    })();
+  }
+
+  initVisitorCounter();
+  document.addEventListener('astro:page-load', initVisitorCounter);
+</script>

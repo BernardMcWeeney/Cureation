@@ -1,9 +1,9 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getTourStatistics, getSetlistsWithSongs } from '../../lib/directus';
+import { filterPastSetlists, getTourStatistics, getSetlistsWithSongs } from '../../lib/directus';
 
 const tourStats = await getTourStatistics();
-const setlists = await getSetlistsWithSongs();
+const setlists = filterPastSetlists(await getSetlistsWithSongs());
 
 // Shows by year
 const showsByYear: Record<number, number> = {};

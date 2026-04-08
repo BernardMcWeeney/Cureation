@@ -149,9 +149,16 @@ const slideCount = slides.length;
   .hero-slider-wrapper {
     position: relative;
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
+    height: 40vh;
+    height: 40dvh;
     overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .hero-slider-wrapper {
+      height: 50vh;
+      height: 50dvh;
+    }
   }
 
   .hero-slider {
@@ -206,13 +213,19 @@ const slideCount = slides.length;
   /* Controls */
   .hero-controls {
     position: absolute;
-    bottom: 1.5rem;
+    bottom: 0.75rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+  }
+
+  .hero-slider-wrapper:hover .hero-controls {
+    opacity: 1;
   }
 
   .hero-dots {
@@ -223,8 +236,8 @@ const slideCount = slides.length;
 
   .hero-dot {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 28px;
+    height: 28px;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -236,38 +249,34 @@ const slideCount = slides.length;
 
   .hero-dot::after {
     content: '';
-    width: 10px;
-    height: 10px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
     transition: all 0.3s ease;
   }
 
   .hero-dot.active::after {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    box-shadow: 0 0 12px rgba(var(--color-primary-rgb), 0.4);
+    background: rgba(var(--color-primary-rgb), 0.8);
+    box-shadow: 0 0 6px rgba(var(--color-primary-rgb), 0.3);
   }
 
   .hero-pause-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    color: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    width: 28px;
+    height: 28px;
+    color: rgba(255, 255, 255, 0.4);
+    background: transparent;
+    border: none;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .hero-pause-btn:hover {
-    color: white;
-    background: rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .hero-pause-btn .hidden {
@@ -296,8 +305,13 @@ const slideCount = slides.length;
 
 <script>
   function initHeroSlider() {
-    const wrapper = document.querySelector('.hero-slider-wrapper');
+    const wrapper = document.querySelector('.hero-slider-wrapper') as HTMLElement | null;
     if (!wrapper) return;
+
+    // Prevent double-init: clean up any previous instance
+    if ((wrapper as any)._sliderCleanup) {
+      (wrapper as any)._sliderCleanup();
+    }
 
     const slider = wrapper.querySelector('.hero-slider') as HTMLElement;
     const dots = wrapper.querySelectorAll('.hero-dot');
@@ -393,24 +407,28 @@ const slideCount = slides.length;
     );
     slides.forEach((slide) => observer.observe(slide));
 
-    // Dot clicks
+    // Event handlers (named so we can remove them on cleanup)
+    const onDotClick = (dot: Element) => () => {
+      const index = parseInt((dot as HTMLElement).dataset.slideIndex || '0', 10);
+      goToSlide(index);
+      pauseAndResumeLater();
+    };
+
+    const dotHandlers: Array<() => void> = [];
     dots.forEach((dot) => {
-      dot.addEventListener('click', () => {
-        const index = parseInt((dot as HTMLElement).dataset.slideIndex || '0', 10);
-        goToSlide(index);
-        pauseAndResumeLater();
-      });
+      const handler = onDotClick(dot);
+      dotHandlers.push(handler);
+      dot.addEventListener('click', handler);
     });
 
-    // Pause button
-    pauseBtn?.addEventListener('click', togglePlayPause);
+    const onPauseClick = () => togglePlayPause();
+    pauseBtn?.addEventListener('click', onPauseClick);
 
-    // Touch interaction pauses auto-advance temporarily
-    slider.addEventListener('touchstart', pauseAndResumeLater, { passive: true });
-    slider.addEventListener('mousedown', pauseAndResumeLater);
+    const onTouchStart = () => pauseAndResumeLater();
+    slider.addEventListener('touchstart', onTouchStart, { passive: true });
+    slider.addEventListener('mousedown', onTouchStart);
 
-    // Keyboard navigation
-    slider.addEventListener('keydown', (e: KeyboardEvent) => {
+    const onKeydown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         goToSlide(currentIndex - 1);
@@ -420,12 +438,25 @@ const slideCount = slides.length;
         goToSlide((currentIndex + 1) % slides.length);
         pauseAndResumeLater();
       }
-    });
+    };
+    slider.addEventListener('keydown', onKeydown);
 
     // Start
     if (isPlaying) startAutoAdvance();
+
+    // Store cleanup function on the wrapper element
+    (wrapper as any)._sliderCleanup = () => {
+      stopAutoAdvance();
+      if (resumeTimer) clearTimeout(resumeTimer);
+      observer.disconnect();
+      dots.forEach((dot, i) => dot.removeEventListener('click', dotHandlers[i]));
+      pauseBtn?.removeEventListener('click', onPauseClick);
+      slider.removeEventListener('touchstart', onTouchStart);
+      slider.removeEventListener('mousedown', onTouchStart);
+      slider.removeEventListener('keydown', onKeydown);
+    };
   }
 
-  initHeroSlider();
+  // Only use astro:page-load — it fires on initial load too with ClientRouter
   document.addEventListener('astro:page-load', initHeroSlider);
 </script>

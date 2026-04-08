@@ -1,5 +1,5 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import MainLayout from '../../layouts/MainLayout.astro';
 import VideoCard from '../../components/VideoCard.astro';
 import { getVideos, getFeaturedVideos } from '../../lib/directus';
 
@@ -14,86 +14,108 @@ try {
 const videoTypes = [...new Set(allVideos.map(v => v.type))].sort();
 ---
 
-<Layout title="Videos" description="Watch The Cure music videos, live performances, interviews, and documentaries.">
-  <div class="pt-24 pb-16 relative">
-    <div class="responsive-container">
-      <!-- Header -->
-      <div class="mb-10">
-        <nav class="mb-4" aria-label="Breadcrumb">
-          <ol class="flex items-center gap-2 text-sm text-white/85">
+<MainLayout title="Videos" description="Watch The Cure music videos, live performances, interviews, and documentaries.">
+  <Fragment slot="hero">
+    <div class="glass-panel p-6 md:p-8 mb-8 relative overflow-hidden">
+      <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-primary/3 rounded-full blur-3xl"></div>
+      <div class="relative z-10">
+        <nav class="mb-3" aria-label="Breadcrumb">
+          <ol class="flex items-center gap-2 text-xs text-white/60">
             <li><a href="/" class="hover:text-white transition-colors">Home</a></li>
             <li aria-hidden="true">/</li>
-            <li class="text-white">Videos</li>
+            <li class="text-white/90">Videos</li>
           </ol>
         </nav>
-        <h1 class="font-display text-5xl md:text-6xl text-white text-glow mb-3">Videos</h1>
-        <p class="text-white/85 max-w-2xl">Music videos, live performances, interviews, documentaries, and more from The Cure's visual archive.</p>
+        <h1 class="font-heading text-2xl md:text-3xl text-white tracking-wider mb-2">Videos</h1>
+        <p class="text-text-secondary text-sm max-w-2xl">Music videos, live performances, interviews, documentaries, and more from The Cure's visual archive.</p>
       </div>
+    </div>
+  </Fragment>
 
-      <!-- Featured Video -->
+  <!-- Featured Video -->
+  {featuredVideo && (
+    <div class="mb-8 glass-panel overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-0">
+        <div class="lg:col-span-3 relative aspect-video">
+          {featuredVideo.embedId ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${featuredVideo.embedId}`}
+              class="absolute inset-0 w-full h-full"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          ) : (
+            <a href={featuredVideo.videoUrl} target="_blank" rel="noopener noreferrer" class="block relative w-full h-full group">
+              <img src={featuredVideo.thumbnailUrl || `https://img.youtube.com/vi/${featuredVideo.embedId}/maxresdefault.jpg`} alt={featuredVideo.title} class="w-full h-full object-cover" />
+              <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
+                <svg class="size-12 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </a>
+          )}
+        </div>
+        <div class="lg:col-span-2 p-6 md:p-8 flex flex-col">
+          <span class="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-primary bg-white/[0.06] border border-primary/[0.35] w-fit mb-3">Featured</span>
+          <h2 class="font-heading text-xl text-white mb-3">{featuredVideo.title}</h2>
+          {featuredVideo.description && <p class="text-white/85 text-sm leading-relaxed flex-1">{featuredVideo.description}</p>}
+          {featuredVideo.director && <p class="text-white/80 text-xs mt-3">Directed by {featuredVideo.director}</p>}
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- Quick Insights -->
+  <section class="mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="glass-tile p-4">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Total Videos</p>
+        <p class="text-2xl font-display text-white text-glow">{allVideos.length}</p>
+      </div>
+      <div class="glass-tile p-4">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Types</p>
+        <p class="text-2xl font-display text-white text-glow">{videoTypes.length}</p>
+      </div>
       {featuredVideo && (
-        <div class="mb-12 glass-panel overflow-hidden">
-          <div class="grid grid-cols-1 lg:grid-cols-5 gap-0">
-            <div class="lg:col-span-3 relative aspect-video">
-              {featuredVideo.embedId ? (
-                <iframe
-                  src={`https://www.youtube.com/embed/${featuredVideo.embedId}`}
-                  class="absolute inset-0 w-full h-full"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                  loading="lazy"
-                ></iframe>
-              ) : (
-                <a href={featuredVideo.videoUrl} target="_blank" rel="noopener noreferrer" class="block relative w-full h-full group">
-                  <img src={featuredVideo.thumbnailUrl || `https://img.youtube.com/vi/${featuredVideo.embedId}/maxresdefault.jpg`} alt={featuredVideo.title} class="w-full h-full object-cover" />
-                  <div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
-                    <svg class="size-16 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                  </div>
-                </a>
-              )}
-            </div>
-            <div class="lg:col-span-2 p-6 md:p-8 flex flex-col">
-              <span class="px-3 py-1 text-[11px] uppercase tracking-[0.16em] text-primary bg-white/[0.06] border border-primary/[0.35] w-fit mb-3">Featured</span>
-              <h2 class="font-heading text-xl text-white mb-3">{featuredVideo.title}</h2>
-              {featuredVideo.description && <p class="text-white/85 text-sm leading-relaxed flex-1">{featuredVideo.description}</p>}
-              {featuredVideo.director && <p class="text-white/80 text-xs mt-3">Directed by {featuredVideo.director}</p>}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <!-- Filter -->
-      {videoTypes.length > 1 && (
-        <div class="flex flex-wrap gap-2 my-8" id="video-filters">
-          <button class="filter-btn active px-3 py-1.5 text-xs uppercase tracking-wider rounded-sm bg-white/10 border border-white/15 text-primary transition-all" data-type="all">
-            All
-          </button>
-          {videoTypes.map(type => (
-            <button class="filter-btn px-3 py-1.5 text-xs uppercase tracking-wider rounded-sm bg-white/[0.04] border border-white/10 text-white/80 hover:text-white hover:border-white/20 transition-all" data-type={type}>
-              {type.replace('_', ' ')}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <!-- Video Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="video-grid">
-        {allVideos.map(video => (
-          <div class="video-item" data-type={video.type}>
-            <VideoCard video={video} />
-          </div>
-        ))}
-      </div>
-
-      {allVideos.length === 0 && (
-        <div class="glass-tile p-12 text-center">
-          <p class="text-white/80 text-lg">No videos available yet. Check back soon!</p>
+        <div class="glass-tile p-4 col-span-2">
+          <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Featured</p>
+          <p class="text-white font-heading text-sm truncate">{featuredVideo.title}</p>
+          {featuredVideo.director && <p class="text-white/60 text-xs">Dir. {featuredVideo.director}</p>}
         </div>
       )}
     </div>
+  </section>
+
+  <!-- Filter -->
+  {videoTypes.length > 1 && (
+    <div class="flex flex-wrap gap-2 my-6" id="video-filters">
+      <button class="filter-btn active px-3 py-1.5 text-xs uppercase tracking-wider bg-primary/10 border border-primary/30 text-primary transition-all" data-type="all">
+        All
+      </button>
+      {videoTypes.map(type => (
+        <button class="filter-btn px-3 py-1.5 text-xs uppercase tracking-wider bg-white/[0.04] border border-white/10 text-white/70 hover:text-white hover:border-white/20 transition-all" data-type={type}>
+          {type.replace('_', ' ')}
+        </button>
+      ))}
+    </div>
+  )}
+
+  <!-- Video Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="video-grid">
+    {allVideos.map(video => (
+      <div class="video-item" data-type={video.type}>
+        <VideoCard video={video} />
+      </div>
+    ))}
   </div>
-</Layout>
+
+  {allVideos.length === 0 && (
+    <div class="glass-tile p-12 text-center">
+      <p class="text-white/80 text-lg">No videos available yet. Check back soon!</p>
+    </div>
+  )}
+</MainLayout>
 
 <script>
   function setupFilters() {
@@ -103,11 +125,11 @@ const videoTypes = [...new Set(allVideos.map(v => v.type))].sort();
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
         buttons.forEach(b => {
-          b.classList.remove('active', 'bg-white/10', 'border-white/15', 'text-primary');
-          b.classList.add('bg-white/[0.04]', 'border-white/10', 'text-white/80');
+          b.classList.remove('active', 'bg-primary/10', 'border-primary/30', 'text-primary');
+          b.classList.add('bg-white/[0.04]', 'border-white/10', 'text-white/70');
         });
-        btn.classList.add('active', 'bg-white/10', 'border-white/15', 'text-primary');
-        btn.classList.remove('bg-white/[0.04]', 'border-white/10', 'text-white/80');
+        btn.classList.add('active', 'bg-primary/10', 'border-primary/30', 'text-primary');
+        btn.classList.remove('bg-white/[0.04]', 'border-white/10', 'text-white/70');
 
         const type = btn.getAttribute('data-type');
         items.forEach(item => {

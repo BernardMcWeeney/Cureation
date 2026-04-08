@@ -249,6 +249,33 @@ export interface WikiMember {
   tenure: string;
 }
 
+// =============================================================================
+// MEMBER STINT TYPES (Band Timeline)
+// =============================================================================
+
+export interface DirectusMemberStint {
+  id: number;
+  member: number;
+  start_year: number;
+  end_year: number | null;
+  role: string;
+  stint_number: number;
+  notes?: string;
+}
+
+export interface MemberStint {
+  id: number;
+  memberId: number;
+  memberName: string;
+  memberSlug: string;
+  memberPhoto?: string;
+  startYear: number;
+  endYear: number | null;
+  role: string;
+  stintNumber: number;
+  notes?: string;
+}
+
 export type TimelineEventType = 'release' | 'tour' | 'member_change' | 'award' | 'milestone' | 'other';
 
 export interface DirectusTimelineEvent {

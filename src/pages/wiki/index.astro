@@ -107,36 +107,76 @@ const recentEvents = timelineEvents.slice(0, 5);
     </nav>
   </section>
 
+  <!-- Quick Insights -->
+  <section class="mb-8">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="glass-tile p-4">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Current Members</p>
+        <p class="text-2xl font-display text-white text-glow">{currentMembers.length}</p>
+      </div>
+      <div class="glass-tile p-4">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Past Members</p>
+        <p class="text-2xl font-display text-white text-glow">{pastMembers.length}</p>
+      </div>
+      <div class="glass-tile p-4">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Timeline Events</p>
+        <p class="text-2xl font-display text-white text-glow">{timelineEvents.length}</p>
+      </div>
+      <div class="glass-tile p-4">
+        <p class="text-white/50 text-[11px] uppercase tracking-[0.15em] mb-1">Wiki Articles</p>
+        <p class="text-2xl font-display text-white text-glow">{articles.length}</p>
+      </div>
+    </div>
+  </section>
+
   {/* Current members */}
   {currentMembers.length > 0 && (
     <section class="mb-12">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl text-white section-header">Current Members</h2>
-        <a href="/wiki/members" class="text-primary text-sm hover:underline">View all →</a>
+        <a href="/wiki/members" class="group text-sm text-white/80 hover:text-white transition-colors flex items-center gap-1.5">
+          View all
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {currentMembers.map(member => (
-          <a href={`/wiki/members/${member.slug}`} class="group" data-filter-item data-filter-text={`${member.name} ${Array.isArray(member.instruments) ? member.instruments.join(' ') : (member.instruments || '')} ${member.tenure}`}>
-            <div class="glass-elevated p-4 text-center">
-              {member.photo ? (
-                <img
-                  src={member.photo}
-                  alt={member.name}
-                  class="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-white/10 group-hover:border-white/20/40 transition-colors"
-                />
-              ) : (
-                <div class="w-20 h-20 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center border-2 border-white/10">
-                  <span class="text-2xl text-primary font-medium">{member.name.charAt(0)}</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {currentMembers.map(member => {
+          const instruments = Array.isArray(member.instruments) ? member.instruments : [];
+          return (
+            <a href={`/wiki/members/${member.slug}`} class="member-card group block" data-filter-item data-filter-text={`${member.name} ${instruments.join(' ')} ${member.tenure}`}>
+              <div class="glass-tile p-0 overflow-hidden h-full">
+                <div class="flex items-start gap-4 p-5">
+                  {/* Photo */}
+                  <div class="shrink-0">
+                    {member.photo ? (
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        class="w-16 h-16 rounded-full object-cover border-2 border-white/10 group-hover:border-primary/40 transition-colors"
+                      />
+                    ) : (
+                      <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border-2 border-white/10 group-hover:border-primary/40 transition-colors">
+                        <span class="text-xl text-primary font-display">{member.name.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Info */}
+                  <div class="min-w-0 flex-1">
+                    <h3 class="font-heading text-lg text-white group-hover:text-primary transition-colors leading-tight">
+                      {member.name}
+                    </h3>
+                    {instruments.length > 0 && (
+                      <p class="text-white/60 text-sm mt-1">{instruments.join(', ')}</p>
+                    )}
+                    <p class="text-white/40 text-xs mt-1.5">{member.tenure}</p>
+                  </div>
+                  {/* Arrow */}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m9 18 6-6-6-6"/></svg>
                 </div>
-              )}
-              <h3 class="font-heading text-white group-hover:text-white transition-colors">
-                {member.name}
-              </h3>
-              <p class="text-white/80 text-sm mt-1">{Array.isArray(member.instruments) ? member.instruments.slice(0, 2).join(', ') : (member.instruments || '')}</p>
-              <p class="text-white/80 text-xs mt-1">{member.tenure}</p>
-            </div>
-          </a>
-        ))}
+              </div>
+            </a>
+          );
+        })}
       </div>
     </section>
   )}

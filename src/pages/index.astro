@@ -1,12 +1,23 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import NewsCard from '../components/NewsCard.astro';
 
 // Homepage sections
 import HeroSlider from '../components/home/HeroSlider.astro';
 import DiscographyStripSection from '../components/home/DiscographyStripSection.astro';
 import CompactStatsStrip from '../components/home/CompactStatsStrip.astro';
 import NewsletterCTASection from '../components/home/NewsletterCTASection.astro';
+
+// Dashboard widgets
+import FeaturedNewsWidget from '../components/home/widgets/FeaturedNewsWidget.astro';
+import NextConcertWidget from '../components/home/widgets/NextConcertWidget.astro';
+import OnThisDayWidget from '../components/home/widgets/OnThisDayWidget.astro';
+import SongOfTheDayWidget from '../components/home/widgets/SongOfTheDayWidget.astro';
+import DidYouKnowWidget from '../components/home/widgets/DidYouKnowWidget.astro';
+import PhotoOfTheDayWidget from '../components/home/widgets/PhotoOfTheDayWidget.astro';
+import BlueskyFeedWidget from '../components/home/widgets/BlueskyFeedWidget.astro';
+import OfficialNewsWidget from '../components/home/widgets/OfficialNewsWidget.astro';
+import AlbumOfTheMonthWidget from '../components/home/widgets/AlbumOfTheMonthWidget.astro';
+import ActivePollWidget from '../components/home/widgets/ActivePollWidget.astro';
 
 // Data fetching
 import {
@@ -20,7 +31,14 @@ import {
   getRandomFact,
   fetchAlbums,
   formatAlbum,
+  getPhotoOfTheDay,
+  getFeaturedPoll,
+  getNextConcert,
+  filterPastSetlists,
 } from '../lib/directus';
+
+import { getBlueskyFeed } from '../lib/bluesky';
+import { fetchRSSFeed } from '../lib/rss';
 
 import {
   getMockSongOfTheDay,
@@ -41,6 +59,11 @@ const [
   timelineEvents,
   randomFact,
   rawAlbums,
+  photoOfTheDay,
+  featuredPoll,
+  nextConcert,
+  blueskyPosts,
+  rssItems,
 ] = await Promise.all([
   getFeaturedNews(),
   getSetlistsWithSongs(),
@@ -50,6 +73,11 @@ const [
   getTimelineEvents(),
   getRandomFact(),
   fetchAlbums(),
+  getPhotoOfTheDay(),
+  getFeaturedPoll(),
+  getNextConcert(),
+  getBlueskyFeed(siteConfig.social.bluesky || 'thecure.com'),
+  fetchRSSFeed(siteConfig.rssFeeds?.official || 'https://www.thecure.com/feed/'),
 ]);
 
 // --- Derived values ---
@@ -69,15 +97,16 @@ const archiveTotals = {
   shows: overallStats.totalShows || setlists.length || 1000,
   countries: overallStats.countriesVisited || 5,
 };
+const historicalSetlists = filterPastSetlists(setlists);
 
-// --- On This Day computation (lifted from OnThisDaySection) ---
+// --- On This Day computation ---
 const today = new Date();
 const currentMonth = today.getMonth() + 1;
 const currentDay = today.getDate();
 const dateString = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
 const uniqueShows = new Map<string, (typeof setlists)[number]>();
-setlists
+historicalSetlists
   .filter((setlist) => {
     if (!setlist.date) return false;
     const eventDate = new Date(setlist.date);
@@ -176,7 +205,7 @@ slides.push({
   label: `Song of the Day: ${songOfTheDay.title}`,
 });
 
-// On This Day slide — include if we have entries or a fallback fact
+// On This Day slide
 if (otdHasEntries || randomFact) {
   slides.push({
     id: 'on-this-day',
@@ -195,10 +224,13 @@ if (spotlightAlbum) {
     label: `Album Spotlight: ${spotlightAlbum.title}`,
   });
 }
+
+// Featured news post for widget (use first post from grid)
+const featuredPost = featuredNews || (newsPostsForGrid.length > 0 ? newsPostsForGrid[0] : null);
 ---
 
 <Layout>
-  <!-- BLOCK 1: Hero Slider -->
+  <!-- SECTION A: Compact Slider -->
   <HeroSlider
     slides={slides}
     welcomeData={{ navigationTiles }}
@@ -216,27 +248,52 @@ if (spotlightAlbum) {
   />
 
   <div class="relative z-10">
-    <!-- BLOCK 2: Latest Content -->
-    <section class="py-12">
+    <!-- SECTION B: Bento Grid -->
+    <section class="pt-8 pb-10 md:pt-10 md:pb-12">
       <div class="responsive-container">
-        <div class="gothic-heading mb-6">
-          <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Latest</h2>
+        <div class="flex items-center justify-between mb-6">
+          <div class="gothic-heading flex-1">
+            <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Today on Cureation</h2>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {newsPostsForGrid.slice(1, 4).map(post => (
-            <NewsCard post={post} compact={true} />
-          ))}
+        <div class="bento-grid">
+          {/* Row 1: Featured News (2-col) + Next Concert */}
+          {featuredPost && <FeaturedNewsWidget post={featuredPost} />}
+          <NextConcertWidget concert={nextConcert} />
+
+          {/* Row 2: On This Day + Song of the Day */}
+          <OnThisDayWidget
+            dateString={dateString}
+            showCount={todaySetlists.length}
+            milestoneCount={todayEvents.length}
+            shows={otdShows}
+            hasEntries={otdHasEntries}
+            fallbackFact={randomFact?.fact || undefined}
+          />
+          <SongOfTheDayWidget song={songOfTheDay} />
+
+          {/* Row 3: Did You Know + Photo of the Day */}
+          <DidYouKnowWidget fact={randomFact} />
+          <PhotoOfTheDayWidget photo={photoOfTheDay} />
+
+          {/* Row 4: Bluesky Feed (2-col) + Active Poll */}
+          <BlueskyFeedWidget posts={blueskyPosts} />
+          <ActivePollWidget poll={featuredPoll} />
+
+          {/* Row 5: Official News RSS + Album of the Month */}
+          <OfficialNewsWidget items={rssItems} />
+          <AlbumOfTheMonthWidget album={spotlightAlbum} />
         </div>
       </div>
     </section>
 
-    <!-- BLOCK 3: Discography Strip -->
+    <!-- SECTION C: Discography Strip -->
     <DiscographyStripSection />
 
-    <!-- BLOCK 4: Stats + Community -->
+    <!-- SECTION D: Archive Stats -->
     <CompactStatsStrip stats={archiveTotals} />
 
-    <!-- BLOCK 5: Newsletter + Contribute -->
+    <!-- SECTION E: Newsletter + Contribute -->
     <NewsletterCTASection />
   </div>
 </Layout>

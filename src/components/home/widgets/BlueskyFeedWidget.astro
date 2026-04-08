@@ -1,0 +1,109 @@
+---
+import type { BlueskyPost } from '../../../lib/bluesky';
+
+interface Props {
+  posts: BlueskyPost[];
+}
+
+const { posts } = Astro.props;
+
+function timeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = now - then;
+
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
+}
+---
+
+<div class="glass-tile p-5 span-2 h-full">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-sky-400" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.6 6.463.636 2.44 2.94 3.066 5.031 2.711-3.558.606-6.631 2.072-2.174 7.125C7.86 25.142 11.17 19.125 12 16.5c.83 2.625 4.14 8.642 8.543 3.567 4.457-5.053 1.384-6.519-2.174-7.125 2.091.355 4.395-.271 5.031-2.711.222-.813.6-5.772.6-6.463 0-.688-.139-1.86-.902-2.203-.659-.299-1.664-.621-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z" />
+      </svg>
+      <span class="text-text-muted text-xs font-medium uppercase tracking-[0.12em]">The Cure on Bluesky</span>
+    </div>
+    <a
+      href="https://bsky.app/profile/thecure.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-sky-400 text-xs hover:text-white transition-colors"
+    >
+      @thecure.com
+    </a>
+  </div>
+
+  {posts.length > 0 ? (
+    <div class="space-y-3 max-h-[320px] overflow-y-auto scrollbar-thin">
+      {posts.map((post) => (
+        <a
+          href={post.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="block p-3 bg-white/[0.03] border border-border-subtle hover:border-border-default hover:bg-white/[0.05] transition-all"
+        >
+          <div class="flex items-start gap-3">
+            {post.authorAvatar && (
+              <img
+                src={post.authorAvatar}
+                alt=""
+                class="size-8 rounded-full shrink-0"
+                loading="lazy"
+              />
+            )}
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-white text-xs font-medium truncate">{post.authorName}</span>
+                <span class="text-text-muted text-xs">{timeAgo(post.createdAt)}</span>
+              </div>
+              <p class="text-text-secondary text-sm leading-relaxed line-clamp-3">{post.text}</p>
+
+              {post.images && post.images.length > 0 && (
+                <div class="mt-2 flex gap-1.5 overflow-hidden">
+                  {post.images.slice(0, 2).map((img) => (
+                    <img
+                      src={img.thumb}
+                      alt={img.alt || ''}
+                      class="h-16 w-auto object-cover rounded-sm border border-border-subtle"
+                      loading="lazy"
+                    />
+                  ))}
+                </div>
+              )}
+
+              <div class="flex items-center gap-4 mt-2 text-text-muted text-xs">
+                <span>{post.replyCount} replies</span>
+                <span>{post.repostCount} reposts</span>
+                <span>{post.likeCount} likes</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  ) : (
+    <p class="text-text-muted text-sm">Unable to load Bluesky feed. Visit <a href="https://bsky.app/profile/thecure.com" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:text-white transition-colors">@thecure.com on Bluesky</a>.</p>
+  )}
+</div>
+
+<style>
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--color-primary-rgb), 0.15) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(var(--color-primary-rgb), 0.15);
+  }
+</style>

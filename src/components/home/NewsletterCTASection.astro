@@ -2,8 +2,22 @@
 // No props needed — self-contained CTA section
 ---
 
-<section class="py-16">
+<section class="py-8 md:py-10">
   <div class="responsive-container">
+    <div class="flex items-center justify-between mb-6">
+      <div class="gothic-heading flex-1">
+        <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Community</h2>
+      </div>
+      <a
+        href="/community"
+        class="group text-sm text-white/80 hover:text-white transition-colors flex items-center gap-1.5 ml-4"
+      >
+        Visit forums
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4 group-hover:translate-x-1 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
     <div class="glass-panel p-8 md:p-12">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         {/* Newsletter */}

@@ -304,60 +304,62 @@
 
   /* Glass Panel - Primary content containers */
   .glass-panel {
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px) saturate(1.1);
+    -webkit-backdrop-filter: blur(24px) saturate(1.1);
     border-radius: var(--radius-lg);
     background: linear-gradient(
       145deg,
       rgba(var(--color-primary-rgb), 0.06) 0%,
-      rgba(15, 15, 18, 0.92) 30%,
-      rgba(12, 12, 15, 0.95) 100%
+      rgba(15, 15, 18, 0.7) 30%,
+      rgba(12, 12, 15, 0.75) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.5),
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
     transition: all 0.4s var(--ease-smooth);
   }
 
   .glass-panel:hover {
-    border-color: rgba(var(--color-primary-rgb), 0.3);
+    border-color: rgba(var(--color-primary-rgb), 0.25);
     box-shadow:
-      0 16px 48px rgba(0, 0, 0, 0.6),
-      0 8px 24px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 20px rgba(var(--color-primary-rgb), 0.08);
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 20px rgba(var(--color-primary-rgb), 0.06);
   }
 
   /* Glass Tile - For bento grid tiles */
   .glass-tile {
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px) saturate(1.1);
+    -webkit-backdrop-filter: blur(20px) saturate(1.1);
     border-radius: var(--radius-lg);
     background: linear-gradient(
       145deg,
-      rgba(var(--color-primary-rgb), 0.05) 0%,
-      rgba(15, 15, 18, 0.93) 40%,
-      rgba(12, 12, 15, 0.96) 100%
+      rgba(var(--color-primary-rgb), 0.06) 0%,
+      rgba(15, 15, 18, 0.65) 40%,
+      rgba(12, 12, 15, 0.7) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.5),
-      0 4px 16px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
     transition: all 0.4s var(--ease-smooth);
   }
 
   .glass-tile:hover {
-    border-color: rgba(var(--color-primary-rgb), 0.25);
+    background: linear-gradient(
+      145deg,
+      rgba(var(--color-primary-rgb), 0.08) 0%,
+      rgba(15, 15, 18, 0.72) 40%,
+      rgba(12, 12, 15, 0.76) 100%
+    );
+    border-color: rgba(var(--color-primary-rgb), 0.2);
     box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.6),
-      0 8px 24px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 25px rgba(var(--color-primary-rgb), 0.08);
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 20px rgba(var(--color-primary-rgb), 0.06);
   }
 
   /* Discography-style hover treatment for homepage feature cards */
@@ -575,6 +577,28 @@
     box-shadow:
       0 6px 20px rgba(0, 0, 0, 0.4),
       var(--glow-sm);
+  }
+
+  /* ─── Bento Dashboard Grid ─── */
+  .bento-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .bento-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .bento-grid .span-2 {
+      grid-column: span 2;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bento-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 
   /* Theme divider with gradient */

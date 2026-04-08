@@ -125,7 +125,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
 
   <!-- All Albums Panel (default) -->
   <section id="panel-all" class="type-panel">
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
       {allAlbums.map((album, index) => (
         <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year} ${album.type}`}>
           <AlbumCard
@@ -181,7 +181,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
               </span>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
               {eraAlbums.map((album, index) => (
                 <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year}`}>
                   <AlbumCard
@@ -203,7 +203,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
 
     <!-- Chronological View (hidden by default) -->
     <div id="studio-chrono-view" class="hidden">
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
         {studioAlbums.map((album, index) => (
           <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year}`}>
             <AlbumCard
@@ -228,7 +228,7 @@ const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> 
 
     return (
       <section id={`panel-${tab.key}`} class="type-panel hidden">
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           {typeAlbums.map((album, index) => (
             <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year} ${tab.label}`}>
               <AlbumCard

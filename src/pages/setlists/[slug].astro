@@ -292,11 +292,14 @@ function buildSourceLinks(rawSource?: string): SourceLink[] {
 }
 
 const sourceLinks = buildSourceLinks(setlist.source);
+const isUpcomingShow = setlist.date ? setlist.date > new Date().toISOString().split('T')[0] : false;
 ---
 
 <MainLayout
   title={`${setlist.venue} - ${setlist.formattedDate}`}
-  description={`The Cure setlist from ${setlist.venue} in ${location} on ${setlist.formattedDate}. ${setlist.songCount} songs performed.`}
+  description={isUpcomingShow
+    ? `The Cure are scheduled to play ${setlist.venue} in ${location} on ${setlist.formattedDate}. Setlist pending.`
+    : `The Cure setlist from ${setlist.venue} in ${location} on ${setlist.formattedDate}. ${setlist.songCount} songs performed.`}
   ogImage={setlist.coverImage}
   showSidebar={false}
   pageClass="bg-black"
@@ -451,7 +454,7 @@ const sourceLinks = buildSourceLinks(setlist.source);
 
       {setlist.songs.length === 0 && (
         <p class="text-white/85 text-center py-8">
-          Setlist details not available for this show.
+          {isUpcomingShow ? 'This show is upcoming. Setlist details will be added after the performance.' : 'Setlist details not available for this show.'}
         </p>
       )}
     </div>
