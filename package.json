@@ -6,12 +6,13 @@
     "dev": "astro dev",
     "build": "astro build && npx pagefind --site dist",
     "preview": "astro preview",
+    "deploy": "astro build && npx pagefind --site dist && wrangler deploy",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.2",
+    "@astrojs/cloudflare": "^13.1.8",
     "@tailwindcss/vite": "^4.1.18",
-    "astro": "^6.0.5",
+    "astro": "^6.1.5",
     "daisyui": "^5.5.14",
     "tailwindcss": "^4.1.18"
   },
