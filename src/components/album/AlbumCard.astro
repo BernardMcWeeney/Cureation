@@ -1,0 +1,61 @@
+---
+import { asset } from '../../lib/assets';
+import type { Album } from '../../lib/directus';
+
+interface Props {
+  album: Pick<Album, 'id' | 'title' | 'slug' | 'cover_art' | 'release_date' | 'type'>;
+  size?: 'sm' | 'md' | 'lg';
+}
+const { album, size = 'md' } = Astro.props;
+const year = album.release_date?.slice(0, 4) || '—';
+const href = album.slug ? `/discography/${album.slug}` : '#';
+const img = asset(album.cover_art, 'card');
+---
+<a href={href} class={`album-card album-card--${size}`}>
+  <figure class="album-card__art" style={`view-transition-name: album-${album.slug || album.id}`}>
+    {album.cover_art ? (
+      <img src={img} alt={`${album.title} cover`} loading="lazy" decoding="async" />
+    ) : (
+      <div class="placeholder">No cover</div>
+    )}
+  </figure>
+  <div class="album-card__meta">
+    <h3 class="album-card__title">{album.title}</h3>
+    <div class="album-card__sub">
+      <span>{year}</span>
+      {album.type && album.type !== 'studio' && <span class="album-card__type">{album.type}</span>}
+    </div>
+  </div>
+</a>
+
+<style>
+  .album-card { display: flex; flex-direction: column; gap: .7rem; border: none; }
+  .album-card__art {
+    aspect-ratio: 1 / 1; margin: 0; overflow: hidden;
+    background: var(--bg-2); border: 1px solid var(--rule);
+    position: relative;
+  }
+  .album-card__art img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: saturate(.92) contrast(1.04);
+    transition: transform .6s ease, filter .4s ease;
+  }
+  .album-card:hover .album-card__art img {
+    transform: scale(1.04);
+    filter: saturate(1) contrast(1.08);
+  }
+  .album-card__title {
+    font-family: var(--f-display); font-style: italic;
+    font-weight: 500; line-height: 1.1;
+    font-size: clamp(18px, 1.8vw, 24px);
+    margin: 0; color: var(--ink);
+  }
+  .album-card__sub {
+    font-family: var(--f-mono); font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted); display: flex; gap: .8rem; align-items: center;
+  }
+  .album-card__type { color: var(--accent-3); }
+  .album-card--lg .album-card__title { font-size: clamp(22px, 2.2vw, 32px); }
+  .album-card--sm .album-card__title { font-size: 16px; }
+</style>

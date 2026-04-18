@@ -1,0 +1,148 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Tag from '../../components/ui/Tag.astro';
+import { getSongBySlug, listAlbums } from '../../lib/directus';
+import { asset } from '../../lib/assets';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/songs');
+const song: any = await getSongBySlug(slug);
+if (!song) return new Response('Not found', { status: 404 });
+
+const albums = await listAlbums();
+const album = song.album ? albums.find((a) => a.id === song.album) : null;
+
+const structured: any[] = Array.isArray(song.lyrics_structured) ? song.lyrics_structured : [];
+
+const facts: Array<[string, string]> = [
+  ['Record', album?.title || '—'],
+  ['Track №', song.track_number ? String(song.track_number) : '—'],
+  ['Length', song.duration || '—'],
+  ['Writer', song.writer || '—'],
+  ['Composer', song.composer || song.writer || '—'],
+  ['Key', song.musical_key || '—'],
+  ['BPM', song.bpm ? String(song.bpm) : '—'],
+  ['Tuning', song.guitar_tuning || '—'],
+  ['First played', song.first_played_live || '—'],
+  ['Last played', song.last_played_live || '—'],
+  ['Live plays', (song.times_played_live || 0).toLocaleString()],
+  ['Released as single', song.is_single ? 'Yes' : 'No'],
+];
+
+const listenLinks: any[] = Array.isArray(song.listen_links) ? song.listen_links : [];
+const year = album?.release_date?.slice(0, 4);
+---
+<Layout title={`${song.title} · Cureation`}>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'Songs', href: '/songs' },
+      ...(album ? [{ label: album.title, href: `/discography/${album.slug}` }] : []),
+      { label: song.title },
+    ]} />
+  </div>
+
+  <section class="container" style="margin-top: 1rem;">
+    <div class="mono-sm muted">SONG · {year || '—'}</div>
+    <div class="cluster" style="gap:.4rem; margin-top:.6rem;">
+      {album && <Tag>{album.title.toUpperCase()}</Tag>}
+      {song.is_single && <Tag variant="accent">SINGLE</Tag>}
+      {song.times_played_live > 0 && <Tag>{song.times_played_live.toLocaleString()} PLAYS</Tag>}
+    </div>
+    <h1 class="serif" style={`font-size: clamp(48px, 8vw, 112px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0; letter-spacing: -.01em;`}>
+      {song.title}
+    </h1>
+    {song.song_meaning && (
+      <p style="font-family: var(--f-serif); font-size: 18px; line-height:1.55; color: var(--ink-2); max-width: 58ch; margin-top: 1rem;">{song.song_meaning}</p>
+    )}
+    <div class="facts" style="margin-top: 1.4rem;">
+      {facts.map(([k, v]) => (
+        <div class="facts__item">
+          <div class="facts__k">{k}</div>
+          <div class="facts__v">{v}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0;">
+    <div class="song-grid">
+      <article class="lyrics">
+        <div class="panel-head" style="border: 1px solid var(--rule);">
+          <span>Lyrics</span>
+          <span>{structured.length > 0 ? `${structured.length} SECTIONS` : 'PLAIN TEXT'}</span>
+        </div>
+        <div class="lyrics__body">
+          {structured.length > 0 ? structured.map((section: any) => (
+            <div class="lyric-section">
+              {section.label && <div class="mono-sm muted lyric-section__label">{String(section.label).toUpperCase()}</div>}
+              {(section.lines || []).map((line: any) => (
+                <div class="lyric-line" data-line-id={line.line_id || line.id}>
+                  {typeof line === 'string' ? line : (line.text || line.line || '')}
+                </div>
+              ))}
+            </div>
+          )) : (
+            song.lyrics ? <pre class="lyrics__plain">{song.lyrics}</pre> : <p class="muted">No lyrics on file.</p>
+          )}
+        </div>
+      </article>
+
+      <aside class="stack" style="--gap: 1.4rem;">
+        {album && (
+          <a class="panel--bare" href={`/discography/${album.slug}`} style="border: 1px solid var(--rule); display:flex; gap: 1rem; padding: 14px; align-items:center; text-decoration: none;">
+            {album.cover_art && <img src={asset(album.cover_art, 'thumb')} alt={album.title} style="width: 72px; height: 72px; object-fit: cover; border: 1px solid var(--rule);" />}
+            <div>
+              <div class="mono-sm muted">FROM THE RECORD</div>
+              <div class="serif" style="font-size:20px; font-style:italic; margin-top:.2rem;">{album.title}</div>
+              <div class="mono-sm" style="color: var(--accent-3); margin-top:.2rem;">{year}</div>
+            </div>
+          </a>
+        )}
+
+        {song.music_video_url && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Music video</span><span>VISUAL</span></div>
+            <div style="padding: 14px 16px;">
+              <a href={song.music_video_url} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);">WATCH →</a>
+            </div>
+          </div>
+        )}
+
+        {listenLinks.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Listen</span><span>STREAMS</span></div>
+            <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
+              {listenLinks.map((l: any) => (
+                <li style="padding: 6px 0;">
+                  <a href={l.url || l.href} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);">{(l.platform || l.label || l.source || 'LINK').toUpperCase()} →</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {song.credits && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Credits</span><span>PERSONNEL</span></div>
+            <div class="mono-sm" style="padding: 12px 16px; color: var(--ink-2); white-space: pre-wrap; line-height: 1.6;">{song.credits}</div>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .song-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3vw, 48px); align-items: start; }
+  @media (max-width: 900px) { .song-grid { grid-template-columns: 1fr; } }
+
+  .lyrics__body { padding: clamp(18px, 2.4vw, 32px); border: 1px solid var(--rule); border-top: none; background: var(--bg-2); }
+  .lyric-section + .lyric-section { margin-top: 1.4rem; }
+  .lyric-section__label { margin-bottom: .5rem; }
+  .lyric-line { font-family: var(--f-serif); font-size: 18px; line-height: 1.75; color: var(--ink); cursor: pointer; padding: 1px 4px; margin: 0 -4px; border-radius: 2px; transition: background-color .15s; }
+  .lyric-line:hover { background: var(--accent-tint); }
+  .lyrics__plain { font-family: var(--f-serif); font-size: 17px; line-height: 1.7; color: var(--ink); white-space: pre-wrap; margin: 0; }
+</style>

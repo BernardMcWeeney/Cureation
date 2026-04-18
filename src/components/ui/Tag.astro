@@ -1,0 +1,19 @@
+---
+interface Props {
+  variant?: 'default' | 'accent';
+  href?: string;
+  class?: string;
+}
+const { variant = 'default', href, class: klass = '' } = Astro.props;
+const classes = ['tag', variant === 'accent' ? 'tag--accent' : '', klass].filter(Boolean).join(' ');
+---
+{href ? (
+  <a href={href} class={classes}><slot /></a>
+) : (
+  <span class={classes}><slot /></span>
+)}
+
+<style>
+  a.tag { border-bottom-width: 1px; }
+  a.tag:hover { color: var(--accent-ink); border-color: var(--accent); }
+</style>

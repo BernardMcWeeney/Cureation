@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+import { listSongs, listAlbums } from '../lib/directus';
+
+const [songs, albums] = await Promise.all([listSongs(), listAlbums()]);
+const albumsById = Object.fromEntries(albums.map((a) => [a.id, a]));
+
+const withLyrics = songs.filter((s: any) => s.lyrics_structured || s.lyrics);
+const letters = Array.from(new Set(withLyrics.map((s) => (s.title?.[0] || '').toUpperCase()).filter(Boolean))).sort();
+
+const facts: Array<[string, string]> = [
+  ['Songs in catalogue', String(songs.length)],
+  ['With lyrics on file', String(withLyrics.length)],
+  ['Letters in index', String(letters.length)],
+  ['Line-level annotations', 'Phase 3'],
+];
+---
+<Layout title="Lyrics · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Lyrics' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · LYRICS</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Lyrics</h1>
+      <p class="deck" style="max-width: 62ch;">Every documented lyric — sortable alphabetically, by record, or by era. Line-by-line annotations live on each song page.</p>
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
+          </div>
+        ))}
+      </div>
+      <div class="cluster" style="gap:6px; flex-wrap:wrap;" data-letter-filters>
+        <Chip active={true} class="l-chip" data-l="all">All</Chip>
+        {letters.map((l) => <Chip class="l-chip" data-l={l}>{l}</Chip>)}
+      </div>
+    </div>
+  </div>
+
+  <IssueSection kicker="A–Z index" title="Catalogue">
+    <table class="data" data-lyric-table>
+      <thead><tr><th style="width:50px;">№</th><th>Title</th><th>Record</th><th class="num" style="text-align:right; width:100px;">Plays</th></tr></thead>
+      <tbody>
+        {withLyrics.slice().sort((a, b) => (a.title || '').localeCompare(b.title || '')).map((s, i) => {
+          const album = s.album ? albumsById[s.album] : null;
+          const letter = (s.title?.[0] || '').toUpperCase();
+          return (
+            <tr data-clickable data-l={letter} onclick={s.slug ? `location.href='/songs/${s.slug}'` : undefined}>
+              <td class="idx">{String(i + 1).padStart(3, '0')}</td>
+              <td><span class="serif" style="font-size:18px; font-style:italic;">{s.title}</span></td>
+              <td class="mono-sm" style="color: var(--ink-2);">{album?.title || '—'}</td>
+              <td class="num">{(s.times_played_live || 0).toLocaleString()}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </IssueSection>
+</Layout>
+
+<script>
+  function wire() {
+    const chips = document.querySelectorAll<HTMLElement>('[data-letter-filters] .l-chip');
+    const rows = document.querySelectorAll<HTMLElement>('[data-lyric-table] tbody tr');
+    if (!chips.length) return;
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+      const l = chip.getAttribute('data-l') || 'all';
+      chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+      rows.forEach((r) => { const rl = r.getAttribute('data-l') || ''; r.style.display = l === 'all' || rl === l ? '' : 'none'; });
+    }));
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

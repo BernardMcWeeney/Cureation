@@ -1,0 +1,96 @@
+---
+const current = Astro.url.pathname;
+const links: Array<{ href: string; label: string }> = [
+  { href: '/discography', label: 'Discography' },
+  { href: '/setlists',    label: 'Live' },
+  { href: '/songs',       label: 'Songs' },
+  { href: '/band',        label: 'Band' },
+  { href: '/wiki',        label: 'Wiki' },
+  { href: '/news',        label: 'News' },
+  { href: '/photos',      label: 'Photos' },
+  { href: '/stats',       label: 'Stats' },
+];
+function isActive(href: string) {
+  if (href === '/') return current === '/';
+  return current === href || current.startsWith(href + '/');
+}
+---
+<header class="nav" data-sticky>
+  <div class="container nav__row">
+    <a href="/" class="nav__brand" aria-label="Cureation — home">
+      <span class="nav__brand-mark">C</span>
+      <span class="nav__brand-name">Cureation</span>
+    </a>
+
+    <nav class="nav__links hide-mobile" aria-label="Primary">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          class={`nav__link ${isActive(l.href) ? 'is-active' : ''}`}
+        >{l.label}</a>
+      ))}
+    </nav>
+
+    <div class="nav__utility">
+      <button class="nav__icon" data-search-open aria-label="Open search (⌘K)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+        </svg>
+      </button>
+      <button class="nav__icon" data-theme-toggle aria-label="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+        </svg>
+      </button>
+      <button class="nav__icon nav__menu" data-menu-open aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in oklab, var(--bg), transparent 30%);
+    backdrop-filter: saturate(140%) blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav__row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 14px 0;
+  }
+  .nav__brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--f-display); font-style: italic; font-size: 22px;
+    color: var(--ink); border: none;
+  }
+  .nav__brand-mark {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border: 1px solid var(--accent);
+    color: var(--accent-ink); background: var(--accent-tint-2);
+    font-family: var(--f-display); font-style: italic; font-size: 18px;
+    line-height: 1;
+  }
+  .nav__brand-name { letter-spacing: 0.01em; }
+  .nav__links { display: flex; gap: 1.6rem; align-items: center; }
+  .nav__link {
+    font-family: var(--f-mono); font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-2); border: none; padding: 4px 0;
+    border-bottom: 1px solid transparent;
+  }
+  .nav__link:hover,
+  .nav__link.is-active { color: var(--accent-ink); border-bottom-color: var(--accent); }
+  .nav__utility { display: flex; align-items: center; gap: 6px; }
+  .nav__icon {
+    width: 36px; height: 36px; display: inline-flex; align-items: center;
+    justify-content: center; background: transparent; color: var(--ink-2);
+    border: 1px solid var(--rule); cursor: pointer; transition: all .18s;
+  }
+  .nav__icon:hover { color: var(--accent-ink); border-color: var(--accent); }
+  .nav__menu { display: none; }
+  @media (max-width: 900px) { .nav__menu { display: inline-flex; } }
+</style>

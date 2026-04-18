@@ -1,538 +1,235 @@
 ---
-import MainLayout from "../../layouts/MainLayout.astro";
-import SetlistSongItem from "../../components/SetlistSongItem.astro";
-import { countryCodeToFlag } from '../../types/directus';
-import { createSongSlug } from '../../lib/lyrics-helpers';
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Tag from '../../components/ui/Tag.astro';
+import { getSetlistBySlug, getSetlistSongs, getVenueById } from '../../lib/directus';
+import { asset } from '../../lib/assets';
 
-interface SongDisplay {
-  position: number;
-  title: string;
-  songSlug?: string;
-  setType: string;
-  notes?: string;
-  isCover: boolean;
-  duration?: string;
-}
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/setlists');
+const setlist = await getSetlistBySlug(slug);
+if (!setlist) return new Response('Not found', { status: 404 });
 
-interface SetlistData {
-  id: string;
-  date: string;
-  formattedDate: string;
-  year: number;
-  venue: string;
-  city: string;
-  country: string;
-  countryCode?: string;
-  stateProvince?: string;
-  tourName?: string;
-  tourSlug?: string;
-  venueSlug?: string;
-  slug: string;
-  notes?: string;
-  source?: string;
-  coverImage?: string;
-  songs: SongDisplay[];
-  songCount: number;
-}
+const [songs, venue] = await Promise.all([
+  getSetlistSongs(setlist.id),
+  setlist.venue_link ? getVenueById(setlist.venue_link) : Promise.resolve(null),
+]);
 
-interface Props {
-  setlist: SetlistData;
-  prevSetlist: SetlistData | null;
-  nextSetlist: SetlistData | null;
-  relatedShows: SetlistData[];
-}
+const year = setlist.date?.slice(0, 4) || '—';
+const readableDate = setlist.date
+  ? new Date(setlist.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
+  : '—';
 
-export async function getStaticPaths() {
-  const DIRECTUS_URL = 'https://dash.cureation.net';
+const sets = songs.reduce((acc: Record<string, any[]>, s: any) => {
+  const k = s.set_type || 'main';
+  (acc[k] = acc[k] || []).push(s);
+  return acc;
+}, {});
+const setOrder = ['main', 'encore_1', 'encore_2', 'encore_3', 'encore'];
+const orderedSets = [
+  ...setOrder.filter((k) => sets[k]).map((k) => [k, sets[k]] as const),
+  ...Object.entries(sets).filter(([k]) => !setOrder.includes(k)),
+];
+const labelFor = (k: string) => k === 'main' ? 'Main set' : k.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-    });
-  }
+const covers = songs.filter((s) => s.is_cover).length;
+const debuts = songs.filter((s) => s.is_debut).length;
+const uniqueAlbums = new Set(songs.map((s) => s.song?.album).filter(Boolean)).size;
 
-  function generateSlug(venue: string, city: string, date: string): string {
-    const dateSlug = date.split('T')[0];
-    return `${venue}-${city}-${dateSlug}`
-      .toLowerCase()
-      .replace(/[^\w\s-]/gi, '')
-      .replace(/\s+/g, '-');
-  }
+const facts: Array<[string, string]> = [
+  ['Date', setlist.date || '—'],
+  ['Venue', setlist.venue || '—'],
+  ['City', [setlist.city, setlist.state_province, setlist.country].filter(Boolean).join(', ') || '—'],
+  ['Tour', setlist.tour_name || '—'],
+  ['Songs', String(songs.length)],
+  ['Covers', String(covers)],
+  ['Debuts', String(debuts)],
+  ['Albums drawn from', String(uniqueAlbums)],
+];
 
-  try {
-    // Fetch all setlists
-    const setlistsResponse = await fetch(`${DIRECTUS_URL}/items/setlists?sort=-date&limit=-1&fields=id,date,venue,city,country,country_code,state_province,tour_name,tour,slug,song_count,venue_image,venue_link,notes,source`);
+const supportActs: string[] = Array.isArray(setlist.support_acts)
+  ? setlist.support_acts.map((a: any) => typeof a === 'string' ? a : (a?.name || a?.artist)).filter(Boolean)
+  : [];
 
-    // Fetch venues for linking
-    const venuesResponse = await fetch(`${DIRECTUS_URL}/items/venues?limit=-1&fields=id,name,slug`);
-    const venuesData = await venuesResponse.json();
-    const venueMap = new Map<number, { name: string; slug: string }>();
-    if (venuesData.data) {
-      for (const v of venuesData.data) {
-        venueMap.set(v.id, { name: v.name, slug: v.slug || '' });
-      }
-    }
-
-    // Fetch tours for linking
-    const toursResponse = await fetch(`${DIRECTUS_URL}/items/tours?limit=-1&fields=id,name,slug`);
-    const toursData = await toursResponse.json();
-    const tourMap = new Map<number, { name: string; slug: string }>();
-    if (toursData.data) {
-      for (const t of toursData.data) {
-        tourMap.set(t.id, { name: t.name, slug: t.slug || '' });
-      }
-    }
-    const setlistsData = await setlistsResponse.json();
-
-    if (!setlistsData.data || !Array.isArray(setlistsData.data)) {
-      console.log('No setlists data found');
-      return [];
-    }
-
-    // Fetch all setlist_songs from the junction table
-    const songsResponse = await fetch(`${DIRECTUS_URL}/items/setlist_songs?limit=-1&fields=setlist,song,song_title,position,set_type,notes,is_cover,cover_artist&sort=position`);
-    const songsData = await songsResponse.json();
-
-    // Build a map of setlist_id -> songs
-    const songsBySetlist = new Map<string, any[]>();
-    if (songsData.data) {
-      for (const row of songsData.data) {
-        const slId = row.setlist?.toString() || '';
-        if (!songsBySetlist.has(slId)) songsBySetlist.set(slId, []);
-        songsBySetlist.get(slId)!.push(row);
-      }
-    }
-
-    // Fetch songs collection for linking to lyrics pages
-    const songsCollResponse = await fetch(`${DIRECTUS_URL}/items/songs?limit=-1&fields=id,title`);
-    const songsCollData = await songsCollResponse.json();
-    const knownSongSlugs = new Set<string>();
-    if (songsCollData.data) {
-      for (const s of songsCollData.data) {
-        if (s.title) knownSongSlugs.add(createSongSlug(s.title));
-      }
-    }
-
-    // Process setlists
-    const allSetlists = setlistsData.data.map((setlist: any) => {
-      const eventDate = setlist.date || '';
-      const slug = setlist.slug || generateSlug(setlist.venue || '', setlist.city || '', eventDate);
-      const slId = setlist.id.toString();
-
-      // Get songs for this setlist from junction table
-      const rawSongs = songsBySetlist.get(slId) || [];
-      const songs: SongDisplay[] = rawSongs.map((row: any) => {
-        const title = row.song_title || `Song #${row.position}`;
-        const songSlug = createSongSlug(title);
-        return {
-          position: row.position || 0,
-          title,
-          songSlug: knownSongSlugs.has(songSlug) ? songSlug : undefined,
-          setType: row.set_type || 'main',
-          notes: row.notes || undefined,
-          isCover: row.is_cover || false,
-        };
-      }).sort((a: SongDisplay, b: SongDisplay) => a.position - b.position);
-
-      const coverImage = setlist.venue_image
-        ? (setlist.venue_image.startsWith('http') ? setlist.venue_image : `${DIRECTUS_URL}/assets/${setlist.venue_image}`)
-        : undefined;
-
-      // Resolve venue and tour slugs for linking
-      const venueInfo = setlist.venue_link ? venueMap.get(setlist.venue_link) : undefined;
-      const tourInfo = setlist.tour ? tourMap.get(setlist.tour) : undefined;
-
-      return {
-        id: slId,
-        date: eventDate,
-        formattedDate: eventDate ? formatDate(eventDate) : 'Date TBA',
-        year: eventDate ? new Date(eventDate).getFullYear() : 0,
-        venue: setlist.venue || 'Unknown Venue',
-        city: setlist.city || 'Unknown City',
-        country: setlist.country || '',
-        countryCode: setlist.country_code || undefined,
-        stateProvince: setlist.state_province,
-        tourName: setlist.tour_name || tourInfo?.name,
-        tourSlug: tourInfo?.slug || undefined,
-        venueSlug: venueInfo?.slug || undefined,
-        slug,
-        notes: setlist.notes,
-        source: setlist.source,
-        coverImage,
-        songs,
-        songCount: setlist.song_count || songs.length,
-      };
-    }).sort((a: any, b: any) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-
-    // Generate paths with prev/next navigation
-    return allSetlists.map((setlist: any, index: number) => {
-      const prevSetlist = index < allSetlists.length - 1 ? allSetlists[index + 1] : null;
-      const nextSetlist = index > 0 ? allSetlists[index - 1] : null;
-
-      // Find related shows (same tour, limit 4)
-      const relatedShows = allSetlists
-        .filter((s: any) => s.slug !== setlist.slug && s.tourName && s.tourName === setlist.tourName)
-        .slice(0, 4);
-
-      return {
-        params: { slug: setlist.slug },
-        props: { setlist, prevSetlist, nextSetlist, relatedShows }
-      };
-    });
-  } catch (error) {
-    console.error('Error in getStaticPaths for setlists:', error);
-    return [];
-  }
-}
-
-const { setlist, prevSetlist, nextSetlist, relatedShows } = Astro.props;
-
-interface SongSetGroup {
-  type: string;
-  label: string;
-  badgeClass: string;
-  songs: SongDisplay[];
-}
-
-function normalizeSetType(value?: string): string {
-  return (value || 'main').toLowerCase().trim();
-}
-
-function formatSetLabel(setType: string): string {
-  if (setType === 'main') return 'Main Set';
-  if (setType === 'acoustic') return 'Acoustic Set';
-  if (setType === 'encore') return 'Encore';
-
-  const encoreMatch = setType.match(/^encore(\d+)$/);
-  if (encoreMatch) return `Encore ${parseInt(encoreMatch[1], 10)}`;
-
-  const setMatch = setType.match(/^set(\d+)$/);
-  if (setMatch) return `Set ${parseInt(setMatch[1], 10)}`;
-
-  return setType
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
-}
-
-function setBadgeClass(setType: string): string {
-  if (setType === 'main') return 'bg-white/10 text-white/85';
-  if (setType === 'acoustic') return 'bg-green-500/20 text-green-400';
-  if (setType === 'encore') return 'bg-white/10 text-primary';
-  if (setType === 'encore2') return 'bg-accent/20 text-accent';
-  if (setType.startsWith('encore')) return 'bg-amber-500/20 text-amber-400';
-  return 'bg-blue-500/20 text-blue-300';
-}
-
-const setGroupsMap = new Map<string, SongDisplay[]>();
-for (const song of setlist.songs) {
-  const type = normalizeSetType(song.setType);
-  if (!setGroupsMap.has(type)) {
-    setGroupsMap.set(type, []);
-  }
-  setGroupsMap.get(type)!.push(song);
-}
-
-const setGroups: SongSetGroup[] = Array.from(setGroupsMap.entries()).map(([type, songs]) => ({
-  type,
-  label: formatSetLabel(type),
-  badgeClass: setBadgeClass(type),
-  songs
-}));
-
-const mainSet = setGroups.find((group) => group.type === 'main')?.songs || [];
-const encoreSongCount = setGroups
-  .filter((group) => group.type.startsWith('encore'))
-  .reduce((count, group) => count + group.songs.length, 0);
-
-const location = setlist.stateProvince
-  ? `${setlist.city}, ${setlist.stateProvince}, ${setlist.country}`
-  : `${setlist.city}, ${setlist.country}`;
-
-const flag = setlist.countryCode ? countryCodeToFlag[setlist.countryCode] || '' : '';
-
-interface SourceLink {
-  href: string;
-  label: string;
-}
-
-function buildSourceLinks(rawSource?: string): SourceLink[] {
-  if (!rawSource) return [];
-
-  const chunks = rawSource
-    .replace(/\r\n/g, '\n')
-    .split(/\n|,/)
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-
-  const links: SourceLink[] = [];
-  const seen = new Set<string>();
-
-  for (const chunk of chunks) {
-    const match = chunk.match(/https?:\/\/\S+/i);
-    const normalized = (match ? match[0] : chunk)
-      .replace(/[),.;]+$/g, '');
-    const href = /^https?:\/\//i.test(normalized)
-      ? normalized
-      : /^[\w.-]+\.[a-z]{2,}/i.test(normalized)
-        ? `https://${normalized}`
-        : '';
-
-    if (!href || seen.has(href)) continue;
-    seen.add(href);
-
-    links.push({
-      href,
-      label: href
-    });
-  }
-
-  return links;
-}
-
-const sourceLinks = buildSourceLinks(setlist.source);
-const isUpcomingShow = setlist.date ? setlist.date > new Date().toISOString().split('T')[0] : false;
+const audioLinks: any[] = Array.isArray(setlist.audio_links) ? setlist.audio_links : [];
+const videoLinks: any[] = Array.isArray(setlist.video_links) ? setlist.video_links : [];
+const recordings: any[] = Array.isArray(setlist.recordings) ? setlist.recordings : [];
+const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.additional_links : [];
 ---
+<Layout title={`${setlist.venue || 'Setlist'} · ${setlist.date} · Cureation`}>
 
-<MainLayout
-  title={`${setlist.venue} - ${setlist.formattedDate}`}
-  description={isUpcomingShow
-    ? `The Cure are scheduled to play ${setlist.venue} in ${location} on ${setlist.formattedDate}. Setlist pending.`
-    : `The Cure setlist from ${setlist.venue} in ${location} on ${setlist.formattedDate}. ${setlist.songCount} songs performed.`}
-  ogImage={setlist.coverImage}
-  showSidebar={false}
-  pageClass="bg-black"
->
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'Setlists', href: '/setlists' },
+      ...(setlist.tour_name ? [{ label: setlist.tour_name, href: '/tours' }] : []),
+      { label: `${setlist.venue} · ${setlist.date}` },
+    ]} />
+  </div>
 
-  <!-- Background image layer -->
-  {setlist.coverImage && (
-    <div class="fixed inset-0 z-[-1]">
-      <div class="absolute inset-0 bg-black opacity-70"></div>
-      <div
-        class="absolute inset-0 bg-cover bg-center opacity-30 blur-xl"
-        style={`background-image: url(${setlist.coverImage})`}
-      ></div>
-    </div>
-  )}
-
-  <!-- Breadcrumb -->
-  <nav class="mb-8" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/85">
-      <li><a href="/setlists" class="hover:text-white transition-colors">Setlists</a></li>
-      <li aria-hidden="true">/</li>
-      {setlist.year > 0 && (
-        <li><span class="text-white/80">{setlist.year}</span></li>
-        <li aria-hidden="true">/</li>
-      )}
-      <li class="text-white truncate max-w-[200px]">{setlist.venue}</li>
-    </ol>
-  </nav>
-
-  <!-- Event Header -->
-  <section class="mb-12">
-    <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
-
-      <div class="relative p-8 md:p-12">
-        <!-- Tour badge -->
-        {setlist.tourName && (
-          <div class="inline-flex items-center gap-2 mb-4">
-            {setlist.tourSlug ? (
-              <a href={`/tours/${setlist.tourSlug}`} class="badge bg-white/10 text-primary border-primary/40 hover:bg-primary/30 transition-colors">
-                {setlist.tourName}
-              </a>
-            ) : (
-              <span class="badge bg-white/10 text-primary border-primary/40">{setlist.tourName}</span>
-            )}
-          </div>
-        )}
-
-        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
-          {setlist.venueSlug ? (
-            <a href={`/venues/${setlist.venueSlug}`} class="hover:text-white transition-colors">{setlist.venue}</a>
-          ) : setlist.venue}
-        </h1>
-
-        <div class="flex flex-wrap items-center gap-4 text-white/90 mb-6">
-          <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            {flag && <span class="text-lg">{flag}</span>}
-            <span>{location}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-              <line x1="16" x2="16" y1="2" y2="6"></line>
-              <line x1="8" x2="8" y1="2" y2="6"></line>
-              <line x1="3" x2="21" y1="10" y2="10"></line>
-            </svg>
-            <time datetime={setlist.date}>{setlist.formattedDate}</time>
-          </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="flex flex-wrap gap-8 pt-6 border-t border-white/[0.08]">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{setlist.songs.length || setlist.songCount}</span>
-            <span class="text-white/85 text-base font-medium">Songs</span>
-          </div>
-          {mainSet.length > 0 && (
-            <div class="flex items-center gap-3">
-              <span class="text-3xl font-display text-white text-glow">{mainSet.length}</span>
-              <span class="text-white/85 text-base font-medium">Main Set</span>
-            </div>
-          )}
-          {encoreSongCount > 0 && (
-            <div class="flex items-center gap-3">
-              <span class="text-3xl font-display text-white text-glow">{encoreSongCount}</span>
-              <span class="text-white/85 text-base font-medium">Encore</span>
-            </div>
-          )}
-        </div>
-
-        {(setlist.notes || sourceLinks.length > 0) && (
-          <div class="mt-6 pt-6 border-t border-white/[0.08]">
-            {setlist.notes && <p class="text-white/90">{setlist.notes}</p>}
-            {sourceLinks.length > 0 && (
-              <div class={setlist.notes ? 'mt-4' : ''}>
-                <p class="text-white/80 text-sm uppercase tracking-wider mb-2">Source</p>
-                <div class="space-y-1.5">
-                  {sourceLinks.map((link) => (
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex items-center gap-2 text-primary hover:text-white/80 transition-colors break-all text-sm"
-                    >
-                      <span>{link.label}</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M7 17 17 7"></path>
-                        <path d="M7 7h10v10"></path>
-                      </svg>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  </section>
-
-  <!-- Setlist -->
-  <section class="mb-12">
-    <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/20">
-      <h2 class="font-heading text-2xl text-primary mb-6">Setlist</h2>
-
-      {setGroups.map((group, index) => (
-        <div class={index < setGroups.length - 1 ? 'mb-8' : ''}>
-          <h3 class="text-white/85 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span>{group.label}</span>
-            <span class={`px-2 py-0.5 text-xs rounded ${group.badgeClass}`}>{group.songs.length} songs</span>
-          </h3>
-          <ol class="space-y-1" aria-label={`${group.label} songs`}>
-            {group.songs.map((song: SongDisplay) => (
-              <SetlistSongItem
-                position={song.position}
-                title={song.title}
-                songSlug={song.songSlug}
-                setType={song.setType}
-                notes={song.notes}
-                isCover={song.isCover}
-                duration={song.duration}
-              />
-            ))}
-          </ol>
-        </div>
-      ))}
-
-      {setlist.songs.length === 0 && (
-        <p class="text-white/85 text-center py-8">
-          {isUpcomingShow ? 'This show is upcoming. Setlist details will be added after the performance.' : 'Setlist details not available for this show.'}
-        </p>
-      )}
-    </div>
-  </section>
-
-  <!-- Navigation -->
-  <section class="mb-12">
-    <div class="flex flex-col sm:flex-row gap-4">
-      {prevSetlist && (
-        <a
-          href={`/setlists/${prevSetlist.slug}`}
-          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-white/20/40 transition-colors group"
-        >
-          <span class="text-white/80 text-sm">Previous Show</span>
-          <div class="flex items-center gap-2 mt-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m15 18-6-6 6-6"></path>
-            </svg>
-            <span class="text-white group-hover:text-white transition-colors truncate">{prevSetlist.venue}</span>
-          </div>
-          <span class="text-white/80 text-xs">{prevSetlist.formattedDate}</span>
-        </a>
-      )}
-      {nextSetlist && (
-        <a
-          href={`/setlists/${nextSetlist.slug}`}
-          class="flex-1 glass-card rounded-xl p-4 border border-white/20 hover:border-white/20/40 transition-colors group text-right"
-        >
-          <span class="text-white/80 text-sm">Next Show</span>
-          <div class="flex items-center justify-end gap-2 mt-1">
-            <span class="text-white group-hover:text-white transition-colors truncate">{nextSetlist.venue}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m9 18 6-6-6-6"></path>
-            </svg>
-          </div>
-          <span class="text-white/80 text-xs">{nextSetlist.formattedDate}</span>
-        </a>
-      )}
-    </div>
-  </section>
-
-  <!-- Related Shows (same tour) -->
-  {relatedShows && relatedShows.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">
-        {setlist.tourName ? `More from ${setlist.tourName}` : 'Related Shows'}
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {relatedShows.map((show: any) => (
-          <a
-            href={`/setlists/${show.slug}`}
-            class="glass-card rounded-xl p-4 border border-white/20 hover:border-white/20/40 transition-colors group"
-          >
-            <h3 class="text-white group-hover:text-white transition-colors truncate">{show.venue}</h3>
-            <p class="text-white/85 text-sm">
-              {show.countryCode && countryCodeToFlag[show.countryCode] && <span class="mr-1">{countryCodeToFlag[show.countryCode]}</span>}
-              {show.city}, {show.country}
-            </p>
-            <p class="text-white/80 text-xs mt-1">{show.formattedDate}</p>
-            <div class="flex items-center justify-between mt-2">
-              <span class="text-white/75 text-xs">{show.songCount} songs</span>
-            </div>
-          </a>
-        ))}
-      </div>
+  {(setlist.hero_image || (venue && venue.photo_file)) && (
+    <section class="container" style="padding: clamp(16px, 3vw, 32px) 0;">
+      <figure style="position: relative; aspect-ratio: 21/9; overflow:hidden; border: 1px solid var(--rule); background: var(--bg-2);">
+        <img src={asset((setlist.hero_image || venue!.photo_file)!, 'hero')} alt={setlist.venue || 'Concert'} style="width:100%; height:100%; object-fit:cover; filter: saturate(.85) contrast(1.08);" />
+        <div class="cover-plate__corner cover-plate__corner--tl"><span>CONCERT · {year}</span></div>
+        <div class="cover-plate__corner cover-plate__corner--tr"><span>{songs.length} SONGS</span></div>
+        {debuts > 0 && <div class="cover-plate__corner cover-plate__corner--br" style="border-color: var(--hot); color: var(--hot);"><span>{debuts} DEBUT{debuts > 1 ? 'S' : ''}</span></div>}
+      </figure>
     </section>
   )}
 
-  <!-- Back to all setlists -->
-  <div class="text-center">
-    <a
-      href="/setlists"
-      class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="m15 18-6-6 6-6"></path>
-      </svg>
-      Back to All Setlists
-    </a>
-  </div>
-</MainLayout>
+  <section class="container show-head" style="margin-top: 1rem;">
+    {!(setlist.hero_image || (venue && venue.photo_file)) && <div class="mono-sm muted">CONCERT · {year}</div>}
+    <div class="cluster" style="gap: .4rem; margin-top: .6rem;">
+      {setlist.tour_name && <Tag>{setlist.tour_name.toUpperCase()}</Tag>}
+      {setlist.country_code && <Tag>{setlist.country_code.toUpperCase()}</Tag>}
+      {debuts > 0 && <span class="tag tag--hot"><span class="pip pip--hot"></span>{debuts} DEBUT{debuts > 1 ? 'S' : ''}</span>}
+      {covers > 0 && <span class="tag tag--cool">{covers} COVER{covers > 1 ? 'S' : ''}</span>}
+    </div>
+    <h1 class="show-head__title serif">{setlist.venue || '—'}</h1>
+    <div class="mono-sm muted" style="margin-top:.6rem;">
+      {readableDate} · {[setlist.city, setlist.state_province, setlist.country].filter(Boolean).join(', ')}
+    </div>
+
+    {setlist.notes && (
+      <p class="show-head__lede">{setlist.notes}</p>
+    )}
+    {setlist.facts && (
+      <div class="voices">
+        <div class="mono-sm muted" style="margin-bottom:.3rem;">ARCHIVIST NOTE</div>
+        <div class="voices__quote">{setlist.facts.split(/(?<=[\.\!\?])\s/)[0]}</div>
+      </div>
+    )}
+
+    <div class="facts" style="margin-top: 1.6rem;">
+      {facts.map(([k, v]) => (
+        <div class="facts__item">
+          <div class="facts__k">{k}</div>
+          <div class="facts__v">{v}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0;">
+    <div class="show-grid">
+      <div class="show-grid__main stack" style="--gap: 2rem;">
+        {orderedSets.map(([k, items]) => (
+          <div>
+            <div class="panel-head" style="border: 1px solid var(--rule);">
+              <span>{labelFor(k)}</span>
+              <span>{items.length} SONGS</span>
+            </div>
+            <table class="data">
+              <thead><tr><th style="width:50px;">№</th><th>Title</th><th>Notes</th><th class="num" style="text-align:right; width:80px;">Length</th></tr></thead>
+              <tbody>
+                {items.map((row: any) => (
+                  <tr data-clickable={row.song?.slug ? '' : undefined} onclick={row.song?.slug ? `location.href='/songs/${row.song.slug}'` : undefined}>
+                    <td class="idx">{String(row.position).padStart(2, '0')}</td>
+                    <td>
+                      <span class="serif" style="font-size:18px; font-style:italic;">{row.song?.title || row.song_title}</span>
+                      {row.is_cover && <span class="mono-sm" style="margin-left:.6rem; color: var(--accent-3);">COVER{row.cover_artist ? ` · ${row.cover_artist.toUpperCase()}` : ''}</span>}
+                      {row.is_debut && <span class="mono-sm" style="margin-left:.6rem; color: var(--accent-3);">DEBUT</span>}
+                    </td>
+                    <td class="mono-sm muted">{row.notes || ''}</td>
+                    <td class="num">{row.song?.duration || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+
+        {setlist.stage_banter && (Array.isArray(setlist.stage_banter) ? setlist.stage_banter.length : 0) > 0 && (
+          <div>
+            <div class="panel-head" style="border: 1px solid var(--rule);">
+              <span>Stage banter</span>
+              <span>OVERHEARD</span>
+            </div>
+            <div class="voices" style="max-width: none; margin: 0; border: 1px solid var(--rule); border-top: none;">
+              {setlist.stage_banter.map((b: any) => (
+                <div class="voices__quote" style="margin-bottom:.8rem;">"{typeof b === 'string' ? b : (b.quote || b.text)}"</div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <aside class="show-grid__aside stack" style="--gap: 1.4rem;">
+        {venue && (
+          <div class="panel--bare">
+            <div class="panel-head">
+              <span>The venue</span>
+              <span>DOSSIER</span>
+            </div>
+            <div style="padding: 14px 16px;">
+              <a href={`/venues/${venue.slug}`} class="serif" style="font-size:22px; font-style:italic; color: var(--ink); border:none; display:block;">{venue.name}</a>
+              <div class="mono-sm muted" style="margin-top:.3rem;">
+                {[venue.city, venue.country].filter(Boolean).join(', ')}
+                {venue.capacity ? ` · CAP ${venue.capacity.toLocaleString()}` : ''}
+              </div>
+              {venue.cure_show_count && (
+                <div class="mono-sm" style="color: var(--accent-3); margin-top:.4rem;">{venue.cure_show_count} CURE SHOWS ON FILE</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {supportActs.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Support acts</span><span>BILL</span></div>
+            <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
+              {supportActs.map((a) => <li class="serif" style="font-size:17px; font-style:italic; padding: 4px 0;">{a}</li>)}
+            </ul>
+          </div>
+        )}
+
+        {recordings.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Recordings</span><span>TAPE TRADE</span></div>
+            <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
+              {recordings.map((r: any) => (
+                <li style="padding: 6px 0; border-bottom: 1px solid var(--rule-2);">
+                  <div class="mono-sm" style="color: var(--ink);">{(r.type || r.source || 'RECORDING').toUpperCase()}</div>
+                  <div class="mono-sm muted">{r.lineage || r.notes || ''}</div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {(audioLinks.length + videoLinks.length + additional.length) > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Listen & watch</span><span>LINKS</span></div>
+            <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
+              {[...audioLinks.map((l: any) => ({ ...l, _kind: 'AUDIO' })),
+                ...videoLinks.map((l: any) => ({ ...l, _kind: 'VIDEO' })),
+                ...additional.map((l: any) => ({ ...l, _kind: 'LINK' }))].map((l: any) => (
+                <li style="padding: 6px 0;">
+                  <a href={l.url || l.href || l} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3); border:none;">
+                    {l._kind} → {l.label || l.title || l.source || new URL(l.url || l.href || l).hostname}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {setlist.cure_concerts_url && (
+          <div class="mono-sm muted">
+            Source · <a href={setlist.cure_concerts_url} target="_blank" rel="noopener" style="color: var(--accent-3);">cureconcerts.com →</a>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .show-head { display: flex; flex-direction: column; }
+  .show-head__title { font-size: clamp(44px, 7vw, 96px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0; letter-spacing: -.01em; }
+  .show-head__lede { font-family: var(--f-serif); font-size: 18px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; margin-top: 1rem; }
+  .show-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: clamp(24px, 3vw, 48px); align-items: start; }
+  @media (max-width: 900px) { .show-grid { grid-template-columns: 1fr; } }
+</style>

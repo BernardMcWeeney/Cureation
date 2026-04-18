@@ -1,295 +1,173 @@
 ---
-import MainLayout from "../../layouts/MainLayout.astro";
-import { countryCodeToFlag } from '../../types/directus';
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Tag from '../../components/ui/Tag.astro';
+import { getTourBySlug, listSetlists, listAlbums } from '../../lib/directus';
+import { asset } from '../../lib/assets';
 
-interface TourData {
-  id: number;
-  name: string;
-  slug: string;
-  startDate?: string;
-  endDate?: string;
-  description?: string;
-  associatedAlbumId?: number;
-  associatedAlbumTitle?: string;
-  associatedAlbumSlug?: string;
-  associatedAlbumCover?: string;
-  totalShows: number;
-  countriesVisited: string[];
-  supportActs: string[];
-  lineup: string[];
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/tours');
+const tour = await getTourBySlug(slug);
+if (!tour) return new Response('Not found', { status: 404 });
+
+const [setlists, albums] = await Promise.all([
+  listSetlists({ tour: tour.id, limit: 400 }),
+  listAlbums(),
+]);
+const album = tour.associated_album ? albums.find((a) => a.id === tour.associated_album) : null;
+
+const startY = tour.start_date?.slice(0, 4);
+const endY = tour.end_date?.slice(0, 4);
+const years = startY && endY ? (startY === endY ? startY : `${startY}–${endY}`) : (startY || '—');
+const countries = Array.from(new Set(setlists.map((s) => s.country).filter(Boolean))).sort();
+
+const lineup: string[] = Array.isArray(tour.lineup)
+  ? tour.lineup.map((m: any) => typeof m === 'string' ? m : (m.name || m.member)).filter(Boolean)
+  : [];
+
+const supportActs: string[] = Array.isArray(tour.support_acts)
+  ? tour.support_acts.map((a: any) => typeof a === 'string' ? a : (a.name || a.artist)).filter(Boolean)
+  : [];
+
+const facts: Array<[string, string]> = [
+  ['Years', years],
+  ['Start', tour.start_date || '—'],
+  ['End', tour.end_date || '—'],
+  ['Shows on file', String(setlists.length)],
+  ['Total shows', String(tour.total_shows || setlists.length || '—')],
+  ['Countries', String(countries.length)],
+  ['Associated record', album?.title || '—'],
+  ['Lineup size', String(lineup.length || '—')],
+];
+
+const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image || null);
+
+const setlistsByYear = new Map<string, typeof setlists>();
+for (const s of setlists) {
+  const y = s.date?.slice(0, 4) || 'undated';
+  if (!setlistsByYear.has(y)) setlistsByYear.set(y, [] as any);
+  setlistsByYear.get(y)!.push(s);
 }
-
-interface TourSetlist {
-  slug: string;
-  date: string;
-  formattedDate: string;
-  venue: string;
-  city: string;
-  country: string;
-  countryCode?: string;
-  songCount: number;
-}
-
-export async function getStaticPaths() {
-  const DIRECTUS_URL = 'https://dash.cureation.net';
-
-  const toursRes = await fetch(`${DIRECTUS_URL}/items/tours?limit=-1`);
-  const toursData = await toursRes.json();
-
-  const albumsRes = await fetch(`${DIRECTUS_URL}/items/discography?limit=-1&fields=id,title,slug,cover_art`);
-  const albumsData = await albumsRes.json();
-
-  const setlistsRes = await fetch(`${DIRECTUS_URL}/items/setlists?limit=-1&fields=id,tour,venue,city,country,country_code,date,slug,song_count,tour_name&sort=-date`);
-  const setlistsData = await setlistsRes.json();
-
-  if (!toursData.data) return [];
-
-  // Album lookup
-  const albumMap = new Map<number, any>();
-  if (albumsData.data) {
-    for (const a of albumsData.data) albumMap.set(a.id, a);
-  }
-
-  // Setlists by tour ID
-  const setlistsByTour = new Map<number, any[]>();
-  if (setlistsData.data) {
-    for (const s of setlistsData.data) {
-      if (s.tour) {
-        const existing = setlistsByTour.get(s.tour) || [];
-        existing.push(s);
-        setlistsByTour.set(s.tour, existing);
-      }
-    }
-  }
-
-  return toursData.data
-    .filter((t: any) => t.slug)
-    .map((t: any) => {
-      const album = t.associated_album ? albumMap.get(t.associated_album) : null;
-      const tourSetlists = (setlistsByTour.get(t.id) || [])
-        .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .map((s: any) => ({
-          slug: s.slug,
-          date: s.date,
-          formattedDate: s.date ? new Date(s.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown',
-          venue: s.venue || 'Unknown Venue',
-          city: s.city || '',
-          country: s.country || '',
-          countryCode: s.country_code,
-          songCount: s.song_count || 0,
-        }));
-
-      // Count unique countries from setlists
-      const countryCodes = [...new Set(tourSetlists.map((s: any) => s.countryCode).filter(Boolean))];
-
-      return {
-        params: { slug: t.slug },
-        props: {
-          tour: {
-            id: t.id,
-            name: t.name,
-            slug: t.slug,
-            startDate: t.start_date,
-            endDate: t.end_date,
-            description: t.description,
-            associatedAlbumId: t.associated_album,
-            associatedAlbumTitle: album?.title,
-            associatedAlbumSlug: album?.slug,
-            associatedAlbumCover: album?.cover_art ? `https://dash.cureation.net/assets/${album.cover_art}` : undefined,
-            totalShows: t.total_shows || tourSetlists.length,
-            countriesVisited: t.countries_visited || countryCodes,
-            supportActs: t.support_acts || [],
-            lineup: t.lineup || [],
-          },
-          setlists: tourSetlists,
-        }
-      };
-    });
-}
-
-const { tour, setlists } = Astro.props as { tour: TourData; setlists: TourSetlist[] };
-const todayIso = new Date().toISOString().split('T')[0];
-
-function formatTourDate(dateStr?: string): string {
-  if (!dateStr) return 'Unknown';
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-}
-
-const uniqueCountries = [...new Set(setlists.map(s => s.countryCode).filter(Boolean))];
-const uniqueCities = [...new Set(setlists.map(s => s.city).filter(Boolean))];
-const totalSongs = setlists.reduce((sum, s) => sum + s.songCount, 0);
+const years_sorted = Array.from(setlistsByYear.keys()).sort();
 ---
+<Layout title={`${tour.name} · Tours · Cureation`}>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'Tours', href: '/tours' },
+      { label: tour.name },
+    ]} />
+  </div>
 
-<MainLayout
-  title={`${tour.name} - Tour`}
-  description={`The Cure's ${tour.name}. ${tour.totalShows} shows across ${uniqueCountries.length} countries.`}
-  showSidebar={false}
-  pageClass="bg-black"
-  albumImage={tour.associatedAlbumCover}
->
-  <!-- Breadcrumb -->
-  <nav class="mb-8" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/85">
-      <li><a href="/setlists" class="hover:text-white transition-colors">Setlists</a></li>
-      <li aria-hidden="true">/</li>
-      <li><span class="text-white/80">Tours</span></li>
-      <li aria-hidden="true">/</li>
-      <li class="text-white truncate max-w-[200px]">{tour.name}</li>
-    </ol>
-  </nav>
+  {heroSrc && (
+    <section class="container" style="padding: clamp(16px, 3vw, 32px) 0;">
+      <figure style="position: relative; aspect-ratio: 21/9; overflow:hidden; border: 1px solid var(--rule); background: var(--bg-2);">
+        <img src={heroSrc} alt={tour.name} style="width:100%; height:100%; object-fit:cover; filter: saturate(.85) contrast(1.1);" />
+        <div class="cover-plate__corner cover-plate__corner--tl"><span>TOUR · {years}</span></div>
+        <div class="cover-plate__corner cover-plate__corner--tr"><span>{setlists.length} ON FILE</span></div>
+      </figure>
+    </section>
+  )}
 
-  <!-- Tour Header -->
-  <section class="mb-12">
-    <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
-
-      <div class="relative p-8 md:p-12">
-        <!-- Associated album badge -->
-        {tour.associatedAlbumTitle && (
-          <div class="inline-flex items-center gap-3 mb-4">
-            {tour.associatedAlbumCover && (
-              <img src={tour.associatedAlbumCover} alt={tour.associatedAlbumTitle} class="w-10 h-10 rounded object-cover" />
-            )}
-            <a href={`/discography/${tour.associatedAlbumSlug}`} class="badge bg-white/10 text-primary border-primary/40 hover:bg-primary/30 transition-colors">
-              {tour.associatedAlbumTitle} era
-            </a>
-          </div>
-        )}
-
-        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
-          {tour.name}
-        </h1>
-
-        <div class="flex flex-wrap items-center gap-4 text-white/90 mb-6">
-          {tour.startDate && (
-            <div class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                <line x1="16" x2="16" y1="2" y2="6"></line>
-                <line x1="8" x2="8" y1="2" y2="6"></line>
-                <line x1="3" x2="21" y1="10" y2="10"></line>
-              </svg>
-              <span>{formatTourDate(tour.startDate)} — {formatTourDate(tour.endDate)}</span>
-            </div>
-          )}
+  <section class="container tour-head" style="margin-top: 1rem;">
+    {!heroSrc && <div class="mono-sm muted">TOUR · {years}</div>}
+    <div class="cluster" style="gap:.4rem; margin-top:.6rem;">
+      {album && <Tag>{album.title.toUpperCase()}</Tag>}
+      {tour.total_shows && <span class="tag tag--gold">{tour.total_shows} SHOWS</span>}
+      {countries.length > 3 && <span class="tag tag--cool">{countries.length} COUNTRIES</span>}
+    </div>
+    <h1 class="tour-head__title serif">{tour.name}</h1>
+    {tour.description && <p class="tour-head__lede">{tour.description}</p>}
+    <div class="facts" style="margin-top: 1.4rem;">
+      {facts.map(([k, v]) => (
+        <div class="facts__item">
+          <div class="facts__k">{k}</div>
+          <div class="facts__v">{v}</div>
         </div>
-
-        <!-- Stats row -->
-        <div class="flex flex-wrap gap-8 pt-6 border-t border-white/8">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{setlists.length || tour.totalShows}</span>
-            <span class="text-white/85 text-base font-medium">Shows</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{uniqueCountries.length}</span>
-            <span class="text-white/85 text-base font-medium">Countries</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{uniqueCities.length}</span>
-            <span class="text-white/85 text-base font-medium">Cities</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{totalSongs.toLocaleString()}</span>
-            <span class="text-white/85 text-base font-medium">Performances</span>
-          </div>
-        </div>
-
-        <!-- Countries visited with flags -->
-        {uniqueCountries.length > 0 && (
-          <div class="flex flex-wrap gap-2 mt-6 pt-6 border-t border-white/8">
-            {uniqueCountries.map(code => (
-              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-sm">
-                <span class="text-base">{countryCodeToFlag[code as string] || ''}</span>
-                <span class="text-white/90">{code}</span>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+      ))}
     </div>
   </section>
 
-  <!-- Lineup -->
-  {tour.lineup && tour.lineup.length > 0 && (
-    <section class="mb-12">
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/20">
-        <h2 class="font-heading text-2xl text-primary mb-4">Lineup</h2>
-        <div class="flex flex-wrap gap-3">
-          {tour.lineup.map(member => (
-            <span class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/80">{member}</span>
-          ))}
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0;">
+    <div class="tour-grid">
+      <div>
+        <div class="panel-head" style="border: 1px solid var(--rule);">
+          <span>Itinerary</span>
+          <span>{setlists.length} SHOWS ON FILE</span>
         </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Support Acts -->
-  {tour.supportActs && tour.supportActs.length > 0 && (
-    <section class="mb-12">
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/20">
-        <h2 class="font-heading text-2xl text-primary mb-4">Support Acts</h2>
-        <div class="flex flex-wrap gap-3">
-          {tour.supportActs.map(act => (
-            <span class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white/80">{act}</span>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- All shows on this tour -->
-  <section class="mb-12">
-    <h2 class="font-heading text-2xl text-primary mb-6">
-      All Shows
-      <span class="text-white/80 text-lg ml-2">({setlists.length})</span>
-    </h2>
-
-    {setlists.length > 0 ? (
-      <div class="space-y-2">
-        {setlists.map((show, index) => (
-          <a
-            href={`/setlists/${show.slug}`}
-            class="flex items-center justify-between p-4 glass-card rounded-xl border border-white/10 hover:border-white/20/40 transition-all group"
-          >
-            <div class="flex items-center gap-4">
-              <div class="text-white/75 text-sm font-mono min-w-[24px] text-right">{index + 1}</div>
-              <div class="text-center min-w-[50px]">
-                <div class="text-xl font-display text-white">{new Date(show.date).getDate()}</div>
-                <div class="text-white/80 text-[10px] uppercase">{new Date(show.date).toLocaleDateString('en-US', { month: 'short' })}</div>
-              </div>
-              <div>
-                <div class="text-white group-hover:text-white transition-colors flex items-center gap-2">
-                  {show.countryCode && countryCodeToFlag[show.countryCode] && (
-                    <span>{countryCodeToFlag[show.countryCode]}</span>
-                  )}
-                  {show.venue}
+        <div style="padding: clamp(16px, 2.4vw, 28px) 0;">
+          <div class="rail">
+            {years_sorted.map(y => (
+              <>
+                <div class="rail__item" style="padding-bottom:12px;">
+                  <div class="rail__date rule-accent" style="padding-top:.4rem;">LEG · {y}</div>
                 </div>
-                <div class="text-white/80 text-sm">{show.city}, {show.country}</div>
-              </div>
+                {(setlistsByYear.get(y) || []).map(s => (
+                  <div class="rail__item">
+                    <div class="rail__date">{s.date || '—'}</div>
+                    <a href={`/setlists/${s.slug}`} style="border:none;">
+                      <div class="rail__title">{s.venue || 'Venue TBD'}</div>
+                    </a>
+                    <div class="rail__body mono-sm" style="color: var(--muted);">
+                      {[s.city, s.state_province, s.country].filter(Boolean).join(', ')}
+                      {s.song_count ? ` · ${s.song_count} songs` : ''}
+                    </div>
+                  </div>
+                ))}
+              </>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <aside class="stack" style="--gap: 1.4rem;">
+        {lineup.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Lineup</span><span>ON THE ROAD</span></div>
+            <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
+              {lineup.map((m) => <li class="serif" style="font-size:17px; font-style:italic; padding: 4px 0;"><span class="pip pip--cool"></span>{m}</li>)}
+            </ul>
+          </div>
+        )}
+        {supportActs.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Support acts</span><span>ROTATING BILL</span></div>
+            <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
+              {supportActs.map((a) => <li class="serif" style="font-size:16px; font-style:italic; padding: 4px 0;">{a}</li>)}
+            </ul>
+          </div>
+        )}
+        {countries.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Countries</span><span>{countries.length}</span></div>
+            <div class="cluster" style="gap:.3rem; padding: 12px 16px 16px;">
+              {countries.map(c => <span class="tag">{c}</span>)}
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-white/80 text-sm hidden sm:inline">{show.date > todayIso && show.songCount === 0 ? 'Setlist pending' : `${show.songCount} songs`}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary opacity-80 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m9 18 6-6-6-6"></path>
-              </svg>
+          </div>
+        )}
+        {album && (
+          <a href={`/discography/${album.slug}`} style="display:block; border: 1px solid var(--rule); background: var(--bg-2); text-decoration: none;">
+            <div class="panel-head"><span>Supporting record</span><span>{album.release_date?.slice(0,4)}</span></div>
+            <div style="padding: 12px;">
+              <div style="display:grid; grid-template-columns: 72px 1fr; gap: 12px; align-items:center;">
+                {album.cover_art && <img src={asset(album.cover_art, 'card')} alt={album.title} style="width:72px; height:72px; object-fit:cover; border:1px solid var(--rule);" />}
+                <div>
+                  <div class="serif" style="font-size:22px; font-style:italic; line-height:1.1;">{album.title}</div>
+                  <div class="mono-sm" style="color: var(--accent-3); margin-top:.3rem;">{(album.type || '').toUpperCase()}</div>
+                </div>
+              </div>
             </div>
           </a>
-        ))}
-      </div>
-    ) : (
-      <div class="glass-card rounded-2xl p-8 text-center">
-        <p class="text-white/85">No setlists linked to this tour yet. Check the <a href="/setlists" class="text-primary hover:underline">setlists page</a> for more.</p>
-      </div>
-    )}
+        )}
+      </aside>
+    </div>
   </section>
+</Layout>
 
-  <!-- Back -->
-  <div class="text-center">
-    <a href="/setlists" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m15 18-6-6 6-6"></path>
-      </svg>
-      Back to Setlists
-    </a>
-  </div>
-</MainLayout>
+<style>
+  .tour-head__title { font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; font-weight: 400; margin: .4rem 0 0; }
+  .tour-head__lede { font-family: var(--f-serif); font-size: 18px; line-height:1.55; color: var(--ink-2); max-width: 58ch; margin-top: 1rem; }
+  .tour-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: clamp(24px, 3vw, 48px); align-items: start; }
+  @media (max-width: 900px) { .tour-grid { grid-template-columns: 1fr; } }
+</style>

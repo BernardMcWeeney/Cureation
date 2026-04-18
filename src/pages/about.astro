@@ -1,0 +1,127 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import { getRunningFigures } from '../lib/directus';
+const fig = await getRunningFigures().catch(() => ({ albums: 0, songs: 0, setlists: 0, venues: 0, photos: 0, members: 0 }));
+const launched = 'August 2024';
+
+const milestones: Array<[string, string, string]> = [
+  [launched, 'Archive opens', 'A first index of 13 studio albums, 300-odd songs, and the outline of a live archive.'],
+  ['2024 Q4', 'Setlists imported', 'Nightly sync from Cure-Concerts with venue, tour, and support act normalisation.'],
+  ['2025', 'Lyrics structured', 'Every song\'s lyrics broken into section/line JSON to support click-to-annotate.'],
+  ['2026', 'Editorial voice', 'A magazine-style rewrite — dark-romantic, purple, slow reading.'],
+];
+
+const pillars: Array<[string, string]> = [
+  ['Primary sources first', 'Wikipedia, liner notes, contemporary reviews, and cureconcerts.com cited on every factual claim.'],
+  ['Schema, not stringly-typed', 'Songs link to albums; setlists link to venues; venues link to coordinates. Relations, not strings.'],
+  ['Non-commercial', 'No ads, no affiliate links, no tracking. Hosted and curated by one fan.'],
+  ['Open corrections', 'If a date is wrong, a lineup is wrong, a writer credit is wrong — the form at /community is the fastest route to fix it.'],
+];
+---
+<Layout title="About · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
+  </div>
+
+  <section class="container" style="padding: clamp(24px, 4vw, 56px) 0;">
+    <div class="mono-sm muted">COLOPHON · SINCE {launched.toUpperCase()}</div>
+    <h1 class="serif" style="font-size: clamp(56px, 10vw, 128px); line-height:.9; font-style: italic; margin: .4rem 0 0; letter-spacing: -.01em;">
+      A <em style="color: var(--accent-3); font-family: var(--f-display);">slow</em> archive<br/>of a band<br/>that never hurried.
+    </h1>
+    <p class="deck" style="max-width: 62ch; margin-top: clamp(16px, 3vw, 28px);">
+      <em>Cureation</em> is a one-person, non-commercial editorial archive of The Cure — the records, the live history, the people who made them, and the room around them. Assembled slowly. Cited where possible. Corrected often.
+    </p>
+  </section>
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="about-grid">
+      <div>
+        <div class="mono-sm muted">THE THESIS</div>
+        <h2 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; font-style: italic; margin: .6rem 0 0;">Four quiet convictions.</h2>
+      </div>
+      <div class="stack" style="--gap: 0;">
+        {pillars.map(([k, v], i) => (
+          <div style={`padding: 1.4rem 0; border-top: 1px solid ${i === 0 ? 'var(--ink)' : 'var(--rule)'}; display: grid; grid-template-columns: 28px 1fr; gap: 1rem; align-items: baseline;`}>
+            <div class="idx" style="color: var(--accent-3);">{String(i + 1).padStart(2, '0')}</div>
+            <div>
+              <div class="serif" style="font-size: clamp(22px, 2.4vw, 28px); font-style: italic; line-height: 1.1;">{k}</div>
+              <p style="font-family: var(--f-serif); font-size: 16px; line-height: 1.6; color: var(--ink-2); margin: .4rem 0 0; max-width: 52ch;">{v}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="panel-head" style="border: 1px solid var(--rule);">
+      <span>Running figures</span>
+      <span>AS OF TODAY</span>
+    </div>
+    <div class="stat-hero">
+      {[
+        ['Studio records', fig.albums],
+        ['Songs catalogued', fig.songs],
+        ['Setlists on file', fig.setlists],
+        ['Venues mapped', fig.venues],
+        ['Archive photographs', fig.photos],
+        ['Band members', fig.members],
+      ].map(([k, v]) => (
+        <div class="stat-hero__cell">
+          <div class="stat-hero__value">{(v as number).toLocaleString()}</div>
+          <div class="stat-hero__label">{k}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted">A CHRONOLOGY OF THE SITE</div>
+    <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .4rem 0 1.6rem;">The archive, dated.</h2>
+    <div class="rail">
+      {milestones.map(([date, title, body], i) => (
+        <div class={`rail__item${i === 0 ? ' rail__item--gold' : i === milestones.length - 1 ? ' rail__item--hot' : ''}`}>
+          <div class="rail__date">{date.toUpperCase()}</div>
+          <div class="rail__title">{title}</div>
+          <div class="rail__body">{body}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="about-grid">
+      <div>
+        <div class="mono-sm muted">CREDITS</div>
+        <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .6rem 0 0;">On whose shoulders.</h2>
+      </div>
+      <div>
+        <div class="facts">
+          <div class="facts__item"><div class="facts__k">Curator</div><div class="facts__v">Bernard McWeeney</div></div>
+          <div class="facts__item"><div class="facts__k">Built with</div><div class="facts__v">Astro · Directus · Cloudflare</div></div>
+          <div class="facts__item"><div class="facts__k">Type</div><div class="facts__v">Cormorant Garamond, EB Garamond, Inter, JetBrains Mono</div></div>
+          <div class="facts__item"><div class="facts__k">Sources</div><div class="facts__v">Wikipedia, cureconcerts.com, setlist.fm, fan scans</div></div>
+        </div>
+        <p style="font-family: var(--f-serif); font-size: 16px; line-height: 1.65; color: var(--ink-2); margin-top: 1.2rem; max-width: 56ch;">
+          This archive exists because other archives existed first. Where a claim is traceable, it is traced. Where it is not, it is marked <span class="tag tag--blood">UNCERTAIN</span> and left for a better source to arrive.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="voices" style="max-width: 780px;">
+      <div class="mono-sm muted" style="margin-bottom:.4rem;"><span class="pip pip--gold"></span>A NOTE ON TONE</div>
+      <div class="voices__quote">
+        "The Cure's records rarely rushed. This archive is built to read the same way — one issue at a time, with room to linger."
+      </div>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  .about-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: clamp(24px, 4vw, 72px); align-items: start; }
+  @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; } }
+</style>

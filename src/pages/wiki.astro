@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import { fetchRaw } from '../lib/directus';
+
+const articles: any[] = await fetchRaw('news', {
+  limit: -1,
+  'filter[category][_eq]': 'wiki',
+  fields: 'id,title,slug,excerpt,published_date,reading_time,tags',
+  sort: 'title',
+}).catch(() => []);
+---
+<Layout title="The wiki · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'The wiki' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · REFERENCE</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">The wiki</h1>
+      <p class="deck" style="max-width: 62ch;">Long-form reference articles — deeper than a liner note, shorter than a biography — cross-referenced to everything else in the archive.</p>
+    </div>
+  </div>
+
+  <IssueSection kicker={articles.length > 0 ? `${articles.length} articles` : 'In progress'} title="Articles">
+    {articles.length === 0 ? (
+      <p class="deck">Articles land here as they're written. Check back as entries land.</p>
+    ) : (
+      <table class="data">
+        <thead><tr><th style="width:50px;">№</th><th>Article</th><th>Tags</th><th class="num" style="text-align:right; width:90px;">Reading</th></tr></thead>
+        <tbody>
+          {articles.map((a, i) => (
+            <tr data-clickable onclick={`location.href='/wiki/${a.slug}'`}>
+              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+              <td>
+                <span class="serif" style="font-size:20px; font-style:italic;">{a.title}</span>
+                {a.excerpt && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{a.excerpt}</div>}
+              </td>
+              <td class="mono-sm" style="color: var(--accent-3);">{Array.isArray(a.tags) ? a.tags.slice(0, 3).join(' · ').toUpperCase() : ''}</td>
+              <td class="num">{a.reading_time ? `${a.reading_time} min` : '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </IssueSection>
+</Layout>

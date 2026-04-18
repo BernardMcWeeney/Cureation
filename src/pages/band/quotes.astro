@@ -1,0 +1,31 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import IssueSection from '../../components/ui/IssueSection.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import PullQuote from '../../components/ui/PullQuote.astro';
+import { listQuotes } from '../../lib/directus';
+
+const quotes = await listQuotes(80);
+---
+<Layout title="Quotes · The band · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'The band', href: '/band' }, { label: 'Quotes' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · IN THEIR WORDS</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">Quotations</h1>
+      <p class="deck" style="max-width: 62ch;">What the band — and the press around them — have said, curated from interviews, sleeves, and passing remarks.</p>
+    </div>
+  </div>
+
+  <IssueSection kicker={`${quotes.length} entries`} title="Collected">
+    <div class="q-grid">
+      {quotes.map((q: any) => (
+        <PullQuote cite={q.attribution || q.source || undefined}>{q.text}</PullQuote>
+      ))}
+    </div>
+  </IssueSection>
+</Layout>
+
+<style>
+  .q-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(24px, 3vw, 48px); }
+</style>

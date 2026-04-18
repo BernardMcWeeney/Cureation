@@ -1,522 +1,659 @@
 ---
-import MainLayout from "../../layouts/MainLayout.astro";
-import TrackList from "../../components/TrackList.astro";
-import AlbumCard from "../../components/AlbumCard.astro";
-import PurchaseLinks from "../../components/PurchaseLinks.astro";
-import ShareButtons from "../../components/ShareButtons.astro";
-import SourceCredit from "../../components/SourceCredit.astro";
-import { generateSlug } from "../../lib/directus";
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Tag from '../../components/ui/Tag.astro';
+import Button from '../../components/ui/Button.astro';
+import {
+  getAlbumBySlug,
+  listAlbumTrivia,
+  listAlbumCharts,
+  listEras,
+} from '../../lib/directus';
+import { asset } from '../../lib/assets';
 
-const typeLabels: Record<string, string> = {
-  studio: 'Studio Album',
-  live: 'Live Album',
-  compilation: 'Compilation',
-  ep: 'EP',
-  single: 'Single',
-  deluxe: 'Deluxe Edition',
-  reissue: 'Reissue',
-  boxset: 'Box Set',
-  soundtrack: 'Soundtrack',
-  remix: 'Remix Album',
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/discography');
+
+const album = await getAlbumBySlug(slug);
+if (!album) return new Response('Not found', { status: 404 });
+
+const [trivia, charts, eras] = await Promise.all([
+  listAlbumTrivia(album.id),
+  listAlbumCharts(album.id),
+  listEras(),
+]);
+
+const songs = (album.songs || []).slice().sort((a, b) => (a.track_number || 0) - (b.track_number || 0));
+const era = album.era || eras.find((e) => e.id === album.era_id) || null;
+
+const totalSec = songs.reduce((n, s) => {
+  if (!s.duration) return n;
+  const parts = s.duration.split(':').map(Number);
+  if (parts.length === 2) return n + (parts[0] || 0) * 60 + (parts[1] || 0);
+  if (parts.length === 3) return n + (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+  return n;
+}, 0);
+const h = Math.floor(totalSec / 3600);
+const m = Math.floor((totalSec % 3600) / 60);
+const s = totalSec % 60;
+const runtime = h ? `${h}h ${m}m` : totalSec ? `${m}:${String(s).padStart(2, '0')}` : '—';
+
+const year = album.release_date?.slice(0, 4) || '—';
+
+const totalLivePlays = songs.reduce((n, s) => n + (s.times_played_live || 0), 0);
+const maxPlays = Math.max(1, ...songs.map((s) => s.times_played_live || 0));
+
+const albumOrdinalMap: Record<string, string> = {
+  'three-imaginary-boys': '1st', 'seventeen-seconds': '2nd', 'faith': '3rd',
+  'pornography': '4th', 'the-top': '5th', 'the-head-on-the-door': '6th',
+  'kiss-me-kiss-me-kiss-me': '7th', 'disintegration': '8th', 'wish': '9th',
+  'wild-mood-swings': '10th', 'bloodflowers': '11th', 'the-cure': '12th',
+  '4-13-dream': '13th', 'songs-of-a-lost-world': '14th',
 };
+const ordinal = album.type === 'studio' && albumOrdinalMap[album.slug!] ? albumOrdinalMap[album.slug!] : null;
 
-export async function getStaticPaths() {
-  try {
-    const DIRECTUS_URL = 'https://dash.cureation.net';
-    const API_BASE = `${DIRECTUS_URL}/items`;
-    const DIRECTUS_TOKEN = import.meta.env.DIRECTUS_TOKEN || '';
-    const headers = { 'Authorization': `Bearer ${DIRECTUS_TOKEN}` };
+const externalLinks = [
+  { label: 'Spotify', href: album.spotify_url },
+  { label: 'Apple Music', href: album.apple_music_url },
+  { label: 'Bandcamp', href: album.bandcamp_url },
+  { label: 'Amazon', href: album.amazon_url },
+  { label: 'Official Store', href: album.official_store_url },
+].filter((l) => l.href);
 
-    const albumsResponse = await fetch(`${API_BASE}/discography?limit=200`, { headers });
-    const albumsData = await albumsResponse.json();
+const firstReceptionSentence = album.critical_reception
+  ? album.critical_reception.split(/(?<=[\.\!\?])\s/)[0]?.trim().replace(/^["""]|["""]$/g, '')
+  : null;
 
-    const songsResponse = await fetch(`${API_BASE}/songs?limit=500`, { headers });
-    const songsData = await songsResponse.json();
+const singles = (album.singles || []).slice().sort((a, b) =>
+  (a.release_date || '').localeCompare(b.release_date || '')
+);
 
-    const singlesResponse = await fetch(`${API_BASE}/singles?limit=100`, { headers });
-    const singlesData = await singlesResponse.json();
-
-    const paths = await Promise.all(albumsData.data.map(async (album: any) => {
-      let slug = album.slug || (album.title ? generateSlug(album.title) : `album-${album.id}`);
-
-      const formattedAlbum: Record<string, any> = {
-        id: album.id.toString(),
-        title: album.title || 'Unknown Album',
-        slug: slug,
-        year: album.release_date ? new Date(album.release_date).getFullYear().toString() : '',
-        coverImage: album.cover_art ? `${DIRECTUS_URL}/assets/${album.cover_art}` : '/images/placeholder-album.jpg',
-        releaseDate: album.release_date ? new Date(album.release_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Unknown',
-        recordLabel: album.label || 'Fiction',
-        producer: album.producer || 'Robert Smith & David M. Allen',
-        description: album.description || '',
-        background: album.background_text || '',
-        reception: album.critical_reception || '',
-        type: album.type || 'studio',
-        parentAlbumId: album.parent_album || null,
-        parentAlbumTitle: null as string | null,
-        spotifyUrl: album.spotify_url || null,
-        appleMusicUrl: album.apple_music_url || null,
-        bandcampUrl: album.bandcamp_url || null,
-        amazonUrl: album.amazon_url || null,
-        officialStoreUrl: album.official_store_url || null,
-        sourceName: null as string | null,
-        sourceUrl: album.source_url || null,
-        discCount: album.disc_count || 1,
-        trackCount: album.track_count || 0,
-        catalogNumber: album.catalog_number || null,
-        genreTags: album.genre_tags || [],
-        credits: album.credits || '',
-        recordingStudios: album.recording_studios || 'Various Studios, UK',
-        genre: album.genre || 'Alternative Rock, Post-Punk',
-        recordingLocation: album.recording_location || null,
-        recordingStory: album.recording_story || null,
-        behindTheSound: album.behind_the_sound || null,
-        bandLineup: album.band_lineup || null,
-        musicVideos: album.music_videos || null,
-        criticalQuotes: album.critical_quotes || null,
-        galleryImages: album.gallery_images || null,
-        instruments: album.instruments || null,
-        tracks: [] as any[],
-        singles: [] as any[],
-      };
-
-      formattedAlbum.tracks = songsData.data
-        .filter(song => song.album === album.id && song.title)
-        .map(song => ({
-          number: song.track_number,
-          title: song.title,
-          duration: song.duration || '0:00',
-          listen_link: song.listen_link
-        }));
-
-      formattedAlbum.singles = singlesData.data
-        .filter(single => single.album === album.id)
-        .map(single => ({
-          title: single.title || 'Unknown Single',
-          releaseDate: single.release_date ? new Date(single.release_date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '',
-          chartPositions: single.chart_position || [],
-          coverImage: single.cover_art ? `${DIRECTUS_URL}/assets/${single.cover_art}` : null
-        }));
-
-      // Find parent album title if this is a deluxe/reissue
-      if (album.parent_album) {
-        const parent = albumsData.data.find(a => a.id === album.parent_album);
-        if (parent) formattedAlbum.parentAlbumTitle = parent.title;
-      }
-
-      return formattedAlbum;
-    }));
-
-    return paths.map(album => {
-      // Related albums: same type first, then others, excluding self
-      const sameType = paths.filter(a => a.slug !== album.slug && a.type === album.type).slice(0, 2);
-      const others = paths.filter(a => a.slug !== album.slug && a.type !== album.type).slice(0, 4 - sameType.length);
-      const relatedAlbums = [...sameType, ...others];
-      return { params: { slug: album.slug }, props: { album, relatedAlbums } };
-    });
-  } catch (error) {
-    console.error('Error in getStaticPaths:', error);
-    return [];
+const featuredChartLine = (() => {
+  if (charts && charts.length > 0) {
+    const best = charts.reduce((a, b) => ((a.peak ?? 999) < (b.peak ?? 999) ? a : b));
+    return `#${best.peak} ${best.territory}`;
   }
-}
+  return null;
+})();
 
-const { album, relatedAlbums } = Astro.props;
+const facts: Array<[string, string]> = [
+  ['Released', album.release_date || '—'],
+  ['Label', album.label || '—'],
+  ['Producer', album.producer?.split(/[\/,]/)[0]?.trim() || '—'],
+  ['Catalog', album.catalog_number || '—'],
+  ['Runtime', runtime],
+  ['Tracks', String(album.track_count || songs.length || '—')],
+  ['Era', era?.name || '—'],
+  ['Peak', featuredChartLine || '—'],
+];
 
-// Calculate duration
-const totalDuration = album.tracks?.reduce((total, track) => {
-  if (!track.duration) return total;
-  const [mins, secs] = track.duration.split(':').map(Number);
-  return total + mins + (secs / 60);
-}, 0) || 0;
-const hours = Math.floor(totalDuration / 60);
-const mins = Math.round(totalDuration % 60);
-const durationDisplay = hours > 0 ? `${hours}h ${mins}m` : `${mins} min`;
+function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' : t; }
 ---
-
-<MainLayout
-  title={album.title}
-  description={`${album.title} by The Cure, released ${album.year}. ${album.description?.slice(0, 150) || ''}`}
-  ogImage={album.coverImage}
-  showSidebar={false}
-  pageClass={`theme-${album.slug} album-page`}
-  theme={album.slug}
+<Layout
+  title={`${album.title} · Cureation`}
+  description={album.description || undefined}
+  ogImage={asset(album.cover_art, 'og')}
 >
 
-  <!-- Breadcrumb -->
-  <nav class="mb-8" aria-label="Breadcrumb">
-    <ol class="flex items-center gap-2 text-sm text-white/85">
-      <li><a href="/discography" class="hover:text-white transition-colors">Discography</a></li>
-      <li aria-hidden="true">/</li>
-      <li class="text-white truncate max-w-[200px]">{album.title}</li>
-    </ol>
-  </nav>
-
-  <!-- Album Header -->
-  <section class="mb-12">
-    <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
-
-      <div class="relative p-8 md:p-12">
-        <div class="flex flex-col sm:flex-row gap-6 md:gap-10">
-          <!-- Album Cover -->
-          <div class="shrink-0">
-            <img
-              src={album.coverImage}
-              alt={`${album.title} album cover`}
-              class="w-48 md:w-56 aspect-square rounded-xl shadow-2xl object-cover"
-              transition:name={`album-${album.id}`}
-            />
-          </div>
-
-          <!-- Album Info -->
-          <div class="flex-1 min-w-0">
-            <div class="flex flex-wrap items-center gap-2 mb-3">
-              <span class="badge">{typeLabels[album.type] || 'Album'}</span>
-              <span class="text-white/75">·</span>
-              <span class="text-white/90 text-sm">{album.recordLabel}</span>
-            </div>
-
-            <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
-              {album.title}
-            </h1>
-
-            <!-- Metadata -->
-            <div class="flex flex-wrap items-center gap-4 text-white/80 mb-6">
-              <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                  <line x1="16" x2="16" y1="2" y2="6"></line>
-                  <line x1="8" x2="8" y1="2" y2="6"></line>
-                  <line x1="3" x2="21" y1="10" y2="10"></line>
-                </svg>
-                <span>{album.releaseDate}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
-                </svg>
-                <span>{album.genre}</span>
-              </div>
-            </div>
-
-            <!-- Streaming Links -->
-            {(album.spotifyUrl || album.appleMusicUrl) && (
-              <div class="flex flex-wrap gap-3 mb-6">
-                {album.spotifyUrl && (
-                  <a href={album.spotifyUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1DB954]/20 border border-[#1DB954]/40 text-[#1DB954] text-sm hover:bg-[#1DB954]/30 transition-colors">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-                    Spotify
-                  </a>
-                )}
-                {album.appleMusicUrl && (
-                  <a href={album.appleMusicUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FC3C44]/20 border border-[#FC3C44]/40 text-[#FC3C44] text-sm hover:bg-[#FC3C44]/30 transition-colors">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026-.747.043-1.49.123-2.193.4-1.336.53-2.3 1.452-2.865 2.78-.192.448-.292.925-.363 1.408-.056.392-.088.785-.1 1.18 0 .032-.007.062-.01.093v12.223c.01.14.017.283.027.424.05.815.154 1.624.497 2.373.65 1.42 1.738 2.353 3.234 2.802.42.127.856.187 1.297.228.468.043.937.065 1.407.066 3.69.004 7.378.002 11.066.002.39 0 .78-.01 1.17-.04.79-.06 1.57-.17 2.31-.5 1.42-.64 2.35-1.73 2.8-3.22.13-.42.19-.86.23-1.3.04-.47.06-.94.06-1.41V6.124zm-6.928 5.055v5.97c0 .497-.045.983-.218 1.45-.312.84-.945 1.354-1.815 1.573-.508.128-1.03.17-1.55.1-.96-.124-1.682-.66-2.045-1.57-.244-.608-.29-1.244-.103-1.878.273-.92.946-1.468 1.835-1.733.364-.108.74-.175 1.112-.24.38-.063.76-.126 1.13-.215.36-.087.543-.32.595-.684.013-.088.02-.178.02-.267V8.572c0-.145-.028-.272-.152-.37-.116-.092-.254-.1-.39-.074l-.06.015-5.7 1.29c-.095.022-.184.058-.19.174-.003.033-.01.064-.01.097v7.386c0 .492-.04.978-.207 1.446-.31.843-.94 1.36-1.812 1.58-.507.13-1.028.174-1.55.106-.963-.12-1.687-.655-2.054-1.564-.247-.61-.292-1.25-.104-1.885.275-.926.95-1.474 1.845-1.74.368-.11.748-.176 1.123-.243.376-.064.75-.128 1.118-.214.375-.088.553-.324.6-.7.008-.063.013-.128.013-.192V5.644c0-.395.108-.642.48-.76.056-.017.113-.032.17-.046L19.002 4.1c.237-.054.477-.1.72-.097.325.005.533.2.567.527.007.068.01.137.01.205v6.444h-.233z"/></svg>
-                    Apple Music
-                  </a>
-                )}
-              </div>
-            )}
-
-            <!-- Stats -->
-            <div class="flex flex-wrap gap-8 pt-6 border-t border-white/[0.08]">
-              <div class="flex items-center gap-3">
-                <span class="text-3xl font-display text-white text-glow">{album.tracks?.length || 0}</span>
-                <span class="text-white/85 text-base font-medium">Tracks</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="text-3xl font-display text-white text-glow">{durationDisplay}</span>
-                <span class="text-white/85 text-base font-medium">Duration</span>
-              </div>
-              {album.singles?.length > 0 && (
-                <div class="flex items-center gap-3">
-                  <span class="text-3xl font-display text-white text-glow">{album.singles.length}</span>
-                  <span class="text-white/85 text-base font-medium">Singles</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- About -->
-  {(album.description || album.background) && (
-    <section class="mb-12">
-      <div class="glass-tile p-8 md:p-10">
-        <h2 class="font-heading text-2xl text-primary mb-6">About the Album</h2>
-        {album.description && <p class="text-xl text-white/90 leading-relaxed mb-4">{album.description}</p>}
-        {album.background && <p class="text-white/80 leading-relaxed">{album.background}</p>}
-
-        {/* Essential details */}
-        <div class="flex flex-wrap gap-x-8 gap-y-4 mt-8 pt-6 border-t border-white/10 text-sm">
-          <div>
-            <span class="text-white/85 block mb-1">Producer</span>
-            <span class="text-white">{album.producer}</span>
-          </div>
-          <div>
-            <span class="text-white/85 block mb-1">Studio</span>
-            <span class="text-white">{album.recordingStudios}</span>
-          </div>
-          {album.catalogNumber && (
-            <div>
-              <span class="text-white/85 block mb-1">Catalog #</span>
-              <span class="text-white">{album.catalogNumber}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Tracklist -->
-  <section class="mb-12">
-    <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/20">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="font-heading text-2xl text-primary">Tracklist</h2>
-        <span class="text-white/90 text-sm">{album.tracks?.length || 0} tracks · {durationDisplay}</span>
-      </div>
-      <TrackList tracks={album.tracks} />
-    </div>
-  </section>
-
-  <!-- Singles -->
-  {album.singles && album.singles.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">Singles</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {album.singles.map((single: any, idx: number) => (
-          <div class="glass-card rounded-xl p-4 border border-white/20 flex gap-4">
-            <div class="relative shrink-0 w-16 h-16">
-              <img src={single.coverImage || album.coverImage} alt={single.title} class="w-full h-full object-cover rounded-lg" />
-              <div class="absolute -top-1.5 -left-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center text-[10px] font-bold text-white">{idx + 1}</div>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="text-white font-medium truncate">{single.title}</h3>
-              <p class="text-white/90 text-sm">{single.releaseDate}</p>
-              {single.chartPositions && single.chartPositions.length > 0 && (
-                <div class="flex flex-wrap gap-1.5 mt-2">
-                  {single.chartPositions.slice(0, 3).map((pos: any) => (
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-primary">#{pos.chart_position} {pos.country}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Recording Story (only if real data from Directus) -->
-  {album.recordingLocation && (
-    <section class="mb-12">
-      <div class="glass-tile p-8 md:p-10">
-        <h2 class="font-heading text-2xl text-primary mb-6">The Recording Story</h2>
-        <div class="grid gap-6 md:grid-cols-2">
-          <div class="space-y-4">
-            {album.recordingLocation.location && (
-              <div class="flex gap-3 items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                <div>
-                  <h3 class="text-white font-medium mb-1">Location</h3>
-                  <p class="text-white/80 text-sm leading-relaxed">{album.recordingLocation.location}{album.recordingLocation.locationDescription ? `. ${album.recordingLocation.locationDescription}` : ''}</p>
-                </div>
-              </div>
-            )}
-            {album.recordingLocation.production && (
-              <div class="flex gap-3 items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-                </svg>
-                <div>
-                  <h3 class="text-white font-medium mb-1">Production</h3>
-                  <p class="text-white/80 text-sm leading-relaxed">{album.recordingLocation.production}</p>
-                </div>
-              </div>
-            )}
-          </div>
-          {album.recordingLocation.behindTheSound && (
-            <div class="glass-inset rounded-xl p-5">
-              <h3 class="text-white font-medium mb-2">Behind the Sound</h3>
-              <p class="text-white/80 text-sm leading-relaxed">{album.recordingLocation.behindTheSound}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Band Members (only if real data from Directus) -->
-  {album.bandLineup && album.bandLineup.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">Band Members</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-        {album.bandLineup.map((member: any) => (
-          <div class="glass-card rounded-xl overflow-hidden border border-white/20">
-            <div class="aspect-square overflow-hidden">
-              <img src={member.image} alt={member.name} loading="lazy" class="w-full h-full object-cover" />
-            </div>
-            <div class="p-3 text-center">
-              <h3 class="text-sm text-white font-medium">{member.name}</h3>
-              <p class="text-xs text-white/90">{member.role}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Music Videos (only if real data from Directus) -->
-  {album.musicVideos && album.musicVideos.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">Music Videos</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {album.musicVideos.map((video: any) => (
-          <a href={video.url} class="glass-tile overflow-hidden group" target="_blank" rel="noopener noreferrer">
-            <div class="relative aspect-video overflow-hidden">
-              <img src={video.thumbnail} alt={video.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-80 group-hover:opacity-100 transition-opacity">
-                <svg class="size-12 text-white drop-shadow-lg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              </div>
-            </div>
-            <div class="p-4">
-              <h3 class="text-white font-medium">{video.title}</h3>
-              <p class="text-sm text-primary">{video.director ? `Directed by ${video.director}` : video.year}</p>
-              {video.description && <p class="text-sm text-white/90 mt-1 line-clamp-2">{video.description}</p>}
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Critical Acclaim (only if real data from Directus) -->
-  {album.criticalQuotes && album.criticalQuotes.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">Critical Acclaim</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {album.criticalQuotes.map((quote: any) => (
-          <div class="glass-card rounded-xl p-6 border border-white/20">
-            <blockquote class="text-white/85 italic leading-relaxed mb-4">"{quote.quote}"</blockquote>
-            <div class="flex justify-between items-end pt-4 border-t border-white/10">
-              <div>
-                <span class="text-white font-medium text-sm block">{quote.publication}</span>
-                {quote.reviewer && <span class="text-white/90 text-xs">{quote.reviewer}</span>}
-              </div>
-              {quote.rating && (
-                <div class="flex gap-0.5">
-                  {[1,2,3,4,5].map((star: number) => (
-                    <svg class={`size-4 ${star <= quote.rating ? 'text-primary' : 'text-white/20'}`} viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Gallery (only if real data from Directus) -->
-  {album.galleryImages && album.galleryImages.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">Album Era Gallery</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-        {album.galleryImages.map((image: any, idx: number) => (
-          <div class={`relative rounded-xl overflow-hidden group ${idx === 0 ? 'col-span-2 row-span-2' : 'aspect-[4/3]'}`}>
-            <img src={image.url} alt={image.caption || ''} loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-            {image.caption && (
-              <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent text-sm text-white/90 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                {image.caption}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Instruments (only if real data from Directus) -->
-  {album.instruments && album.instruments.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">Instruments & Gear</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {album.instruments.map((instrument: any) => (
-          <div class="glass-card rounded-xl p-5 border border-white/20">
-            <span class="text-xs uppercase tracking-wider text-primary">{instrument.type}</span>
-            <h3 class="text-white font-medium mt-1">{instrument.name}</h3>
-            <p class="text-sm text-white/90 mt-1">Played by {instrument.player}</p>
-            {instrument.description && <p class="text-sm text-white/85 mt-2 leading-relaxed">{instrument.description}</p>}
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Related Albums -->
-  {relatedAlbums.length > 0 && (
-    <section class="mb-12">
-      <h2 class="font-heading text-2xl text-primary mb-6">More Albums</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {relatedAlbums.map((related: any) => (
-          <AlbumCard
-            title={related.title}
-            coverImage={related.coverImage}
-            year={related.year}
-            slug={related.slug}
-            id={related.id}
-            type={related.type || 'studio'}
-          />
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Purchase Links -->
-  <section class="mb-12">
-    <PurchaseLinks
-      spotifyUrl={album.spotifyUrl}
-      appleMusicUrl={album.appleMusicUrl}
-      bandcampUrl={album.bandcampUrl}
-      amazonUrl={album.amazonUrl}
-      officialStoreUrl={album.officialStoreUrl}
-    />
-  </section>
-
-  <!-- Share & Attribution -->
-  <section class="mb-12">
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <ShareButtons title={`${album.title} by The Cure`} />
-      <SourceCredit sourceName={album.sourceName} sourceUrl={album.sourceUrl} />
-    </div>
-  </section>
-
-  <!-- Back to Discography -->
-  <div class="text-center">
-    <a
-      href="/discography"
-      class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 border border-primary/40 text-white hover:bg-primary/30 transition-colors"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="m15 18-6-6 6-6"></path>
-      </svg>
-      Back to Discography
-    </a>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[
+      { label: 'Home',        href: '/' },
+      { label: 'Discography', href: '/discography' },
+      ...(era ? [{ label: era.name, href: `/band/history#${era.slug}` }] : []),
+      { label: album.title },
+    ]} />
   </div>
 
-</MainLayout>
+  <!-- HEADER -->
+  <section class="container album-head">
+    <div class="album-head__art">
+      <figure class="cover-plate" style={`view-transition-name: album-${album.slug};`}>
+        <div class="cover-plate__corner cover-plate__corner--tl">
+          <span class="mono-sm muted">{album.type?.toUpperCase()} · {year}</span>
+        </div>
+        <div class="cover-plate__corner cover-plate__corner--tr">
+          <span class="mono-sm muted">FIX · {album.catalog_number || '—'}</span>
+        </div>
+        {album.cover_art ? (
+          <img src={asset(album.cover_art, 'card')} alt={`${album.title} cover`} />
+        ) : (
+          <div class="cover-plate__fallback" aria-hidden="true"></div>
+        )}
+        <div class="cover-plate__corner cover-plate__corner--bl">
+          <span class="mono-sm muted">{album.label ? album.label.split(/[\/]/)[0].trim().toUpperCase() : '—'}</span>
+        </div>
+      </figure>
+    </div>
+
+    <div class="album-head__body">
+      <div class="cluster" style="gap: .4rem;">
+        {album.type && ordinal && <Tag>STUDIO · {ordinal.toUpperCase()}</Tag>}
+        {album.type && !ordinal && <Tag>{album.type.toUpperCase()}</Tag>}
+        {era?.short_name && <Tag>{era.short_name.toUpperCase()}</Tag>}
+        {featuredChartLine && <Tag variant="accent">{featuredChartLine.toUpperCase()}</Tag>}
+      </div>
+
+      <h1 class="album-head__title serif" style={`view-transition-name: album-title-${album.slug};`}>
+        {album.title}
+      </h1>
+
+      <div class="mono-sm" style="color: var(--ink-2); margin-top: 10px;">
+        {year} · {runtime} · {songs.length || album.track_count || '—'} TRACKS
+        {featuredChartLine && <> · {featuredChartLine.toUpperCase()}</>}
+      </div>
+
+      {album.description && (
+        <p class="album-head__lede">{album.description}</p>
+      )}
+
+      {firstReceptionSentence && (
+        <div class="voices">
+          <div class="mono-sm muted" style="margin-bottom: 8px;">
+            CRITICAL RECEPTION · ARCHIVE EXCERPT
+          </div>
+          <div class="voices__quote">"{firstReceptionSentence}"</div>
+          <div class="mono-sm muted" style="margin-top: 8px;">— Press, {year}</div>
+        </div>
+      )}
+
+      {album.background_text && (
+        <div class="archivist">
+          <span class="mono-sm muted" style="margin-right: .4em;">Archivist's note:</span>
+          {album.background_text.split(/\n{2,}/)[0]}
+        </div>
+      )}
+
+      <!-- QUICK FACTS -->
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
+          </div>
+        ))}
+      </div>
+
+      <div class="cluster" style="gap: .5rem; margin-top: 22px;">
+        {totalLivePlays > 0 && (
+          <Button href={`/setlists?album=${album.slug}`} variant="default">
+            View {totalLivePlays.toLocaleString()} performances →
+          </Button>
+        )}
+        {externalLinks.slice(0, 2).map((l) => (
+          <Button href={l.href!} variant="ghost" target="_blank" rel="noopener">{l.label} →</Button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- TABS -->
+  <div class="container album-tabs-wrap">
+    <div class="album-tabs" data-tabs role="tablist">
+      <button class="album-tab is-active" role="tab" data-target="tracks">
+        Tracklist <span class="album-tab__count">{songs.length}</span>
+      </button>
+      {(album.credits || album.producer) && (
+        <button class="album-tab" role="tab" data-target="personnel">
+          Personnel <span class="album-tab__count">·</span>
+        </button>
+      )}
+      {trivia.length > 0 && (
+        <button class="album-tab" role="tab" data-target="trivia">
+          Trivia & sessions <span class="album-tab__count">{trivia.length}</span>
+        </button>
+      )}
+      {(charts.length > 0 || singles.length > 0) && (
+        <button class="album-tab" role="tab" data-target="charts">
+          Charts & singles <span class="album-tab__count">{charts.length + singles.length}</span>
+        </button>
+      )}
+      {totalLivePlays > 0 && (
+        <button class="album-tab" role="tab" data-target="live">
+          Live performances <span class="album-tab__count">{totalLivePlays.toLocaleString()}</span>
+        </button>
+      )}
+    </div>
+  </div>
+
+  <!-- TRACKS -->
+  <section class="container album-section" data-panel="tracks">
+    <div class="tracks-grid">
+      <div>
+        <table class="data">
+          <thead>
+            <tr>
+              <th style="width: 36px;">#</th>
+              <th>Title</th>
+              <th>Notes</th>
+              <th style="text-align: right; width: 90px;">Length</th>
+              <th style="text-align: right; width: 90px;">Live</th>
+            </tr>
+          </thead>
+          <tbody>
+            {songs.map((song) => {
+              const plays = song.times_played_live || 0;
+              return (
+                <tr
+                  data-clickable
+                  data-track-row
+                  data-track-id={song.id}
+                  data-track-n={song.track_number}
+                  data-track-title={song.title}
+                  data-track-slug={song.slug || ''}
+                  data-track-dur={song.duration || ''}
+                  data-track-plays={plays}
+                  data-track-meaning={(song.song_meaning || '').slice(0, 260)}
+                  onclick={song.slug ? `window.location='/songs/${song.slug}'` : ''}
+                >
+                  <td class="idx">{String(song.track_number ?? 0).padStart(2, '0')}</td>
+                  <td><span class="serif" style="font-size: 18px;">{song.title}</span></td>
+                  <td><span class="mono-sm muted">
+                    {song.is_single ? 'SINGLE' : song.writer && song.writer.toLowerCase() !== 'robert smith' ? `CO-WRITTEN` : ''}
+                  </span></td>
+                  <td class="num">{song.duration || '—'}</td>
+                  <td class="num" style="color: var(--accent-3);">{plays ? plays.toLocaleString() : '—'}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <aside class="stack" style="--gap: 18px;">
+        <div class="panel--bare" data-focus>
+          <div class="panel-head">
+            <span>Track in focus</span>
+            <span data-focus-label>HOVER TO PREVIEW</span>
+          </div>
+          <div style="padding: 18px;" data-focus-body>
+            <div class="muted" style="font-size: 13px; font-family: var(--f-serif);">
+              Hover any track for cross-references, a preview waveform, and the song's documented live-performance count.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel--bare">
+          <div class="panel-head">
+            <span>Variants</span>
+            <span>{(album.disc_count || 1) + (album.type === 'deluxe' ? 1 : 0)}</span>
+          </div>
+          <div>
+            {[
+              ['Original', `${songs.length || album.track_count || '—'} tracks`, runtime],
+              album.disc_count && album.disc_count > 1 ? ['Multi-disc', `${album.disc_count} discs`, runtime] : null,
+              album.type === 'deluxe' ? ['Deluxe edition', 'Expanded', '—'] : null,
+            ].filter(Boolean).map((v, i, arr) => (
+              <div style={`display: grid; grid-template-columns: 1fr auto auto; gap: 14px; padding: 10px 18px; border-bottom: ${i < arr.length - 1 ? '1px solid var(--rule-2)' : 'none'}; font-size: 13px;`}>
+                <div>{(v as string[])[0]}</div>
+                <div class="mono-sm muted">{(v as string[])[1]}</div>
+                <div class="mono-sm">{(v as string[])[2]}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {externalLinks.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head">
+              <span>Listen</span>
+              <span>{externalLinks.length}</span>
+            </div>
+            <div style="padding: 10px 0;">
+              {externalLinks.map((l, i) => (
+                <a
+                  href={l.href!} target="_blank" rel="noopener"
+                  style={`display: flex; justify-content: space-between; padding: 10px 18px; border-bottom: ${i < externalLinks.length - 1 ? '1px solid var(--rule-2)' : 'none'}; border-left: none; border-right: none; border-top: none; color: var(--ink); font-family: var(--f-serif); font-size: 15px;`}
+                >
+                  <span>{l.label}</span>
+                  <span class="mono-sm muted">OPEN →</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+
+  <!-- PERSONNEL -->
+  {(album.credits || album.producer) && (
+    <section class="container album-section" data-panel="personnel" hidden>
+      <div class="personnel-grid">
+        <div>
+          <h3 class="serif" style="font-size: clamp(26px, 3vw, 36px); margin: 0 0 20px;">Credits</h3>
+          {album.credits ? (
+            <table class="data">
+              <tbody>
+                {album.credits.split(/\n+/).filter((l) => l.trim()).slice(0, 24).map((line) => {
+                  const m = line.match(/^([^:]+?):\s*(.+)$/);
+                  if (m) return (
+                    <tr>
+                      <td style="width: 220px;"><span class="serif" style="font-size: 16px;">{m[1].trim()}</span></td>
+                      <td><span class="mono-sm muted">{m[2].trim()}</span></td>
+                    </tr>
+                  );
+                  return (
+                    <tr>
+                      <td colspan="2"><span style="font-family: var(--f-serif); font-size: 15px; color: var(--ink-2);">{line}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <p class="muted">Personnel not yet catalogued.</p>
+          )}
+        </div>
+        <div>
+          <h3 class="serif" style="font-size: clamp(26px, 3vw, 36px); margin: 0 0 20px;">Session intensity</h3>
+          <p class="mono-sm muted" style="margin-bottom: 12px;">
+            Heuristic · 16-week schematic based on release date.
+          </p>
+          <div class="session-grid">
+            {Array.from({ length: 112 }).map((_, i) => {
+              const active = [3,4,5,11,12,13,14,15,18,19,20,21,25,26,32,33,34,35,40,41,42,48,55,56,57,63,70,71,72,73,80,81,82,88,95,102,103,104].includes(i);
+              const intense = [13,14,20,21,33,34,41,56,72,81,103].includes(i);
+              return <div class={`session-cell ${intense ? 'is-intense' : active ? 'is-active' : ''}`}></div>;
+            })}
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <div class="mono-sm muted">WEEK 1</div>
+            <div class="mono-sm muted">WEEK 16</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- TRIVIA -->
+  {trivia.length > 0 && (
+    <section class="container album-section" data-panel="trivia" hidden>
+      <div class="trivia-list">
+        {trivia.map((t: any, i: number) => (
+          <div class="trivia-row">
+            <div class="mono" style="color: var(--accent-3);">№ {String(i + 1).padStart(2, '0')}</div>
+            <div>
+              <p class="serif" style="font-size: clamp(19px, 2vw, 24px); line-height: 1.45; margin: 0; color: var(--ink);">
+                {t.fact}
+              </p>
+              {(t.category || t.is_verified) && (
+                <div class="cluster mono-sm muted" style="margin-top: 8px; gap: 12px;">
+                  {t.category && <span>{t.category.toUpperCase()}</span>}
+                  {t.is_verified && <span style="color: var(--accent-3);">VERIFIED</span>}
+                  {t.source_detail && <a href={t.source_detail} target="_blank" rel="noopener" style="border: none; color: var(--muted);">SOURCE →</a>}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- CHARTS & SINGLES -->
+  {(charts.length > 0 || singles.length > 0) && (
+    <section class="container album-section" data-panel="charts" hidden>
+      <div class="charts-grid">
+        {charts.length > 0 && (
+          <div>
+            <h3 class="serif" style="font-size: clamp(22px, 2.4vw, 30px); margin: 0 0 16px;">Chart peaks</h3>
+            <table class="data">
+              <thead>
+                <tr><th>Territory</th><th style="text-align:right;">Peak</th><th style="text-align:right;">Weeks</th><th style="text-align:right;">Year</th></tr>
+              </thead>
+              <tbody>
+                {charts.map((c: any) => (
+                  <tr>
+                    <td>{c.territory}</td>
+                    <td class="num">{c.peak ? '#' + c.peak : '—'}</td>
+                    <td class="num">{c.weeks ?? '—'}</td>
+                    <td class="num">{c.year ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {singles.length > 0 && (
+          <div>
+            <h3 class="serif" style="font-size: clamp(22px, 2.4vw, 30px); margin: 0 0 16px;">Singles</h3>
+            <table class="data">
+              <thead>
+                <tr><th>Title</th><th>Released</th><th style="text-align:right;">Peak</th></tr>
+              </thead>
+              <tbody>
+                {singles.map((s) => {
+                  const peaks = Array.isArray(s.chart_position)
+                    ? s.chart_position.map((c: any) => Number(c.chart_position)).filter((n) => !isNaN(n))
+                    : [];
+                  const peak = peaks.length ? Math.min(...peaks) : null;
+                  return (
+                    <tr>
+                      <td><span class="serif" style="font-size: 16px;">{s.title}</span></td>
+                      <td class="mono-sm">{s.release_date?.slice(0, 7).toUpperCase() || '—'}</td>
+                      <td class="num" style="color: var(--accent-3);">{peak !== null ? `#${peak}` : '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- LIVE -->
+  {totalLivePlays > 0 && (
+    <section class="container album-section" data-panel="live" hidden>
+      <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px;">
+        <div class="mono muted">Album tracks ranked by documented live performances</div>
+        <div style="flex: 1; border-top: 1px solid var(--rule);"></div>
+        <a href="/setlists" class="mono-sm" style="border: none; color: var(--accent-3);">OPEN SETLISTS →</a>
+      </div>
+      <div class="live-bars">
+        {songs.map((song) => {
+          const plays = song.times_played_live || 0;
+          const pct = (plays / maxPlays) * 100;
+          return (
+            <a class="live-bar" href={song.slug ? `/songs/${song.slug}` : '#'}>
+              <div class="live-bar__fill" style={`height: ${pct}%; background: ${plays > maxPlays * 0.6 ? 'var(--accent)' : 'var(--ink-2)'};`}></div>
+              <div class="mono-sm live-bar__label">{shortTitle(song.title)}</div>
+              <div class="mono-sm muted live-bar__count">{plays ? plays.toLocaleString() : '—'}</div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
+</Layout>
 
 <style>
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+  /* Header grid */
+  .album-head {
+    display: grid;
+    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+    padding: clamp(16px, 3vw, 32px) var(--gutter) clamp(32px, 4vw, 56px);
+    border-bottom: 1px solid var(--rule);
+    max-width: var(--max-w);
+    margin: 0 auto;
   }
+  @media (max-width: 900px) { .album-head { grid-template-columns: 1fr; } }
+
+  /* Cover plate (magazine corners) */
+  .cover-plate {
+    aspect-ratio: 1 / 1;
+    background: var(--bg-3);
+    border: 1px solid var(--rule);
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+  }
+  .cover-plate img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.94) contrast(1.04); }
+  .cover-plate__fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .cover-plate__fallback::after { content: ''; width: 60px; height: 60px; border-radius: 50%; background: var(--accent); }
+  .cover-plate__corner { position: absolute; padding: 14px 16px; pointer-events: none; }
+  .cover-plate__corner--tl { top: 0; left: 0; }
+  .cover-plate__corner--tr { top: 0; right: 0; }
+  .cover-plate__corner--bl { bottom: 0; left: 0; }
+  .cover-plate__corner > * {
+    background: color-mix(in oklab, var(--bg), transparent 10%);
+    padding: 4px 8px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* Head body */
+  .album-head__title {
+    font-weight: 500;
+    font-size: clamp(56px, 11vw, 128px);
+    line-height: 0.92;
+    margin: 16px 0 0;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .album-head__lede {
+    font-size: 17px; line-height: 1.6; color: var(--ink-2);
+    max-width: 640px; margin: 22px 0 0;
+  }
+  .archivist {
+    margin-top: 18px; font-size: 13px; line-height: 1.6;
+    color: var(--muted); max-width: 640px; font-style: italic;
+    font-family: var(--f-serif);
+  }
+  .album-head__body .facts { margin-top: 28px; }
+  .album-head__body .voices { margin-top: 24px; }
+
+  /* Tabs */
+  .album-tabs-wrap { margin-top: clamp(20px, 2.4vw, 32px); padding-bottom: 0; }
+  .album-tabs {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+  }
+  .album-tab {
+    font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    background: transparent; border: none;
+    padding: 12px 18px 14px; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color .18s, border-color .18s;
+    display: inline-flex; align-items: baseline; gap: 6px;
+  }
+  .album-tab:hover { color: var(--ink-2); }
+  .album-tab.is-active { color: var(--accent-ink); border-bottom-color: var(--accent); }
+  .album-tab__count { font-size: 10px; opacity: 0.5; letter-spacing: 0.1em; }
+
+  .album-section {
+    padding: clamp(32px, 5vw, 56px) var(--gutter);
+    max-width: var(--max-w); margin: 0 auto;
+  }
+
+  /* Tracks grid */
+  .tracks-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 1fr);
+    gap: clamp(24px, 3vw, 48px);
+  }
+  @media (max-width: 900px) { .tracks-grid { grid-template-columns: 1fr; } }
+
+  /* Personnel */
+  .personnel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 48px);
+  }
+  @media (max-width: 780px) { .personnel-grid { grid-template-columns: 1fr; } }
+
+  .session-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
+  }
+  .session-cell {
+    aspect-ratio: 1 / 1;
+    background: var(--bg-2);
+    border: 1px solid var(--rule-2);
+  }
+  .session-cell.is-active { background: var(--ink-2); }
+  .session-cell.is-intense { background: var(--accent); border-color: var(--accent); }
+
+  /* Trivia */
+  .trivia-list { max-width: 880px; }
+  .trivia-row {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: 24px; padding: 24px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .trivia-row:first-child { border-top: 1px solid var(--rule); }
+
+  /* Charts */
+  .charts-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: clamp(24px, 3vw, 48px);
+  }
+
+  /* Live bars */
+  .live-bars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+    gap: 4px;
+    align-items: end;
+    height: 260px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+  }
+  .live-bar {
+    display: flex; flex-direction: column; align-items: stretch;
+    text-align: center; border: none; color: var(--ink-2);
+    height: 100%; justify-content: flex-end;
+  }
+  .live-bar:hover .live-bar__fill { background: var(--accent-3) !important; }
+  .live-bar__fill { transition: background .2s; min-height: 2px; }
+  .live-bar__label { font-size: 9px; margin-top: 6px; letter-spacing: 0.06em; }
+  .live-bar__count { font-size: 9px; margin-top: 2px; color: var(--accent-3); }
 </style>
+
+<script>
+  function wireTabs() {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('[data-tabs] .album-tab');
+    const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
+    if (!tabs.length) return;
+    tabs.forEach((t) => {
+      t.addEventListener('click', () => {
+        const target = t.getAttribute('data-target');
+        tabs.forEach((x) => x.classList.toggle('is-active', x === t));
+        panels.forEach((p) => {
+          p.hidden = p.getAttribute('data-panel') !== target;
+        });
+      });
+    });
+  }
+  function wireTrackFocus() {
+    const focus = document.querySelector<HTMLElement>('[data-focus]');
+    const focusLabel = document.querySelector<HTMLElement>('[data-focus-label]');
+    const focusBody = document.querySelector<HTMLElement>('[data-focus-body]');
+    const rows = document.querySelectorAll<HTMLElement>('[data-track-row]');
+    if (!focus || !rows.length) return;
+    rows.forEach((r) => {
+      r.addEventListener('mouseenter', () => {
+        const n = r.getAttribute('data-track-n') || '—';
+        const title = r.getAttribute('data-track-title') || '';
+        const dur = r.getAttribute('data-track-dur') || '';
+        const plays = parseInt(r.getAttribute('data-track-plays') || '0', 10);
+        const meaning = r.getAttribute('data-track-meaning') || '';
+        if (focusLabel) focusLabel.textContent = `#${String(n).padStart(2, '0')}`;
+        if (focusBody) focusBody.innerHTML = `
+          <div class="serif" style="font-size: 28px; line-height: 1.1;">${title}</div>
+          <div class="mono-sm muted" style="margin-top: 6px;">Track ${n} · ${dur || '—'}</div>
+          ${meaning ? `<p style="margin-top: 14px; font-size: 14px; color: var(--ink-2); line-height: 1.55;">${meaning}${meaning.length >= 260 ? '…' : ''}</p>` : ''}
+          ${plays ? `<p style="margin-top: 14px; font-size: 13px; color: var(--accent-3); font-family: var(--f-mono); letter-spacing: .14em;">${plays.toLocaleString()} DOCUMENTED PLAYS</p>` : ''}
+          <div style="margin-top: 14px; height: 48px; display: flex; align-items: end; gap: 2px;">
+            ${Array.from({length:64}).map((_,i)=>`<div style="flex:1;height:${15+Math.abs(Math.sin((i+(+n)*7)*0.4))*80}%;background:${i<32?'var(--ink-2)':'var(--muted-2)'};"></div>`).join('')}
+          </div>
+        `;
+      });
+    });
+  }
+  wireTabs(); wireTrackFocus();
+  document.addEventListener('astro:page-load', () => { wireTabs(); wireTrackFocus(); });
+</script>

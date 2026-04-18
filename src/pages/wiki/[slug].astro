@@ -4,59 +4,51 @@ import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
 import { fetchRaw } from '../../lib/directus';
-import { asset } from '../../lib/assets';
 
 const { slug } = Astro.params;
-if (!slug) return Astro.redirect('/news');
+if (!slug) return Astro.redirect('/wiki');
 
 const rows: any[] = await fetchRaw('news', { limit: 1, 'filter[slug][_eq]': slug, fields: '*' }).catch(() => []);
 const article = rows[0];
 if (!article) return new Response('Not found', { status: 404 });
 
 const tags: string[] = Array.isArray(article.tags) ? article.tags : [];
-const cover = article.featured_image_file || article.featured_image;
 ---
-<Layout title={`${article.title} · News · Cureation`}>
+<Layout title={`${article.title} · Wiki · Cureation`}>
   <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
       { label: 'Home', href: '/' },
-      { label: 'News', href: '/news' },
+      { label: 'The wiki', href: '/wiki' },
       { label: article.title },
     ]} />
   </div>
 
   <article class="container" style="padding: clamp(24px, 4vw, 48px) 0; max-width: 780px;">
-    <div class="mono-sm muted">DISPATCH · {(article.category || 'NEWS').toUpperCase()}</div>
-    <div class="cluster" style="gap:.4rem; margin-top:.6rem;">
-      {article.is_editorial && <Tag variant="accent">EDITORIAL</Tag>}
+    <div class="mono-sm muted">WIKI · {article.category?.toUpperCase() || 'REFERENCE'}</div>
+    <div class="cluster" style="gap: .4rem; margin-top: .6rem;">
       {tags.slice(0, 4).map((t) => <Tag>{t.toUpperCase()}</Tag>)}
     </div>
     <h1 class="serif" style="font-size: clamp(40px, 6vw, 80px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0;">{article.title}</h1>
     {article.excerpt && <p style="font-family: var(--f-serif); font-size: 20px; line-height: 1.55; color: var(--ink-2); margin-top: 1rem;">{article.excerpt}</p>}
     <div class="mono-sm muted" style="margin-top: 1rem;">
-      {(article.published_date || article.date_created || '').slice(0, 10)}
+      {article.published_date || '—'}
       {article.reading_time && <> · {article.reading_time} MIN READ</>}
       {article.author_name && <> · {article.author_name.toUpperCase()}</>}
     </div>
 
-    {cover && (
-      <figure style="margin: 2rem 0 0;">
-        <img src={typeof cover === 'string' && cover.startsWith('http') ? cover : asset(cover, 'hero')}
-             alt={article.image_credit || article.title}
-             style="width: 100%; height: auto; border: 1px solid var(--rule);" />
-        {article.image_credit && <figcaption class="mono-sm muted" style="margin-top:.4rem;">{article.image_credit}</figcaption>}
-      </figure>
+    {article.content && (
+      <div class="prose" set:html={article.content} />
     )}
-
-    {article.content && <div class="prose" set:html={article.content} />}
   </article>
 </Layout>
 
 <style>
   .prose { font-family: var(--f-serif); font-size: 18px; line-height: 1.75; color: var(--ink); margin-top: 2rem; }
-  .prose :global(h2) { font-family: var(--f-display); font-style: italic; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 2.4rem 0 1rem; }
+  .prose :global(h2) { font-family: var(--f-display); font-style: italic; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 2.4rem 0 1rem; letter-spacing: -.01em; }
   .prose :global(h3) { font-family: var(--f-display); font-style: italic; font-size: clamp(22px, 2.2vw, 30px); margin: 2rem 0 .8rem; }
   .prose :global(p) { margin: 1rem 0; }
   .prose :global(blockquote) { border-left: 2px solid var(--accent); padding: 0 0 0 1.2rem; font-style: italic; color: var(--ink-2); margin: 1.5rem 0; }
   .prose :global(a) { color: var(--accent-3); border-bottom: 1px solid var(--rule); }
+  .prose :global(ul),
+  .prose :global(ol) { padding-left: 1.4rem; margin: 1rem 0; }
 </style>

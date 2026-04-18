@@ -1,299 +1,414 @@
 ---
 import Layout from '../layouts/Layout.astro';
-
-// Homepage sections
-import HeroSlider from '../components/home/HeroSlider.astro';
-import DiscographyStripSection from '../components/home/DiscographyStripSection.astro';
-import CompactStatsStrip from '../components/home/CompactStatsStrip.astro';
-import NewsletterCTASection from '../components/home/NewsletterCTASection.astro';
-
-// Dashboard widgets
-import FeaturedNewsWidget from '../components/home/widgets/FeaturedNewsWidget.astro';
-import NextConcertWidget from '../components/home/widgets/NextConcertWidget.astro';
-import OnThisDayWidget from '../components/home/widgets/OnThisDayWidget.astro';
-import SongOfTheDayWidget from '../components/home/widgets/SongOfTheDayWidget.astro';
-import DidYouKnowWidget from '../components/home/widgets/DidYouKnowWidget.astro';
-import PhotoOfTheDayWidget from '../components/home/widgets/PhotoOfTheDayWidget.astro';
-import BlueskyFeedWidget from '../components/home/widgets/BlueskyFeedWidget.astro';
-import OfficialNewsWidget from '../components/home/widgets/OfficialNewsWidget.astro';
-import AlbumOfTheMonthWidget from '../components/home/widgets/AlbumOfTheMonthWidget.astro';
-import ActivePollWidget from '../components/home/widgets/ActivePollWidget.astro';
-
-// Data fetching
+import StatHero from '../components/ui/StatHero.astro';
+import BarChart from '../components/ui/BarChart.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import PullQuote from '../components/ui/PullQuote.astro';
+import Tag from '../components/ui/Tag.astro';
+import Button from '../components/ui/Button.astro';
 import {
-  getFeaturedNews,
-  getSetlistsWithSongs,
-  getSongsWithAlbums,
-  getSongOfTheDay,
-  getNewsPosts,
-  getOverallStats,
-  getTimelineEvents,
-  getRandomFact,
-  fetchAlbums,
-  formatAlbum,
-  getPhotoOfTheDay,
-  getFeaturedPoll,
+  getAlbumOfMonth,
+  listAlbums,
+  listEras,
+  topLivePlayedSongs,
+  getRunningFigures,
+  getOnThisDay,
+  listNews,
+  listEditorial,
+  listQuotes,
+  getSongOfDay,
+  getLyricOfDay,
+  getPhotoOfDay,
   getNextConcert,
-  filterPastSetlists,
+  getLatestConcert,
 } from '../lib/directus';
+import { asset } from '../lib/assets';
 
-import { getBlueskyFeed } from '../lib/bluesky';
-import { fetchRSSFeed } from '../lib/rss';
-
-import {
-  getMockSongOfTheDay,
-  mockSongsWithAlbums,
-  mockNewsPosts,
-} from '../lib/mockData';
-
-import siteConfig from '../config/site.config';
-import type { SongWithAlbum, NewsPost, Album } from '../types/directus';
-
-// Fetch all data for homepage in parallel
-const [
-  featuredNews,
-  setlists,
-  songs,
-  allNewsPosts,
-  overallStats,
-  timelineEvents,
-  randomFact,
-  rawAlbums,
-  photoOfTheDay,
-  featuredPoll,
-  nextConcert,
-  blueskyPosts,
-  rssItems,
-] = await Promise.all([
-  getFeaturedNews(),
-  getSetlistsWithSongs(),
-  getSongsWithAlbums(),
-  getNewsPosts(),
-  getOverallStats(),
-  getTimelineEvents(),
-  getRandomFact(),
-  fetchAlbums(),
-  getPhotoOfTheDay(),
-  getFeaturedPoll(),
-  getNextConcert(),
-  getBlueskyFeed(siteConfig.social.bluesky || 'thecure.com'),
-  fetchRSSFeed(siteConfig.rssFeeds?.official || 'https://www.thecure.com/feed/'),
+const [issue, albums, eras, topSongs, figures, otd, news, editorial, quotes, songOfDay, lyricOfDay, photoOfDay, nextConcert, latestConcert] = await Promise.all([
+  getAlbumOfMonth(),
+  listAlbums({ type: 'studio' }),
+  listEras(),
+  topLivePlayedSongs(10).catch(() => []),
+  getRunningFigures(),
+  getOnThisDay(),
+  listNews(3),
+  listEditorial(1),
+  listQuotes(4),
+  getSongOfDay().catch(() => null),
+  getLyricOfDay().catch(() => null),
+  getPhotoOfDay().catch(() => null),
+  getNextConcert().catch(() => null),
+  getLatestConcert().catch(() => null),
 ]);
 
-// --- Derived values ---
-
-// Song of the Day
-const songOfTheDay: SongWithAlbum = getSongOfTheDay(songs) || getMockSongOfTheDay() || mockSongsWithAlbums[0];
-
-// News
-const newsPostsForGrid: NewsPost[] = allNewsPosts && allNewsPosts.length > 1
-  ? allNewsPosts
-  : mockNewsPosts;
-
-// Archive stats
-const archiveTotals = {
-  albums: overallStats.totalAlbums || 14,
-  songs: overallStats.totalSongs || songs.length || 200,
-  shows: overallStats.totalShows || setlists.length || 1000,
-  countries: overallStats.countriesVisited || 5,
+const now = new Date();
+const today = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+const todayShort = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+const mastYear = now.getFullYear();
+const toRoman = (n: number): string => {
+  const map: Array<[number, string]> = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+  let out = '', r = n;
+  for (const [v, s] of map) { while (r >= v) { out += s; r -= v; } }
+  return out;
 };
-const historicalSetlists = filterPastSetlists(setlists);
+const volume = toRoman(Math.max(1, mastYear - 2018));
+const issueNumber = Math.floor((Date.now() - Date.UTC(mastYear, 0, 0)) / 86400000);
+const monthName = now.toLocaleDateString(undefined, { month: 'long' }).toUpperCase();
 
-// --- On This Day computation ---
-const today = new Date();
-const currentMonth = today.getMonth() + 1;
-const currentDay = today.getDate();
-const dateString = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+const issueYear = issue?.release_date?.slice(0, 4);
+const issueEra = issue && eras.find((e) => e.id === issue.era_id);
+const issueFirstSentence = issue?.critical_reception
+  ? issue.critical_reception.split(/(?<=[\.\!\?])\s/)[0]?.trim().replace(/^["""]|["""]$/g, '')
+  : null;
+const issueFacts = issue ? [
+  ['Released', issue.release_date || '—'],
+  ['Label', issue.label || '—'],
+  ['Era', issueEra?.name || '—'],
+  ['Type', (issue.type || '—').toString().toUpperCase()],
+] : [];
 
-const uniqueShows = new Map<string, (typeof setlists)[number]>();
-historicalSetlists
-  .filter((setlist) => {
-    if (!setlist.date) return false;
-    const eventDate = new Date(setlist.date);
-    return eventDate.getMonth() + 1 === currentMonth && eventDate.getDate() === currentDay;
-  })
-  .forEach((setlist) => {
-    const key = `${setlist.year}-${setlist.venue}-${setlist.city}-${setlist.country}`.toLowerCase();
-    const existing = uniqueShows.get(key);
-    if (!existing || (setlist.songCount || 0) > (existing.songCount || 0)) {
-      uniqueShows.set(key, setlist);
-    }
-  });
-
-const todaySetlists = Array.from(uniqueShows.values()).sort((a, b) => b.year - a.year);
-
-const uniqueEvents = new Map<string, (typeof timelineEvents)[number]>();
-timelineEvents
-  .filter((event) => {
-    if (!event.date) return false;
-    const eventDate = new Date(event.date);
-    return eventDate.getMonth() + 1 === currentMonth && eventDate.getDate() === currentDay;
-  })
-  .forEach((event) => {
-    const key = `${event.year}-${event.title}`.toLowerCase();
-    if (!uniqueEvents.has(key)) uniqueEvents.set(key, event);
-  });
-
-const todayEvents = Array.from(uniqueEvents.values()).sort((a, b) => b.year - a.year);
-const otdHasEntries = todaySetlists.length > 0 || todayEvents.length > 0;
-
-const otdShows = todaySetlists.slice(0, 3).map(s => ({
-  venue: s.venue,
-  city: s.city || '',
-  country: s.country || '',
-  year: s.year,
-}));
-
-// --- Album spotlight ---
-const featuredSlug = siteConfig.featured?.album || 'disintegration';
-const allAlbums = rawAlbums.map(formatAlbum);
-const spotlightAlbum: Album =
-  allAlbums.find(a => a.slug === featuredSlug) ||
-  allAlbums.filter(a => (a.type || 'studio') === 'studio').sort((a, b) => parseInt(b.year || '0') - parseInt(a.year || '0'))[0] ||
-  allAlbums[0];
-
-const albumTypeLabel = (() => {
-  switch (spotlightAlbum?.type) {
-    case 'studio': return 'Studio Album';
-    case 'live': return 'Live Album';
-    case 'compilation': return 'Compilation';
-    case 'ep': return 'EP';
-    default: return 'Release';
-  }
-})();
-
-// --- Build slider slides ---
-const navigationTiles = [
-  { title: 'News', path: '/news', icon: 'newspaper' },
-  { title: 'Discography', path: '/discography', icon: 'music' },
-  { title: 'Setlists', path: '/setlists', icon: 'list-music' },
-  { title: 'Lyrics', path: '/lyrics', icon: 'text' },
-  { title: 'Videos', path: '/videos', icon: 'video' },
-  { title: 'Stats', path: '/stats', icon: 'stats' },
-];
-
-const slides: Array<{
-  id: string;
-  type: 'welcome' | 'news' | 'song' | 'on-this-day' | 'album';
-  backgroundImage?: string;
-  backgroundGradient?: string;
-  label: string;
-}> = [
-  {
-    id: 'welcome',
-    type: 'welcome',
-    backgroundImage: '/images/hero-background.jpg',
-    label: 'Welcome to Cureation',
-  },
-];
-
-// News slide
-if (featuredNews) {
-  slides.push({
-    id: 'news',
-    type: 'news',
-    backgroundImage: featuredNews.featuredImage || '/images/hero-background.jpg',
-    label: `Latest News: ${featuredNews.title}`,
-  });
-}
-
-// Song of the Day slide
-slides.push({
-  id: 'song',
-  type: 'song',
-  backgroundImage: songOfTheDay.albumCover || '/images/hero-background.jpg',
-  label: `Song of the Day: ${songOfTheDay.title}`,
-});
-
-// On This Day slide
-if (otdHasEntries || randomFact) {
-  slides.push({
-    id: 'on-this-day',
-    type: 'on-this-day',
-    backgroundGradient: 'linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.12) 0%, #060608 60%)',
-    label: `On This Day: ${dateString}`,
-  });
-}
-
-// Album spotlight slide
-if (spotlightAlbum) {
-  slides.push({
-    id: 'album',
-    type: 'album',
-    backgroundImage: spotlightAlbum.coverImage || '/images/hero-background.jpg',
-    label: `Album Spotlight: ${spotlightAlbum.title}`,
-  });
-}
-
-// Featured news post for widget (use first post from grid)
-const featuredPost = featuredNews || (newsPostsForGrid.length > 0 ? newsPostsForGrid[0] : null);
+const songAlbum = songOfDay?.album ? albums.find(a => a.id === songOfDay.album) : null;
+const concert = nextConcert || latestConcert;
+const concertIsFuture = !!nextConcert;
+const concertTarget = concert?.date ? new Date(concert.date).toISOString() : null;
 ---
+<Layout title="Cureation · An editorial archive of The Cure">
 
-<Layout>
-  <!-- SECTION A: Compact Slider -->
-  <HeroSlider
-    slides={slides}
-    welcomeData={{ navigationTiles }}
-    newsData={featuredNews ? { post: featuredNews } : undefined}
-    songData={{ song: songOfTheDay }}
-    onThisDayData={{
-      dateString,
-      showCount: todaySetlists.length,
-      milestoneCount: todayEvents.length,
-      shows: otdShows,
-      hasEntries: otdHasEntries,
-      fallbackFact: randomFact?.fact || undefined,
-    }}
-    albumData={spotlightAlbum ? { album: spotlightAlbum, albumTypeLabel } : undefined}
-  />
+  <section class="masthead">
+    <div class="container">
+      <div class="masthead-rule">
+        <span>Vol. {volume} · №{issueNumber}</span>
+        <span>{today}</span>
+      </div>
+      <h1 class="masthead-wordmark">Cureation</h1>
+      <div class="masthead-rule">
+        <span class="hide-mobile">An editorial archive of The Cure</span>
+        <span>Preserved with care · since 2019</span>
+      </div>
+    </div>
+  </section>
 
-  <div class="relative z-10">
-    <!-- SECTION B: Bento Grid -->
-    <section class="pt-8 pb-10 md:pt-10 md:pb-12">
-      <div class="responsive-container">
-        <div class="flex items-center justify-between mb-6">
-          <div class="gothic-heading flex-1">
-            <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Today on Cureation</h2>
+  {concert && concertTarget && (
+    <section class="container" style="padding: clamp(24px, 4vw, 48px) 0; border-bottom: 1px solid var(--rule);">
+      <div class="panel-head" style="border: 1px solid var(--accent);">
+        <span><span class="pip"></span>{concertIsFuture ? 'Next concert' : 'Most recent concert'}</span>
+        <span>{concert.city || ''}{concert.country ? ` · ${concert.country}` : ''}</span>
+      </div>
+      <div class="panel" style="border-top: 0; border-color: var(--rule); padding: clamp(20px, 3vw, 36px); background: var(--bg-2);">
+        <div class="concert-head">
+          <div>
+            <div class="mono-sm muted">{concert.tour_name || 'Live'}</div>
+            <h3 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; margin: .4rem 0; font-style: italic;">
+              {concert.venue_link ? (
+                <a href={`/setlists/${concert.slug}`} style="border:none;">{concert.venue || 'TBA'}</a>
+              ) : concert.venue || 'TBA'}
+            </h3>
+            <div class="mono-sm muted">
+              {concert.date} · {[concert.city, concert.state_province, concert.country].filter(Boolean).join(', ')}
+            </div>
           </div>
-        </div>
-        <div class="bento-grid">
-          {/* Row 1: Featured News (2-col) + Next Concert */}
-          {featuredPost && <FeaturedNewsWidget post={featuredPost} />}
-          <NextConcertWidget concert={nextConcert} />
-
-          {/* Row 2: On This Day + Song of the Day */}
-          <OnThisDayWidget
-            dateString={dateString}
-            showCount={todaySetlists.length}
-            milestoneCount={todayEvents.length}
-            shows={otdShows}
-            hasEntries={otdHasEntries}
-            fallbackFact={randomFact?.fact || undefined}
-          />
-          <SongOfTheDayWidget song={songOfTheDay} />
-
-          {/* Row 3: Did You Know + Photo of the Day */}
-          <DidYouKnowWidget fact={randomFact} />
-          <PhotoOfTheDayWidget photo={photoOfTheDay} />
-
-          {/* Row 4: Bluesky Feed (2-col) + Active Poll */}
-          <BlueskyFeedWidget posts={blueskyPosts} />
-          <ActivePollWidget poll={featuredPoll} />
-
-          {/* Row 5: Official News RSS + Album of the Month */}
-          <OfficialNewsWidget items={rssItems} />
-          <AlbumOfTheMonthWidget album={spotlightAlbum} />
+          {concertIsFuture && (
+            <div class="countdown" data-countdown={concertTarget}>
+              <div class="countdown__cell"><div class="countdown__value" data-cd="d">—</div><div class="countdown__label">Days</div></div>
+              <div class="countdown__cell"><div class="countdown__value" data-cd="h">—</div><div class="countdown__label">Hours</div></div>
+              <div class="countdown__cell"><div class="countdown__value" data-cd="m">—</div><div class="countdown__label">Minutes</div></div>
+              <div class="countdown__cell"><div class="countdown__value" data-cd="s">—</div><div class="countdown__label">Seconds</div></div>
+            </div>
+          )}
         </div>
       </div>
     </section>
+  )}
 
-    <!-- SECTION C: Discography Strip -->
-    <DiscographyStripSection />
+  {issue && (
+    <section class="container issue">
+      <div class="issue__grid">
+        <figure class="cover-plate" style={`view-transition-name: album-${issue.slug}`}>
+          <div class="cover-plate__corner cover-plate__corner--tl">
+            <span class="mono-sm muted">{monthName} · RECORD OF THE MONTH</span>
+          </div>
+          <div class="cover-plate__corner cover-plate__corner--tr">
+            <span class="mono-sm muted">FIX · {issue.catalog_number || '—'}</span>
+          </div>
+          {issue.cover_art ? (
+            <a href={`/discography/${issue.slug}`}>
+              <img src={asset(issue.cover_art, 'card')} alt={`${issue.title} cover`} />
+            </a>
+          ) : (
+            <div class="placeholder">No cover</div>
+          )}
+          <div class="cover-plate__corner cover-plate__corner--bl">
+            <span class="mono-sm muted">{issue.label ? issue.label.split(/[\/]/)[0].trim().toUpperCase() : '—'}</span>
+          </div>
+        </figure>
 
-    <!-- SECTION D: Archive Stats -->
-    <CompactStatsStrip stats={archiveTotals} />
+        <div class="issue__body stack" style="--gap: 1rem;">
+          <div class="cluster" style="gap:.4rem;">
+            <Tag>ALBUM OF THE MONTH</Tag>
+            {issueEra?.short_name && <Tag>{issueEra.short_name.toUpperCase()}</Tag>}
+            <span class="tag tag--gold">CRITIC'S PICK</span>
+          </div>
+          <h2 class="issue__title serif" style={`view-transition-name: album-title-${issue.slug}`}>
+            {issue.title}
+          </h2>
+          <div class="mono-sm muted">
+            {issueYear} · {issue.label || 'Fiction'} · {(issue.type || '').toUpperCase()}
+          </div>
+          {issue.description && <p class="issue__lede">{issue.description}</p>}
+          {issueFirstSentence && (
+            <div class="voices">
+              <div class="mono-sm muted" style="margin-bottom:.3rem;">CRITICAL VOICES</div>
+              <div class="voices__quote">"{issueFirstSentence}"</div>
+            </div>
+          )}
+          <div class="facts">
+            {issueFacts.map(([k, v]) => (
+              <div class="facts__item">
+                <div class="facts__k">{k}</div>
+                <div class="facts__v">{v}</div>
+              </div>
+            ))}
+          </div>
+          <div class="cluster" style="gap:.6rem;">
+            <Button href={`/discography/${issue.slug}`} variant="accent">Read the dossier →</Button>
+            {issue.spotify_url && <Button href={issue.spotify_url} variant="ghost" target="_blank" rel="noopener">Listen</Button>}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
 
-    <!-- SECTION E: Newsletter + Contribute -->
-    <NewsletterCTASection />
-  </div>
+  {(lyricOfDay || photoOfDay || songOfDay) && (
+    <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-bottom: 1px solid var(--rule);">
+      <div class="panel-head" style="border: 1px solid var(--rule); border-bottom: 0;">
+        <span><span class="pip pip--gold"></span>Daily</span>
+        <span>{today.toUpperCase()}</span>
+      </div>
+      <div class="daily-grid">
+        {photoOfDay && (
+          <a href={photoOfDay.album_slug ? `/discography/${photoOfDay.album_slug}` : '#'} class="daily-photo" style="text-decoration:none;">
+            <img src={photoOfDay.image_file ? asset(photoOfDay.image_file, 'hero') : photoOfDay.image_url} alt={photoOfDay.title || 'Photo of the day'} />
+            <div class="daily-photo__overlay">
+              <div class="mono-sm" style="color: var(--accent-ink); margin-bottom:.4rem;"><span class="pip pip--hot"></span>PHOTO OF THE DAY</div>
+              <div class="serif" style="font-size: clamp(22px, 2.6vw, 30px); font-style: italic; line-height: 1.15; color: var(--accent-ink);">{photoOfDay.title || 'Untitled'}</div>
+              <div class="mono-sm" style="margin-top:.4rem; color: rgba(240, 232, 247, 0.7);">
+                {[photoOfDay.formatted_date || photoOfDay.date_taken, photoOfDay.location, photoOfDay.photographer].filter(Boolean).join(' · ').toUpperCase()}
+              </div>
+            </div>
+          </a>
+        )}
+        <div class="daily-text stack" style="--gap: 0;">
+          {lyricOfDay && (
+            <a class="lyric-card daily-lyric" href={lyricOfDay.song.slug ? `/songs/${lyricOfDay.song.slug}` : '#'} style="text-decoration:none; display:block; border: 1px solid var(--rule); border-bottom: 0;">
+              <div class="lyric-card__mark">"</div>
+              <div class="mono-sm muted" style="margin-bottom: .8rem;"><span class="pip pip--gold"></span>LYRIC OF THE DAY</div>
+              <blockquote class="lyric-card__body">{lyricOfDay.line}</blockquote>
+              <div class="lyric-card__cite">— {lyricOfDay.song.title}{songAlbum ? `, ${songAlbum.title}` : ''}</div>
+            </a>
+          )}
+          {songOfDay && (
+            <a href={songOfDay.slug ? `/songs/${songOfDay.slug}` : '#'} style="display:grid; grid-template-columns: 88px 1fr auto; gap: 14px; align-items:center; border: 1px solid var(--rule); background: var(--bg-2); padding: 14px 16px; text-decoration:none;">
+              {songAlbum?.cover_art ? (
+                <img src={asset(songAlbum.cover_art, 'card')} alt={songAlbum.title} style="width:88px; height:88px; object-fit:cover; border:1px solid var(--rule);" />
+              ) : <div class="placeholder" style="width:88px; height:88px;">—</div>}
+              <div>
+                <div class="mono-sm muted" style="margin-bottom:.3rem;"><span class="pip pip--cool"></span>SONG OF THE DAY</div>
+                <div class="serif" style="font-size: clamp(22px, 2.4vw, 28px); font-style: italic; line-height: 1.05;">{songOfDay.title}</div>
+                <div class="mono-sm muted" style="margin-top:.25rem;">
+                  {songAlbum ? songAlbum.title.toUpperCase() : ''}
+                </div>
+              </div>
+              {songOfDay.times_played_live ? (
+                <div style="text-align:right;">
+                  <div class="serif" style="font-size: 26px; font-style: italic; color: var(--gold); line-height: 1;">{songOfDay.times_played_live.toLocaleString()}</div>
+                  <div class="mono-sm muted" style="margin-top:.2rem;">PLAYS LIVE</div>
+                </div>
+              ) : null}
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="container" style="margin-top: clamp(24px, 4vw, 48px);">
+    <div class="panel-head" style="margin-bottom: 0; border: 1px solid var(--rule);">
+      <span>Running figures</span>
+      <span>Live · the archive</span>
+    </div>
+    <StatHero stats={[
+      { label: 'Studio albums', value: figures.albums },
+      { label: 'Songs catalogued', value: figures.songs },
+      { label: 'Setlists on file', value: figures.setlists },
+      { label: 'Venues visited', value: figures.venues },
+      { label: 'Archive photos', value: figures.photos },
+      { label: 'Band members', value: figures.members },
+    ]} />
+  </section>
+
+  {otd.length > 0 && (
+    <IssueSection kicker="On this day" title={todayShort} href="/on-this-day" meta={`${otd.length} entries`}>
+      <table class="data">
+        <thead>
+          <tr><th style="width:80px;">Year</th><th style="width:140px;">Kind</th><th>Entry</th><th></th></tr>
+        </thead>
+        <tbody>
+          {otd.slice(0, 6).map((e: any) => (
+            <tr>
+              <td class="num" style="text-align:left; font-size:14px; color: var(--gold);">{e.year}</td>
+              <td class="idx">{(e.kind || '').toUpperCase()}</td>
+              <td>
+                <span class="serif" style="font-size:17px;">{e.title}</span>
+                {e.subtitle && <div class="muted" style="font-family:var(--f-serif); font-style:italic; font-size:14px;">{e.subtitle}</div>}
+              </td>
+              <td class="num">
+                {e.link_collection && e.link_slug && (
+                  <a href={`/${e.link_collection}/${e.link_slug}`} style="color: var(--accent-3);">→</a>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </IssueSection>
+  )}
+
+  {topSongs.length > 0 && (
+    <IssueSection kicker="A taxonomy of the setlist" title="Ten songs, a thousand nights" href="/stats/songs" meta="All-time frequency">
+      <BarChart
+        bars={topSongs.slice(0, 10).map((s: any) => {
+          const a = albums.find(al => al.id === s.album);
+          return {
+            label: s.title,
+            sub: a?.title || '',
+            value: s.times_played_live || 0,
+            href: s.slug ? `/songs/${s.slug}` : undefined,
+          };
+        })}
+        unit="plays"
+      />
+    </IssueSection>
+  )}
+
+  <IssueSection kicker="The records" title="The discography" href="/discography" meta={`${albums.length} studio albums`}>
+    <div class="cover-wall">
+      {albums.map((a) => (
+        <a href={`/discography/${a.slug}`} class="cover-wall__cell" style={`view-transition-name: album-${a.slug};`}>
+          {a.cover_art ? <img src={asset(a.cover_art, 'card')} alt={a.title} /> : <div class="placeholder">No cover</div>}
+          <div class="cover-wall__cap">{a.title} · {a.release_date?.slice(0,4)}</div>
+        </a>
+      ))}
+    </div>
+  </IssueSection>
+
+  {editorial[0] && (
+    <IssueSection kicker="Editorial" title={editorial[0].title || 'From the editor'} href={editorial[0].slug ? `/news/${editorial[0].slug}` : '/news'}>
+      <div class="editorial">
+        {editorial[0].subtitle && <p class="deck">{editorial[0].subtitle}</p>}
+        {editorial[0].excerpt && <p class="deck" style="color: var(--ink-2);">{editorial[0].excerpt}</p>}
+        <Button href={editorial[0].slug ? `/news/${editorial[0].slug}` : '/news'} variant="ghost">Continue reading →</Button>
+      </div>
+    </IssueSection>
+  )}
+
+  {quotes.length > 0 && (
+    <IssueSection kicker="In their words" title="Epigraphs">
+      <div class="quotes-grid">
+        {quotes.map((q: any) => (
+          <PullQuote cite={q.attribution || q.source || undefined}>{q.text}</PullQuote>
+        ))}
+      </div>
+    </IssueSection>
+  )}
+
+  {eras.length > 0 && (
+    <section class="container" style="padding: clamp(20px, 3vw, 32px) 0; border-bottom: 1px solid var(--rule);">
+      <div class="eras-strip">
+        <div class="eras-strip__lead">
+          <div class="mono-sm muted">Chronology</div>
+          <a href="/band/history" class="eras-strip__link serif">Six eras →</a>
+        </div>
+        <div class="eras-strip__rail">
+          {eras.map((e: any, i: number) => (
+            <a href={`/band/history#${e.slug}`} class="eras-strip__item">
+              <div class="mono-sm" style="color: var(--cool); font-size: 9.5px;">{String(i + 1).padStart(2, '0')} · {e.year_start}–{e.year_end && e.year_end < 2099 ? e.year_end : 'now'}</div>
+              <div class="serif" style="font-style: italic; font-size: 15px; line-height: 1.1; margin-top: .15rem;">{e.name}</div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {news.length > 0 && (
+    <IssueSection kicker="Dispatches" title="Recent news" href="/news" meta={`${news.length} latest`}>
+      <div class="news-grid">
+        {news.map((n: any, i: number) => (
+          <article class="news-entry">
+            <div class="mono-sm muted" style="margin-bottom:.4rem;">№ {String(i + 1).padStart(2, '0')} · <time>{n.date_created?.slice(0, 10)}</time></div>
+            <a class="news-entry__title serif" href={n.slug ? `/news/${n.slug}` : '#'}>{n.title}</a>
+            {n.excerpt && <p class="news-entry__excerpt">{n.excerpt}</p>}
+          </article>
+        ))}
+      </div>
+    </IssueSection>
+  )}
+
 </Layout>
+
+<style>
+  .issue { padding: clamp(32px, 5vw, 72px) 0; border-bottom: 1px solid var(--rule); }
+  .issue__grid { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: start; }
+  .issue__title { font-size: clamp(56px, 9vw, 112px); line-height: .95; font-style: italic; font-weight: 400; letter-spacing: -.01em; margin: 0; }
+  .issue__lede { font-family: var(--f-serif); font-size: 18px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; }
+  @media (max-width: 900px) { .issue__grid { grid-template-columns: 1fr; } }
+
+  .concert-head { display: grid; grid-template-columns: 1fr auto; gap: clamp(16px, 3vw, 40px); align-items: center; }
+  @media (max-width: 780px) { .concert-head { grid-template-columns: 1fr; } }
+
+  .daily-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0; border: 1px solid var(--rule); border-top: 0; }
+  .daily-photo { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--bg-2); display: block; border-right: 1px solid var(--rule); }
+  .daily-photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.08); transition: transform .6s ease; }
+  .daily-photo:hover img { transform: scale(1.03); }
+  .daily-photo__overlay { position: absolute; inset: auto 0 0 0; padding: clamp(16px, 2.4vw, 26px); background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0.55) 60%, transparent); }
+  .daily-text { display: flex; flex-direction: column; }
+  .daily-lyric { flex: 1; }
+  @media (max-width: 900px) {
+    .daily-grid { grid-template-columns: 1fr; }
+    .daily-photo { aspect-ratio: 16/9; border-right: 0; border-bottom: 1px solid var(--rule); }
+  }
+
+  .editorial { display: flex; flex-direction: column; gap: 1rem; max-width: 68ch; }
+  .quotes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(24px, 3vw, 48px); }
+
+  .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(20px, 2.8vw, 40px); border-top: 1px solid var(--ink); padding-top: clamp(18px, 2vw, 28px); }
+  .news-entry { display: flex; flex-direction: column; gap: .5rem; }
+  .news-entry__title { font-size: clamp(22px, 2vw, 28px); font-style: italic; color: var(--ink); border: none; line-height: 1.15; }
+  .news-entry__title:hover { color: var(--accent-3); }
+  .news-entry__excerpt { font-family: var(--f-serif); color: var(--ink-2); margin: 0; font-size: 15px; line-height: 1.55; }
+</style>
+
+<script>
+  function wireCountdown() {
+    const nodes = document.querySelectorAll<HTMLElement>('[data-countdown]');
+    nodes.forEach((n) => {
+      const target = new Date(n.getAttribute('data-countdown') || '').getTime();
+      if (!target) return;
+      const tick = () => {
+        const ms = target - Date.now();
+        if (ms <= 0) { n.querySelectorAll('[data-cd]').forEach(e => e.textContent = '0'); return; }
+        const d = Math.floor(ms / 86400000);
+        const h = Math.floor((ms % 86400000) / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        const set = (k: string, v: number) => { const el = n.querySelector(`[data-cd="${k}"]`); if (el) el.textContent = String(v).padStart(2, '0'); };
+        set('d', d); set('h', h); set('m', m); set('s', s);
+      };
+      tick();
+      const id = setInterval(tick, 1000);
+      document.addEventListener('astro:before-swap', () => clearInterval(id), { once: true });
+    });
+  }
+  wireCountdown();
+  document.addEventListener('astro:page-load', wireCountdown);
+</script>

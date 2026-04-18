@@ -1,0 +1,49 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import IssueSection from '../../components/ui/IssueSection.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import { fetchRaw } from '../../lib/directus';
+
+const gear: any[] = await fetchRaw('gear', { limit: -1, fields: '*' }).catch(() => []);
+
+const byCategory = gear.reduce((acc: Record<string, any[]>, g: any) => {
+  const k = (g.category || g.kind || 'Other');
+  (acc[k] = acc[k] || []).push(g);
+  return acc;
+}, {});
+const categories = Object.keys(byCategory).sort();
+---
+<Layout title="Gear · The band · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'The band', href: '/band' }, { label: 'Gear' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · GEAR</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">Instruments & equipment</h1>
+      <p class="deck" style="max-width: 62ch;">Guitars, pedals, synths and stage equipment — documented where known, cross-referenced to records and tours.</p>
+    </div>
+  </div>
+
+  {gear.length === 0 ? (
+    <IssueSection kicker="In progress" title="Gear ledger">
+      <p class="deck">Collection is being populated. Check back as entries land.</p>
+    </IssueSection>
+  ) : categories.map((cat) => (
+    <IssueSection kicker={cat.toUpperCase()} title={cat} meta={`${byCategory[cat].length} entries`}>
+      <table class="data">
+        <thead><tr><th style="width:50px;">№</th><th>Item</th><th>Notes</th><th>Used by</th></tr></thead>
+        <tbody>
+          {byCategory[cat].map((g: any, i: number) => (
+            <tr>
+              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+              <td><span class="serif" style="font-size: 17px; font-style: italic;">{g.name || g.model || g.title}</span>
+                {g.manufacturer && <span class="mono-sm muted"> · {g.manufacturer}</span>}
+              </td>
+              <td class="mono-sm muted">{g.description || g.notes || ''}</td>
+              <td class="mono-sm" style="color: var(--accent-3);">{g.owner || g.used_by || '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </IssueSection>
+  ))}
+</Layout>

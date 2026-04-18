@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+import { fetchRaw } from '../lib/directus';
+
+const news: any[] = await fetchRaw('news', {
+  limit: -1,
+  fields: 'id,title,slug,excerpt,category,published_date,date_created,reading_time,author_name,featured,tags',
+  sort: '-published_date,-date_created',
+}).catch(() => []);
+
+const categories = Array.from(new Set(news.map((n) => n.category).filter(Boolean))).sort();
+---
+<Layout title="News · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'News' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · DISPATCHES</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">Dispatches</h1>
+      <p class="deck" style="max-width: 62ch;">News, editorials, and archive additions — filed chronologically.</p>
+      <div class="cluster" style="gap:6px; flex-wrap:wrap;" data-cat-filters>
+        <Chip active={true} class="cat-chip" data-cat="all">All</Chip>
+        {categories.map((c) => <Chip class="cat-chip" data-cat={c}>{c}</Chip>)}
+      </div>
+    </div>
+  </div>
+
+  <IssueSection kicker={`${news.length} entries`} title="Archive">
+    <table class="data" data-news>
+      <thead><tr><th style="width:110px;">Date</th><th style="width:120px;">Category</th><th>Entry</th><th class="num" style="text-align:right; width:70px;">Read</th></tr></thead>
+      <tbody>
+        {news.map((n) => (
+          <tr data-clickable data-cat={n.category || ''} onclick={n.slug ? `location.href='/news/${n.slug}'` : undefined}>
+            <td class="mono-sm" style="color: var(--ink);">{(n.published_date || n.date_created || '').slice(0, 10)}</td>
+            <td class="mono-sm" style="color: var(--accent-3);">{(n.category || '—').toUpperCase()}</td>
+            <td>
+              <span class="serif" style="font-size: 18px; font-style: italic;">{n.title}</span>
+              {n.excerpt && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{n.excerpt}</div>}
+            </td>
+            <td class="num">{n.reading_time ? `${n.reading_time}m` : '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </IssueSection>
+</Layout>
+
+<script>
+  function wire() {
+    const chips = document.querySelectorAll<HTMLElement>('[data-cat-filters] .cat-chip');
+    const rows = document.querySelectorAll<HTMLElement>('[data-news] tbody tr');
+    if (!chips.length) return;
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+      const c = chip.getAttribute('data-cat') || 'all';
+      chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+      rows.forEach((r) => { const rc = r.getAttribute('data-cat') || ''; r.style.display = c === 'all' || rc === c ? '' : 'none'; });
+    }));
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

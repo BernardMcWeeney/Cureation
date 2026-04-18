@@ -1,0 +1,100 @@
+---
+const sections: Array<{ title: string; links: Array<{ href: string; label: string }> }> = [
+  { title: 'Records', links: [
+    { href: '/discography', label: 'Discography' },
+    { href: '/discography/ep', label: 'EPs' },
+    { href: '/discography/compilations', label: 'Compilations' },
+    { href: '/discography/singles', label: 'Singles' },
+  ]},
+  { title: 'Live', links: [
+    { href: '/setlists', label: 'Setlists' },
+    { href: '/tours', label: 'Tours' },
+    { href: '/venues', label: 'Venues' },
+    { href: '/on-this-day', label: 'On this day' },
+  ]},
+  { title: 'Words & images', links: [
+    { href: '/songs', label: 'Songs' },
+    { href: '/lyrics', label: 'Lyrics' },
+    { href: '/news', label: 'News' },
+    { href: '/photos', label: 'Photos' },
+    { href: '/videos', label: 'Videos' },
+  ]},
+  { title: 'The band', links: [
+    { href: '/band/members', label: 'Members' },
+    { href: '/band/history', label: 'History' },
+    { href: '/band/gear', label: 'Gear' },
+    { href: '/band/quotes', label: 'Quotes' },
+  ]},
+  { title: 'Archive', links: [
+    { href: '/wiki', label: 'Wiki' },
+    { href: '/stats', label: 'Stats' },
+    { href: '/curiosities', label: 'Curiosities' },
+    { href: '/community', label: 'Community' },
+  ]},
+];
+---
+<div class="menu" data-menu hidden>
+  <div class="menu__panel">
+    <header class="menu__head">
+      <span class="kicker">Cureation · Menu</span>
+      <button class="nav__icon" data-menu-close aria-label="Close menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 6 18 18M18 6 6 18"/>
+        </svg>
+      </button>
+    </header>
+    <div class="menu__body">
+      {sections.map((sec) => (
+        <div class="menu__section">
+          <div class="kicker" style="margin-bottom:.6rem">{sec.title}</div>
+          <ul>
+            {sec.links.map((l) => (
+              <li><a href={l.href}>{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .menu {
+    position: fixed; inset: 0; z-index: 60;
+    background: color-mix(in oklab, var(--bg), transparent 10%);
+    backdrop-filter: blur(10px);
+  }
+  .menu[hidden] { display: none; }
+  .menu__panel {
+    max-width: var(--max-w); margin: 0 auto; padding: clamp(20px, 4vw, 48px);
+    height: 100%; overflow-y: auto;
+  }
+  .menu__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .menu__body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: clamp(20px, 3vw, 40px);
+  }
+  .menu__section ul { list-style: none; margin: 0; padding: 0; }
+  .menu__section li + li { margin-top: .5rem; }
+  .menu__section a {
+    font-family: var(--f-display); font-style: italic; font-size: clamp(22px, 2.4vw, 32px);
+    border: none; color: var(--ink);
+  }
+  .menu__section a:hover { color: var(--accent-3); }
+</style>
+
+<script>
+  function wire() {
+    const menu = document.querySelector<HTMLElement>('[data-menu]');
+    if (!menu) return;
+    const open = () => { menu.hidden = false; document.body.style.overflow = 'hidden'; };
+    const close = () => { menu.hidden = true; document.body.style.overflow = ''; };
+    document.querySelectorAll('[data-menu-open]').forEach((b) => b.addEventListener('click', open));
+    document.querySelectorAll('[data-menu-close]').forEach((b) => b.addEventListener('click', close));
+    menu.addEventListener('click', (e) => { if (e.target === menu) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

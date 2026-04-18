@@ -1,0 +1,186 @@
+---
+// ⌘K overlay. Queries /api/search.json?q= on keyup.
+---
+<div class="search" data-search hidden role="dialog" aria-modal="true" aria-label="Search">
+  <div class="search__backdrop" data-search-close></div>
+  <div class="search__panel container">
+    <div class="search__head">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+      </svg>
+      <input
+        type="search"
+        data-search-input
+        placeholder="Search albums, songs, venues…"
+        autocomplete="off"
+      />
+      <span class="kicker">ESC</span>
+    </div>
+    <div class="search__results" data-search-results>
+      <p class="search__hint">Type to search across the archive.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .search {
+    position: fixed; inset: 0; z-index: 70;
+    display: flex; flex-direction: column;
+    padding-top: clamp(40px, 10vh, 120px);
+  }
+  .search[hidden] { display: none; }
+  .search__backdrop {
+    position: absolute; inset: 0;
+    background: color-mix(in oklab, var(--bg), transparent 20%);
+    backdrop-filter: blur(10px);
+  }
+  .search__panel {
+    position: relative;
+    background: var(--bg-2);
+    border: 1px solid var(--rule);
+    padding: 0;
+    max-width: 720px;
+    box-shadow: var(--shadow-2);
+  }
+  .search__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-bottom: 1px solid var(--rule);
+    color: var(--ink-2);
+  }
+  .search__head input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--ink); font-family: var(--f-serif); font-size: 18px;
+  }
+  .search__results { padding: 14px 18px 20px; max-height: 60vh; overflow-y: auto; }
+  .search__hint { color: var(--muted); font-family: var(--f-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+  .search__group { margin-top: 14px; }
+  .search__group:first-child { margin-top: 0; }
+  .search__group-title { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: .4rem; }
+  .search__result {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0; border-bottom: 1px solid var(--rule-2);
+    font-family: var(--f-serif); color: var(--ink); border-left: none; border-right: none; border-top: none;
+  }
+  .search__result:hover { color: var(--accent-3); }
+  .search__result em { font-family: var(--f-display); font-style: italic; color: var(--accent-3); }
+  .search__meta { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+</style>
+
+<script>
+  type Results = {
+    albums: Array<{ title: string; slug: string; type: string }>;
+    songs:  Array<{ title: string; slug: string }>;
+    setlists: Array<{ id: number; date: string | null; venue_link: any }>;
+    venues: Array<{ name: string; slug: string | null; city: string | null; country: string | null }>;
+  };
+
+  function wire() {
+    const root = document.querySelector<HTMLElement>('[data-search]');
+    if (!root) return;
+    const input = root.querySelector<HTMLInputElement>('[data-search-input]');
+    const results = root.querySelector<HTMLElement>('[data-search-results]');
+    if (!input || !results) return;
+
+    const open = () => {
+      root.hidden = false;
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => input.focus(), 0);
+    };
+    const close = () => {
+      root.hidden = true;
+      document.body.style.overflow = '';
+      input.value = '';
+      results.innerHTML = '<p class="search__hint">Type to search across the archive.</p>';
+    };
+
+    document.querySelectorAll('[data-search-open]').forEach((b) => b.addEventListener('click', open));
+    document.querySelectorAll('[data-search-close]').forEach((b) => b.addEventListener('click', close));
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        root.hidden ? open() : close();
+      } else if (e.key === 'Escape' && !root.hidden) {
+        close();
+      }
+    });
+
+    let controller: AbortController | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      if (timer) clearTimeout(timer);
+      if (controller) controller.abort();
+      if (!q) {
+        results.innerHTML = '<p class="search__hint">Type to search across the archive.</p>';
+        return;
+      }
+      timer = setTimeout(async () => {
+        controller = new AbortController();
+        try {
+          const res = await fetch(`/api/search.json?q=${encodeURIComponent(q)}`, { signal: controller.signal });
+          const data = (await res.json()) as Results;
+          results.innerHTML = render(data);
+        } catch (err) {
+          if ((err as any).name !== 'AbortError') {
+            results.innerHTML = '<p class="search__hint">Search failed — try again.</p>';
+          }
+        }
+      }, 180);
+    });
+  }
+
+  function render(d: Results): string {
+    const groups: string[] = [];
+    if (d.albums?.length) {
+      groups.push(`<div class="search__group">
+        <div class="search__group-title">Records</div>
+        ${d.albums.map((a) => `
+          <a class="search__result" href="/discography/${a.slug}">
+            <span><em>${esc(a.title)}</em></span>
+            <span class="search__meta">${esc(a.type || '')}</span>
+          </a>
+        `).join('')}
+      </div>`);
+    }
+    if (d.songs?.length) {
+      groups.push(`<div class="search__group">
+        <div class="search__group-title">Songs</div>
+        ${d.songs.map((s) => `
+          <a class="search__result" href="/songs/${s.slug}">
+            <span>${esc(s.title)}</span>
+          </a>
+        `).join('')}
+      </div>`);
+    }
+    if (d.venues?.length) {
+      groups.push(`<div class="search__group">
+        <div class="search__group-title">Venues</div>
+        ${d.venues.map((v) => `
+          <a class="search__result" href="/venues/${v.slug || ''}">
+            <span>${esc(v.name)}</span>
+            <span class="search__meta">${esc([v.city, v.country].filter(Boolean).join(', '))}</span>
+          </a>
+        `).join('')}
+      </div>`);
+    }
+    if (d.setlists?.length) {
+      groups.push(`<div class="search__group">
+        <div class="search__group-title">Setlists</div>
+        ${d.setlists.map((s) => `
+          <a class="search__result" href="/setlists/${s.id}">
+            <span>${esc(s.date || 'Undated')}</span>
+          </a>
+        `).join('')}
+      </div>`);
+    }
+    return groups.length ? groups.join('') : '<p class="search__hint">No results.</p>';
+  }
+
+  function esc(s: string | null | undefined): string {
+    return String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] as string));
+  }
+
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

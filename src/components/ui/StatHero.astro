@@ -1,0 +1,17 @@
+---
+interface Stat { label: string; value: string | number; }
+interface Props { stats: Stat[]; }
+const { stats } = Astro.props;
+function fmt(v: string | number): string {
+  if (typeof v === 'number') return v.toLocaleString();
+  return v;
+}
+---
+<section class="stat-hero" aria-label="Archive by the numbers">
+  {stats.map((s) => (
+    <div class="stat-hero__cell">
+      <div class="stat-hero__value">{fmt(s.value)}</div>
+      <div class="stat-hero__label">{s.label}</div>
+    </div>
+  ))}
+</section>

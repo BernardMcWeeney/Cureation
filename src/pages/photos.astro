@@ -1,0 +1,106 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Tag from '../components/ui/Tag.astro';
+import { fetchRaw, getPhotoOfDay } from '../lib/directus';
+import { asset } from '../lib/assets';
+
+const [photos, hero] = await Promise.all([
+  fetchRaw<any[]>('photos', {
+    limit: -1,
+    fields: 'id,title,description,image_file,image_url,date_taken,formatted_date,photographer,location,tour,album,album_slug,is_featured,tags',
+    sort: '-date_taken',
+  }).catch(() => [] as any[]),
+  getPhotoOfDay().catch(() => null),
+]);
+
+const withImage = photos.filter((p: any) => p.image_file || p.image_url);
+const featured = withImage.filter((p: any) => p.is_featured).slice(0, 6);
+const byDecade = new Map<string, any[]>();
+for (const p of withImage) {
+  const y = p.date_taken?.slice(0, 4);
+  if (!y) continue;
+  const decade = `${y.slice(0, 3)}0s`;
+  if (!byDecade.has(decade)) byDecade.set(decade, []);
+  byDecade.get(decade)!.push(p);
+}
+const decades = Array.from(byDecade.keys()).sort().reverse();
+const toursSet = new Set<string>();
+for (const p of withImage) if (p.tour) toursSet.add(p.tour);
+const tours = Array.from(toursSet).slice(0, 20);
+
+function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
+  return p.image_file ? asset(p.image_file, preset) : p.image_url;
+}
+---
+<Layout title="Photographs · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Photographs' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · ARCHIVE</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 112px); line-height:.92; font-style: italic; margin: 0;">Photographs</h1>
+      <p class="deck" style="max-width: 62ch;">An archive of pictures — stage, street, studio, sleeve. Filed by decade, tagged to tours and records.</p>
+    </div>
+
+    <div class="facts" style="margin-top: 1.4rem;">
+      <div class="facts__item"><div class="facts__k">On file</div><div class="facts__v" style="color: var(--gold);">{withImage.length.toLocaleString()}</div></div>
+      <div class="facts__item"><div class="facts__k">Decades covered</div><div class="facts__v">{decades.length}</div></div>
+      <div class="facts__item"><div class="facts__k">Featured</div><div class="facts__v">{featured.length || '—'}</div></div>
+      <div class="facts__item"><div class="facts__k">Tours tagged</div><div class="facts__v">{tours.length}+</div></div>
+    </div>
+  </div>
+
+  {hero && (
+    <section class="container" style="padding: clamp(24px, 4vw, 48px) 0; margin-top: 2rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+      <div class="mono-sm muted" style="margin-bottom: 1rem;"><span class="pip pip--hot"></span>PHOTO OF THE DAY</div>
+      <div class="pod-grid">
+        <a href={hero.album_slug ? `/discography/${hero.album_slug}` : '#'} class="photo-plate" style="text-decoration:none;">
+          <img src={src(hero, 'hero')} alt={hero.title || 'Photo of the day'} />
+        </a>
+        <div class="stack" style="--gap: 1rem;">
+          <div class="mono-sm" style="color: var(--accent-3);">{hero.formatted_date || hero.date_taken}</div>
+          <h2 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height:.95; font-style: italic; margin: 0;">{hero.title || 'Untitled'}</h2>
+          {hero.description && <p style="font-family: var(--f-serif); font-size: 17px; color: var(--ink-2); max-width: 56ch;">{hero.description}</p>}
+          <div class="cluster" style="gap:.4rem;">
+            {hero.location && <Tag>{hero.location.toUpperCase()}</Tag>}
+            {hero.tour && <span class="tag tag--cool">{hero.tour.toUpperCase()}</span>}
+            {hero.photographer && <span class="tag tag--gold">© {hero.photographer.toUpperCase()}</span>}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {featured.length > 0 && (
+    <IssueSection kicker="From the editors" title="Featured frames" meta={`${featured.length} picks`}>
+      <div class="filmstrip">
+        {featured.map((p: any) => (
+          <a href={p.album_slug ? `/discography/${p.album_slug}` : '#'} class="filmstrip__cell" style="text-decoration: none;">
+            <img src={src(p, 'hero')} alt={p.title || ''} />
+            <div class="filmstrip__caption">{p.title || p.formatted_date || p.date_taken || 'Untitled'}</div>
+          </a>
+        ))}
+      </div>
+    </IssueSection>
+  )}
+
+  {decades.map(decade => (
+    <IssueSection kicker={`THE ${decade.toUpperCase()}`} title={`${decade}`} meta={`${byDecade.get(decade)!.length} frames`}>
+      <div class="cover-wall">
+        {byDecade.get(decade)!.slice(0, 36).map((p: any, i: number) => (
+          <a href={p.album_slug ? `/discography/${p.album_slug}` : '#'} class={`cover-wall__cell${i === 0 ? ' cover-wall__cell--lg' : ''}`} style="text-decoration:none;">
+            <img src={src(p, i === 0 ? 'hero' : 'card')} alt={p.title || ''} loading="lazy" />
+            <div class="cover-wall__cap">{p.title || p.formatted_date || p.date_taken || ''}</div>
+          </a>
+        ))}
+      </div>
+    </IssueSection>
+  ))}
+
+</Layout>
+
+<style>
+  .pod-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: center; }
+  @media (max-width: 860px) { .pod-grid { grid-template-columns: 1fr; } }
+</style>

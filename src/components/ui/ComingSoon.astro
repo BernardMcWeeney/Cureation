@@ -1,0 +1,19 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Button from './Button.astro';
+interface Props { title: string; phase: 2 | 3 | 4; deck?: string; }
+const { title, phase, deck } = Astro.props;
+---
+<Layout title={`${title} · Cureation`}>
+  <section class="container" style="padding: clamp(60px, 10vw, 140px) 0; text-align: center;">
+    <div class="kicker">In Phase {phase}</div>
+    <h1 class="headline headline--xxl" style="margin: 1rem 0;">{title}</h1>
+    <p class="deck" style="margin: 0 auto; max-width: 56ch;">
+      {deck || 'This section is being rebuilt from the ground up — catalogue data is already in the archive and the page is coming soon.'}
+    </p>
+    <div class="cluster" style="justify-content: center; margin-top: 2rem; gap: .6rem;">
+      <Button href="/" variant="accent">Home</Button>
+      <Button href="/discography" variant="ghost">Discography</Button>
+    </div>
+  </section>
+</Layout>

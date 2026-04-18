@@ -1,135 +1,87 @@
 ---
 import { ClientRouter } from 'astro:transitions';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import siteConfig from '../config/site.config';
 import '../styles/global.css';
-import SearchEnhancer from '../components/SearchEnhancer.astro';
-import { getDefaultTheme } from '../config/theme.config';
-
+import Nav from '../components/nav/Nav.astro';
+import MobileMenu from '../components/nav/MobileMenu.astro';
+import SearchOverlay from '../components/nav/SearchOverlay.astro';
+import Footer from '../components/nav/Footer.astro';
+import Fog from '../components/atmosphere/Fog.astro';
 
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
-  pageClass?: string;
-  theme?: string;
+  theme?: 'dark' | 'midnight' | 'papers';
 }
 
 const {
-  title,
-  description,
-  ogImage,
-  pageClass = '',
-  theme = getDefaultTheme()
+  title = 'Cureation — an archive of The Cure',
+  description = 'An editorial archive documenting The Cure: albums, live shows, lyrics, members, photos, news.',
+  ogImage = '/hero-image1.jpg',
+  theme = 'dark',
 } = Astro.props;
 
-// Generate full URLs for social sharing
-const siteUrl = import.meta.env.SITE || siteConfig.url;
-const canonicalURL = new URL(Astro.url.pathname, siteUrl);
-const socialImageURL = new URL(ogImage || siteConfig.meta.ogImage, siteUrl);
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
 ---
-
-<!DOCTYPE html>
-<html lang="en" style="color-scheme: dark;" data-theme={theme}>
+<!doctype html>
+<html lang="en" data-theme={theme}>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
-  <link rel="canonical" href={canonicalURL} />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="generator" content={Astro.generator} />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="canonical" href={canonical} />
 
-  <!-- Primary Meta Tags -->
-  <title>
-    {title
-      ? `${title} | ${siteConfig.name}`
-      : `${siteConfig.name} - ${siteConfig.description}`}
-  </title>
-  <meta
-    name="title"
-    content={
-      title
-        ? `${title} | ${siteConfig.name}`
-        : `${siteConfig.name} - ${siteConfig.description}`
-    }
-  />
-  <meta name="description" content={description || siteConfig.description} />
-
-  <!-- Open Graph / Facebook -->
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={ogImage} />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content={canonicalURL} />
-  <meta
-    property="og:title"
-    content={
-      title
-        ? `${title} | ${siteConfig.name}`
-        : `${siteConfig.name} - ${siteConfig.description}`
-    }
-  />
-  <meta property="og:description" content={description || siteConfig.description} />
-  <meta property="og:image" content={socialImageURL} />
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content={siteConfig.meta.twitterHandle} />
-  <meta
-    name="twitter:title"
-    content={
-      title
-        ? `${title} | ${siteConfig.name}`
-        : `${siteConfig.name} - ${siteConfig.description}`
-    }
-  />
-  <meta name="twitter:description" content={description || siteConfig.description} />
-  <meta name="twitter:image" content={socialImageURL} />
 
-  <!-- Preconnect & Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <!-- View transitions -->
   <ClientRouter />
 
-  <!-- Browser theme color -->
-  <meta name="theme-color" content="#000000" />
-
-  <!-- Additional head -->
-  <slot name="head" />
+  <script is:inline>
+    // Restore stored theme before paint to avoid flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('cureation:theme');
+        if (t === 'midnight' || t === 'papers' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
-<body class="min-h-screen flex flex-col noise-overlay">
-  <!-- Gothic theme-aware background -->
-  <div class="fixed inset-0 -z-50 theme-gradient-bg">
-    <div class="absolute inset-0" style="background: radial-gradient(ellipse at top left, rgba(var(--color-primary-rgb), 0.08) 0%, transparent 50%);"></div>
-    <div class="absolute inset-0" style="background: radial-gradient(ellipse at bottom right, rgba(var(--color-primary-rgb), 0.05) 0%, transparent 50%);"></div>
-    <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 70%, rgba(var(--color-primary-rgb), 0.03) 0%, transparent 40%);"></div>
-    <div class="absolute inset-0" style="background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%);"></div>
-  </div>
+<body>
+  <Fog />
+  <a class="sr-only" href="#main">Skip to content</a>
 
-  <Header />
+  <Nav />
+  <MobileMenu />
+  <SearchOverlay />
 
-  <main class="grow">
+  <main id="main" style="position:relative; z-index:1;">
     <slot />
   </main>
 
   <Footer />
 
-  <slot name="after-footer" />
-  <!-- Include our search enhancer component -->
-  <SearchEnhancer />
-
   <script>
-    function setupSmoothScroll() {
-      document.addEventListener('click', (e) => {
-        const target = e.target.closest('a');
-        if (target && target.getAttribute('href')?.startsWith('#')) {
-          e.preventDefault();
-          const id = target.getAttribute('href').slice(1);
-          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-        }
+    function wireTheme() {
+      const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+      if (!btn) return;
+      const order: Array<'dark' | 'midnight' | 'papers'> = ['dark', 'midnight', 'papers'];
+      btn.addEventListener('click', () => {
+        const current = (document.documentElement.getAttribute('data-theme') as any) || 'dark';
+        const next = order[(order.indexOf(current) + 1) % order.length];
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('cureation:theme', next); } catch (e) {}
       });
     }
-    setupSmoothScroll();
-    document.addEventListener('astro:page-load', setupSmoothScroll);
+    wireTheme();
+    document.addEventListener('astro:page-load', wireTheme);
   </script>
 </body>
 </html>

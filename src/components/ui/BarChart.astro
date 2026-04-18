@@ -1,0 +1,108 @@
+---
+interface Bar {
+  label: string;
+  sub?: string;
+  value: number;
+  href?: string;
+}
+interface Props {
+  bars: Bar[];
+  unit?: string;
+  height?: number;
+}
+const { bars, unit = '', height = 260 } = Astro.props as Props;
+const max = Math.max(1, ...bars.map(b => b.value));
+---
+<div class="bar-chart" style={`--h: ${height}px;`}>
+  <div class="bar-chart__inner" role="list">
+    {bars.map((b, i) => {
+      const h = (b.value / max) * 100;
+      const Tag: any = b.href ? 'a' : 'div';
+      return (
+        <Tag
+          class={`bar bar--${i < 3 ? 'top' : 'rest'}`}
+          href={b.href}
+          style={`--bar-h: ${h}%;`}
+          role="listitem"
+          data-label={b.label}
+          data-value={b.value.toLocaleString() + (unit ? ` ${unit}` : '')}
+        >
+          <div class="bar__val">{b.value.toLocaleString()}</div>
+          <div class="bar__fill"></div>
+          <div class="bar__label">{b.label}</div>
+          {b.sub && <div class="bar__sub">{b.sub}</div>}
+        </Tag>
+      );
+    })}
+  </div>
+</div>
+
+<style>
+  .bar-chart { padding: 1.5rem 0 .5rem; }
+  .bar-chart__inner {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 10), minmax(0, 1fr));
+    gap: clamp(6px, 1vw, 14px);
+    align-items: end;
+    height: calc(var(--h) + 90px);
+  }
+  .bar {
+    display: grid;
+    grid-template-rows: auto var(--h) auto auto;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    color: inherit;
+    align-self: stretch;
+    transition: transform .22s ease;
+  }
+  .bar:hover { transform: translateY(-3px); }
+  .bar__val {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--accent-3);
+    margin-bottom: 6px;
+    opacity: 0.85;
+    transition: opacity .2s;
+  }
+  .bar:hover .bar__val { opacity: 1; color: var(--accent-ink); }
+  .bar__fill {
+    height: var(--bar-h);
+    background: linear-gradient(to top, var(--accent-2), var(--accent));
+    box-shadow: var(--glow);
+    opacity: 0.72;
+    transition: opacity .2s, box-shadow .2s;
+    min-height: 2px;
+    align-self: end;
+    position: relative;
+  }
+  .bar--top .bar__fill { opacity: 1; background: linear-gradient(to top, var(--accent), var(--gold)); }
+  .bar:hover .bar__fill { opacity: 1; box-shadow: 0 0 48px var(--accent); }
+  .bar__label {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: clamp(12px, 1.1vw, 15px);
+    line-height: 1.15;
+    margin-top: 10px;
+    color: var(--ink);
+    min-height: 2.2em;
+    padding: 0 2px;
+  }
+  .bar__sub {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin-top: 3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 780px) {
+    .bar-chart__inner { grid-template-columns: repeat(5, 1fr); grid-auto-rows: auto; height: auto; }
+    .bar { grid-template-rows: auto 120px auto auto; }
+  }
+</style>

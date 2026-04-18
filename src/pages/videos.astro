@@ -1,0 +1,134 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+import { fetchRaw } from '../lib/directus';
+
+const videos: any[] = await fetchRaw('videos', { limit: -1, sort: '-release_date,-date_created' }).catch(() => []);
+const types = Array.from(new Set(videos.map((v) => v.type).filter(Boolean))).sort();
+const years = Array.from(new Set(videos.map((v) => (v.release_date || '').slice(0, 4)).filter(Boolean))).sort().reverse();
+
+const ytId = (url: string): string | null => {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/);
+  return m && m[1] ? m[1] : null;
+};
+---
+<Layout title="Videos · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Videos' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · MOVING IMAGE</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Videos</h1>
+      <p class="deck" style="max-width: 62ch;">Promos, performances, interviews, and concert films — catalogued with director, year, and source.</p>
+      <div class="facts">
+        <div class="facts__item"><div class="facts__k">On file</div><div class="facts__v">{videos.length}</div></div>
+        <div class="facts__item"><div class="facts__k">Types</div><div class="facts__v">{types.length}</div></div>
+        <div class="facts__item"><div class="facts__k">Years</div><div class="facts__v">{years.length}</div></div>
+      </div>
+    </div>
+  </div>
+
+  {videos.length === 0 ? (
+    <section class="container" style="padding: clamp(40px, 6vw, 80px) 0;">
+      <div class="panel-head" style="border: 1px solid var(--rule);"><span>No entries yet</span><span>Coming soon</span></div>
+      <p class="deck" style="margin-top:.8rem;">The video index is being compiled — promos first, then live films, then interviews.</p>
+    </section>
+  ) : (
+    <>
+      <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+        <div class="filter-grid">
+          <div class="filter-grid__block">
+            <div class="mono-sm muted">Type</div>
+            <div class="cluster filter-chips" data-filter-group="type">
+              <Chip active={true} data-fval="all">All</Chip>
+              {types.map((t) => <Chip data-fval={t}>{t}</Chip>)}
+            </div>
+          </div>
+          <div class="filter-grid__block">
+            <div class="mono-sm muted">Year</div>
+            <div class="cluster filter-chips" data-filter-group="year">
+              <Chip active={true} data-fval="all">All</Chip>
+              {years.map((y) => <Chip data-fval={y}>{y}</Chip>)}
+            </div>
+          </div>
+          <div class="filter-grid__block">
+            <div class="mono-sm muted">Search</div>
+            <input class="filter-search" type="search" placeholder="Title, director…" data-filter-search />
+          </div>
+        </div>
+      </section>
+
+      <IssueSection kicker="Catalogue" title="Every film" meta={`${videos.length} entries`}>
+        <div class="video-grid" data-video-grid>
+          {videos.map((v) => {
+            const yid = ytId(v.url || v.video_url || '');
+            const thumb = yid ? `https://i.ytimg.com/vi/${yid}/hqdefault.jpg` : v.thumbnail_url || '';
+            return (
+              <a class="video-card"
+                 href={v.slug ? `/videos/${v.slug}` : (v.url || '#')}
+                 target={!v.slug && v.url ? '_blank' : undefined}
+                 rel={!v.slug && v.url ? 'noopener' : undefined}
+                 data-type={v.type || ''}
+                 data-year={(v.release_date || '').slice(0, 4)}
+                 data-search={`${v.title || ''} ${v.director || ''} ${v.album_title || ''}`.toLowerCase()}>
+                <div class="video-card__thumb">
+                  {thumb ? <img src={thumb} alt={v.title || ''} loading="lazy" /> : <div class="video-card__ph" />}
+                  <div class="video-card__play">▶</div>
+                </div>
+                <div class="video-card__meta">
+                  <div class="mono-sm muted">{(v.type || 'VIDEO').toUpperCase()} · {(v.release_date || '').slice(0, 4) || '—'}</div>
+                  <div class="serif" style="font-style: italic; font-size: 19px; line-height: 1.2; margin-top: .2rem;">{v.title}</div>
+                  {v.director && <div class="mono-sm muted" style="margin-top:.2rem;">Dir. {v.director}</div>}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </IssueSection>
+    </>
+  )}
+</Layout>
+
+<script>
+  function wire() {
+    const state: Record<string, string> = { type: 'all', year: 'all', search: '' };
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-video-grid] .video-card'));
+    const apply = () => {
+      cards.forEach((r) => {
+        const t = r.getAttribute('data-type') || '';
+        const y = r.getAttribute('data-year') || '';
+        const s = r.getAttribute('data-search') || '';
+        const ok = (state.type === 'all' || t === state.type) && (state.year === 'all' || y === state.year) && (!state.search || s.includes(state.search));
+        r.style.display = ok ? '' : 'none';
+      });
+    };
+    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+      const key = group.getAttribute('data-filter-group') || '';
+      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
+      chips.forEach((chip) => chip.addEventListener('click', () => {
+        state[key] = chip.getAttribute('data-fval') || 'all';
+        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+        apply();
+      }));
+    });
+    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>
+
+<style is:global>
+  .video-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
+  @media (max-width: 900px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .video-grid { grid-template-columns: 1fr; } }
+  .video-card { color: inherit; border: none; display: block; transition: transform .22s ease; }
+  .video-card:hover { transform: translateY(-3px); }
+  .video-card__thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; background: var(--bg-2); border: 1px solid var(--rule); }
+  .video-card__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .video-card__ph { position: absolute; inset: 0; background: repeating-linear-gradient(45deg, var(--bg-2), var(--bg-2) 10px, var(--bg-3) 10px, var(--bg-3) 20px); }
+  .video-card__play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; color: var(--accent-ink); text-shadow: 0 2px 16px rgba(0,0,0,.6); opacity: .85; }
+  .video-card__meta { padding-top: .8rem; }
+</style>

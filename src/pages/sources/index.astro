@@ -1,0 +1,144 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import IssueSection from '../../components/ui/IssueSection.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Chip from '../../components/ui/Chip.astro';
+import { fetchRaw } from '../../lib/directus';
+
+export const prerender = false;
+
+const sources: any[] = await fetchRaw('sources', { limit: -1, sort: '-reliability,name' }).catch(() => []);
+
+const collectionCount = async (coll: string, id: number) => {
+  try {
+    const res: any[] = await fetchRaw(coll, { limit: -1, fields: 'id', filter: { source: { _eq: id } } as any });
+    return res.length;
+  } catch { return 0; }
+};
+
+const enriched = await Promise.all(sources.map(async (s) => {
+  const [alb, sng, set, tur, mem, phs, nws, ap, dyk, tml] = await Promise.all([
+    collectionCount('discography', s.id),
+    collectionCount('songs', s.id),
+    collectionCount('setlists', s.id),
+    collectionCount('tours', s.id),
+    collectionCount('members', s.id),
+    collectionCount('photos', s.id),
+    collectionCount('news', s.id),
+    collectionCount('album_personnel', s.id),
+    collectionCount('did_you_know', s.id),
+    collectionCount('timeline', s.id),
+  ]);
+  const total = alb + sng + set + tur + mem + phs + nws + ap + dyk + tml;
+  return { ...s, counts: { alb, sng, set, tur, mem, phs, nws, ap, dyk, tml, total } };
+}));
+
+enriched.sort((a, b) => b.counts.total - a.counts.total);
+
+const types = Array.from(new Set(sources.map((s) => s.type).filter(Boolean))).sort();
+const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
+---
+<Layout title="Sources · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Sources' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · PROVENANCE</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Sources</h1>
+      <p class="deck" style="max-width: 62ch;">Every claim traces back to something. This is the ledger of where the archive's facts came from — cited, counted, and ranked by reliability.</p>
+      <div class="facts">
+        <div class="facts__item"><div class="facts__k">Sources on file</div><div class="facts__v">{sources.length}</div></div>
+        <div class="facts__item"><div class="facts__k">Records sourced</div><div class="facts__v">{totalRecords.toLocaleString()}</div></div>
+        <div class="facts__item"><div class="facts__k">Types</div><div class="facts__v">{types.length}</div></div>
+        <div class="facts__item"><div class="facts__k">Ranking</div><div class="facts__v">RELIABILITY</div></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+    <div class="filter-grid">
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Type</div>
+        <div class="cluster filter-chips" data-filter-group="type">
+          <Chip active={true} data-fval="all">All</Chip>
+          {types.map((t) => <Chip data-fval={t}>{t}</Chip>)}
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Status</div>
+        <div class="cluster filter-chips" data-filter-group="official">
+          <Chip active={true} data-fval="all">Any</Chip>
+          <Chip data-fval="yes">Official</Chip>
+          <Chip data-fval="no">Independent</Chip>
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Search</div>
+        <input class="filter-search" type="search" placeholder="Name, author…" data-filter-search />
+      </div>
+    </div>
+  </section>
+
+  <IssueSection kicker="Citations" title="The ledger" meta={`${enriched.length} sources`}>
+    <table class="data data--airy" data-sources-table>
+      <thead><tr>
+        <th style="width:50px;">№</th>
+        <th>Source</th>
+        <th>Type</th>
+        <th>Author</th>
+        <th class="num" style="text-align:right; width:90px;">Records</th>
+        <th class="num" style="text-align:right; width:90px;">Reliability</th>
+      </tr></thead>
+      <tbody>
+        {enriched.map((s, i) => (
+          <tr data-clickable
+              data-type={s.type || ''}
+              data-official={s.is_official ? 'yes' : 'no'}
+              data-search={`${s.name || ''} ${s.author || ''} ${s.description || ''}`.toLowerCase()}
+              onclick={`location.href='/sources/${s.id}'`}>
+            <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+            <td>
+              <span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{s.name}</span>
+              {s.is_official && <span class="tag" style="margin-left:.5rem; font-size:9px; background: var(--accent-tint);">OFFICIAL</span>}
+              {s.description && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem; max-width: 60ch;">{s.description}</div>}
+            </td>
+            <td class="mono-sm muted">{(s.type || '—').toUpperCase()}</td>
+            <td class="mono-sm muted">{s.author || '—'}</td>
+            <td class="num" style="color: var(--accent-3);">{s.counts.total.toLocaleString()}</td>
+            <td class="num">{s.reliability ?? '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </IssueSection>
+</Layout>
+
+<script>
+  function wire() {
+    const state: Record<string, string> = { type: 'all', official: 'all', search: '' };
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-sources-table] tbody tr'));
+    const apply = () => {
+      rows.forEach((r) => {
+        const t = r.getAttribute('data-type') || '';
+        const o = r.getAttribute('data-official') || '';
+        const s = r.getAttribute('data-search') || '';
+        const ok = (state.type === 'all' || t === state.type) &&
+                   (state.official === 'all' || o === state.official) &&
+                   (!state.search || s.includes(state.search));
+        r.style.display = ok ? '' : 'none';
+      });
+    };
+    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+      const key = group.getAttribute('data-filter-group') || '';
+      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
+      chips.forEach((chip) => chip.addEventListener('click', () => {
+        state[key] = chip.getAttribute('data-fval') || 'all';
+        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+        apply();
+      }));
+    });
+    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

@@ -1,0 +1,181 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+import { listSetlists } from '../lib/directus';
+
+const setlists = await listSetlists({ limit: 1000 });
+const years = Array.from(new Set(setlists.map((s) => s.date?.slice(0, 4)).filter(Boolean))).sort().reverse();
+const countries = Array.from(new Set(setlists.map((s) => s.country).filter(Boolean))).sort();
+const tours = Array.from(new Set(setlists.map((s) => s.tour_name).filter(Boolean))).sort();
+const byDecade: Record<string, number> = {};
+years.forEach((y) => { if (!y) return; const d = `${y.slice(0, 3)}0s`; byDecade[d] = (byDecade[d] || 0) + setlists.filter((s) => s.date?.startsWith(y)).length; });
+const maxDecade = Math.max(1, ...Object.values(byDecade));
+
+const facts: Array<[string, string]> = [
+  ['Shows on file', String(setlists.length)],
+  ['Years covered', years.length ? `${years[years.length - 1]}–${years[0]}` : '—'],
+  ['Countries', String(countries.length)],
+  ['Tours', String(tours.length)],
+];
+---
+<Layout title="Setlists · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Setlists' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · LIVE ARCHIVE</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Setlists</h1>
+      <p class="deck" style="max-width: 62ch;">Every documented performance — date, city, venue — cross-referenced to tours, songs, and contemporaneous press.</p>
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <section class="container" style="padding: clamp(28px, 4vw, 48px) 0; border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted" style="margin-bottom:.6rem;">BY THE DECADE · CLICK TO JUMP</div>
+    <div class="decade-bars">
+      {Object.entries(byDecade).sort((a, b) => a[0].localeCompare(b[0])).map(([d, c]) => (
+        <button class="decade-bar" data-decade-jump={d} style={`--h: ${Math.round((c / maxDecade) * 100)}%;`}>
+          <div class="decade-bar__val">{c}</div>
+          <div class="decade-bar__fill"></div>
+          <div class="decade-bar__label">{d}</div>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+    <div class="filter-grid">
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Year</div>
+        <div class="cluster filter-chips" data-filter-group="year">
+          <Chip active={true} data-fval="all">All</Chip>
+          {years.map((y) => <Chip data-fval={y}>{y}</Chip>)}
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Country</div>
+        <div class="cluster filter-chips" data-filter-group="country">
+          <Chip active={true} data-fval="all">All</Chip>
+          {countries.map((c) => <Chip data-fval={c}>{c}</Chip>)}
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Tour</div>
+        <div class="cluster filter-chips" data-filter-group="tour">
+          <Chip active={true} data-fval="all">All</Chip>
+          {tours.slice(0, 40).map((t) => <Chip data-fval={t}>{t}</Chip>)}
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Search</div>
+        <input class="filter-search" type="search" placeholder="Venue, city, tour…" data-filter-search />
+      </div>
+    </div>
+  </section>
+
+  <IssueSection kicker="The ledger" title="Every show" meta={`${setlists.length} entries`}>
+    <div class="mono-sm muted" data-match-count style="margin-bottom: .8rem;">{setlists.length} shows</div>
+    <table class="data data--airy" data-setlist-table>
+      <thead><tr><th style="width:120px;">Date</th><th>Venue</th><th>City</th><th>Country</th><th>Tour</th><th class="num" style="text-align:right; width:80px;">Songs</th></tr></thead>
+      <tbody>
+        {setlists.map((s) => (
+          <tr data-clickable
+              data-year={s.date?.slice(0, 4) || ''}
+              data-country={s.country || ''}
+              data-tour={s.tour_name || ''}
+              data-search={`${s.venue || ''} ${s.city || ''} ${s.country || ''} ${s.tour_name || ''}`.toLowerCase()}
+              onclick={`location.href='/setlists/${s.slug}'`}>
+            <td class="mono-sm" style="color: var(--ink);">{s.date || '—'}</td>
+            <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{s.venue || '—'}</span></td>
+            <td class="mono-sm muted">{[s.city, s.state_province].filter(Boolean).join(', ') || '—'}</td>
+            <td class="mono-sm muted">{s.country || '—'}</td>
+            <td class="mono-sm" style="color: var(--accent-3);">{s.tour_name || '—'}</td>
+            <td class="num">{s.song_count || '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </IssueSection>
+</Layout>
+
+<script>
+  function wire() {
+    const state: Record<string, string> = { year: 'all', country: 'all', tour: 'all', search: '' };
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-setlist-table] tbody tr'));
+    const counter = document.querySelector<HTMLElement>('[data-match-count]');
+    const apply = () => {
+      let matched = 0;
+      rows.forEach((r) => {
+        const y = r.getAttribute('data-year') || '';
+        const c = r.getAttribute('data-country') || '';
+        const t = r.getAttribute('data-tour') || '';
+        const s = r.getAttribute('data-search') || '';
+        const ok =
+          (state.year === 'all' || y === state.year) &&
+          (state.country === 'all' || c === state.country) &&
+          (state.tour === 'all' || t === state.tour) &&
+          (!state.search || s.includes(state.search));
+        r.style.display = ok ? '' : 'none';
+        if (ok) matched++;
+      });
+      if (counter) counter.textContent = `${matched} shows`;
+    };
+    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+      const key = group.getAttribute('data-filter-group') || '';
+      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
+      chips.forEach((chip) => chip.addEventListener('click', () => {
+        state[key] = chip.getAttribute('data-fval') || 'all';
+        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+        apply();
+      }));
+    });
+    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    document.querySelectorAll<HTMLElement>('[data-decade-jump]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const d = btn.getAttribute('data-decade-jump') || '';
+        const yearPrefix = d.slice(0, 3);
+        const yearGroup = document.querySelector<HTMLElement>('[data-filter-group="year"]');
+        if (!yearGroup) return;
+        const chip = Array.from(yearGroup.querySelectorAll<HTMLElement>('[data-fval]')).find((c) => (c.getAttribute('data-fval') || '').startsWith(yearPrefix));
+        if (chip) chip.click();
+      });
+    });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>
+
+<style is:global>
+  .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(12px, 2vw, 24px); align-items: start; }
+  @media (max-width: 960px) { .filter-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .filter-grid { grid-template-columns: 1fr; } }
+  .filter-grid__block { border-left: 1px solid var(--rule); padding: .2rem 0 .2rem 1rem; }
+  .filter-grid__block > .mono-sm { margin-bottom: .5rem; }
+  .filter-chips { gap: 6px; max-height: 140px; overflow-y: auto; scrollbar-width: thin; }
+  .filter-search {
+    width: 100%; background: var(--bg-2); border: 1px solid var(--rule); color: var(--ink);
+    font-family: var(--f-serif); font-style: italic; font-size: 15px;
+    padding: .55rem .8rem; border-radius: 2px; margin-top: .2rem;
+  }
+  .filter-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-tint); }
+
+  table.data--airy thead th { padding: 14px 16px; }
+  table.data--airy tbody td { padding: 18px 16px; line-height: 1.5; }
+  table.data--airy tbody td:first-child { padding-left: 2px; }
+
+  .decade-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(60px, 1fr); gap: clamp(6px, 1vw, 14px); align-items: end; height: 160px; }
+  .decade-bar { background: transparent; border: 0; display: grid; grid-template-rows: auto 1fr auto; cursor: pointer; padding: 0; color: inherit; text-align: center; }
+  .decade-bar__val { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .12em; color: var(--accent-3); margin-bottom: 4px; }
+  .decade-bar__fill { align-self: end; height: var(--h); background: linear-gradient(to top, var(--accent-2), var(--accent)); box-shadow: var(--glow); opacity: .75; min-height: 2px; transition: opacity .2s; }
+  .decade-bar:hover .decade-bar__fill { opacity: 1; }
+  .decade-bar__label { font-family: var(--f-display); font-style: italic; font-size: 14px; margin-top: 8px; color: var(--ink); }
+</style>

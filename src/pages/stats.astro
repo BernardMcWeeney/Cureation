@@ -1,0 +1,130 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import BarChart from '../components/ui/BarChart.astro';
+import { listAlbums, listSongs, listSetlists, listTours, listEras, getRunningFigures } from '../lib/directus';
+
+const [albums, songs, setlists, tours, eras, fig] = await Promise.all([
+  listAlbums(),
+  listSongs(),
+  listSetlists({ limit: 1500 }),
+  listTours(),
+  listEras(),
+  getRunningFigures().catch(() => ({ albums: 0, songs: 0, setlists: 0, venues: 0, photos: 0, members: 0 })),
+]);
+
+const albumsById = Object.fromEntries(albums.map((a) => [a.id, a]));
+
+// Top played songs
+const topSongs = songs.slice()
+  .filter((s) => (s.times_played_live || 0) > 0)
+  .sort((a, b) => (b.times_played_live || 0) - (a.times_played_live || 0))
+  .slice(0, 10);
+
+// Albums ranked by live plays of their songs
+const albumPlays: Record<number, number> = {};
+songs.forEach((s) => { if (s.album) albumPlays[s.album] = (albumPlays[s.album] || 0) + (s.times_played_live || 0); });
+const topAlbums = Object.entries(albumPlays)
+  .map(([id, c]) => ({ album: albumsById[Number(id)], plays: c }))
+  .filter((x) => x.album)
+  .sort((a, b) => b.plays - a.plays)
+  .slice(0, 10);
+
+// Tours per decade + shows per decade
+const decadesSetMap: Record<string, number> = {};
+setlists.forEach((s) => { const y = s.date?.slice(0, 4); if (!y) return; const d = `${y.slice(0,3)}0s`; decadesSetMap[d] = (decadesSetMap[d] || 0) + 1; });
+const decadeEntries = Object.entries(decadesSetMap).sort((a, b) => a[0].localeCompare(b[0]));
+
+// Countries
+const countryMap: Record<string, number> = {};
+setlists.forEach((s) => { if (s.country) countryMap[s.country] = (countryMap[s.country] || 0) + 1; });
+const topCountries = Object.entries(countryMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+// Eras distribution by number of albums
+const eraCount: Record<string, number> = {};
+albums.forEach((a) => { const e = eras.find((x) => x.id === a.era_id); if (e) eraCount[e.name] = (eraCount[e.name] || 0) + 1; });
+const eraEntries = Object.entries(eraCount);
+
+const maxDecadeShows = Math.max(1, ...decadeEntries.map(([, c]) => c));
+
+const tourDecades: Record<string, number> = {};
+tours.forEach((t) => { const y = t.start_date?.slice(0, 4); if (!y) return; const d = `${y.slice(0, 3)}0s`; tourDecades[d] = (tourDecades[d] || 0) + 1; });
+const tourDecadeEntries = Object.entries(tourDecades).sort((a, b) => a[0].localeCompare(b[0]));
+const maxTourDecade = Math.max(1, ...tourDecadeEntries.map(([, c]) => c));
+
+const facts: Array<[string, string]> = [
+  ['Records', String(fig.albums)],
+  ['Songs', String(fig.songs)],
+  ['Setlists', String(fig.setlists)],
+  ['Venues', String(fig.venues)],
+];
+---
+<Layout title="Statistics · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Statistics' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · BY THE NUMBERS</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Statistics</h1>
+      <p class="deck" style="max-width: 62ch;">The archive, quantified — live frequencies, tour cadence, catalogue distribution — stacked against decades and geography.</p>
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <IssueSection kicker="Live frequency" title="Most-played songs" meta="Top 10 by live count">
+    <BarChart bars={topSongs.map((s) => {
+      const alb = s.album ? albumsById[s.album] : null;
+      return { label: s.title || '—', sub: alb?.title || '', value: s.times_played_live || 0, href: s.slug ? `/songs/${s.slug}` : undefined };
+    })} />
+  </IssueSection>
+
+  <IssueSection kicker="Records rank" title="Albums by live prevalence" meta="Aggregate of song plays">
+    <BarChart bars={topAlbums.map(({ album, plays }) => ({
+      label: album!.title,
+      sub: String(album!.release_date || '').slice(0, 4),
+      value: plays,
+      href: `/discography/${album!.slug}`,
+    }))} />
+  </IssueSection>
+
+  <IssueSection kicker="Cadence" title="Shows per decade" meta="Live archive">
+    <div class="decade-bars" style="height: 220px;">
+      {decadeEntries.map(([d, c]) => (
+        <div class="decade-bar" style={`--h: ${Math.round((c / maxDecadeShows) * 100)}%;`}>
+          <div class="decade-bar__val">{c}</div>
+          <div class="decade-bar__fill"></div>
+          <div class="decade-bar__label">{d}</div>
+        </div>
+      ))}
+    </div>
+  </IssueSection>
+
+  <IssueSection kicker="Geography" title="Top touring countries" meta="By show count">
+    <BarChart bars={topCountries.map(([c, n]) => ({ label: c, value: n }))} />
+  </IssueSection>
+
+  {eraEntries.length > 0 && (
+    <IssueSection kicker="Chronology" title="Records per era" meta="Catalogue distribution">
+      <BarChart bars={eraEntries.map(([k, v]) => ({ label: k, value: v }))} height={160} />
+    </IssueSection>
+  )}
+
+  <IssueSection kicker="Tours cadence" title="Tours launched, by decade" meta={`${tours.length} tours total`}>
+    <div class="decade-bars" style="height: 180px;">
+      {tourDecadeEntries.map(([d, c]) => (
+        <div class="decade-bar" style={`--h: ${Math.round((c / maxTourDecade) * 100)}%;`}>
+          <div class="decade-bar__val">{c}</div>
+          <div class="decade-bar__fill"></div>
+          <div class="decade-bar__label">{d}</div>
+        </div>
+      ))}
+    </div>
+  </IssueSection>
+</Layout>

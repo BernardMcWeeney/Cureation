@@ -1,0 +1,96 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import { fetchRaw } from '../lib/directus';
+
+const polls: any[] = await fetchRaw('polls', { limit: -1, fields: '*,options.*', sort: '-date_created' }).catch(() => []);
+const active = polls.filter((p) => p.status !== 'archived');
+---
+<Layout title="Community · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Community' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · CONTRIBUTORS</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Community</h1>
+      <p class="deck" style="max-width: 62ch;">The archive only survives through correction. Submit a fix, vote in a poll, or tell us what's missing.</p>
+    </div>
+  </div>
+
+  {active.length > 0 && (
+    <IssueSection kicker="Open questions" title="Polls" meta={`${active.length} open`}>
+      <div class="polls">
+        {active.map((p) => {
+          const opts = Array.isArray(p.options) ? p.options : [];
+          const total = opts.reduce((n: number, o: any) => n + (o.votes || 0), 0);
+          return (
+            <article class="poll">
+              <div class="mono-sm muted">POLL · {(p.category || 'OPEN').toUpperCase()}</div>
+              <h3 class="serif" style="font-size: clamp(22px, 2.6vw, 32px); font-style: italic; line-height: 1.1; margin: .3rem 0 .8rem;">{p.question || p.title}</h3>
+              <div class="poll__opts">
+                {opts.map((o: any) => {
+                  const pct = total ? Math.round(((o.votes || 0) / total) * 100) : 0;
+                  return (
+                    <div class="poll__opt">
+                      <div class="poll__row">
+                        <span class="serif" style="font-style: italic; font-size: 16px;">{o.label || o.text}</span>
+                        <span class="mono-sm" style="color: var(--accent-3);">{pct}%</span>
+                      </div>
+                      <div class="poll__bar"><div class="poll__bar-fill" style={`width: ${pct}%;`}></div></div>
+                      <div class="mono-sm muted" style="font-size: 10px;">{(o.votes || 0).toLocaleString()} votes</div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div class="mono-sm muted" style="margin-top:.8rem;">{total.toLocaleString()} total votes</div>
+            </article>
+          );
+        })}
+      </div>
+    </IssueSection>
+  )}
+
+  <IssueSection kicker="Correction" title="Submit an edit" meta="We read every entry">
+    <form class="contrib" method="post" action="/api/contribute">
+      <div class="contrib__grid">
+        <label>
+          <div class="mono-sm muted">Page or URL</div>
+          <input name="page" type="text" class="filter-search" placeholder="e.g. /setlists/1992-06-14-paris" required />
+        </label>
+        <label>
+          <div class="mono-sm muted">Your name (optional)</div>
+          <input name="name" type="text" class="filter-search" placeholder="Anonymous contributor" />
+        </label>
+        <label class="contrib__full">
+          <div class="mono-sm muted">What's wrong, or what's missing?</div>
+          <textarea name="body" class="filter-search" rows={6} placeholder="Describe the fix or addition, with a source if possible." required></textarea>
+        </label>
+        <label>
+          <div class="mono-sm muted">Your source (optional)</div>
+          <input name="source" type="text" class="filter-search" placeholder="Book, scan, press clipping, URL…" />
+        </label>
+        <label>
+          <div class="mono-sm muted">Contact (optional)</div>
+          <input name="contact" type="text" class="filter-search" placeholder="Email or handle" />
+        </label>
+      </div>
+      <button type="submit" class="btn" style="margin-top: 1rem;">Send correction →</button>
+    </form>
+  </IssueSection>
+</Layout>
+
+<style is:global>
+  .polls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(16px, 2vw, 24px); }
+  @media (max-width: 780px) { .polls { grid-template-columns: 1fr; } }
+  .poll { padding: clamp(18px, 2vw, 24px); border: 1px solid var(--rule); background: var(--bg-2); }
+  .poll__opts { display: grid; gap: .8rem; }
+  .poll__row { display: flex; justify-content: space-between; align-items: baseline; }
+  .poll__bar { height: 4px; background: var(--rule-2); overflow: hidden; margin-top: .3rem; }
+  .poll__bar-fill { height: 100%; background: linear-gradient(to right, var(--accent-2), var(--accent)); }
+
+  .contrib__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .contrib__full { grid-column: 1 / -1; }
+  .contrib label { display: block; }
+  .contrib label > .mono-sm { margin-bottom: .3rem; }
+  @media (max-width: 680px) { .contrib__grid { grid-template-columns: 1fr; } }
+</style>

@@ -1,428 +1,101 @@
 ---
-import MainLayout from '../layouts/MainLayout.astro';
-import { getWikiMembers, getMemberStints } from '../lib/directus';
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import { listMembers, listTimeline } from '../lib/directus';
+import { asset } from '../lib/assets';
 
-const members = await getWikiMembers();
-const stints = await getMemberStints();
+const [members, timeline] = await Promise.all([listMembers(), listTimeline({ limit: 40 })]);
+const current = members.filter((m) => m.is_current_member);
+const former = members.filter((m) => !m.is_current_member);
 
-const currentMembers = members.filter(m => m.isCurrentMember);
-const pastMembers = members.filter(m => !m.isCurrentMember);
-
-// Timeline config
-const TIMELINE_START = 1976;
-const TIMELINE_END = new Date().getFullYear() + 1;
-const TIMELINE_SPAN = TIMELINE_END - TIMELINE_START;
-
-// Role-to-color mapping
-const roleColors: Record<string, string> = {
-  'Vocals': '#e74c3c',
-  'Vocals, Guitar': '#e74c3c',
-  'Guitar': '#3498db',
-  'Bass': '#2ecc71',
-  'Bass Guitar': '#2ecc71',
-  'Drums': '#f39c12',
-  'Drums, Percussion': '#f39c12',
-  'Keyboards': '#9b59b6',
-  'Keyboards, Synthesizers': '#9b59b6',
-  'Guitar, Keyboards': '#3498db',
-  'Guitar, Saxophone': '#3498db',
-};
-
-function getRoleColor(role: string): string {
-  return roleColors[role] || '#95a5a6';
-}
-
-function getRoleCategory(role: string): string {
-  if (role.includes('Vocal')) return 'Vocals';
-  if (role.includes('Guitar') && !role.includes('Bass')) return 'Guitar';
-  if (role.includes('Bass')) return 'Bass';
-  if (role.includes('Drum') || role.includes('Percussion')) return 'Drums';
-  if (role.includes('Key') || role.includes('Synth')) return 'Keyboards';
-  return 'Other';
-}
-
-// Group stints by member, sorted by first appearance
-const memberStintMap = new Map<number, typeof stints>();
-stints.forEach(s => {
-  const existing = memberStintMap.get(s.memberId) || [];
-  existing.push(s);
-  memberStintMap.set(s.memberId, existing);
-});
-
-// Sort members by earliest start year
-const sortedMemberIds = [...memberStintMap.entries()]
-  .sort((a, b) => {
-    const aMin = Math.min(...a[1].map(s => s.startYear));
-    const bMin = Math.min(...b[1].map(s => s.startYear));
-    return aMin - bMin;
-  })
-  .map(([id]) => id);
-
-// Year markers
-const yearMarkers: number[] = [];
-for (let y = TIMELINE_START; y <= TIMELINE_END; y += 5) {
-  yearMarkers.push(y);
-}
+const facts: Array<[string, string]> = [
+  ['Total members', String(members.length)],
+  ['Current lineup', String(current.length)],
+  ['Former members', String(former.length)],
+  ['Founded', '1978'],
+];
 ---
-
-<MainLayout
-  title="The Band"
-  description="The Cure's complete band history - current lineup, past members, and an interactive timeline spanning nearly 50 years."
-  showSidebar={false}
-  pageClass="bg-black"
->
-  <!-- Hero -->
-  <section class="mb-12">
-    <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
-
-      <div class="relative p-8 md:p-12">
-        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
-          The Band
-        </h1>
-        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
-          From a trio of school friends in Crawley to one of the most enduring bands in rock history.
-          Meet every musician who has been part of The Cure.
-        </p>
-
-        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{currentMembers.length}</span>
-            <span class="text-white/85 text-base font-medium">Current Members</span>
+<Layout title="The band · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'The band' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · THE BAND</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">The band</h1>
+      <p class="deck" style="max-width: 62ch;">Members past and present — their instruments, their tenures, and the shape of the lineup across forty-plus years.</p>
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{members.length}</span>
-            <span class="text-white/85 text-base font-medium">Total Members</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{TIMELINE_END - TIMELINE_START}</span>
-            <span class="text-white/85 text-base font-medium">Years</span>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- Band Timeline -->
-  <section class="mb-16">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-2xl md:text-3xl text-white tracking-wider">Band Timeline</h2>
-    </div>
-
-    <!-- Legend -->
-    <div class="flex flex-wrap items-center gap-4 mb-6">
-      {['Vocals', 'Guitar', 'Bass', 'Drums', 'Keyboards'].map(role => (
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full" style={`background: ${getRoleColor(role)}`}></span>
-          <span class="text-white/80 text-sm">{role}</span>
-        </div>
-      ))}
-    </div>
-
-    <!-- Timeline Chart -->
-    <div class="glass-card rounded-2xl border border-white/10 overflow-hidden">
-      <div class="overflow-x-auto timeline-scroll">
-        <div class="min-w-[900px] p-6">
-          <!-- Year axis -->
-          <div class="flex items-end mb-2 ml-[180px]">
-            {yearMarkers.map(year => {
-              const left = ((year - TIMELINE_START) / TIMELINE_SPAN) * 100;
-              return (
-                <span
-                  class="absolute text-xs text-white/50 font-mono"
-                  style={`left: calc(180px + ${left}% * (100% - 180px) / 100%)`}
-                >
-                  {year}
-                </span>
-              );
-            })}
-          </div>
-          <div class="relative" style={`padding-left: 180px`}>
-            <!-- Year grid lines -->
-            <div class="absolute inset-0" style="left: 0">
-              {yearMarkers.map(year => {
-                const left = ((year - TIMELINE_START) / TIMELINE_SPAN) * 100;
-                return (
-                  <div
-                    class="absolute top-0 bottom-0 border-l border-white/[0.06]"
-                    style={`left: ${left}%`}
-                  >
-                    <span class="absolute -top-6 -translate-x-1/2 text-xs text-white/40 font-mono whitespace-nowrap">
-                      {year}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <!-- Member rows -->
-            {sortedMemberIds.map(memberId => {
-              const memberStints = memberStintMap.get(memberId)!;
-              const firstStint = memberStints[0];
-              return (
-                <div class="timeline-row flex items-center h-10 relative group">
-                  <!-- Member name -->
-                  <div class="absolute -left-[180px] w-[170px] text-right pr-4 flex items-center justify-end gap-2">
-                    <a
-                      href={`/wiki/members/${firstStint.memberSlug}`}
-                      class="text-sm text-white/80 hover:text-white transition-colors truncate"
-                    >
-                      {firstStint.memberName}
-                    </a>
-                  </div>
-
-                  <!-- Stints -->
-                  {memberStints.map(stint => {
-                    const startPct = ((stint.startYear - TIMELINE_START) / TIMELINE_SPAN) * 100;
-                    const endYear = stint.endYear || TIMELINE_END;
-                    const widthPct = ((endYear - stint.startYear) / TIMELINE_SPAN) * 100;
-                    const color = getRoleColor(stint.role);
-
-                    return (
-                      <div
-                        class="stint-bar absolute h-6 rounded-sm cursor-pointer transition-all duration-200 hover:h-7 hover:brightness-125"
-                        style={`left: ${startPct}%; width: ${widthPct}%; background: ${color}; opacity: 0.85;`}
-                        data-member={firstStint.memberName}
-                        data-role={stint.role}
-                        data-start={stint.startYear}
-                        data-end={stint.endYear || 'present'}
-                        data-stint={stint.stintNumber > 1 ? `${stint.stintNumber}nd stint` : ''}
-                        data-notes={stint.notes || ''}
-                      >
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <!-- Tooltip (positioned by JS) -->
-      <div id="timeline-tooltip" class="hidden fixed z-50 px-4 py-3 rounded-lg bg-black/95 border border-white/20 shadow-xl pointer-events-none max-w-xs">
-        <div class="font-heading text-white text-base" id="tt-name"></div>
-        <div class="text-white/80 text-sm" id="tt-role"></div>
-        <div class="text-white/60 text-xs mt-1" id="tt-stint"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Current Lineup -->
-  <section class="mb-16">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-2xl md:text-3xl text-white tracking-wider">Current Lineup</h2>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {currentMembers.map((member, index) => (
-        <a
-          href={`/wiki/members/${member.slug}`}
-          class="group"
-          style={`--index: ${index}`}
-        >
-          <div class="glass-card-hover overflow-hidden animate-fade-in rounded-2xl">
-            <div class="p-6">
-              <div class="flex items-start gap-4 mb-4">
-                {member.photo ? (
-                  <img
-                    src={member.photo}
-                    alt={member.name}
-                    class="w-20 h-20 rounded-xl object-cover shrink-0 border border-white/10 group-hover:border-white/30 transition-colors"
-                  />
-                ) : (
-                  <div class="w-20 h-20 rounded-xl bg-white/10 shrink-0 flex items-center justify-center border border-white/10">
-                    <span class="text-3xl text-primary font-medium">{member.name.charAt(0)}</span>
-                  </div>
-                )}
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-heading text-xl text-white group-hover:text-primary transition-colors">
-                    {member.name}
-                  </h3>
-                  <p class="text-primary/80 text-sm mt-1">
-                    {Array.isArray(member.instruments) ? member.instruments.join(', ') : (member.instruments || '')}
-                  </p>
-                  <p class="text-white/60 text-sm mt-1">{member.tenure}</p>
-                </div>
-              </div>
-              {member.bio && (
-                <p class="text-white/60 text-sm line-clamp-3 leading-relaxed">
-                  {member.bio}
-                </p>
-              )}
-            </div>
-          </div>
+  <IssueSection kicker="Current lineup" title="On stage now" meta={`${current.length} members`}>
+    <div class="member-grid">
+      {current.map((m) => (
+        <a href={`/band/members/${m.slug}`} class="member-card">
+          <figure class="member-card__art">
+            {m.photo_file ? (
+              <img src={asset(m.photo_file, 'card')} alt={m.name} loading="lazy" />
+            ) : (
+              <div class="placeholder">No photo</div>
+            )}
+          </figure>
+          <div class="mono-sm muted" style="margin-top:.5rem;">{m.tenure || '—'}</div>
+          <h3 class="serif" style="font-size: 22px; font-style: italic; margin: .2rem 0 0;">{m.name}</h3>
+          <div class="mono-sm" style="color: var(--accent-3);">{Array.isArray(m.instruments) ? m.instruments.slice(0, 3).join(' · ').toUpperCase() : ''}</div>
         </a>
       ))}
     </div>
-  </section>
+  </IssueSection>
 
-  <!-- Past Members -->
-  {pastMembers.length > 0 && (
-    <section class="mb-16">
-      <div class="gothic-heading mb-8">
-        <h2 class="font-heading text-2xl md:text-3xl text-white tracking-wider">Past Members</h2>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {pastMembers.map((member, index) => (
-          <a
-            href={`/wiki/members/${member.slug}`}
-            class="group"
-            style={`--index: ${index}`}
-          >
-            <div class="glass-card-hover overflow-hidden animate-fade-in rounded-xl">
-              <div class="flex items-center gap-3 p-4">
-                {member.photo ? (
-                  <img
-                    src={member.photo}
-                    alt={member.name}
-                    class="w-14 h-14 rounded-lg object-cover shrink-0 border border-white/10 grayscale group-hover:grayscale-0 transition-all"
-                  />
-                ) : (
-                  <div class="w-14 h-14 rounded-lg bg-white/10 shrink-0 flex items-center justify-center border border-white/10">
-                    <span class="text-xl text-white/60 font-medium">{member.name.charAt(0)}</span>
-                  </div>
-                )}
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-heading text-base text-white group-hover:text-primary transition-colors truncate">
-                    {member.name}
-                  </h3>
-                  <p class="text-white/50 text-xs">
-                    {Array.isArray(member.instruments) ? member.instruments.join(', ') : (member.instruments || '')}
-                  </p>
-                  <p class="text-white/40 text-xs mt-0.5">{member.tenure}</p>
-                </div>
-              </div>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
+  {former.length > 0 && (
+    <IssueSection kicker="Former members" title="Alumni" meta={`${former.length} past`}>
+      <table class="data">
+        <thead><tr><th style="width:50px;">№</th><th>Name</th><th>Instruments</th><th>Tenure</th></tr></thead>
+        <tbody>
+          {former.map((m, i) => (
+            <tr data-clickable onclick={`location.href='/band/members/${m.slug}'`}>
+              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+              <td><span class="serif" style="font-size: 18px; font-style: italic;">{m.name}</span></td>
+              <td class="mono-sm muted">{Array.isArray(m.instruments) ? m.instruments.join(' · ') : ''}</td>
+              <td class="mono-sm" style="color: var(--accent-3);">{m.tenure || `${m.tenure_start || ''}–${m.tenure_end || ''}`}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </IssueSection>
   )}
 
-  <!-- Band History -->
-  <section class="mb-12">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-2xl md:text-3xl text-white tracking-wider">Band History</h2>
-    </div>
-
-    <div class="space-y-6">
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/10">
-        <h3 class="font-heading text-xl text-primary mb-3">The Beginning (1976-1979)</h3>
-        <p class="text-white/70 leading-relaxed">
-          The Cure formed in Crawley, West Sussex in 1976 as Easy Cure, with Robert Smith, Michael Dempsey, and Lol Tolhurst.
-          After trimming the name, they released their debut <em>Three Imaginary Boys</em> in 1979, establishing their post-punk credentials
-          with sharp, minimal songs like "10:15 Saturday Night" and "Boys Don't Cry."
-        </p>
-      </div>
-
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/10">
-        <h3 class="font-heading text-xl text-primary mb-3">The Dark Trilogy (1980-1982)</h3>
-        <p class="text-white/70 leading-relaxed">
-          Simon Gallup joined on bass, and the band entered their most intense period.
-          <em>Seventeen Seconds</em>, <em>Faith</em>, and <em>Pornography</em> form a gothic masterwork,
-          pushing the band to breaking point. After Pornography, the band nearly dissolved.
-        </p>
-      </div>
-
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/10">
-        <h3 class="font-heading text-xl text-primary mb-3">Pop Reinvention (1983-1987)</h3>
-        <p class="text-white/70 leading-relaxed">
-          Smith reinvented The Cure as a pop force, scoring hits with "The Lovecats," "In Between Days,"
-          "Close to Me," and "Just Like Heaven." The lineup expanded, with Boris Williams on drums and
-          Porl Thompson on guitar, culminating in the sprawling <em>Kiss Me, Kiss Me, Kiss Me</em>.
-        </p>
-      </div>
-
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/10">
-        <h3 class="font-heading text-xl text-primary mb-3">The Peak (1989-1992)</h3>
-        <p class="text-white/70 leading-relaxed">
-          <em>Disintegration</em> became the band's masterpiece and commercial breakthrough, followed by <em>Wish</em>
-          and the global hit "Friday I'm in Love." Stadium tours, gold records, and critical acclaim cemented
-          The Cure's place as one of the biggest bands in the world.
-        </p>
-      </div>
-
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-white/10">
-        <h3 class="font-heading text-xl text-primary mb-3">Evolution & Legacy (1996-Present)</h3>
-        <p class="text-white/70 leading-relaxed">
-          Through lineup changes and evolving sounds, The Cure continued with <em>Wild Mood Swings</em>,
-          <em>Bloodflowers</em>, and <em>4:13 Dream</em>. After years of anticipation, 2024's
-          <em>Songs of a Lost World</em> was met with widespread critical acclaim, proving The Cure's
-          creative fire burns as brightly as ever.
-        </p>
-      </div>
-    </div>
-  </section>
-</MainLayout>
+  {timeline.length > 0 && (
+    <IssueSection kicker="Recent history" title="Timeline" href="/band/history" meta={`${timeline.length} entries`}>
+      <table class="data">
+        <thead><tr><th style="width:80px;">Date</th><th style="width:110px;">Kind</th><th>Event</th></tr></thead>
+        <tbody>
+          {timeline.slice(-15).reverse().map((t) => (
+            <tr>
+              <td class="mono-sm" style="color: var(--ink);">{t.formatted_date || t.date || t.year || '—'}</td>
+              <td class="mono-sm muted">{(t.type || '').toUpperCase()}</td>
+              <td>
+                <span class="serif" style="font-size: 17px; font-style: italic;">{t.title}</span>
+                {t.description && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{t.description}</div>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </IssueSection>
+  )}
+</Layout>
 
 <style>
-  .timeline-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.2) transparent;
-  }
-  .timeline-scroll::-webkit-scrollbar { height: 6px; }
-  .timeline-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-
-  .timeline-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
-  .timeline-row:last-child { border-bottom: none; }
-
-  .stint-bar {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease forwards;
-    animation-delay: calc(var(--index, 0) * 75ms);
-    opacity: 0;
-  }
+  .member-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(20px, 2.4vw, 36px); }
+  .member-card { display: flex; flex-direction: column; border: none; }
+  .member-card__art { aspect-ratio: 1 / 1; margin: 0; overflow: hidden; background: var(--bg-2); border: 1px solid var(--rule); }
+  .member-card__art img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.05); transition: transform .6s ease, filter .3s; }
+  .member-card:hover .member-card__art img { transform: scale(1.03); filter: saturate(1) contrast(1.1); }
 </style>
-
-<script>
-  function initBandTimeline() {
-    const tooltip = document.getElementById('timeline-tooltip');
-    const ttName = document.getElementById('tt-name');
-    const ttRole = document.getElementById('tt-role');
-    const ttStint = document.getElementById('tt-stint');
-
-    if (!tooltip || !ttName || !ttRole || !ttStint) return;
-
-    document.querySelectorAll('.stint-bar').forEach(bar => {
-      bar.addEventListener('mouseenter', (e) => {
-        const el = e.currentTarget as HTMLElement;
-        const member = el.dataset.member || '';
-        const role = el.dataset.role || '';
-        const start = el.dataset.start || '';
-        const end = el.dataset.end || '';
-        const stint = el.dataset.stint || '';
-        const notes = el.dataset.notes || '';
-
-        ttName.textContent = member;
-        ttRole.textContent = `${role} \u00B7 ${start}\u2013${end}`;
-        ttStint.textContent = [stint, notes].filter(Boolean).join(' \u2014 ');
-        ttStint.style.display = ttStint.textContent ? 'block' : 'none';
-
-        tooltip.classList.remove('hidden');
-      });
-
-      bar.addEventListener('mousemove', (e) => {
-        const mouseEvent = e as MouseEvent;
-        tooltip.style.left = mouseEvent.clientX + 12 + 'px';
-        tooltip.style.top = mouseEvent.clientY - 10 + 'px';
-      });
-
-      bar.addEventListener('mouseleave', () => {
-        tooltip.classList.add('hidden');
-      });
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', initBandTimeline);
-  document.addEventListener('astro:page-load', initBandTimeline);
-</script>

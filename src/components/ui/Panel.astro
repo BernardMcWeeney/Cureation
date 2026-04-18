@@ -1,0 +1,16 @@
+---
+interface Props {
+  variant?: 'default' | 'elev' | 'ruled';
+  as?: string;
+  class?: string;
+}
+const { variant = 'default', as: Tag = 'div', class: klass = '' } = Astro.props;
+const classes = [
+  'panel',
+  variant === 'elev' ? 'panel--elev' : '',
+  variant === 'ruled' ? 'panel--ruled' : '',
+  klass,
+].filter(Boolean).join(' ');
+const Component = Tag as any;
+---
+<Component class={classes}><slot /></Component>

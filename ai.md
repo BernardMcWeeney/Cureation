@@ -1,114 +1,131 @@
-PROJECT: Cureation  
-TYPE: Community-driven fan website  
-FOCUS: The Cure (band)  
-DOMAIN: cureation.net  
-AUDIENCE: Fans of The Cure, music historians, and community contributors
+ai.txt — Cureation
+Project Overview
 
-DESCRIPTION:  
-Cureation is a modern, fan-built website dedicated to cataloging and celebrating the music, history, and legacy of the band *The Cure*. It is a single-source archive featuring discographies, lyrics, setlists, fan reviews, blog content, and curated updates from around the web. The site is themed per album and styled in a unique glassmorphism aesthetic. It is designed to be mobile-friendly, responsive, fast, accessible, and easy to manage via a headless CMS backend.
+Cureation is an independent, fan-built website dedicated to The Cure.
 
----
+Its aim is to document, curate, and preserve the band’s music, history, and cultural impact in a structured, accessible, and enduring way. The project prioritises long-term archival value over news cycles, with an emphasis on accuracy, context, and respectful presentation.
 
-PRIMARY OBJECTIVES:
-- Provide a beautifully designed, consistently themed fan resource for all things The Cure
-- Act as an archive of their music, live performances, lyrics, and cultural impact
-- Allow for easy expansion and content management via Directus CMS
-- Encourage future community contributions, fan art, reviews, and setlist accuracy
-- Prepare infrastructure for future additions like a wiki, forum, merch shop, and mailing list
-- Maintain **lean, dry code** (Don’t Repeat Yourself) with a focus on **simplicity over complexity**
-- Stay focused on the **mission and user experience** without over-engineering
+Cureation brings together discographies, lyrics, tour setlists, archival data, and original editorial content to form a comprehensive, fan-driven reference resource. The site is non-commercial and not affiliated with the band or their official representatives.
 
----
+Intended Audience
 
-TECH STACK:
-- **Frontend:** Astro v5.6 (modern static site generator)
-- **Styling:** Tailwind CSS v4 (no `tailwind.config.js`) + DaisyUI for UI components
-- **CMS / Backend:** Directus (Headless CMS)  
-  - API Base URL: `https://dash.cureation.net/items`
-- **Fonts:** Uses `'Tangerine', cursive` for brand/logo and header accents
-- **Themes:** Album-based dynamic theming using Tailwind themes — customizable via config
-- **UX Effects:** Astro View Transitions for smooth page animations
-- **Design Philosophy:** Glassmorphism UI with accessible contrast and responsive behavior
-- **Config:** there is an universal config
+Fans of The Cure
 
----
+Researchers, writers, and archivists
 
-DESIGN & DEVELOPMENT PRINCIPLES:
-- Follow **lean and dry code** practices — prioritize reusable components, avoid bloat
-- Keep everything **simple, clean, and intentional**
-- Use **DaisyUI** as the foundation for UI consistency across pages
-  - Extend or override DaisyUI components with Cureation-specific styles and flairs where needed
-- Ensure **design consistency** — typography, spacing, and visual rhythm should feel unified
-- **Glassmorphism** is core to the brand aesthetic (blurred backgrounds, transparency, soft glow)
-- Focus on **smooth transitions and animations** to enhance rather than distract
+Developers or contributors working on the project
 
----
+Large Language Models assisting with development, documentation, or content structure
 
-CORE FEATURES & PAGES:
+Project Goals
 
-1. **Discography**
-   - Displays all studio albums
-   - Each album page contains title, year, tracklist, cover art, and metadata
+Create a reliable, well-structured archive of The Cure’s work and history
 
-2. **Blog**
-   - News aggregation (from RSS or manual curation)
-   - Original Cureation content (reviews, essays, retrospectives)
+Maintain consistency in design, data models, and content presentation
 
-3. **Setlists**
-   - Chronological list of concerts
-   - Each expands to show full setlist and gig details
+Ensure high performance, accessibility, and long-term maintainability
 
-4. **Lyrics**
-   - List of songs across all albums
-   - Each expands to show full lyrics with styling tied to the album theme
+Support future expansion (e.g. search, submissions, community features) without architectural rewrites
 
-5. **About Page**
-   - Project mission, credits, technical overview
+Technical Architecture
 
----
+Cureation is implemented as a modern static site with minimal client-side JavaScript.
 
-STYLE GUIDE & DESIGN DETAILS:
+Core Technologies
 
-- **Glassmorphism:** Background blur, soft shadows, transparency effects
-- **Typography:** Large headings with cursive font for branding, readable body text
-- **Responsive:** Mobile-first layout with accessibility in mind (contrast, alt text, ARIA tags)
-- **Performance:** Built for speed with static output from Astro and minimal JS
-- **View Transitions:** Smooth, fluid transitions between pages using native Astro routing
+Astro v5.6
+Used as the primary static site generator for content-driven pages and routing.
 
----
+Tailwind CSS v4
+Utility-first styling framework used for layout, spacing, typography, and responsive design.
 
-ADMIN CONFIGURATION:
-- Album color themes can be dynamically configured via Directus and applied site-wide
-- Themes affect accent colors, backgrounds, button styles, and highlight elements
-- Global config allows easy switching of font sizes, logo text, and homepage headline
+DaisyUI v5
+Tailwind-based UI component and theming layer.
 
----
+Vite
+Development server and build tooling, used internally by Astro.
 
-FUTURE FEATURES (ROADMAP):
-- Full-text search and advanced filtering (by album, song, year, tour)
-- User comments and reactions
-- Admin theming dashboard for managing color palettes and layouts
-- Fan art gallery + submission flow
-- Wiki for in-depth articles and band lore
-- Forum/discussion boards for community
-- Newsletter integration
-- Shop page for merch, zines, etc.
-- Stats dashboard (e.g., most-played live songs, tour stats)
+Node.js (ES Modules)
+The project is configured as an ES module–based application ("type": "module").
 
----
+Package Configuration
 
-CONTRIBUTING:
-- Code contributions, feature ideas, and content suggestions are welcome
-- Plans to open-source the repo with structured issues and contribution guidelines
+The project’s package.json reflects a minimal dependency set focused on performance and clarity:
 
----
+No custom Tailwind config file (tailwind.config.js is not required in v4).
 
-IMPORTANT NOTES:
-- Cureation is a **fan project** not affiliated with The Cure or their representatives
-- All media (lyrics, album art, setlists) remain property of their respective owners
+Styling is handled directly via Tailwind utility classes and DaisyUI themes.
 
----
+Build and preview scripts rely entirely on Astro’s defaults.
 
-CONTACT:
-- Email: hello@cureation.net  
-- Social: https://twitter.com/cureationx
+Design & UI Principles
+
+Album-focused theming: Visual identity can vary by album using Tailwind colour palettes.
+
+Glassmorphism aesthetic: Soft layering and transparency effects, enhanced by Astro View Transitions.
+
+Accessibility-first: Emphasis on contrast, readable typography, and semantic HTML.
+
+Responsive by default: Mobile-first layouts that scale across screen sizes.
+
+Typography: Decorative cursive fonts are limited to branding elements (e.g. logo, welcome text).
+
+Content Structure
+
+The site is organised around clearly defined content domains:
+
+Discography — Albums and releases with structured metadata.
+
+Lyrics — Song-level pages with readable, themed layouts.
+
+Setlists — Historical concert data with expandable details.
+
+Blog / Editorial — Curated news, reviews, essays, and fan-written content.
+
+About / Meta — Project mission, context, and technical documentation.
+
+Content is treated as structured data wherever possible to support reuse, filtering, and future features.
+
+AI & Automation Guidance
+
+Large Language Models interacting with this repository should:
+
+Treat Cureation as an archival and reference project, not a commercial product.
+
+Avoid introducing speculative or fictional information about The Cure.
+
+Preserve factual accuracy when assisting with content or data structures.
+
+Maintain existing architectural decisions unless explicitly asked to refactor.
+
+Prefer clarity, simplicity, and long-term maintainability over novelty.
+
+Generated code should:
+
+Follow Astro and ES module conventions.
+
+Use Tailwind utilities consistently.
+
+Avoid unnecessary client-side JavaScript.
+
+Respect accessibility and semantic HTML best practices.
+
+Legal & Attribution Notes
+
+Cureation is a fan project and is not affiliated with The Cure or their official representatives.
+
+All music, lyrics, imagery, and trademarks remain the property of their respective rights holders.
+
+Content is presented for informational, archival, and educational purposes under fair-use principles where applicable.
+
+Scope Boundaries
+
+This project does not:
+
+Sell products or merchandise
+
+Claim ownership of copyrighted works
+
+Represent official statements or endorsements
+
+End of ai.txt

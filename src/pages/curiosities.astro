@@ -1,470 +1,69 @@
 ---
-import MainLayout from '../layouts/MainLayout.astro';
-import {
-  getOverallStats,
-  getTopSongs,
-  getDidYouKnowFacts,
-  getActivePolls,
-  getFeaturedPoll,
-  getTours,
-  fetchAlbums,
-  formatAlbum,
-} from '../lib/directus';
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+import { fetchRaw } from '../lib/directus';
 
-// Fetch all data in parallel
-const [overallStats, topSongs, facts, polls, featuredPoll, tours, rawAlbums] = await Promise.all([
-  getOverallStats(),
-  getTopSongs(30),
-  getDidYouKnowFacts(50),
-  getActivePolls(),
-  getFeaturedPoll(),
-  getTours(),
-  fetchAlbums(),
-]);
-
-const albums = rawAlbums.map(formatAlbum);
-const todayIso = new Date().toISOString().split('T')[0];
-const historicalTours = tours.filter(t => !t.startDate || t.startDate <= todayIso);
-
-// Compute curiosity data
-const totalTours = historicalTours.length;
-const totalAlbums = albums.filter(a => a.type === 'studio').length;
-
-// Shows per year data for chart
-const showsByYear: Record<number, number> = {};
-historicalTours.forEach(t => {
-  if (t.year && t.totalShows) {
-    showsByYear[t.year] = (showsByYear[t.year] || 0) + t.totalShows;
-  }
-});
-const showYears = Object.keys(showsByYear).map(Number).sort((a, b) => a - b);
-const maxShowsInYear = Math.max(...Object.values(showsByYear), 1);
-
-// Top 10 songs for display
-const top10Songs = topSongs.slice(0, 10);
-const maxPlays = top10Songs.length > 0 ? top10Songs[0].totalPlays : 1;
-
-// Country stats from tours
-const countrySet = new Set<string>();
-historicalTours.forEach(t => t.countriesVisited.forEach(c => countrySet.add(c)));
-
-// Random facts for rotation
-const verifiedFacts = facts.filter(f => f.isVerified);
-
-// Active tabs
-type TabId = 'curiosities' | 'polls' | 'top-songs' | 'by-year' | 'timeline' | 'by-tour';
-const tabs: { id: TabId; label: string; icon: string }[] = [
-  { id: 'curiosities', label: 'Curiosities', icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' },
-  { id: 'polls', label: 'Polls', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-  { id: 'top-songs', label: 'Top Songs', icon: 'M9 19V6l12-2v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' },
-  { id: 'by-year', label: 'By Year', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-  { id: 'by-tour', label: 'By Tour', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
-];
+const items: any[] = await fetchRaw('did_you_know', { limit: -1, sort: '-id' }).catch(() => []);
+const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean))).sort();
 ---
-
-<MainLayout
-  title="Curiosities"
-  description="Data, charts, polls, and trivia about The Cure's concerts and songs."
-  showSidebar={false}
-  pageClass="bg-black"
->
-  <!-- Hero -->
-  <section class="mb-10">
-    <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
-
-      <div class="relative p-8 md:p-12">
-        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow">
-          Curiosities
-        </h1>
-        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed">
-          Data, charts, polls, and trivia about The Cure's concerts and songs.
-        </p>
-
-        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{overallStats.totalSongs}</span>
-            <span class="text-white/85 text-base font-medium">Songs</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{overallStats.totalShows.toLocaleString()}</span>
-            <span class="text-white/85 text-base font-medium">Concerts</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{totalTours}</span>
-            <span class="text-white/85 text-base font-medium">Tours</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{overallStats.countriesVisited}</span>
-            <span class="text-white/85 text-base font-medium">Countries</span>
-          </div>
-        </div>
+<Layout title="Curiosities · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Curiosities' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · DID YOU KNOW</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Curiosities</h1>
+      <p class="deck" style="max-width: 62ch;">Footnotes, trivia, and the minor observations — the marginalia that keep an archive honest about what it knows.</p>
+      <div class="facts">
+        <div class="facts__item"><div class="facts__k">On file</div><div class="facts__v">{items.length}</div></div>
+        <div class="facts__item"><div class="facts__k">Categories</div><div class="facts__v">{categories.length}</div></div>
       </div>
+      {categories.length > 0 && (
+        <div class="cluster" style="gap:6px; flex-wrap:wrap;" data-cat-filters>
+          <Chip active={true} class="cat-chip" data-cat="all">All</Chip>
+          {categories.map((c) => <Chip class="cat-chip" data-cat={c}>{c}</Chip>)}
+        </div>
+      )}
     </div>
-  </section>
+  </div>
 
-  <!-- Tab navigation -->
-  <section class="mb-8">
-    <div class="glass-panel overflow-hidden p-2">
-      <nav class="overflow-x-auto scrollbar-hide">
-        <div class="flex gap-1 min-w-max">
-          {tabs.map((tab, i) => (
-            <button
-              type="button"
-              class={`curiosity-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide ${i === 0 ? 'active' : ''}`}
-              data-tab={tab.id}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d={tab.icon} />
-              </svg>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </nav>
-    </div>
-  </section>
-
-  <!-- ==================== CURIOSITIES TAB ==================== -->
-  <section id="panel-curiosities" class="curiosity-panel">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Did You Know...</h2>
-    </div>
-
-    <!-- Key stats grid inside panel -->
-    <div class="glass-panel overflow-hidden p-6 mb-10">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {overallStats.mostPlayedSong && (
-          <div class="p-4 rounded-sm bg-white/[0.02]">
-            <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] mb-2">Most Played Song Live</p>
-            <p class="font-heading text-xl text-primary">{overallStats.mostPlayedSong.songTitle}</p>
-            <p class="text-white/60 text-sm">Played {overallStats.mostPlayedSong.totalPlays.toLocaleString()} times</p>
+  <IssueSection kicker="Marginalia" title="Annotations">
+    <div class="curios" data-curios>
+      {items.map((it, i) => (
+        <article class="curio" data-cat={it.category || ''}>
+          <div class="curio__idx mono-sm">№ {String(i + 1).padStart(3, '0')}</div>
+          <div>
+            <div class="mono-sm muted" style="letter-spacing:.18em;">{(it.category || '—').toUpperCase()}</div>
+            <div class="curio__title serif">{it.title || '—'}</div>
+            <p class="curio__body">{it.content || it.body || ''}</p>
           </div>
-        )}
-
-        {overallStats.rarestSong && overallStats.rarestSong.totalPlays > 0 && (
-          <div class="p-4 rounded-sm bg-white/[0.02]">
-            <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] mb-2">Rarest Song Live</p>
-            <p class="font-heading text-xl text-primary">{overallStats.rarestSong.songTitle}</p>
-            <p class="text-white/60 text-sm">Played {overallStats.rarestSong.totalPlays} time{overallStats.rarestSong.totalPlays !== 1 ? 's' : ''}</p>
-          </div>
-        )}
-
-        <div class="p-4 rounded-sm bg-white/[0.02]">
-          <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] mb-2">Years Active</p>
-          <p class="font-heading text-xl text-primary">{overallStats.yearsActive} years</p>
-          <p class="text-white/60 text-sm">Since 1976</p>
-        </div>
-
-        <div class="p-4 rounded-sm bg-white/[0.02]">
-          <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] mb-2">Average Songs Per Show</p>
-          <p class="font-heading text-xl text-primary">{overallStats.averageSongsPerShow}</p>
-          <p class="text-white/60 text-sm">songs per concert</p>
-        </div>
-
-        <div class="p-4 rounded-sm bg-white/[0.02]">
-          <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] mb-2">Studio Albums</p>
-          <p class="font-heading text-xl text-primary">{totalAlbums}</p>
-          <p class="text-white/60 text-sm">from Three Imaginary Boys to Songs of a Lost World</p>
-        </div>
-
-        <div class="p-4 rounded-sm bg-white/[0.02]">
-          <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] mb-2">Countries Visited</p>
-          <p class="font-heading text-xl text-primary">{overallStats.countriesVisited}</p>
-          <p class="text-white/60 text-sm">spread across all continents</p>
-        </div>
-      </div>
+        </article>
+      ))}
     </div>
-
-    <!-- Did You Know facts -->
-    {verifiedFacts.length > 0 && (
-      <div class="glass-panel overflow-hidden divide-y divide-white/[0.04]">
-        {verifiedFacts.slice(0, 12).map((fact, i) => (
-          <div class="p-5 flex gap-4 items-start hover:bg-white/[0.015] transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-white/80 text-sm leading-relaxed">{fact.fact}</p>
-              {fact.category && (
-                <span class="inline-block mt-2 px-2 py-0.5 rounded bg-white/5 text-white/40 text-xs">{fact.category}</span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
-
-    {verifiedFacts.length === 0 && (
-      <div class="glass-panel p-8 text-center">
-        <p class="text-white/50">Curiosities and trivia are being collected. Check back soon!</p>
-      </div>
-    )}
-  </section>
-
-  <!-- ==================== POLLS TAB ==================== -->
-  <section id="panel-polls" class="curiosity-panel hidden">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Community Polls</h2>
-    </div>
-
-    {featuredPoll && (
-      <div class="glass-panel p-6 md:p-8 mb-8">
-        <h3 class="font-heading text-2xl text-white mb-2">{featuredPoll.question}</h3>
-        <p class="text-white/50 text-sm mb-6">{featuredPoll.totalVotes} votes</p>
-
-        <!-- Bar chart -->
-        <div class="space-y-3 mb-6">
-          {featuredPoll.options.sort((a, b) => b.voteCount - a.voteCount).map((opt, i) => {
-            const barColors = ['#e74c3c', '#e91e63', '#f39c12', '#2ecc71', '#3498db', '#9b59b6', '#1abc9c', '#e67e22'];
-            const color = barColors[i % barColors.length];
-            return (
-              <div class="poll-option">
-                <div class="flex items-center justify-between mb-1">
-                  <div class="flex items-center gap-2">
-                    {opt.imageUrl && (
-                      <img src={opt.imageUrl} alt={opt.label} class="w-8 h-8 rounded object-cover" />
-                    )}
-                    <span class="text-white/90 text-sm font-medium">{opt.label}</span>
-                  </div>
-                  <span class="text-white/50 text-sm">{opt.voteCount} ({opt.percentage}%)</span>
-                </div>
-                <div class="h-5 bg-white/5 rounded-sm overflow-hidden">
-                  <div
-                    class="h-full rounded-sm transition-all duration-700"
-                    style={`width: ${opt.percentage}%; background: ${color};`}
-                  ></div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    )}
-
-    {polls.filter(p => p.id !== featuredPoll?.id).length > 0 && (
-      <div class="glass-panel overflow-hidden divide-y divide-white/[0.04]">
-        {polls.filter(p => p.id !== featuredPoll?.id).map(poll => (
-          <div class="p-6">
-            <h3 class="font-heading text-lg text-white mb-1">{poll.question}</h3>
-            <p class="text-white/40 text-sm mb-4">{poll.totalVotes} votes</p>
-            <div class="space-y-2">
-              {poll.options.sort((a, b) => b.voteCount - a.voteCount).slice(0, 5).map(opt => (
-                <div class="flex items-center gap-3">
-                  <div class="flex-1 h-3 bg-white/5 rounded-sm overflow-hidden">
-                    <div class="h-full bg-primary/60 rounded-sm" style={`width: ${opt.percentage}%`}></div>
-                  </div>
-                  <span class="text-white/70 text-xs min-w-[80px] text-right">{opt.label} ({opt.percentage}%)</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
-
-    {!featuredPoll && polls.length === 0 && (
-      <div class="glass-panel p-8 text-center">
-        <p class="text-white/50">No active polls at the moment. Check back soon!</p>
-      </div>
-    )}
-  </section>
-
-  <!-- ==================== TOP SONGS TAB ==================== -->
-  <section id="panel-top-songs" class="curiosity-panel hidden">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Most Played Songs Live</h2>
-    </div>
-
-    {top10Songs.length > 0 ? (
-      <div class="glass-panel overflow-hidden divide-y divide-white/[0.04]">
-        {top10Songs.map((song, i) => {
-          const barWidth = (song.totalPlays / maxPlays) * 100;
-          return (
-            <div class="p-4 flex items-center gap-4 hover:bg-white/[0.015] transition-colors">
-              <span class="text-white/30 font-mono text-sm min-w-[24px] text-right">{i + 1}.</span>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-heading text-white text-base truncate">{song.songTitle}</span>
-                  <span class="text-white/50 text-sm shrink-0 ml-2">{song.totalPlays.toLocaleString()}</span>
-                </div>
-                <div class="h-2 bg-white/5 rounded-sm overflow-hidden">
-                  <div
-                    class="h-full bg-primary rounded-sm transition-all duration-500"
-                    style={`width: ${barWidth}%;`}
-                  ></div>
-                </div>
-                {song.albumTitle && (
-                  <span class="text-white/30 text-xs mt-1 block">{song.albumTitle}</span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    ) : (
-      <div class="glass-panel p-8 text-center">
-        <p class="text-white/50">Song statistics are being computed from setlist data. Check back soon!</p>
-      </div>
-    )}
-
-    {topSongs.length > 10 && (
-      <div class="mt-8">
-        <h3 class="font-heading text-lg text-white/80 mb-4">Songs 11&ndash;{Math.min(30, topSongs.length)}</h3>
-        <div class="glass-panel overflow-hidden divide-y divide-white/[0.04]">
-          {topSongs.slice(10, 30).map((song, i) => (
-            <div class="flex items-center gap-3 p-3 hover:bg-white/[0.015] transition-colors">
-              <span class="text-white/20 font-mono text-xs min-w-[24px] text-right">{i + 11}.</span>
-              <span class="text-white/70 text-sm truncate flex-1">{song.songTitle}</span>
-              <span class="text-white/30 text-xs shrink-0">{song.totalPlays.toLocaleString()}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
-  </section>
-
-  <!-- ==================== BY YEAR TAB ==================== -->
-  <section id="panel-by-year" class="curiosity-panel hidden">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Shows By Year</h2>
-    </div>
-
-    {showYears.length > 0 ? (
-      <div class="glass-panel overflow-hidden p-6">
-        <!-- Bar chart -->
-        <div class="overflow-x-auto">
-          <div class="flex items-end gap-1 min-w-[800px] h-64">
-            {showYears.map(year => {
-              const count = showsByYear[year] || 0;
-              const heightPct = (count / maxShowsInYear) * 100;
-              return (
-                <div class="flex-1 flex flex-col items-center justify-end h-full group relative">
-                  <div class="year-bar-tooltip hidden absolute bottom-full mb-2 px-2 py-1 bg-black/90 border border-white/20 rounded text-xs text-white whitespace-nowrap z-10">
-                    {year}: {count} shows
-                  </div>
-                  <div
-                    class="w-full max-w-[20px] bg-primary/70 rounded-t-sm hover:bg-primary transition-colors cursor-pointer"
-                    style={`height: ${Math.max(heightPct, 2)}%;`}
-                  ></div>
-                  <span class="text-white/30 text-[9px] mt-1 rotate-[-45deg] origin-center whitespace-nowrap">
-                    {year % 5 === 0 ? year : ''}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <p class="text-white/40 text-xs text-center mt-4">Shows per year across all tours</p>
-      </div>
-    ) : (
-      <div class="glass-panel p-8 text-center">
-        <p class="text-white/50">Year data is being compiled. Check back soon!</p>
-      </div>
-    )}
-
-    <!-- Year breakdown table -->
-    {showYears.length > 0 && (
-      <div class="mt-8 glass-panel overflow-hidden p-4">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-          {[...showYears].reverse().map(year => (
-            <div class="p-3 text-center rounded-sm bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
-              <div class="font-display text-lg text-white">{year}</div>
-              <div class="text-primary text-sm font-medium">{showsByYear[year]} shows</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
-  </section>
-
-  <!-- ==================== BY TOUR TAB ==================== -->
-  <section id="panel-by-tour" class="curiosity-panel hidden">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">Tours Ranked by Shows</h2>
-    </div>
-
-    {tours.length > 0 ? (
-      <div class="glass-panel overflow-hidden divide-y divide-white/[0.04]">
-        {tours
-          .filter(t => t.totalShows > 0)
-          .sort((a, b) => b.totalShows - a.totalShows)
-          .slice(0, 25)
-          .map((tour, i) => {
-            const barWidth = (tour.totalShows / Math.max(...tours.map(t => t.totalShows), 1)) * 100;
-            return (
-              <a href={`/tours/${tour.slug}`} class="group flex items-center gap-4 p-4 hover:bg-white/[0.015] transition-colors">
-                <span class="text-white/30 font-mono text-sm min-w-[24px] text-right">{i + 1}.</span>
-                {tour.associatedAlbumCover && (
-                  <img src={tour.associatedAlbumCover} alt="" class="w-10 h-10 rounded object-cover shrink-0 border border-white/10" loading="lazy" />
-                )}
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="font-heading text-white text-sm group-hover:text-primary transition-colors truncate">{tour.name}</span>
-                    <span class="text-white/50 text-sm shrink-0 ml-2">{tour.totalShows} shows</span>
-                  </div>
-                  <div class="h-1.5 bg-white/5 rounded-sm overflow-hidden">
-                    <div class="h-full bg-primary/60 rounded-sm" style={`width: ${barWidth}%`}></div>
-                  </div>
-                  <span class="text-white/30 text-xs">{tour.year || ''}</span>
-                </div>
-              </a>
-            );
-        })}
-      </div>
-    ) : (
-      <div class="glass-panel p-8 text-center">
-        <p class="text-white/50">Tour data is being compiled. Check back soon!</p>
-      </div>
-    )}
-  </section>
-</MainLayout>
-
-<style>
-  .curiosity-tab {
-    color: rgba(255, 255, 255, 0.5);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm, 4px);
-  }
-  .curiosity-tab:hover {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.04);
-  }
-  .curiosity-tab.active {
-    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.15);
-    color: var(--color-primary);
-    border-color: rgba(var(--color-primary-rgb, 137, 176, 201), 0.3);
-  }
-
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-
-  .year-bar-tooltip { pointer-events: none; }
-  .group:hover .year-bar-tooltip { display: block; }
-
-</style>
+  </IssueSection>
+</Layout>
 
 <script>
-  function initCuriosities() {
-    const tabs = document.querySelectorAll('.curiosity-tab');
-    const panels = document.querySelectorAll('.curiosity-panel');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const target = tab.getAttribute('data-tab');
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        panels.forEach(p => p.classList.add('hidden'));
-        const panel = document.getElementById(`panel-${target}`);
-        if (panel) panel.classList.remove('hidden');
-      });
-    });
+  function wire() {
+    const chips = document.querySelectorAll<HTMLElement>('[data-cat-filters] .cat-chip');
+    const cards = document.querySelectorAll<HTMLElement>('[data-curios] .curio');
+    chips.forEach((chip) => chip.addEventListener('click', () => {
+      const c = chip.getAttribute('data-cat') || 'all';
+      chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+      cards.forEach((r) => { const rc = r.getAttribute('data-cat') || ''; r.style.display = c === 'all' || rc === c ? '' : 'none'; });
+    }));
   }
-
-  document.addEventListener('DOMContentLoaded', initCuriosities);
-  document.addEventListener('astro:page-load', initCuriosities);
+  wire();
+  document.addEventListener('astro:page-load', wire);
 </script>
+
+<style is:global>
+  .curios { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--rule); }
+  @media (max-width: 780px) { .curios { grid-template-columns: 1fr; } }
+  .curio { padding: clamp(20px, 3vw, 32px); border-bottom: 1px solid var(--rule); border-left: 1px solid var(--rule); display: grid; grid-template-columns: 52px 1fr; gap: 1rem; align-items: start; }
+  .curio:nth-child(odd) { border-left: none; }
+  .curio__idx { color: var(--accent-3); }
+  .curio__title { font-size: clamp(20px, 2.2vw, 26px); font-style: italic; line-height: 1.15; margin: .2rem 0 .4rem; }
+  .curio__body { font-family: var(--f-serif); font-size: 16px; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 52ch; }
+</style>

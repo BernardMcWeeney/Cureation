@@ -1,0 +1,152 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+import { listTours, listAlbums } from '../lib/directus';
+
+const [tours, albums] = await Promise.all([listTours(), listAlbums()]);
+const albumsById = Object.fromEntries(albums.map((a) => [a.id, a]));
+
+const totalShows = tours.reduce((n, t) => n + (t.total_shows || 0), 0);
+const countriesSet = new Set<string>();
+tours.forEach((t) => {
+  const cs = Array.isArray(t.countries_visited) ? t.countries_visited : [];
+  cs.forEach((c: any) => c && countriesSet.add(typeof c === 'string' ? c : (c.country || c.name)));
+});
+
+const decades: Record<string, { count: number; shows: number }> = {};
+tours.forEach((t) => {
+  const y = t.start_date?.slice(0, 4);
+  if (!y) return;
+  const d = `${y.slice(0, 3)}0s`;
+  if (!decades[d]) decades[d] = { count: 0, shows: 0 };
+  decades[d].count += 1;
+  decades[d].shows += t.total_shows || 0;
+});
+const decadeEntries = Object.entries(decades).sort((a, b) => a[0].localeCompare(b[0]));
+const maxShows = Math.max(1, ...decadeEntries.map(([, v]) => v.shows));
+
+const facts: Array<[string, string]> = [
+  ['Tours catalogued', String(tours.length)],
+  ['Total shows', totalShows.toLocaleString()],
+  ['Countries visited', String(countriesSet.size)],
+  ['Decades active', String(decadeEntries.length)],
+];
+---
+<Layout title="Tours · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Tours' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · TOURING</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">The tours</h1>
+      <p class="deck" style="max-width: 62ch;">Every run, in order — from the earliest club dates to the arena cycles — with associated records and lineups on file.</p>
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <section class="container" style="padding: clamp(28px, 4vw, 48px) 0; border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted" style="margin-bottom:.6rem;">SHOWS PER DECADE</div>
+    <div class="decade-bars">
+      {decadeEntries.map(([d, v]) => (
+        <button class="decade-bar" data-decade-jump={d} style={`--h: ${Math.round((v.shows / maxShows) * 100)}%;`}>
+          <div class="decade-bar__val">{v.shows} shows</div>
+          <div class="decade-bar__fill"></div>
+          <div class="decade-bar__label">{d}</div>
+          <div class="decade-bar__sub">{v.count} tours</div>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+    <div class="filter-grid">
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Decade</div>
+        <div class="cluster filter-chips" data-filter-group="decade">
+          <Chip active={true} data-fval="all">All</Chip>
+          {decadeEntries.map(([d]) => <Chip data-fval={d}>{d}</Chip>)}
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Search</div>
+        <input class="filter-search" type="search" placeholder="Tour, record…" data-filter-search />
+      </div>
+    </div>
+  </section>
+
+  <IssueSection kicker={`${tours.length} tours`} title="Chronology" meta="All confirmed runs">
+    <div class="mono-sm muted" data-match-count style="margin-bottom:.8rem;">{tours.length} tours</div>
+    <table class="data data--airy" data-tours-table>
+      <thead><tr><th style="width:50px;">№</th><th style="width:110px;">Start</th><th>Tour</th><th>Record</th><th class="num" style="text-align:right; width:80px;">Shows</th></tr></thead>
+      <tbody>
+        {tours.slice().reverse().map((t, i) => {
+          const album = t.associated_album ? albumsById[t.associated_album] : null;
+          const y = t.start_date?.slice(0, 4) || '';
+          const decade = y ? `${y.slice(0, 3)}0s` : '';
+          const search = `${t.name || ''} ${album?.title || ''}`.toLowerCase();
+          return (
+            <tr data-clickable data-decade={decade} data-search={search} onclick={`location.href='/tours/${t.slug}'`}>
+              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+              <td class="mono-sm" style="color: var(--ink);">{t.start_date || '—'}</td>
+              <td><span class="serif" style="font-size:20px; font-style:italic;">{t.name}</span></td>
+              <td class="mono-sm" style="color: var(--ink-2);">{album ? album.title : '—'}</td>
+              <td class="num">{t.total_shows || '—'}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </IssueSection>
+</Layout>
+
+<script>
+  function wire() {
+    const state: Record<string, string> = { decade: 'all', search: '' };
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-tours-table] tbody tr'));
+    const counter = document.querySelector<HTMLElement>('[data-match-count]');
+    const apply = () => {
+      let m = 0;
+      rows.forEach((r) => {
+        const d = r.getAttribute('data-decade') || '';
+        const s = r.getAttribute('data-search') || '';
+        const ok = (state.decade === 'all' || d === state.decade) && (!state.search || s.includes(state.search));
+        r.style.display = ok ? '' : 'none';
+        if (ok) m++;
+      });
+      if (counter) counter.textContent = `${m} tours`;
+    };
+    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+      const key = group.getAttribute('data-filter-group') || '';
+      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
+      chips.forEach((chip) => chip.addEventListener('click', () => {
+        state[key] = chip.getAttribute('data-fval') || 'all';
+        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+        apply();
+      }));
+    });
+    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    document.querySelectorAll<HTMLElement>('[data-decade-jump]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const d = btn.getAttribute('data-decade-jump') || '';
+        const chip = Array.from(document.querySelectorAll<HTMLElement>('[data-filter-group="decade"] [data-fval]'))
+          .find((c) => c.getAttribute('data-fval') === d);
+        if (chip) chip.click();
+      });
+    });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>
+
+<style is:global>
+  .decade-bar__sub { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+</style>

@@ -1,0 +1,46 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import IssueSection from '../../../components/ui/IssueSection.astro';
+import Crumbs from '../../../components/ui/Crumbs.astro';
+import { listMembers } from '../../../lib/directus';
+import { asset } from '../../../lib/assets';
+
+const members = await listMembers();
+---
+<Layout title="Members · The band · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'The band', href: '/band' },
+      { label: 'Members' },
+    ]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · MEMBERS</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">Every member</h1>
+      <p class="deck" style="max-width: 62ch;">Every musician who has passed through The Cure, in one index.</p>
+    </div>
+  </div>
+
+  <IssueSection kicker={`${members.length} on file`} title="Catalogue">
+    <div class="grid">
+      {members.map((m) => (
+        <a href={`/band/members/${m.slug}`} class="card">
+          <figure class="card__art">
+            {m.photo_file ? <img src={asset(m.photo_file, 'card')} alt={m.name} loading="lazy" /> : <div class="placeholder">No photo</div>}
+          </figure>
+          <div class="mono-sm muted" style="margin-top:.5rem;">{m.tenure || '—'}</div>
+          <h3 class="serif" style="font-size: 20px; font-style: italic; margin: .2rem 0 0;">{m.name}</h3>
+          <div class="mono-sm" style="color: var(--accent-3);">{Array.isArray(m.instruments) ? m.instruments.slice(0, 2).join(' · ').toUpperCase() : ''}</div>
+        </a>
+      ))}
+    </div>
+  </IssueSection>
+</Layout>
+
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: clamp(20px, 2.4vw, 36px); }
+  .card { display: flex; flex-direction: column; border: none; }
+  .card__art { aspect-ratio: 1 / 1; margin: 0; background: var(--bg-2); border: 1px solid var(--rule); overflow: hidden; }
+  .card__art img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9); transition: transform .5s; }
+  .card:hover .card__art img { transform: scale(1.04); }
+</style>

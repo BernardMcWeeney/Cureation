@@ -1,0 +1,61 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AlbumCard from '../../components/album/AlbumCard.astro';
+import IssueSection from '../../components/ui/IssueSection.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Chip from '../../components/ui/Chip.astro';
+import { listAlbums } from '../../lib/directus';
+
+const comps = await listAlbums({ type: ['compilation', 'live', 'boxset', 'deluxe'] });
+const tabs = [
+  { href: '/discography',              label: 'Studio',      active: false },
+  { href: '/discography/ep',           label: 'EPs',         active: false },
+  { href: '/discography/compilations', label: 'Compilations',active: true  },
+  { href: '/discography/singles',      label: 'Singles',     active: false },
+];
+---
+<Layout title="Compilations · Discography · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Discography', href: '/discography' }, { label: 'Compilations' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · COMPILATIONS & LIVE</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Compilations & live</h1>
+      <p class="deck" style="max-width: 62ch;">Anthologies, live records, deluxe reissues and boxsets — how the catalogue was repackaged across decades.</p>
+      <div class="cluster" style="gap: 6px; flex-wrap: wrap;">
+        {tabs.map((t) => <Chip href={t.href} active={t.active}>{t.label}</Chip>)}
+      </div>
+    </div>
+  </div>
+
+  <IssueSection kicker={`${comps.length} records`} title="Ledger">
+    {comps.length > 0 ? (
+      <table class="data">
+        <thead><tr><th style="width:50px;">№</th><th style="width:80px;">Year</th><th>Record</th><th>Kind</th></tr></thead>
+        <tbody>
+          {comps.map((a, i) => (
+            <tr data-clickable onclick={`location.href='/discography/${a.slug}'`}>
+              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+              <td class="mono-sm muted">{a.release_date?.slice(0, 4) || '—'}</td>
+              <td><span class="serif" style="font-size:22px; font-style:italic;">{a.title}</span></td>
+              <td class="mono-sm" style="color: var(--accent-3);">{(a.type || '').toUpperCase()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <p class="deck">No compilations catalogued yet.</p>
+    )}
+  </IssueSection>
+
+  {comps.length > 0 && (
+    <IssueSection kicker="Cover plates" title="Sleeves">
+      <div class="records-grid">
+        {comps.map((a) => <AlbumCard album={a} size="md" />)}
+      </div>
+    </IssueSection>
+  )}
+</Layout>
+
+<style>
+  .records-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(20px, 2.4vw, 36px); }
+</style>

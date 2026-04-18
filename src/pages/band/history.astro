@@ -1,0 +1,69 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import IssueSection from '../../components/ui/IssueSection.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import { listEras, listTimeline } from '../../lib/directus';
+
+const [eras, timeline] = await Promise.all([listEras(), listTimeline()]);
+
+const byYear = timeline.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+const byDecade = byYear.reduce((acc: Record<string, any[]>, t: any) => {
+  const dec = t.year ? `${Math.floor(t.year / 10) * 10}s` : 'Undated';
+  (acc[dec] = acc[dec] || []).push(t);
+  return acc;
+}, {});
+const decades = Object.keys(byDecade).sort();
+---
+<Layout title="History · The band · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'The band', href: '/band' },
+      { label: 'History' },
+    ]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · HISTORY</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">A chronology</h1>
+      <p class="deck" style="max-width: 62ch;">The Cure, year by year — divided into six identifying eras and annotated with the events that defined each.</p>
+    </div>
+  </div>
+
+  <IssueSection kicker="Six eras" title="Periodisation">
+    <table class="data">
+      <thead><tr><th style="width:60px;">№</th><th style="width:160px;">Years</th><th>Era</th><th>Short name</th></tr></thead>
+      <tbody>
+        {eras.map((e, i) => (
+          <tr id={e.slug}>
+            <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+            <td class="mono-sm muted">{e.year_start}–{e.year_end && e.year_end < 2099 ? e.year_end : 'present'}</td>
+            <td>
+              <span class="serif" style="font-size:22px; font-style:italic;">{e.name}</span>
+              {e.description && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{e.description}</div>}
+            </td>
+            <td class="mono-sm" style="color: var(--accent-3);">{e.short_name || '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </IssueSection>
+
+  {decades.map((dec) => (
+    <IssueSection kicker={dec} title={`The ${dec}`} meta={`${byDecade[dec].length} entries`}>
+      <table class="data">
+        <thead><tr><th style="width:90px;">Date</th><th style="width:110px;">Kind</th><th>Event</th></tr></thead>
+        <tbody>
+          {byDecade[dec].map((t: any) => (
+            <tr>
+              <td class="mono-sm" style="color: var(--ink);">{t.formatted_date || t.date || t.year}</td>
+              <td class="mono-sm muted">{(t.type || '').toUpperCase()}</td>
+              <td>
+                <span class="serif" style="font-size:17px; font-style:italic;">{t.title}</span>
+                {t.description && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{t.description}</div>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </IssueSection>
+  ))}
+</Layout>

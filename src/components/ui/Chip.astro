@@ -1,0 +1,18 @@
+---
+interface Props {
+  href?: string;
+  active?: boolean;
+  class?: string;
+}
+const { href, active = false, class: klass = '' } = Astro.props;
+const classes = ['chip', active ? 'is-active' : '', klass].filter(Boolean).join(' ');
+---
+{href ? (
+  <a href={href} class={classes} aria-pressed={active ? 'true' : 'false'}><slot /></a>
+) : (
+  <button type="button" class={classes} aria-pressed={active ? 'true' : 'false'}><slot /></button>
+)}
+
+<style>
+  a.chip { border-bottom-width: 1px; }
+</style>

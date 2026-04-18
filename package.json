@@ -13,7 +13,6 @@
     "@astrojs/cloudflare": "^13.1.8",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^6.1.5",
-    "daisyui": "^5.5.14",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

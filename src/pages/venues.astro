@@ -1,0 +1,147 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+import { listVenues } from '../lib/directus';
+
+const venues = await listVenues();
+const byCountry = Array.from(new Set(venues.map((v) => v.country).filter(Boolean))).sort();
+const withCoords = venues.filter((v) => v.latitude && v.longitude).length;
+
+const countryCounts: Record<string, number> = {};
+venues.forEach((v) => { if (v.country) countryCounts[v.country] = (countryCounts[v.country] || 0) + (v.cure_show_count || 1); });
+const topCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+const maxCountry = Math.max(1, ...topCountries.map(([, c]) => c));
+
+const facts: Array<[string, string]> = [
+  ['Venues on file', String(venues.length)],
+  ['Countries', String(byCountry.length)],
+  ['With coordinates', String(withCoords)],
+  ['Sorted by', 'SHOW COUNT'],
+];
+---
+<Layout title="Venues · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Venues' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · VENUES</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Venues</h1>
+      <p class="deck" style="max-width: 62ch;">Every room the band has played — ranked by repeat visits, annotated with capacity and first/last Cure appearance.</p>
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <section class="container" style="padding: clamp(28px, 4vw, 48px) 0; border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted" style="margin-bottom:.6rem;">TOP 10 COUNTRIES BY SHOWS</div>
+    <div class="decade-bars">
+      {topCountries.map(([c, count]) => (
+        <button class="decade-bar" data-country-jump={c} style={`--h: ${Math.round((count / maxCountry) * 100)}%;`}>
+          <div class="decade-bar__val">{count}</div>
+          <div class="decade-bar__fill"></div>
+          <div class="decade-bar__label">{c}</div>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+    <div class="filter-grid">
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Country</div>
+        <div class="cluster filter-chips" data-filter-group="country">
+          <Chip active={true} data-fval="all">All</Chip>
+          {byCountry.map((c) => <Chip data-fval={c}>{c}</Chip>)}
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Capacity</div>
+        <div class="cluster filter-chips" data-filter-group="cap">
+          <Chip active={true} data-fval="all">Any</Chip>
+          <Chip data-fval="small">&lt; 1k</Chip>
+          <Chip data-fval="mid">1k–5k</Chip>
+          <Chip data-fval="large">5k–20k</Chip>
+          <Chip data-fval="huge">20k+</Chip>
+        </div>
+      </div>
+      <div class="filter-grid__block">
+        <div class="mono-sm muted">Search</div>
+        <input class="filter-search" type="search" placeholder="Venue, city…" data-filter-search />
+      </div>
+    </div>
+  </section>
+
+  <IssueSection kicker="Ranked ledger" title="Rooms" meta="Most-visited first">
+    <div class="mono-sm muted" data-match-count style="margin-bottom:.8rem;">{venues.length} venues</div>
+    <table class="data data--airy" data-venue-table>
+      <thead><tr><th style="width:50px;">№</th><th>Venue</th><th>City</th><th>Country</th><th class="num" style="text-align:right;">Capacity</th><th class="num" style="text-align:right;">Cure shows</th></tr></thead>
+      <tbody>
+        {venues.map((v, i) => {
+          const cap = v.capacity || 0;
+          const bucket = cap === 0 ? 'all' : cap < 1000 ? 'small' : cap < 5000 ? 'mid' : cap < 20000 ? 'large' : 'huge';
+          const search = `${v.name || ''} ${v.city || ''} ${v.country || ''}`.toLowerCase();
+          return (
+            <tr data-clickable data-country={v.country || ''} data-cap={bucket} data-search={search} onclick={`location.href='/venues/${v.slug}'`}>
+              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+              <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{v.name}</span></td>
+              <td class="mono-sm muted">{[v.city, v.state_province].filter(Boolean).join(', ')}</td>
+              <td class="mono-sm muted">{v.country || '—'}</td>
+              <td class="num">{v.capacity ? v.capacity.toLocaleString() : '—'}</td>
+              <td class="num" style="color: var(--accent-3);">{v.cure_show_count || '—'}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </IssueSection>
+</Layout>
+
+<script>
+  function wire() {
+    const state: Record<string, string> = { country: 'all', cap: 'all', search: '' };
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-venue-table] tbody tr'));
+    const counter = document.querySelector<HTMLElement>('[data-match-count]');
+    const apply = () => {
+      let m = 0;
+      rows.forEach((r) => {
+        const c = r.getAttribute('data-country') || '';
+        const cap = r.getAttribute('data-cap') || '';
+        const s = r.getAttribute('data-search') || '';
+        const ok = (state.country === 'all' || c === state.country) &&
+                   (state.cap === 'all' || cap === state.cap) &&
+                   (!state.search || s.includes(state.search));
+        r.style.display = ok ? '' : 'none';
+        if (ok) m++;
+      });
+      if (counter) counter.textContent = `${m} venues`;
+    };
+    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+      const key = group.getAttribute('data-filter-group') || '';
+      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
+      chips.forEach((chip) => chip.addEventListener('click', () => {
+        state[key] = chip.getAttribute('data-fval') || 'all';
+        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+        apply();
+      }));
+    });
+    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    document.querySelectorAll<HTMLElement>('[data-country-jump]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const c = btn.getAttribute('data-country-jump') || '';
+        const chip = Array.from(document.querySelectorAll<HTMLElement>('[data-filter-group="country"] [data-fval]'))
+          .find((x) => x.getAttribute('data-fval') === c);
+        if (chip) chip.click();
+      });
+    });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

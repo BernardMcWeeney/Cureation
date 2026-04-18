@@ -1,397 +1,131 @@
 ---
-import MainLayout from '../../layouts/MainLayout.astro';
-import AlbumCard from '../../components/AlbumCard.astro';
-import PageFilter from '../../components/PageFilter.astro';
-import { fetchAlbumsGroupedByType, getAlbumEra, eraMetadata } from '../../lib/directus';
-import type { AlbumEra } from '../../types/directus';
+import Layout from '../../layouts/Layout.astro';
+import AlbumCard from '../../components/album/AlbumCard.astro';
+import IssueSection from '../../components/ui/IssueSection.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Chip from '../../components/ui/Chip.astro';
+import { listAlbums, listEras } from '../../lib/directus';
 
-// Fetch all albums grouped by type
-const albumsByType = await fetchAlbumsGroupedByType();
+const [all, eras] = await Promise.all([listAlbums({ type: 'studio' }), listEras()]);
+const erasById = Object.fromEntries(eras.map((e) => [e.id, e]));
 
-// Define tab order and which types to show as primary tabs
-const primaryTypes: { key: string; label: string; icon: string }[] = [
-  { key: 'studio', label: 'Studio Albums', icon: 'M9 19V6l12-2v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3' },
-  { key: 'compilation', label: 'Compilations', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
-  { key: 'live', label: 'Live Albums', icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z' },
-  { key: 'deluxe', label: 'Deluxe Editions', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
-  { key: 'ep', label: 'EPs & Singles', icon: 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z' },
-  { key: 'boxset', label: 'Box Sets', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+const firstYear = all.map((a) => Number(a.release_date?.slice(0, 4))).filter(Boolean).sort()[0];
+const lastYear  = all.map((a) => Number(a.release_date?.slice(0, 4))).filter(Boolean).sort().slice(-1)[0];
+
+const tabs = [
+  { href: '/discography',               label: 'Studio',      active: true },
+  { href: '/discography/ep',            label: 'EPs',         active: false },
+  { href: '/discography/compilations',  label: 'Compilations',active: false },
+  { href: '/discography/singles',       label: 'Singles',     active: false },
 ];
 
-// Count totals
-const allAlbums = Object.values(albumsByType).flat().sort((a, b) => {
-  if (!a.year) return 1;
-  if (!b.year) return -1;
-  return parseInt(a.year) - parseInt(b.year);
-});
-const totalReleases = allAlbums.length;
-
-// Also prepare era-grouped view for studio albums
-const studioAlbums = albumsByType['studio'] || [];
-const studioByEra = studioAlbums.reduce((acc, album) => {
-  const era = getAlbumEra(album.releaseDate !== 'Unknown' ? album.releaseDate : undefined);
-  if (!acc[era]) acc[era] = [];
-  acc[era].push(album);
-  return acc;
-}, {} as Record<AlbumEra, typeof studioAlbums>);
-
-const eraOrder: AlbumEra[] = ['early', 'pop', 'classic', 'experimental', 'modern'];
-const eraColors: Record<AlbumEra, { bg: string; border: string; text: string }> = {
-  early: { bg: 'bg-violet-500/20', border: 'border-violet-500/30', text: 'text-violet-400' },
-  pop: { bg: 'bg-pink-500/20', border: 'border-pink-500/30', text: 'text-pink-400' },
-  classic: { bg: 'bg-blue-500/20', border: 'border-blue-500/30', text: 'text-blue-400' },
-  experimental: { bg: 'bg-amber-500/20', border: 'border-amber-500/30', text: 'text-amber-400' },
-  modern: { bg: 'bg-green-500/20', border: 'border-green-500/30', text: 'text-green-400' }
-};
+const facts: Array<[string, string]> = [
+  ['Records', String(all.length)],
+  ['First issue', firstYear ? String(firstYear) : '—'],
+  ['Latest issue', lastYear ? String(lastYear) : '—'],
+  ['Eras in range', String(eras.length)],
+];
 ---
+<Layout title="Discography · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Discography' }]} />
 
-<MainLayout
-  title="Discography"
-  description="The complete discography of The Cure — studio albums, compilations, live albums, deluxe editions, EPs, box sets, and more."
-  pageClass="bg-black"
->
-  <!-- Hero Section -->
-  <section class="mb-10">
-    <div class="glass-panel overflow-hidden relative">
-      <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-white/[0.06] blur-3xl pointer-events-none"></div>
-      <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-accent/[0.06] blur-2xl pointer-events-none"></div>
-
-      <div class="relative p-8 md:p-12">
-        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4 text-glow" transition:animate="slide">
-          Discography
-        </h1>
-        <p class="text-white/75 text-lg md:text-xl max-w-3xl leading-relaxed" transition:animate="fade">
-          Every release from The Cure — spanning over four decades of studio albums, compilations, live recordings, deluxe editions, and more.
-        </p>
-
-        <div class="flex flex-wrap gap-8 mt-8 pt-6 border-t border-white/[0.08]">
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{totalReleases}</span>
-            <span class="text-white/85 text-base font-medium">Releases</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">{studioAlbums.length}</span>
-            <span class="text-white/85 text-base font-medium">Studio Albums</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="text-3xl font-display text-white text-glow">45+</span>
-            <span class="text-white/85 text-base font-medium">Years</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Search & Filters -->
-  <section class="mb-8">
-    <div class="mb-4">
-      <PageFilter id="disco" placeholder="Search albums..." />
-    </div>
-
-    <!-- Type Tabs -->
-    <nav class="overflow-x-auto scrollbar-hide">
-      <div class="flex gap-2 min-w-max pb-2">
-        <button
-          type="button"
-          class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide active"
-          data-tab="all"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-          </svg>
-          All
-          <span class="tab-count px-1.5 py-0.5 rounded-sm text-xs">{totalReleases}</span>
-        </button>
-        {primaryTypes.map((tab) => {
-          const count = albumsByType[tab.key]?.length || 0;
-          if (count === 0) return null;
-          return (
-            <button
-              type="button"
-              class="type-tab flex items-center gap-2 px-4 py-2.5 rounded-sm text-sm font-medium transition-all whitespace-nowrap tracking-wide"
-              data-tab={tab.key}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d={tab.icon} />
-              </svg>
-              {tab.label}
-              <span class="tab-count px-1.5 py-0.5 rounded-sm text-xs">{count}</span>
-            </button>
-          );
-        })}
-      </div>
-    </nav>
-  </section>
-
-  <!-- All Albums Panel (default) -->
-  <section id="panel-all" class="type-panel">
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-      {allAlbums.map((album, index) => (
-        <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year} ${album.type}`}>
-          <AlbumCard
-            title={album.title}
-            coverImage={album.coverImage}
-            year={album.year}
-            slug={album.slug}
-            featured={album.featured}
-            id={album.id}
-            type={album.type as any}
-          />
-        </div>
-      ))}
-    </div>
-  </section>
-
-  <!-- Studio Albums Panel (with era grouping) -->
-  <section id="panel-studio" class="type-panel hidden">
-    <!-- Sub-toggle: By Era vs Chronological -->
-    <div class="flex items-center gap-3 mb-8">
-      <div class="flex items-center gap-1 p-1 rounded-sm bg-black/40 border border-white/[0.08]">
-        <button type="button" id="studio-era-btn" class="studio-view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all active">By Era</button>
-        <button type="button" id="studio-chrono-btn" class="studio-view-btn px-3 py-1.5 rounded-sm text-xs font-medium tracking-wide transition-all">Chronological</button>
-      </div>
-      <span class="text-sm text-white/75">{studioAlbums.length} studio albums</span>
-    </div>
-
-    <!-- Era View -->
-    <div id="studio-era-view" class="space-y-14">
-      {eraOrder.map(era => {
-        const eraAlbums = studioByEra[era] || [];
-        if (eraAlbums.length === 0) return null;
-        const meta = eraMetadata[era];
-        const colors = eraColors[era];
-
-        return (
-          <div class="era-section" data-era={era} data-filter-group>
-            <div class="flex items-center gap-4 mb-6">
-              <div class="flex items-center gap-3">
-                <div class={`size-9 rounded-sm ${colors.bg} border ${colors.border} flex items-center justify-center`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" class={`size-4 ${colors.text}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="3" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 class={`font-heading text-xl md:text-2xl ${colors.text}`}>{meta.name}</h2>
-                  <p class="text-white/80 text-xs tracking-wide">{meta.years} · {meta.description}</p>
-                </div>
-              </div>
-              <div class="flex-1 h-px bg-gradient-to-r from-white/15 to-transparent"></div>
-              <span class={`px-2.5 py-1 rounded-sm ${colors.bg} border ${colors.border} ${colors.text} text-xs font-medium tracking-wider`}>
-                {eraAlbums.length}
-              </span>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-              {eraAlbums.map((album, index) => (
-                <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year}`}>
-                  <AlbumCard
-                    title={album.title}
-                    coverImage={album.coverImage}
-                    year={album.year}
-                    slug={album.slug}
-                    featured={album.featured}
-                    id={album.id}
-                    type="studio"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-
-    <!-- Chronological View (hidden by default) -->
-    <div id="studio-chrono-view" class="hidden">
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-        {studioAlbums.map((album, index) => (
-          <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year}`}>
-            <AlbumCard
-              title={album.title}
-              coverImage={album.coverImage}
-              year={album.year}
-              slug={album.slug}
-              featured={album.featured}
-              id={album.id}
-              type="studio"
-            />
+    <div class="disc-head stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · DISCOGRAPHY</div>
+      <h1 class="disc-head__title serif">The discography</h1>
+      <p class="deck" style="max-width: 62ch;">
+        Every studio record, EP, compilation and single — chronologically arranged,
+        annotated by era, and cross-referenced to the live archive.
+      </p>
+      <div class="facts">
+        {facts.map(([k, v]) => (
+          <div class="facts__item">
+            <div class="facts__k">{k}</div>
+            <div class="facts__v">{v}</div>
           </div>
         ))}
       </div>
+      <div class="cluster" style="gap: 6px; flex-wrap: wrap;">
+        {tabs.map((t) => <Chip href={t.href} active={t.active}>{t.label}</Chip>)}
+      </div>
+      <div class="cluster" style="gap: 6px; flex-wrap: wrap;" data-era-filters>
+        <Chip active={true} class="era-chip" data-era="all">All eras</Chip>
+        {eras.map((e) => (
+          <Chip class="era-chip" data-era={e.id}>{e.short_name || e.name}</Chip>
+        ))}
+      </div>
     </div>
-  </section>
+  </div>
 
-  <!-- Other Type Panels -->
-  {primaryTypes.slice(1).map(tab => {
-    const typeAlbums = albumsByType[tab.key] || [];
-    if (typeAlbums.length === 0) return null;
+  <IssueSection kicker={`${all.length} studio records`} title="The ledger">
+    <table class="data" data-ledger>
+      <thead><tr><th style="width:50px;">№</th><th style="width:80px;">Year</th><th>Record</th><th>Era</th><th class="num" style="text-align:right;">Peak</th></tr></thead>
+      <tbody>
+        {all
+          .slice()
+          .sort((a, b) => (a.release_date || '').localeCompare(b.release_date || ''))
+          .map((a, i) => {
+            const era = a.era_id ? erasById[a.era_id] : null;
+            return (
+              <tr data-clickable data-era={a.era_id || ''} onclick={`location.href='/discography/${a.slug}'`}>
+                <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+                <td class="mono-sm muted">{a.release_date?.slice(0, 4) || '—'}</td>
+                <td><span class="serif" style="font-size:22px; font-style:italic;">{a.title}</span></td>
+                <td class="mono-sm" style="color: var(--ink-2);">{era?.short_name || era?.name || '—'}</td>
+                <td class="num" style="color: var(--accent-3);">—</td>
+              </tr>
+            );
+          })}
+      </tbody>
+    </table>
+  </IssueSection>
 
-    return (
-      <section id={`panel-${tab.key}`} class="type-panel hidden">
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-          {typeAlbums.map((album, index) => (
-            <div style={`--index: ${index + 1}`} data-filter-item data-filter-text={`${album.title} ${album.year} ${tab.label}`}>
-              <AlbumCard
-                title={album.title}
-                coverImage={album.coverImage}
-                year={album.year}
-                slug={album.slug}
-                featured={album.featured}
-                id={album.id}
-                type={tab.key as any}
-              />
+  <IssueSection kicker="Cover plates" title="Records in sequence">
+    <div class="records-grid" data-records>
+      {all.map((a) => (
+        <div class="record-wrap" data-era={a.era_id || ''}>
+          <AlbumCard album={a} size="lg" />
+          {a.era_id && erasById[a.era_id] && (
+            <div class="kicker" style="margin-top: .3rem; color: var(--accent-3);">
+              {erasById[a.era_id].short_name || erasById[a.era_id].name}
             </div>
-          ))}
+          )}
         </div>
-      </section>
-    );
-  })}
-
-  <!-- Era Timeline (always visible at bottom) -->
-  <section class="mt-16 pt-8 border-t border-white/[0.08]">
-    <div class="gothic-heading mb-8">
-      <h2 class="font-heading text-xl md:text-2xl text-white tracking-wider">The Cure Through the Eras</h2>
+      ))}
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-      {eraOrder.map(era => {
-        const meta = eraMetadata[era];
-        const colors = eraColors[era];
-        const count = studioByEra[era]?.length || 0;
-
-        return (
-          <button
-            type="button"
-            class={`era-quick-nav group p-4 rounded-sm ${colors.bg} border ${colors.border} transition-all duration-300 text-left gothic-corners`}
-            data-target-era={era}
-          >
-            <p class={`font-heading text-lg ${colors.text}`}>{meta.name}</p>
-            <p class="text-white/80 text-xs mb-2 tracking-wide">{meta.years}</p>
-            <p class="text-white/85 text-sm">{count} albums</p>
-          </button>
-        );
-      })}
-    </div>
-  </section>
-</MainLayout>
+  </IssueSection>
+</Layout>
 
 <style>
-  /* Tab styling - gothic squared */
-  .type-tab {
-    color: rgba(255, 255, 255, 0.45);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-  }
-  .type-tab:hover {
-    color: rgba(255, 255, 255, 0.85);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  .type-tab.active {
-    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.12);
-    color: var(--color-primary);
-    border-color: rgba(var(--color-primary-rgb, 137, 176, 201), 0.25);
-  }
-  .tab-count {
-    background: rgba(255, 255, 255, 0.04);
-    color: rgba(255, 255, 255, 0.35);
-  }
-  .type-tab.active .tab-count {
-    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.15);
-    color: var(--color-primary);
-  }
-
-  /* Studio sub-toggle */
-  .studio-view-btn {
-    color: rgba(255, 255, 255, 0.45);
-  }
-  .studio-view-btn:hover {
-    color: rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.04);
-  }
-  .studio-view-btn.active {
-    background: rgba(var(--color-primary-rgb, 137, 176, 201), 0.15);
-    color: var(--color-primary);
-  }
-
-  /* Grid animations */
-  .grid { --stagger-delay: 60ms; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  :global(.grid > div) {
-    animation: fadeIn 0.4s ease forwards;
-    opacity: 0;
-    animation-delay: calc(var(--stagger-delay) * var(--index, 1));
-  }
-
-  /* Hide scrollbar for tabs */
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .disc-head__title { font-size: clamp(48px, 7.5vw, 96px); line-height: .95; font-style: italic; font-weight: 400; letter-spacing: -.01em; margin: 0; }
+  .records-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(24px, 2.8vw, 40px); }
+  .record-wrap { display: flex; flex-direction: column; }
 </style>
 
 <script>
-  function initDiscography() {
-    // Type tab switching
-    const tabs = document.querySelectorAll('.type-tab');
-    const panels = document.querySelectorAll('.type-panel');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const target = tab.getAttribute('data-tab');
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        panels.forEach(p => p.classList.add('hidden'));
-        const panel = document.getElementById(`panel-${target}`);
-        if (panel) panel.classList.remove('hidden');
-      });
-    });
-
-    // Studio album sub-views (era vs chronological)
-    const eraBtn = document.getElementById('studio-era-btn');
-    const chronoBtn = document.getElementById('studio-chrono-btn');
-    const eraView = document.getElementById('studio-era-view');
-    const chronoView = document.getElementById('studio-chrono-view');
-    const studioViewBtns = document.querySelectorAll('.studio-view-btn');
-
-    eraBtn?.addEventListener('click', () => {
-      studioViewBtns.forEach(b => b.classList.remove('active'));
-      eraBtn.classList.add('active');
-      eraView?.classList.remove('hidden');
-      chronoView?.classList.add('hidden');
-    });
-
-    chronoBtn?.addEventListener('click', () => {
-      studioViewBtns.forEach(b => b.classList.remove('active'));
-      chronoBtn.classList.add('active');
-      chronoView?.classList.remove('hidden');
-      eraView?.classList.add('hidden');
-    });
-
-    // Era quick navigation
-    document.querySelectorAll('.era-quick-nav').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetEra = btn.getAttribute('data-target-era');
-        // Ensure studio tab + era view are active
-        tabs.forEach(t => t.classList.remove('active'));
-        document.querySelector('.type-tab[data-tab="studio"]')?.classList.add('active');
-        panels.forEach(p => p.classList.add('hidden'));
-        document.getElementById('panel-studio')?.classList.remove('hidden');
-        studioViewBtns.forEach(b => b.classList.remove('active'));
-        eraBtn?.classList.add('active');
-        eraView?.classList.remove('hidden');
-        chronoView?.classList.add('hidden');
-
-        setTimeout(() => {
-          const section = document.querySelector(`.era-section[data-era="${targetEra}"]`);
-          section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
+  function wireFilter() {
+    const chips = document.querySelectorAll<HTMLElement>('[data-era-filters] .era-chip');
+    const records = document.querySelectorAll<HTMLElement>('[data-records] .record-wrap');
+    const rows = document.querySelectorAll<HTMLElement>('[data-ledger] tbody tr');
+    if (!chips.length) return;
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const era = chip.getAttribute('data-era') || 'all';
+        chips.forEach((c) => {
+          c.classList.toggle('is-active', c === chip);
+          c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+        });
+        records.forEach((r) => {
+          const e = r.getAttribute('data-era') || '';
+          r.style.display = era === 'all' || e === era ? '' : 'none';
+        });
+        rows.forEach((r) => {
+          const e = r.getAttribute('data-era') || '';
+          r.style.display = era === 'all' || e === era ? '' : 'none';
+        });
       });
     });
   }
-
-  document.addEventListener('DOMContentLoaded', initDiscography);
-  document.addEventListener('astro:page-load', initDiscography);
+  wireFilter();
+  document.addEventListener('astro:page-load', wireFilter);
 </script>

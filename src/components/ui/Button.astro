@@ -1,0 +1,29 @@
+---
+interface Props {
+  href?: string;
+  variant?: 'default' | 'accent' | 'ghost';
+  type?: 'button' | 'submit';
+  class?: string;
+  target?: string;
+  rel?: string;
+}
+const {
+  href, variant = 'default', type = 'button',
+  class: klass = '', target, rel,
+} = Astro.props;
+const classes = [
+  'btn',
+  variant === 'accent' ? 'btn--accent' : '',
+  variant === 'ghost'  ? 'btn--ghost'  : '',
+  klass,
+].filter(Boolean).join(' ');
+---
+{href ? (
+  <a href={href} class={classes} target={target} rel={rel}><slot /></a>
+) : (
+  <button type={type} class={classes}><slot /></button>
+)}
+
+<style>
+  a.btn { border-bottom-width: 1px; }
+</style>
