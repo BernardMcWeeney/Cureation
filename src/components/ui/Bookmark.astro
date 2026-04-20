@@ -1,0 +1,67 @@
+---
+interface Props {
+  kind: 'album' | 'song' | 'setlist' | 'venue' | 'tour' | 'member' | 'news' | 'source';
+  id: string | number;
+  label: string;
+  href?: string;
+}
+const { kind, id, label, href } = Astro.props;
+---
+<button class="bookmark" type="button"
+  data-bookmark
+  data-kind={kind}
+  data-id={String(id)}
+  data-label={label}
+  data-href={href || ''}
+  aria-label={`Bookmark ${label}`}
+  title="Save to My Archive">
+  <span class="bookmark__icon" aria-hidden="true">☆</span>
+  <span class="bookmark__label">Save</span>
+</button>
+
+<style is:global>
+  .bookmark {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: transparent; border: 1px solid var(--rule); color: var(--ink);
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: .4rem .7rem; cursor: pointer; transition: all .2s ease;
+  }
+  .bookmark:hover { border-color: var(--accent); color: var(--accent-3); }
+  .bookmark[data-saved="true"] { background: var(--accent-tint); border-color: var(--accent); color: var(--accent-3); }
+  .bookmark[data-saved="true"] .bookmark__icon::before { content: '★'; }
+  .bookmark__icon { font-size: 12px; line-height: 1; }
+  .bookmark[data-saved="true"] .bookmark__icon { display: none; }
+  .bookmark[data-saved="true"] .bookmark__label::before { content: 'Saved · '; opacity: .7; }
+</style>
+
+<script>
+  const KEY = 'cureation:bookmarks';
+  type Bookmark = { kind: string; id: string; label: string; href: string; added: number };
+  function read(): Bookmark[] {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; }
+  }
+  function write(list: Bookmark[]) { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch {} }
+  function wire() {
+    const list = read();
+    document.querySelectorAll<HTMLButtonElement>('[data-bookmark]').forEach((btn) => {
+      const kind = btn.dataset.kind || '';
+      const id = btn.dataset.id || '';
+      const saved = list.some((b) => b.kind === kind && b.id === id);
+      btn.setAttribute('data-saved', saved ? 'true' : 'false');
+      btn.addEventListener('click', () => {
+        const cur = read();
+        const idx = cur.findIndex((b) => b.kind === kind && b.id === id);
+        if (idx >= 0) {
+          cur.splice(idx, 1);
+          btn.setAttribute('data-saved', 'false');
+        } else {
+          cur.push({ kind, id, label: btn.dataset.label || '', href: btn.dataset.href || '', added: Date.now() });
+          btn.setAttribute('data-saved', 'true');
+        }
+        write(cur);
+      });
+    });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

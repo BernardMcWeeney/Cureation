@@ -1,10 +1,13 @@
 ---
+const current = Astro.url.pathname;
 const sections: Array<{ title: string; links: Array<{ href: string; label: string }> }> = [
   { title: 'Records', links: [
     { href: '/discography', label: 'Discography' },
     { href: '/discography/ep', label: 'EPs' },
     { href: '/discography/compilations', label: 'Compilations' },
     { href: '/discography/singles', label: 'Singles' },
+    { href: '/songs', label: 'Songs' },
+    { href: '/lyrics', label: 'Lyrics' },
   ]},
   { title: 'Live', links: [
     { href: '/setlists', label: 'Setlists' },
@@ -13,14 +16,13 @@ const sections: Array<{ title: string; links: Array<{ href: string; label: strin
     { href: '/on-this-day', label: 'On this day' },
   ]},
   { title: 'Words & images', links: [
-    { href: '/songs', label: 'Songs' },
-    { href: '/lyrics', label: 'Lyrics' },
     { href: '/news', label: 'News' },
     { href: '/photos', label: 'Photos' },
     { href: '/videos', label: 'Videos' },
+    { href: '/newsletter', label: 'Newsletter' },
   ]},
   { title: 'The band', links: [
-    { href: '/band/members', label: 'Members' },
+    { href: '/band', label: 'Members' },
     { href: '/band/history', label: 'History' },
     { href: '/band/gear', label: 'Gear' },
     { href: '/band/quotes', label: 'Quotes' },
@@ -30,70 +32,194 @@ const sections: Array<{ title: string; links: Array<{ href: string; label: strin
     { href: '/stats', label: 'Stats' },
     { href: '/curiosities', label: 'Curiosities' },
     { href: '/community', label: 'Community' },
+    { href: '/sources', label: 'Sources' },
+    { href: '/about', label: 'About' },
   ]},
 ];
+function isActive(href: string) {
+  return current === href || current.startsWith(href + '/');
+}
 ---
-<div class="menu" data-menu hidden>
-  <div class="menu__panel">
+<div class="menu" id="site-menu" data-menu hidden role="dialog" aria-modal="true" aria-label="Site menu">
+  <div class="menu__scrim" data-menu-close aria-hidden="true"></div>
+  <aside class="menu__panel">
     <header class="menu__head">
-      <span class="kicker">Cureation · Menu</span>
-      <button class="nav__icon" data-menu-close aria-label="Close menu">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M6 6 18 18M18 6 6 18"/>
-        </svg>
-      </button>
+      <a href="/" class="menu__brand" aria-label="Cureation — home">
+        <span class="menu__brand-mark" aria-hidden="true">C</span>
+        <span class="menu__brand-name">Cureation</span>
+      </a>
+      <div class="menu__actions">
+        <button class="menu__icon" data-theme-toggle aria-label="Toggle theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+          </svg>
+        </button>
+        <button class="menu__icon" data-menu-close aria-label="Close menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M6 6 18 18M18 6 6 18"/>
+          </svg>
+        </button>
+      </div>
     </header>
     <div class="menu__body">
       {sections.map((sec) => (
         <div class="menu__section">
-          <div class="kicker" style="margin-bottom:.6rem">{sec.title}</div>
-          <ul>
+          <div class="menu__kicker">{sec.title}</div>
+          <ul class="menu__list">
             {sec.links.map((l) => (
-              <li><a href={l.href}>{l.label}</a></li>
+              <li>
+                <a
+                  href={l.href}
+                  class={`menu__link ${isActive(l.href) ? 'is-active' : ''}`}
+                >{l.label}</a>
+              </li>
             ))}
           </ul>
         </div>
       ))}
     </div>
-  </div>
+  </aside>
 </div>
 
 <style>
   .menu {
     position: fixed; inset: 0; z-index: 60;
-    background: color-mix(in oklab, var(--bg), transparent 10%);
-    backdrop-filter: blur(10px);
+    display: flex; align-items: stretch; justify-content: flex-end;
   }
   .menu[hidden] { display: none; }
+  .menu__scrim {
+    position: absolute; inset: 0;
+    background: color-mix(in oklab, var(--bg), transparent 20%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: menu-fade .2s ease;
+  }
+  @keyframes menu-fade { from { opacity: 0 } to { opacity: 1 } }
+
   .menu__panel {
-    max-width: var(--max-w); margin: 0 auto; padding: clamp(20px, 4vw, 48px);
-    height: 100%; overflow-y: auto;
+    position: relative;
+    width: min(440px, 100%);
+    margin-left: auto;
+    background: var(--bg);
+    border-left: 1px solid var(--rule);
+    box-shadow: var(--shadow-2);
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex; flex-direction: column;
+    animation: menu-slide .25s cubic-bezier(0.22, 0.8, 0.3, 1);
   }
-  .menu__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  @keyframes menu-slide { from { transform: translateX(18px); opacity: .6 } to { transform: translateX(0); opacity: 1 } }
+
+  .menu__head {
+    position: sticky; top: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px clamp(18px, 4vw, 28px);
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--bg), transparent 6%);
+    backdrop-filter: blur(6px);
+    z-index: 1;
+  }
+  .menu__brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--f-display); font-style: italic; font-size: 22px;
+    color: var(--ink); border: none;
+  }
+  .menu__brand-mark {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border: 1px solid var(--accent);
+    color: var(--accent-3); background: var(--accent-tint-2);
+    font-family: var(--f-display); font-style: italic; font-size: 16px; line-height: 1;
+  }
+  :root[data-theme='papers'] .menu__brand-mark { color: var(--accent); }
+  .menu__actions { display: flex; gap: 6px; }
+  .menu__icon {
+    width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; color: var(--ink-2); border: 1px solid var(--rule);
+    cursor: pointer; transition: all .18s;
+  }
+  .menu__icon:hover { color: var(--accent-3); border-color: var(--accent); background: transparent; }
+  :root[data-theme='papers'] .menu__icon:hover { color: var(--accent); }
+
   .menu__body {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: clamp(20px, 3vw, 40px);
+    padding: clamp(20px, 4vw, 32px) clamp(18px, 4vw, 28px) clamp(32px, 6vw, 48px);
+    display: flex; flex-direction: column; gap: clamp(22px, 3.5vw, 32px);
   }
-  .menu__section ul { list-style: none; margin: 0; padding: 0; }
-  .menu__section li + li { margin-top: .5rem; }
-  .menu__section a {
-    font-family: var(--f-display); font-style: italic; font-size: clamp(22px, 2.4vw, 32px);
-    border: none; color: var(--ink);
+  .menu__section {
+    display: flex; flex-direction: column; gap: .4rem;
+    padding-top: 14px; border-top: 1px solid var(--rule);
   }
-  .menu__section a:hover { color: var(--accent-3); }
+  .menu__section:first-child { border-top: 0; padding-top: 0; }
+
+  .menu__kicker {
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: .2rem;
+  }
+  .menu__list { list-style: none; margin: 0; padding: 0; }
+  .menu__list li + li { margin-top: .2rem; }
+  .menu__link {
+    display: block;
+    font-family: var(--f-display); font-style: italic;
+    font-size: clamp(22px, 5vw, 30px);
+    line-height: 1.15;
+    padding: .3rem 0;
+    color: var(--ink);
+    border: none;
+    letter-spacing: -0.005em;
+  }
+  .menu__link:hover { color: var(--accent-3); }
+  .menu__link.is-active { color: var(--accent); }
+
+  @media (max-width: 520px) {
+    .menu__panel { width: 100%; border-left: 0; }
+  }
 </style>
 
 <script>
   function wire() {
     const menu = document.querySelector<HTMLElement>('[data-menu]');
     if (!menu) return;
-    const open = () => { menu.hidden = false; document.body.style.overflow = 'hidden'; };
-    const close = () => { menu.hidden = true; document.body.style.overflow = ''; };
-    document.querySelectorAll('[data-menu-open]').forEach((b) => b.addEventListener('click', open));
-    document.querySelectorAll('[data-menu-close]').forEach((b) => b.addEventListener('click', close));
-    menu.addEventListener('click', (e) => { if (e.target === menu) close(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    // Always re-close on page-load so a navigation inside the menu leaves
+    // a clean state (ClientRouter keeps the DOM, so stale open states persist).
+    menu.hidden = true;
+    document.body.style.overflow = '';
+
+    if ((menu as any).__wired) return;
+    (menu as any).__wired = true;
+
+    let opener: HTMLElement | null = null;
+
+    const open = (trigger?: HTMLElement) => {
+      opener = trigger || null;
+      menu.hidden = false;
+      document.body.style.overflow = 'hidden';
+      document.querySelectorAll<HTMLElement>('[data-menu-open]')
+        .forEach(b => b.setAttribute('aria-expanded', 'true'));
+      const focusable = menu.querySelector<HTMLElement>('a, button');
+      focusable?.focus();
+    };
+    const close = () => {
+      menu.hidden = true;
+      document.body.style.overflow = '';
+      document.querySelectorAll<HTMLElement>('[data-menu-open]')
+        .forEach(b => b.setAttribute('aria-expanded', 'false'));
+      opener?.focus();
+    };
+
+    // Delegate from document so handlers survive DOM swaps from ClientRouter.
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      const opener = t.closest<HTMLElement>('[data-menu-open]');
+      if (opener) { e.preventDefault(); open(opener); return; }
+      const closer = t.closest<HTMLElement>('[data-menu-close]');
+      if (closer && menu.contains(closer)) { e.preventDefault(); close(); return; }
+      if (t.closest('.menu__link') && menu.contains(t)) { setTimeout(close, 0); }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) close();
+    });
   }
   wire();
   document.addEventListener('astro:page-load', wire);

@@ -3,7 +3,10 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
-import { getTourBySlug, listSetlists, listAlbums } from '../../lib/directus';
+import Bookmark from '../../components/ui/Bookmark.astro';
+import TourStrip from '../../components/viz/TourStrip.astro';
+import DotMap from '../../components/viz/DotMap.astro';
+import { getTourBySlug, listSetlists, listAlbums, listVenues } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 
 const { slug } = Astro.params;
@@ -11,10 +14,22 @@ if (!slug) return Astro.redirect('/tours');
 const tour = await getTourBySlug(slug);
 if (!tour) return new Response('Not found', { status: 404 });
 
-const [setlists, albums] = await Promise.all([
+const [setlists, albums, venues] = await Promise.all([
   listSetlists({ tour: tour.id, limit: 400 }),
   listAlbums(),
+  listVenues(),
 ]);
+
+const venueById = new Map(venues.map((v) => [v.id, v]));
+const mapPoints = setlists
+  .map((s) => {
+    const v = s.venue_link ? venueById.get(s.venue_link) : null;
+    if (!v || typeof v.latitude !== 'number' || typeof v.longitude !== 'number') return null;
+    return { lat: v.latitude, lon: v.longitude, label: `${v.name} — ${s.date || ''}`, weight: 1 };
+  })
+  .filter(Boolean) as Array<{ lat: number; lon: number; label: string; weight: number }>;
+
+const sortedByDate = [...setlists].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 const album = tour.associated_album ? albums.find((a) => a.id === tour.associated_album) : null;
 
 const startY = tour.start_date?.slice(0, 4);
@@ -51,13 +66,14 @@ for (const s of setlists) {
 }
 const years_sorted = Array.from(setlistsByYear.keys()).sort();
 ---
-<Layout title={`${tour.name} · Tours · Cureation`}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+<Layout title={`${tour.name} · Tours · Cureation`} description={tour.description || undefined} ogImage={(tour.image_file || album?.cover_art) ? asset(tour.image_file || album!.cover_art, 'og') : undefined}>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'Tours', href: '/tours' },
       { label: tour.name },
     ]} />
+    <Bookmark kind="tour" id={tour.id} label={tour.name} href={`/tours/${tour.slug}`} />
   </div>
 
   {heroSrc && (
@@ -89,7 +105,24 @@ const years_sorted = Array.from(setlistsByYear.keys()).sort();
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0;">
+  {setlists.length > 1 && (
+    <section class="container" style="padding: clamp(16px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+      <div class="mono-sm muted" style="margin-bottom:.5rem;">THE RUN · SHOW BY SHOW</div>
+      <TourStrip total={setlists.length} height={42} />
+      <div class="mono-sm muted" style="margin-top:.5rem;">
+        {setlists.length} shows on file · {tour.start_date || '?'} → {tour.end_date || '?'}
+      </div>
+    </section>
+  )}
+
+  {mapPoints.length > 0 && (
+    <section class="container" style="padding: clamp(24px, 4vw, 48px) 0; border-top: 1px solid var(--rule);">
+      <div class="mono-sm muted" style="margin-bottom:.6rem;">GEOGRAPHY · {mapPoints.length} LOCATIONS</div>
+      <DotMap points={mapPoints} height={360} />
+    </section>
+  )}
+
+  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
     <div class="tour-grid">
       <div>
         <div class="panel-head" style="border: 1px solid var(--rule);">

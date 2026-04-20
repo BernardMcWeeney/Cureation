@@ -323,7 +323,7 @@ export async function listEditorial(limit = 1): Promise<any[]> {
       limit,
       'filter[is_editorial][_eq]': true,
       sort: '-date_created',
-      fields: 'id,title,slug,subtitle,excerpt,date_created,reading_time',
+      fields: 'id,title,slug,subtitle,excerpt,content,date_created,published_date,reading_time,author_name,category,tags',
     });
   } catch {
     return [];

@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import AlbumCard from '../../components/album/AlbumCard.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
-import Chip from '../../components/ui/Chip.astro';
+import Select from '../../components/ui/Select.astro';
 import { listAlbums, listEras } from '../../lib/directus';
 
 const [all, eras] = await Promise.all([listAlbums({ type: 'studio' }), listEras()]);
@@ -45,87 +45,198 @@ const facts: Array<[string, string]> = [
           </div>
         ))}
       </div>
-      <div class="cluster" style="gap: 6px; flex-wrap: wrap;">
-        {tabs.map((t) => <Chip href={t.href} active={t.active}>{t.label}</Chip>)}
-      </div>
-      <div class="cluster" style="gap: 6px; flex-wrap: wrap;" data-era-filters>
-        <Chip active={true} class="era-chip" data-era="all">All eras</Chip>
-        {eras.map((e) => (
-          <Chip class="era-chip" data-era={e.id}>{e.short_name || e.name}</Chip>
-        ))}
-      </div>
     </div>
   </div>
 
+  <nav class="container disc-tabs" aria-label="Record type">
+    {tabs.map((t) => (
+      <a href={t.href} class={`disc-tabs__tab${t.active ? ' is-active' : ''}`} aria-current={t.active ? 'page' : undefined}>
+        {t.label}
+      </a>
+    ))}
+  </nav>
+
+  <section class="container disc-filters">
+    <div class="filter-grid filter-grid--3">
+      <Select
+        name="era"
+        label="Era"
+        options={[
+          { value: 'all', label: 'All eras' },
+          ...eras.map((e) => ({ value: e.id, label: e.short_name || e.name })),
+        ]}
+      />
+      <Select
+        name="sort"
+        label="Sort"
+        value="chron"
+        options={[
+          { value: 'chron', label: 'Chronological' },
+          { value: 'rchron', label: 'Reverse chronological' },
+          { value: 'alpha', label: 'A–Z' },
+        ]}
+      />
+      <label class="select">
+        <span class="select__label">Search</span>
+        <span class="select__wrap">
+          <input class="filter-search" type="search" placeholder="Title, label, era…" data-filter-search />
+        </span>
+      </label>
+    </div>
+  </section>
+
   <IssueSection kicker={`${all.length} studio records`} title="The ledger">
-    <table class="data" data-ledger>
-      <thead><tr><th style="width:50px;">№</th><th style="width:80px;">Year</th><th>Record</th><th>Era</th><th class="num" style="text-align:right;">Peak</th></tr></thead>
-      <tbody>
-        {all
-          .slice()
-          .sort((a, b) => (a.release_date || '').localeCompare(b.release_date || ''))
-          .map((a, i) => {
-            const era = a.era_id ? erasById[a.era_id] : null;
-            return (
-              <tr data-clickable data-era={a.era_id || ''} onclick={`location.href='/discography/${a.slug}'`}>
-                <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-                <td class="mono-sm muted">{a.release_date?.slice(0, 4) || '—'}</td>
-                <td><span class="serif" style="font-size:22px; font-style:italic;">{a.title}</span></td>
-                <td class="mono-sm" style="color: var(--ink-2);">{era?.short_name || era?.name || '—'}</td>
-                <td class="num" style="color: var(--accent-3);">—</td>
-              </tr>
-            );
-          })}
-      </tbody>
-    </table>
+    <div class="mono-sm muted" data-match-count style="margin-bottom:.6rem;">{all.length} records</div>
+    <div class="table-wrap">
+      <table class="data" data-ledger>
+        <thead><tr><th style="width:50px;">№</th><th style="width:80px;">Year</th><th>Record</th><th>Era</th><th class="num" style="text-align:right;">Peak</th></tr></thead>
+        <tbody>
+          {all
+            .slice()
+            .sort((a, b) => (a.release_date || '').localeCompare(b.release_date || ''))
+            .map((a, i) => {
+              const era = a.era_id ? erasById[a.era_id] : null;
+              const year = a.release_date?.slice(0, 4) || '';
+              return (
+                <tr data-clickable
+                    data-era={a.era_id || ''}
+                    data-year={year}
+                    data-title={(a.title || '').toLowerCase()}
+                    data-search={`${a.title || ''} ${a.label || ''} ${era?.name || ''}`.toLowerCase()}
+                    onclick={`location.href='/discography/${a.slug}'`}>
+                  <td class="idx">{String(i + 1).padStart(2, '0')}</td>
+                  <td class="mono-sm muted">{year || '—'}</td>
+                  <td><span class="serif" style="font-size:22px; font-style:italic;">{a.title}</span></td>
+                  <td class="mono-sm" style="color: var(--ink-2);">{era?.short_name || era?.name || '—'}</td>
+                  <td class="num" style="color: var(--accent-3);">—</td>
+                </tr>
+              );
+            })}
+        </tbody>
+      </table>
+    </div>
   </IssueSection>
 
   <IssueSection kicker="Cover plates" title="Records in sequence">
     <div class="records-grid" data-records>
-      {all.map((a) => (
-        <div class="record-wrap" data-era={a.era_id || ''}>
-          <AlbumCard album={a} size="lg" />
-          {a.era_id && erasById[a.era_id] && (
-            <div class="kicker" style="margin-top: .3rem; color: var(--accent-3);">
-              {erasById[a.era_id].short_name || erasById[a.era_id].name}
-            </div>
-          )}
-        </div>
-      ))}
+      {all.map((a) => {
+        const era = a.era_id ? erasById[a.era_id] : null;
+        const year = a.release_date?.slice(0, 4) || '';
+        return (
+          <div class="record-wrap"
+               data-era={a.era_id || ''}
+               data-year={year}
+               data-title={(a.title || '').toLowerCase()}
+               data-search={`${a.title || ''} ${a.label || ''} ${era?.name || ''}`.toLowerCase()}>
+            <AlbumCard album={a} size="lg" />
+            {era && (
+              <div class="kicker" style="margin-top: .3rem; color: var(--accent-3);">
+                {era.short_name || era.name}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   </IssueSection>
 </Layout>
 
-<style>
+<style is:global>
   .disc-head__title { font-size: clamp(48px, 7.5vw, 96px); line-height: .95; font-style: italic; font-weight: 400; letter-spacing: -.01em; margin: 0; }
+
+  /* Type tabs — segmented bar (not chips) */
+  .disc-tabs {
+    padding-top: clamp(20px, 3vw, 32px);
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .disc-tabs::-webkit-scrollbar { display: none; }
+  .disc-tabs__tab {
+    display: inline-flex; align-items: center;
+    padding: .9rem 1.2rem;
+    font-family: var(--f-mono); font-size: 11px;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted);
+    border: none; border-bottom: 2px solid transparent;
+    transition: color .18s, border-color .18s;
+    white-space: nowrap;
+  }
+  .disc-tabs__tab:hover { color: var(--ink); }
+  .disc-tabs__tab.is-active {
+    color: var(--accent-3);
+    border-bottom-color: var(--accent);
+  }
+  :root[data-theme='papers'] .disc-tabs__tab.is-active { color: var(--accent); }
+
+  .disc-filters {
+    padding-top: clamp(18px, 2.6vw, 28px);
+    padding-bottom: clamp(18px, 2.6vw, 28px);
+    border-bottom: 1px solid var(--rule);
+  }
+
   .records-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(24px, 2.8vw, 40px); }
   .record-wrap { display: flex; flex-direction: column; }
 </style>
 
 <script>
-  function wireFilter() {
-    const chips = document.querySelectorAll<HTMLElement>('[data-era-filters] .era-chip');
-    const records = document.querySelectorAll<HTMLElement>('[data-records] .record-wrap');
-    const rows = document.querySelectorAll<HTMLElement>('[data-ledger] tbody tr');
-    if (!chips.length) return;
-    chips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        const era = chip.getAttribute('data-era') || 'all';
-        chips.forEach((c) => {
-          c.classList.toggle('is-active', c === chip);
-          c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
-        });
-        records.forEach((r) => {
-          const e = r.getAttribute('data-era') || '';
-          r.style.display = era === 'all' || e === era ? '' : 'none';
-        });
-        rows.forEach((r) => {
-          const e = r.getAttribute('data-era') || '';
-          r.style.display = era === 'all' || e === era ? '' : 'none';
-        });
+  function wireDisc() {
+    const tbody = document.querySelector<HTMLElement>('[data-ledger] tbody');
+    if (!tbody) return;
+    const allRows = Array.from(tbody.querySelectorAll<HTMLElement>('tr'));
+    const records = Array.from(document.querySelectorAll<HTMLElement>('[data-records] .record-wrap'));
+    const counter = document.querySelector<HTMLElement>('[data-match-count]');
+    const state = { era: 'all', sort: 'chron', search: '' };
+
+    const matches = (el: HTMLElement) => {
+      const era = el.getAttribute('data-era') || '';
+      const s = el.getAttribute('data-search') || '';
+      if (state.era !== 'all' && era !== state.era) return false;
+      if (state.search && !s.includes(state.search)) return false;
+      return true;
+    };
+
+    const cmp = (a: HTMLElement, b: HTMLElement) => {
+      if (state.sort === 'alpha') {
+        return (a.getAttribute('data-title') || '').localeCompare(b.getAttribute('data-title') || '');
+      }
+      const ay = a.getAttribute('data-year') || '';
+      const by = b.getAttribute('data-year') || '';
+      return state.sort === 'rchron' ? by.localeCompare(ay) : ay.localeCompare(by);
+    };
+
+    const apply = () => {
+      const sortedRows = [...allRows].sort(cmp);
+      sortedRows.forEach((r, i) => {
+        tbody.appendChild(r);
+        const ok = matches(r);
+        r.style.display = ok ? '' : 'none';
+        const idx = r.querySelector('.idx');
+        if (idx && ok) idx.textContent = String(i + 1).padStart(2, '0');
       });
+      const recordsParent = records[0]?.parentElement;
+      if (recordsParent) {
+        const sortedRecords = [...records].sort(cmp);
+        sortedRecords.forEach((r) => recordsParent.appendChild(r));
+        sortedRecords.forEach((r) => { r.style.display = matches(r) ? '' : 'none'; });
+      }
+      if (counter) {
+        const matched = allRows.filter(matches).length;
+        counter.textContent = `${matched} record${matched === 1 ? '' : 's'}`;
+      }
+    };
+
+    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+      const key = sel.getAttribute('data-filter-select') || '';
+      sel.addEventListener('change', () => { (state as any)[key] = sel.value; apply(); });
     });
+    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+
+    apply();
   }
-  wireFilter();
-  document.addEventListener('astro:page-load', wireFilter);
+  wireDisc();
+  document.addEventListener('astro:page-load', wireDisc);
 </script>

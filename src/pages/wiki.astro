@@ -25,6 +25,7 @@ const articles: any[] = await fetchRaw('news', {
     {articles.length === 0 ? (
       <p class="deck">Articles land here as they're written. Check back as entries land.</p>
     ) : (
+      <div class="table-wrap">
       <table class="data">
         <thead><tr><th style="width:50px;">№</th><th>Article</th><th>Tags</th><th class="num" style="text-align:right; width:90px;">Reading</th></tr></thead>
         <tbody>
@@ -41,6 +42,7 @@ const articles: any[] = await fetchRaw('news', {
           ))}
         </tbody>
       </table>
+      </div>
     )}
   </IssueSection>
 </Layout>

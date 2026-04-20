@@ -1,0 +1,36 @@
+---
+interface Props { target?: string }
+const { target = 'article, .prose, main article' } = Astro.props;
+---
+<div class="reading-progress" data-reading-progress data-target={target} aria-hidden="true">
+  <div class="reading-progress__bar"></div>
+</div>
+
+<style is:global>
+  .reading-progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: transparent; z-index: 60; pointer-events: none; }
+  .reading-progress__bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-3, var(--accent))); box-shadow: 0 0 8px var(--accent); transition: width .08s linear; }
+</style>
+
+<script>
+  function wire() {
+    const root = document.querySelector<HTMLElement>('[data-reading-progress]');
+    if (!root) return;
+    const bar = root.querySelector<HTMLElement>('.reading-progress__bar');
+    if (!bar) return;
+    const targetSel = root.getAttribute('data-target') || 'article';
+    const el = document.querySelector<HTMLElement>(targetSel);
+    if (!el) { root.style.display = 'none'; return; }
+    const onScroll = () => {
+      const rect = el.getBoundingClientRect();
+      const total = Math.max(1, el.offsetHeight - window.innerHeight);
+      const scrolled = Math.min(total, Math.max(0, -rect.top));
+      const pct = (scrolled / total) * 100;
+      bar.style.width = pct + '%';
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

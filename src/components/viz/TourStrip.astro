@@ -1,0 +1,61 @@
+---
+/**
+ * A 1D pip strip — every show in a tour as a vertical tick, with the current
+ * show raised and accented. Use for "show 41 of 65" context on setlist pages,
+ * or a compact visualisation of a tour's length on the tour index.
+ */
+interface Props {
+  total: number;
+  current?: number | null;
+  markers?: Array<{ index: number; label?: string }>;
+  height?: number;
+  class?: string;
+  label?: string;
+}
+const { total, current = null, markers = [], height = 30, class: klass = '', label } = Astro.props;
+const markerSet = new Map<number, string>();
+markers.forEach((m) => { if (m.index >= 0 && m.index < total) markerSet.set(m.index, m.label || ''); });
+---
+<div class={`tour-strip ${klass}`} aria-label={label || `${total} shows`}>
+  <div class="tour-strip__row" style={`--strip-h: ${height}px;`}>
+    {Array.from({ length: total }).map((_, i) => {
+      const is = i === current;
+      const hasMark = markerSet.has(i);
+      return (
+        <span
+          class={`tour-strip__pip${is ? ' is-current' : ''}${hasMark ? ' is-mark' : ''}`}
+          title={hasMark ? markerSet.get(i) : undefined}
+        />
+      );
+    })}
+  </div>
+  {current !== null && (
+    <div class="tour-strip__cap mono-sm muted">
+      Show {current + 1} of {total}
+    </div>
+  )}
+</div>
+
+<style>
+  .tour-strip { display: flex; flex-direction: column; gap: .5rem; }
+  .tour-strip__row {
+    display: flex; gap: 2px; align-items: center;
+    min-height: var(--strip-h);
+    overflow-x: auto; scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .tour-strip__row::-webkit-scrollbar { display: none; }
+  .tour-strip__pip {
+    flex: 0 0 3px;
+    height: calc(var(--strip-h) * .55);
+    background: var(--muted-2);
+    opacity: .7;
+    transition: background .2s, height .2s;
+  }
+  .tour-strip__pip.is-mark { background: var(--ink-2); opacity: .9; }
+  .tour-strip__pip.is-current {
+    background: var(--accent);
+    height: var(--strip-h);
+    box-shadow: 0 0 10px var(--accent);
+  }
+</style>

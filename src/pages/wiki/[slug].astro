@@ -3,6 +3,8 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
+import ReadingProgress from '../../components/ui/ReadingProgress.astro';
+import Bookmark from '../../components/ui/Bookmark.astro';
 import { fetchRaw } from '../../lib/directus';
 
 const { slug } = Astro.params;
@@ -15,12 +17,14 @@ if (!article) return new Response('Not found', { status: 404 });
 const tags: string[] = Array.isArray(article.tags) ? article.tags : [];
 ---
 <Layout title={`${article.title} · Wiki · Cureation`}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+  <ReadingProgress target="article" />
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem;">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'The wiki', href: '/wiki' },
       { label: article.title },
     ]} />
+    <Bookmark kind="news" id={article.id} label={article.title} href={`/wiki/${article.slug}`} />
   </div>
 
   <article class="container" style="padding: clamp(24px, 4vw, 48px) 0; max-width: 780px;">

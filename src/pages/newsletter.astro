@@ -1,0 +1,65 @@
+---
+import Layout from '../layouts/Layout.astro';
+import IssueSection from '../components/ui/IssueSection.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import { fetchRaw } from '../lib/directus';
+
+const issues: any[] = await fetchRaw('newsletter_issues', {
+  limit: -1,
+  sort: '-sent_date,-date_created',
+}).catch(() => []);
+
+const firstDate = issues[issues.length - 1]?.sent_date?.slice(0, 7);
+const lastDate = issues[0]?.sent_date?.slice(0, 7);
+---
+<Layout title="Newsletter · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Newsletter' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · EMAIL DIGEST</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">The dispatch</h1>
+      <p class="deck" style="max-width: 62ch;">A slow newsletter — anniversary pieces, reader corrections, new archive additions, and anything worth lingering over. Roughly monthly. Unsubscribe at any time.</p>
+      <form class="newsletter-form" action="https://buttondown.email/api/emails/embed-subscribe/cureation" method="post" target="popupwindow">
+        <input type="email" name="email" placeholder="your@email" required class="filter-search" style="flex:1; max-width: 320px;" />
+        <input type="hidden" value="1" name="embed" />
+        <button type="submit" class="btn">Subscribe →</button>
+      </form>
+      {issues.length > 0 && (
+        <div class="facts" style="margin-top: .8rem;">
+          <div class="facts__item"><div class="facts__k">Issues sent</div><div class="facts__v">{issues.length}</div></div>
+          <div class="facts__item"><div class="facts__k">First</div><div class="facts__v">{firstDate || '—'}</div></div>
+          <div class="facts__item"><div class="facts__k">Most recent</div><div class="facts__v">{lastDate || '—'}</div></div>
+        </div>
+      )}
+    </div>
+  </div>
+
+  {issues.length === 0 ? (
+    <section class="container" style="padding: clamp(40px, 6vw, 80px) 0;">
+      <div class="panel-head" style="border: 1px solid var(--rule);"><span>No issues sent yet</span><span>Inaugural issue pending</span></div>
+      <p class="deck" style="margin-top: .8rem; max-width: 62ch;">The newsletter hasn't yet launched in this issue cycle. Once it does, every past edition lives here — full-text, linkable, and searchable.</p>
+    </section>
+  ) : (
+    <IssueSection kicker="Back issues" title="The archive" meta={`${issues.length} editions`}>
+      <table class="data data--airy">
+        <thead><tr><th style="width:120px;">Sent</th><th>Issue</th><th class="num" style="text-align:right; width:90px;">№</th></tr></thead>
+        <tbody>
+          {issues.map((it, i) => (
+            <tr data-clickable onclick={`location.href='/newsletter/${it.slug}'`}>
+              <td class="mono-sm" style="color: var(--ink);">{(it.sent_date || it.date_created || '').slice(0, 10)}</td>
+              <td>
+                <span class="serif" style="font-size:19px; font-style:italic;">{it.title || it.subject || '—'}</span>
+                {it.deck && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem;">{it.deck}</div>}
+              </td>
+              <td class="num" style="color: var(--accent-3);">№ {String(issues.length - i).padStart(3, '0')}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </IssueSection>
+  )}
+</Layout>
+
+<style is:global>
+  .newsletter-form { display: flex; gap: .6rem; align-items: stretch; flex-wrap: wrap; }
+</style>

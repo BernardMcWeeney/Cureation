@@ -3,7 +3,9 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
-import { getSongBySlug, listAlbums } from '../../lib/directus';
+import Bookmark from '../../components/ui/Bookmark.astro';
+import Waveform from '../../components/viz/Waveform.astro';
+import { getSongBySlug, listAlbums, fetchRaw } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 
 const { slug } = Astro.params;
@@ -15,6 +17,18 @@ const albums = await listAlbums();
 const album = song.album ? albums.find((a) => a.id === song.album) : null;
 
 const structured: any[] = Array.isArray(song.lyrics_structured) ? song.lyrics_structured : [];
+
+const annotations: any[] = await fetchRaw('lyric_annotations', {
+  'filter[song_id][_eq]': song.id,
+  fields: 'id,line_id,note,source,url',
+  limit: -1,
+}).catch(() => []);
+const annByLine: Record<string, any[]> = {};
+for (const a of annotations) {
+  const k = String(a.line_id || '');
+  if (!k) continue;
+  (annByLine[k] = annByLine[k] || []).push(a);
+}
 
 const facts: Array<[string, string]> = [
   ['Record', album?.title || '—'],
@@ -34,14 +48,15 @@ const facts: Array<[string, string]> = [
 const listenLinks: any[] = Array.isArray(song.listen_links) ? song.listen_links : [];
 const year = album?.release_date?.slice(0, 4);
 ---
-<Layout title={`${song.title} · Cureation`}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+<Layout title={`${song.title} · Cureation`} description={song.song_meaning || undefined} ogImage={album?.cover_art ? asset(album.cover_art, 'og') : undefined}>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'Songs', href: '/songs' },
       ...(album ? [{ label: album.title, href: `/discography/${album.slug}` }] : []),
       { label: song.title },
     ]} />
+    <Bookmark kind="song" id={song.id} label={song.title} href={`/songs/${song.slug}`} />
   </div>
 
   <section class="container" style="margin-top: 1rem;">
@@ -57,6 +72,10 @@ const year = album?.release_date?.slice(0, 4);
     {song.song_meaning && (
       <p style="font-family: var(--f-serif); font-size: 18px; line-height:1.55; color: var(--ink-2); max-width: 58ch; margin-top: 1rem;">{song.song_meaning}</p>
     )}
+    <div class="song-wave" style="margin-top: 1.6rem; padding: 16px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+      <div class="mono-sm muted" style="margin-bottom:.4rem;">WAVEFORM · IMPRESSION</div>
+      <Waveform seed={song.slug || song.title || String(song.id)} bars={120} height={70} duration={song.duration} title={song.title} />
+    </div>
     <div class="facts" style="margin-top: 1.4rem;">
       {facts.map(([k, v]) => (
         <div class="facts__item">
@@ -78,11 +97,16 @@ const year = album?.release_date?.slice(0, 4);
           {structured.length > 0 ? structured.map((section: any) => (
             <div class="lyric-section">
               {section.label && <div class="mono-sm muted lyric-section__label">{String(section.label).toUpperCase()}</div>}
-              {(section.lines || []).map((line: any) => (
-                <div class="lyric-line" data-line-id={line.line_id || line.id}>
-                  {typeof line === 'string' ? line : (line.text || line.line || '')}
-                </div>
-              ))}
+              {(section.lines || []).map((line: any) => {
+                const lid = String(line.line_id || line.id || '');
+                const notes = annByLine[lid] || [];
+                return (
+                  <div class={`lyric-line${notes.length ? ' has-note' : ''}`} data-line-id={lid} data-notes={notes.length ? JSON.stringify(notes) : undefined}>
+                    <span class="lyric-line__text">{typeof line === 'string' ? line : (line.text || line.line || '')}</span>
+                    {notes.length > 0 && <span class="lyric-line__pip" aria-label={`${notes.length} annotation${notes.length === 1 ? '' : 's'}`}>◉</span>}
+                  </div>
+                );
+              })}
             </div>
           )) : (
             song.lyrics ? <pre class="lyrics__plain">{song.lyrics}</pre> : <p class="muted">No lyrics on file.</p>
@@ -133,7 +157,44 @@ const year = album?.release_date?.slice(0, 4);
       </aside>
     </div>
   </section>
+  <div class="annot-drawer" data-annot-drawer aria-hidden="true">
+    <div class="annot-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="annot-title">
+      <button class="annot-drawer__close" data-annot-close aria-label="Close">×</button>
+      <div class="mono-sm muted" id="annot-title">Annotation</div>
+      <blockquote class="annot-drawer__line"></blockquote>
+      <div class="annot-drawer__body"></div>
+    </div>
+  </div>
 </Layout>
+
+<script>
+  function wireAnnot() {
+    const drawer = document.querySelector<HTMLElement>('[data-annot-drawer]');
+    if (!drawer) return;
+    const body = drawer.querySelector<HTMLElement>('.annot-drawer__body')!;
+    const lineEl = drawer.querySelector<HTMLElement>('.annot-drawer__line')!;
+    const close = () => drawer.setAttribute('aria-hidden', 'true');
+    drawer.addEventListener('click', (e) => { if (e.target === drawer) close(); });
+    drawer.querySelector('[data-annot-close]')?.addEventListener('click', close);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    document.querySelectorAll<HTMLElement>('.lyric-line.has-note').forEach((el) => {
+      el.addEventListener('click', () => {
+        const raw = el.getAttribute('data-notes') || '[]';
+        const notes = JSON.parse(raw) as Array<{ note: string; source?: string; url?: string }>;
+        lineEl.textContent = el.querySelector('.lyric-line__text')?.textContent || '';
+        body.innerHTML = notes.map((n) => `
+          <div class="annot-item">
+            <p>${(n.note || '').replace(/</g, '&lt;')}</p>
+            ${n.source || n.url ? `<div class="mono-sm muted">${n.source ? n.source.replace(/</g, '&lt;') : ''}${n.url ? ` · <a href="${n.url}" target="_blank" rel="noopener">source →</a>` : ''}</div>` : ''}
+          </div>
+        `).join('');
+        drawer.setAttribute('aria-hidden', 'false');
+      });
+    });
+  }
+  wireAnnot();
+  document.addEventListener('astro:page-load', wireAnnot);
+</script>
 
 <style>
   .song-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3vw, 48px); align-items: start; }
@@ -143,6 +204,19 @@ const year = album?.release_date?.slice(0, 4);
   .lyric-section + .lyric-section { margin-top: 1.4rem; }
   .lyric-section__label { margin-bottom: .5rem; }
   .lyric-line { font-family: var(--f-serif); font-size: 18px; line-height: 1.75; color: var(--ink); cursor: pointer; padding: 1px 4px; margin: 0 -4px; border-radius: 2px; transition: background-color .15s; }
-  .lyric-line:hover { background: var(--accent-tint); }
+  .lyric-line:hover { color: var(--accent-3); background: transparent; }
+  :root[data-theme='papers'] .lyric-line:hover { color: var(--accent); }
   .lyrics__plain { font-family: var(--f-serif); font-size: 17px; line-height: 1.7; color: var(--ink); white-space: pre-wrap; margin: 0; }
+  .lyric-line { display: flex; align-items: baseline; gap: .4rem; }
+  .lyric-line.has-note { color: var(--accent-3); }
+  .lyric-line.has-note:hover { color: var(--accent); background: transparent; }
+  .lyric-line__pip { font-size: 10px; opacity: .75; }
+
+  .annot-drawer { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; justify-content: flex-end; z-index: 80; opacity: 1; transition: opacity .2s; }
+  .annot-drawer[aria-hidden="true"] { opacity: 0; pointer-events: none; }
+  .annot-drawer__panel { width: min(480px, 100%); height: 100%; background: var(--bg); border-left: 1px solid var(--rule); padding: clamp(20px, 3vw, 32px); overflow-y: auto; position: relative; }
+  .annot-drawer__close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 28px; color: var(--ink-2); cursor: pointer; }
+  .annot-drawer__line { font-family: var(--f-display); font-style: italic; font-size: clamp(22px, 3vw, 32px); line-height: 1.2; color: var(--accent-3); border-left: 2px solid var(--accent); padding-left: 1rem; margin: 1rem 0 1.2rem; }
+  .annot-drawer__body .annot-item { padding: 1rem 0; border-top: 1px solid var(--rule); }
+  .annot-drawer__body p { font-family: var(--f-serif); font-size: 16px; line-height: 1.7; color: var(--ink); margin: 0 0 .4rem; }
 </style>

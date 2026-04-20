@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import Crumbs from '../components/ui/Crumbs.astro';
-import Chip from '../components/ui/Chip.astro';
+import Select from '../components/ui/Select.astro';
 import { listSongs, listAlbums } from '../lib/directus';
 
 const [songs, albums] = await Promise.all([listSongs(), listAlbums()]);
@@ -42,40 +42,44 @@ const facts: Array<[string, string]> = [
 
   <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
     <div class="filter-grid">
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Record</div>
-        <div class="cluster filter-chips" data-filter-group="album">
-          <Chip active={true} data-fval="all">All</Chip>
-          {albumOptions.slice(0, 24).map((a: any) => <Chip data-fval={String(a.id)}>{a.title}</Chip>)}
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Live status</div>
-        <div class="cluster filter-chips" data-filter-group="live">
-          <Chip active={true} data-fval="all">Any</Chip>
-          <Chip data-fval="played">Played live</Chip>
-          <Chip data-fval="unplayed">Never played</Chip>
-          <Chip data-fval="rare">Fewer than 10</Chip>
-          <Chip data-fval="common">100+ plays</Chip>
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Sort</div>
-        <div class="cluster filter-chips" data-filter-group="sort">
-          <Chip active={true} data-fval="title">A–Z</Chip>
-          <Chip data-fval="plays">Most played</Chip>
-          <Chip data-fval="date">Chronological</Chip>
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Search</div>
-        <input class="filter-search" type="search" placeholder="Title…" data-filter-search />
-      </div>
+      <Select
+        name="album"
+        label="Record"
+        options={[{ value: 'all', label: 'All records' }, ...albumOptions.map((a: any) => ({ value: String(a.id), label: a.title }))]}
+      />
+      <Select
+        name="live"
+        label="Live status"
+        options={[
+          { value: 'all', label: 'Any' },
+          { value: 'played', label: 'Played live' },
+          { value: 'unplayed', label: 'Never played' },
+          { value: 'rare', label: 'Fewer than 10' },
+          { value: 'common', label: '100+ plays' },
+        ]}
+      />
+      <Select
+        name="sort"
+        label="Sort"
+        value="title"
+        options={[
+          { value: 'title', label: 'A–Z' },
+          { value: 'plays', label: 'Most played' },
+          { value: 'date', label: 'Chronological' },
+        ]}
+      />
+      <label class="select">
+        <span class="select__label">Search</span>
+        <span class="select__wrap">
+          <input class="filter-search" type="search" placeholder="Title…" data-filter-search />
+        </span>
+      </label>
     </div>
   </section>
 
   <IssueSection kicker={`${songs.length} songs`} title="Catalogue" meta="Filtered">
     <div class="mono-sm muted" data-match-count style="margin-bottom:.8rem;">{songs.length} songs</div>
+    <div class="table-wrap">
     <table class="data data--airy" data-songs-table>
       <thead><tr><th style="width:50px;">№</th><th>Title</th><th>Record</th><th class="num" style="text-align:right; width:80px;">Length</th><th class="num" style="text-align:right; width:100px;">Plays</th></tr></thead>
       <tbody>
@@ -101,6 +105,7 @@ const facts: Array<[string, string]> = [
         })}
       </tbody>
     </table>
+    </div>
   </IssueSection>
 </Layout>
 
@@ -141,15 +146,13 @@ const facts: Array<[string, string]> = [
       });
       if (counter) counter.textContent = `${m} songs`;
     };
-    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
-      const key = group.getAttribute('data-filter-group') || '';
-      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
-      chips.forEach((chip) => chip.addEventListener('click', () => {
-        state[key] = chip.getAttribute('data-fval') || 'all';
-        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
+    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+      const key = sel.getAttribute('data-filter-select') || '';
+      sel.addEventListener('change', () => {
+        state[key] = sel.value || 'all';
         if (key === 'sort') sortRows();
         apply();
-      }));
+      });
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });

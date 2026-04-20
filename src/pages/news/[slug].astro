@@ -3,6 +3,8 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
+import ReadingProgress from '../../components/ui/ReadingProgress.astro';
+import Bookmark from '../../components/ui/Bookmark.astro';
 import { fetchRaw } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 
@@ -16,13 +18,15 @@ if (!article) return new Response('Not found', { status: 404 });
 const tags: string[] = Array.isArray(article.tags) ? article.tags : [];
 const cover = article.featured_image_file || article.featured_image;
 ---
-<Layout title={`${article.title} · News · Cureation`}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+<Layout title={`${article.title} · News · Cureation`} description={article.excerpt || undefined} ogImage={article.featured_image_file ? asset(article.featured_image_file, 'og') : (typeof article.featured_image === 'string' && article.featured_image.startsWith('http') ? article.featured_image : undefined)}>
+  <ReadingProgress target="article" />
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem;">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'News', href: '/news' },
       { label: article.title },
     ]} />
+    <Bookmark kind="news" id={article.id} label={article.title} href={`/news/${article.slug}`} />
   </div>
 
   <article class="container" style="padding: clamp(24px, 4vw, 48px) 0; max-width: 780px;">

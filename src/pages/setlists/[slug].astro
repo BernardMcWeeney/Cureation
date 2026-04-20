@@ -3,7 +3,10 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
-import { getSetlistBySlug, getSetlistSongs, getVenueById } from '../../lib/directus';
+import Bookmark from '../../components/ui/Bookmark.astro';
+import TourStrip from '../../components/viz/TourStrip.astro';
+import EraBreakdown from '../../components/viz/EraBreakdown.astro';
+import { getSetlistBySlug, getSetlistSongs, getVenueById, listAlbums, listEras, listSetlists } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 
 const { slug } = Astro.params;
@@ -11,10 +14,53 @@ if (!slug) return Astro.redirect('/setlists');
 const setlist = await getSetlistBySlug(slug);
 if (!setlist) return new Response('Not found', { status: 404 });
 
-const [songs, venue] = await Promise.all([
+const [songs, venue, albums, eras, tourSetlists] = await Promise.all([
   getSetlistSongs(setlist.id),
   setlist.venue_link ? getVenueById(setlist.venue_link) : Promise.resolve(null),
+  listAlbums(),
+  listEras(),
+  setlist.tour ? listSetlists({ tour: setlist.tour, limit: 400 }) : Promise.resolve([]),
 ]);
+
+// Build era breakdown from songs -> album -> era
+const albumById = new Map(albums.map((a) => [a.id, a]));
+const eraById = new Map(eras.map((e) => [e.id, e]));
+const eraCounts = new Map<string, { name: string; hue: number | null; count: number }>();
+for (const row of songs) {
+  const albumId = row.song?.album;
+  const album = albumId ? albumById.get(albumId) : null;
+  const eraId = album?.era_id;
+  const era = eraId ? eraById.get(eraId) : null;
+  const key = era?.id || 'other';
+  const prev = eraCounts.get(key) || { name: era?.short_name || era?.name || 'Other', hue: era?.hue ?? null, count: 0 };
+  prev.count += 1;
+  eraCounts.set(key, prev);
+}
+const eraSegments = Array.from(eraCounts.values()).map((e) => ({
+  label: e.name, count: e.count, hue: e.hue,
+}));
+
+// Tour position — keep null when this show can't be located in the tour
+// sequence, so we don't render "Show 0 of N".
+let tourIndex: number | null = null;
+let tourTotal = 0;
+let nearbyShows: Array<any> = [];
+if (tourSetlists.length > 0) {
+  const sorted = [...tourSetlists].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  tourTotal = sorted.length;
+  const idx = sorted.findIndex((s) => s.id === setlist.id);
+  if (idx >= 0) {
+    tourIndex = idx;
+    const from = Math.max(0, idx - 2);
+    const to = Math.min(sorted.length, idx + 3);
+    nearbyShows = sorted.slice(from, to).filter((s) => s.id !== setlist.id);
+  }
+}
+
+// First sentence of facts as editorial commentary
+const commentary: string | null = setlist.facts
+  ? String(setlist.facts).split(/(?<=[\.\!\?])\s/).slice(0, 2).join(' ').trim()
+  : null;
 
 const year = setlist.date?.slice(0, 4) || '—';
 const readableDate = setlist.date
@@ -37,15 +83,25 @@ const covers = songs.filter((s) => s.is_cover).length;
 const debuts = songs.filter((s) => s.is_debut).length;
 const uniqueAlbums = new Set(songs.map((s) => s.song?.album).filter(Boolean)).size;
 
+// Only surface song-derived stats when there is a setlist on file;
+// otherwise suppress them so an archival entry without a tracklist doesn't
+// render "0 / 0 / 0 / 0" in the facts grid.
+const hasSongs = songs.length > 0;
 const facts: Array<[string, string]> = [
   ['Date', setlist.date || '—'],
   ['Venue', setlist.venue || '—'],
   ['City', [setlist.city, setlist.state_province, setlist.country].filter(Boolean).join(', ') || '—'],
   ['Tour', setlist.tour_name || '—'],
-  ['Songs', String(songs.length)],
-  ['Covers', String(covers)],
-  ['Debuts', String(debuts)],
-  ['Albums drawn from', String(uniqueAlbums)],
+  ...(hasSongs
+    ? ([
+        ['Songs', String(songs.length)],
+        ['Covers', String(covers)],
+        ['Debuts', String(debuts)],
+        ['Albums drawn from', String(uniqueAlbums)],
+      ] as Array<[string, string]>)
+    : ([
+        ['Songs', 'Not on file'],
+      ] as Array<[string, string]>)),
 ];
 
 const supportActs: string[] = Array.isArray(setlist.support_acts)
@@ -57,15 +113,16 @@ const videoLinks: any[] = Array.isArray(setlist.video_links) ? setlist.video_lin
 const recordings: any[] = Array.isArray(setlist.recordings) ? setlist.recordings : [];
 const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.additional_links : [];
 ---
-<Layout title={`${setlist.venue || 'Setlist'} · ${setlist.date} · Cureation`}>
+<Layout title={`${setlist.venue || 'Setlist'} · ${setlist.date} · Cureation`} description={setlist.notes || `${songs.length} songs performed at ${setlist.venue || 'this show'} on ${setlist.date}.`} ogImage={(setlist.hero_image || venue?.photo_file) ? asset(setlist.hero_image || venue!.photo_file, 'og') : undefined}>
 
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'Setlists', href: '/setlists' },
       ...(setlist.tour_name ? [{ label: setlist.tour_name, href: '/tours' }] : []),
       { label: `${setlist.venue} · ${setlist.date}` },
     ]} />
+    <Bookmark kind="setlist" id={setlist.id} label={`${setlist.venue || 'Show'} · ${setlist.date || ''}`} href={`/setlists/${setlist.slug}`} />
   </div>
 
   {(setlist.hero_image || (venue && venue.photo_file)) && (
@@ -95,11 +152,15 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
     {setlist.notes && (
       <p class="show-head__lede">{setlist.notes}</p>
     )}
-    {setlist.facts && (
-      <div class="voices">
-        <div class="mono-sm muted" style="margin-bottom:.3rem;">ARCHIVIST NOTE</div>
-        <div class="voices__quote">{setlist.facts.split(/(?<=[\.\!\?])\s/)[0]}</div>
-      </div>
+    {commentary && (
+      <aside class="commentary" aria-label="Archivist commentary">
+        <div class="commentary__lead">
+          <div class="mono-sm muted">Commentary track</div>
+          <div class="serif commentary__title">The Record</div>
+          <div class="mono-sm muted commentary__cite">Archive notes · entry {String(setlist.id).padStart(3, '0')}</div>
+        </div>
+        <p class="commentary__body">{commentary}</p>
+      </aside>
     )}
 
     <div class="facts" style="margin-top: 1.6rem;">
@@ -129,8 +190,8 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
                     <td class="idx">{String(row.position).padStart(2, '0')}</td>
                     <td>
                       <span class="serif" style="font-size:18px; font-style:italic;">{row.song?.title || row.song_title}</span>
-                      {row.is_cover && <span class="mono-sm" style="margin-left:.6rem; color: var(--accent-3);">COVER{row.cover_artist ? ` · ${row.cover_artist.toUpperCase()}` : ''}</span>}
-                      {row.is_debut && <span class="mono-sm" style="margin-left:.6rem; color: var(--accent-3);">DEBUT</span>}
+                      {Boolean(row.is_cover) && <span class="mono-sm" style="margin-left:.6rem; color: var(--accent-3);">COVER{row.cover_artist ? ` · ${row.cover_artist.toUpperCase()}` : ''}</span>}
+                      {Boolean(row.is_debut) && <span class="mono-sm" style="margin-left:.6rem; color: var(--accent-3);">DEBUT</span>}
                     </td>
                     <td class="mono-sm muted">{row.notes || ''}</td>
                     <td class="num">{row.song?.duration || '—'}</td>
@@ -157,6 +218,42 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
       </div>
 
       <aside class="show-grid__aside stack" style="--gap: 1.4rem;">
+        {eraSegments.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Setlist by era</span><span>{songs.length} SONGS</span></div>
+            <div style="padding: 14px 16px 18px;">
+              <EraBreakdown segments={eraSegments} total={songs.length} />
+            </div>
+          </div>
+        )}
+
+        {tourTotal > 1 && tourIndex !== null && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Tour · {setlist.tour_name || '—'}</span><span>{tourTotal} SHOWS</span></div>
+            <div style="padding: 14px 16px 18px;">
+              <TourStrip total={tourTotal} current={tourIndex} height={36} />
+              <div class="mono-sm muted" style="margin-top:.8rem;">
+                This is show <span style="color: var(--ink);">{tourIndex + 1}</span> of {tourTotal} on the run.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {nearbyShows.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head"><span>Nearby on the tour</span><span>{nearbyShows.length}</span></div>
+            <div>
+              {nearbyShows.map((s) => (
+                <a href={`/setlists/${s.slug}`} style="display:grid; grid-template-columns: 96px 1fr auto; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--rule-2); font-size: 13px; border-bottom-color: var(--rule-2); border-top: none; border-left: none; border-right: none; color: var(--ink);">
+                  <div class="mono-sm" style="color: var(--ink-2);">{s.date || '—'}</div>
+                  <div class="serif" style="font-style: italic; line-height:1.3; min-width:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{s.venue || '—'}</div>
+                  <div class="mono-sm muted">{s.country_code || ''}</div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
         {venue && (
           <div class="panel--bare">
             <div class="panel-head">
@@ -230,6 +327,20 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
   .show-head { display: flex; flex-direction: column; }
   .show-head__title { font-size: clamp(44px, 7vw, 96px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0; letter-spacing: -.01em; }
   .show-head__lede { font-family: var(--f-serif); font-size: 18px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; margin-top: 1rem; }
-  .show-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: clamp(24px, 3vw, 48px); align-items: start; }
+  .show-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3vw, 48px); align-items: start; }
   @media (max-width: 900px) { .show-grid { grid-template-columns: 1fr; } }
+
+  .commentary {
+    margin-top: 1.6rem;
+    display: grid; grid-template-columns: 180px 1fr; gap: clamp(16px, 3vw, 32px);
+    padding: 20px 24px;
+    background: var(--bg-2);
+    border-top: 1px solid var(--ink-2);
+    border-bottom: 1px solid var(--ink-2);
+  }
+  @media (max-width: 640px) { .commentary { grid-template-columns: 1fr; padding: 18px 20px; } }
+  .commentary__lead { display: flex; flex-direction: column; gap: .4rem; }
+  .commentary__title { font-size: 22px; font-style: italic; line-height: 1.1; color: var(--ink); }
+  .commentary__cite { margin-top: .2rem; }
+  .commentary__body { font-family: var(--f-serif); font-size: 17px; line-height: 1.6; color: var(--ink-2); margin: 0; text-wrap: pretty; }
 </style>

@@ -1,0 +1,102 @@
+---
+/**
+ * Horizontal era ribbon — each era gets a coloured span sized by year range,
+ * plus optional marker points for albums / tours / events. Used on band and
+ * discography index pages.
+ */
+interface Era { id: string | number; name: string; year_start?: number | null; year_end?: number | null; hue?: number | null; }
+interface Marker { year: number; label: string; color?: string; href?: string | null; }
+interface Props {
+  eras: Era[];
+  markers?: Marker[];
+  start?: number;
+  end?: number;
+  height?: number;
+  class?: string;
+}
+const { eras, markers = [], start, end, height = 48, class: klass = '' } = Astro.props;
+
+const yearsAll: number[] = [
+  ...eras.flatMap((e) => [e.year_start, e.year_end].filter((y): y is number => typeof y === 'number')),
+  ...markers.map((m) => m.year),
+];
+const yStart = start ?? (yearsAll.length ? Math.min(...yearsAll) : 1976);
+const yEndRaw = end ?? (yearsAll.length ? Math.max(...yearsAll) : new Date().getUTCFullYear());
+const yEnd = Math.max(yEndRaw, yStart + 1);
+const span = yEnd - yStart;
+const pct = (y: number) => ((y - yStart) / span) * 100;
+
+const ticks: number[] = [];
+for (let y = Math.ceil(yStart / 5) * 5; y <= yEnd; y += 5) ticks.push(y);
+---
+<div class={`era-tl ${klass}`}>
+  <div class="era-tl__rail" style={`--h: ${height}px;`}>
+    {eras.map((e) => {
+      if (typeof e.year_start !== 'number') return null;
+      const s = pct(e.year_start);
+      const eend = pct(typeof e.year_end === 'number' ? e.year_end : yEnd);
+      const hue = typeof e.hue === 'number' ? e.hue : 320;
+      return (
+        <div
+          class="era-tl__band"
+          style={`left:${s}%; right:${100 - eend}%; background: oklch(0.55 0.12 ${hue} / 0.65); border-color: oklch(0.62 0.16 ${hue});`}
+          title={`${e.name} · ${e.year_start}–${e.year_end || '…'}`}
+        >
+          <span class="era-tl__band-lb">{e.name}</span>
+        </div>
+      );
+    })}
+    {markers.map((m) => (
+      m.href
+        ? <a class="era-tl__mark" href={m.href} style={`left:${pct(m.year)}%;${m.color ? ` background:${m.color};` : ''}`} title={`${m.year} · ${m.label}`}><span class="sr-only">{m.year} {m.label}</span></a>
+        : <span class="era-tl__mark" style={`left:${pct(m.year)}%;${m.color ? ` background:${m.color};` : ''}`} title={`${m.year} · ${m.label}`} />
+    ))}
+  </div>
+  <div class="era-tl__axis">
+    {ticks.map((y) => (
+      <span class="era-tl__tick" style={`left:${pct(y)}%;`}>{y}</span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .era-tl { display: flex; flex-direction: column; gap: .5rem; }
+  .era-tl__rail {
+    position: relative;
+    height: var(--h);
+    background: var(--bg-2);
+    border: 1px solid var(--rule);
+  }
+  .era-tl__band {
+    position: absolute; top: 0; bottom: 0;
+    border-left: 1px solid; border-right: 1px solid;
+    display: flex; align-items: center; padding: 0 10px;
+    overflow: hidden;
+  }
+  .era-tl__band-lb {
+    font-family: var(--f-display); font-style: italic; font-size: 15px;
+    color: var(--ink); letter-spacing: -.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .era-tl__mark {
+    position: absolute; top: -4px;
+    width: 10px; height: calc(var(--h) + 8px);
+    transform: translateX(-50%);
+    background: var(--ink);
+    border: 1px solid var(--bg);
+  }
+  a.era-tl__mark { background: var(--accent-3); }
+  a.era-tl__mark:hover { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+  .era-tl__axis {
+    position: relative; height: 1.2em;
+    margin-top: .2rem;
+    border-top: 1px solid var(--rule-2);
+  }
+  .era-tl__tick {
+    position: absolute; top: 4px;
+    transform: translateX(-50%);
+    font-family: var(--f-mono); font-size: 10px; color: var(--muted);
+    letter-spacing: .1em;
+  }
+</style>

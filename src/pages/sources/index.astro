@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
-import Chip from '../../components/ui/Chip.astro';
+import Select from '../../components/ui/Select.astro';
 import { fetchRaw } from '../../lib/directus';
 
 export const prerender = false;
@@ -55,30 +55,32 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
   </div>
 
   <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
-    <div class="filter-grid">
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Type</div>
-        <div class="cluster filter-chips" data-filter-group="type">
-          <Chip active={true} data-fval="all">All</Chip>
-          {types.map((t) => <Chip data-fval={t}>{t}</Chip>)}
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Status</div>
-        <div class="cluster filter-chips" data-filter-group="official">
-          <Chip active={true} data-fval="all">Any</Chip>
-          <Chip data-fval="yes">Official</Chip>
-          <Chip data-fval="no">Independent</Chip>
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Search</div>
-        <input class="filter-search" type="search" placeholder="Name, author…" data-filter-search />
-      </div>
+    <div class="filter-grid filter-grid--3">
+      <Select
+        name="type"
+        label="Type"
+        options={[{ value: 'all', label: 'All types' }, ...types.map((t) => ({ value: t!, label: String(t).toUpperCase() }))]}
+      />
+      <Select
+        name="official"
+        label="Status"
+        options={[
+          { value: 'all', label: 'Any status' },
+          { value: 'yes', label: 'Official' },
+          { value: 'no', label: 'Independent' },
+        ]}
+      />
+      <label class="select">
+        <span class="select__label">Search</span>
+        <span class="select__wrap">
+          <input class="filter-search" type="search" placeholder="Name, author…" data-filter-search />
+        </span>
+      </label>
     </div>
   </section>
 
   <IssueSection kicker="Citations" title="The ledger" meta={`${enriched.length} sources`}>
+    <div class="table-wrap">
     <table class="data data--airy" data-sources-table>
       <thead><tr>
         <th style="width:50px;">№</th>
@@ -109,6 +111,7 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
         ))}
       </tbody>
     </table>
+    </div>
   </IssueSection>
 </Layout>
 
@@ -127,14 +130,9 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
         r.style.display = ok ? '' : 'none';
       });
     };
-    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
-      const key = group.getAttribute('data-filter-group') || '';
-      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
-      chips.forEach((chip) => chip.addEventListener('click', () => {
-        state[key] = chip.getAttribute('data-fval') || 'all';
-        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
-        apply();
-      }));
+    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+      const key = sel.getAttribute('data-filter-select') || '';
+      sel.addEventListener('change', () => { state[key] = sel.value || 'all'; apply(); });
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });

@@ -1,0 +1,55 @@
+---
+/**
+ * Cheap dot-map — equirectangular projection. Not cartographically honest, but
+ * it's editorial: a suggestion of geography, not navigation. Renders lat/lon
+ * pairs as pips on a faint world grid. For venues / tour maps.
+ */
+interface Point { lat: number; lon: number; label?: string; weight?: number; href?: string | null; }
+interface Props {
+  points: Point[];
+  class?: string;
+  height?: number;
+}
+const { points, class: klass = '', height = 320 } = Astro.props;
+const valid = points.filter((p) => typeof p.lat === 'number' && typeof p.lon === 'number');
+const maxW = Math.max(1, ...valid.map((p) => p.weight || 1));
+const W = 960, H = 480;
+const project = (lat: number, lon: number) => ({
+  x: ((lon + 180) / 360) * W,
+  y: ((90 - lat) / 180) * H,
+});
+// Latitude gridlines at 0, ±30, ±60
+const latLines = [-60, -30, 0, 30, 60];
+// Longitude gridlines at 0, ±60, ±120
+const lonLines = [-120, -60, 0, 60, 120];
+---
+<figure class={`dotmap ${klass}`} style={`--h: ${height}px;`} aria-label={`${valid.length} locations`}>
+  <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" width="100%" role="img">
+    <rect x="0" y="0" width={W} height={H} fill="var(--bg-2)" />
+    {latLines.map((lat) => {
+      const { y } = project(lat, 0);
+      return <line x1="0" x2={W} y1={y} y2={y} stroke="var(--rule)" stroke-dasharray="2 4" />;
+    })}
+    {lonLines.map((lon) => {
+      const { x } = project(0, lon);
+      return <line y1="0" y2={H} x1={x} x2={x} stroke="var(--rule)" stroke-dasharray="2 4" />;
+    })}
+    {valid.map((p) => {
+      const { x, y } = project(p.lat, p.lon);
+      const r = 2 + Math.sqrt((p.weight || 1) / maxW) * 6;
+      return (
+        <g>
+          <circle cx={x} cy={y} r={r + 2} fill="var(--accent-tint-2)" />
+          <circle cx={x} cy={y} r={r} fill="var(--accent)" opacity="0.9">
+            <title>{p.label}</title>
+          </circle>
+        </g>
+      );
+    })}
+  </svg>
+</figure>
+
+<style>
+  .dotmap { margin: 0; border: 1px solid var(--rule); }
+  .dotmap svg { display: block; width: 100%; height: var(--h); }
+</style>

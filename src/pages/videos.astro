@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import Crumbs from '../components/ui/Crumbs.astro';
-import Chip from '../components/ui/Chip.astro';
+import Select from '../components/ui/Select.astro';
 import { fetchRaw } from '../lib/directus';
 
 const videos: any[] = await fetchRaw('videos', { limit: -1, sort: '-release_date,-date_created' }).catch(() => []);
@@ -38,25 +38,23 @@ const ytId = (url: string): string | null => {
   ) : (
     <>
       <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
-        <div class="filter-grid">
-          <div class="filter-grid__block">
-            <div class="mono-sm muted">Type</div>
-            <div class="cluster filter-chips" data-filter-group="type">
-              <Chip active={true} data-fval="all">All</Chip>
-              {types.map((t) => <Chip data-fval={t}>{t}</Chip>)}
-            </div>
-          </div>
-          <div class="filter-grid__block">
-            <div class="mono-sm muted">Year</div>
-            <div class="cluster filter-chips" data-filter-group="year">
-              <Chip active={true} data-fval="all">All</Chip>
-              {years.map((y) => <Chip data-fval={y}>{y}</Chip>)}
-            </div>
-          </div>
-          <div class="filter-grid__block">
-            <div class="mono-sm muted">Search</div>
-            <input class="filter-search" type="search" placeholder="Title, director…" data-filter-search />
-          </div>
+        <div class="filter-grid filter-grid--3">
+          <Select
+            name="type"
+            label="Type"
+            options={[{ value: 'all', label: 'All types' }, ...types.map((t) => ({ value: t!, label: String(t).toUpperCase() }))]}
+          />
+          <Select
+            name="year"
+            label="Year"
+            options={[{ value: 'all', label: 'All years' }, ...years.map((y) => ({ value: y!, label: y! }))]}
+          />
+          <label class="select">
+            <span class="select__label">Search</span>
+            <span class="select__wrap">
+              <input class="filter-search" type="search" placeholder="Title, director…" data-filter-search />
+            </span>
+          </label>
         </div>
       </section>
 
@@ -104,14 +102,9 @@ const ytId = (url: string): string | null => {
         r.style.display = ok ? '' : 'none';
       });
     };
-    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
-      const key = group.getAttribute('data-filter-group') || '';
-      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
-      chips.forEach((chip) => chip.addEventListener('click', () => {
-        state[key] = chip.getAttribute('data-fval') || 'all';
-        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
-        apply();
-      }));
+    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+      const key = sel.getAttribute('data-filter-select') || '';
+      sel.addEventListener('change', () => { state[key] = sel.value || 'all'; apply(); });
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });

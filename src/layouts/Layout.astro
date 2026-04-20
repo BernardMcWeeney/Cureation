@@ -18,7 +18,7 @@ const {
   title = 'Cureation — an archive of The Cure',
   description = 'An editorial archive documenting The Cure: albums, live shows, lyrics, members, photos, news.',
   ogImage = '/hero-image1.jpg',
-  theme = 'dark',
+  theme = 'midnight',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
@@ -31,6 +31,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString(
   <meta name="generator" content={Astro.generator} />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="canonical" href={canonical} />
+  <link rel="alternate" type="application/rss+xml" title="Cureation — all dispatches & shows" href="/rss.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Cureation — dispatches only" href="/news/rss.xml" />
+  <link rel="alternate" type="text/calendar" title="The Cure — tour dates" href="/calendar.ics" />
 
   <title>{title}</title>
   <meta name="description" content={description} />
@@ -70,14 +73,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString(
 
   <script>
     function wireTheme() {
-      const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
-      if (!btn) return;
+      const btns = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+      if (!btns.length) return;
       const order: Array<'dark' | 'midnight' | 'papers'> = ['dark', 'midnight', 'papers'];
-      btn.addEventListener('click', () => {
-        const current = (document.documentElement.getAttribute('data-theme') as any) || 'dark';
-        const next = order[(order.indexOf(current) + 1) % order.length];
-        document.documentElement.setAttribute('data-theme', next);
-        try { localStorage.setItem('cureation:theme', next); } catch (e) {}
+      btns.forEach((btn) => {
+        if ((btn as any).__wired) return;
+        (btn as any).__wired = true;
+        btn.addEventListener('click', () => {
+          const current = (document.documentElement.getAttribute('data-theme') as any) || 'dark';
+          const next = order[(order.indexOf(current) + 1) % order.length];
+          document.documentElement.setAttribute('data-theme', next);
+          try { localStorage.setItem('cureation:theme', next); } catch (e) {}
+        });
       });
     }
     wireTheme();

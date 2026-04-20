@@ -29,6 +29,7 @@ const categories = Object.keys(byCategory).sort();
     </IssueSection>
   ) : categories.map((cat) => (
     <IssueSection kicker={cat.toUpperCase()} title={cat} meta={`${byCategory[cat].length} entries`}>
+      <div class="table-wrap">
       <table class="data">
         <thead><tr><th style="width:50px;">№</th><th>Item</th><th>Notes</th><th>Used by</th></tr></thead>
         <tbody>
@@ -44,6 +45,7 @@ const categories = Object.keys(byCategory).sort();
           ))}
         </tbody>
       </table>
+      </div>
     </IssueSection>
   ))}
 </Layout>

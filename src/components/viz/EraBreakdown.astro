@@ -1,0 +1,64 @@
+---
+/**
+ * Horizontal stacked bar showing the era composition of a set (or any grouped
+ * list). Each segment sized by count, coloured by era hue, with a legend underneath.
+ */
+interface Segment {
+  label: string;
+  count: number;
+  hue?: number | null;
+}
+interface Props {
+  segments: Segment[];
+  total?: number;
+  class?: string;
+  compact?: boolean;
+}
+const { segments, total, class: klass = '', compact = false } = Astro.props;
+const sum = (total ?? segments.reduce((n, s) => n + (s.count || 0), 0)) || 1;
+const colored = segments
+  .filter((s) => (s.count || 0) > 0)
+  .map((s) => ({
+    ...s,
+    pct: (s.count / sum) * 100,
+    color: typeof s.hue === 'number' ? `oklch(0.58 0.14 ${s.hue})` : 'var(--muted-2)',
+  }))
+  .sort((a, b) => b.pct - a.pct);
+---
+<div class={`era-bd ${klass}`}>
+  <div class={`era-bd__bar${compact ? ' era-bd__bar--compact' : ''}`}>
+    {colored.map((s) => (
+      <span class="era-bd__seg" style={`flex: ${s.count}; background: ${s.color};`} title={`${s.label} — ${s.count}`} />
+    ))}
+  </div>
+  {!compact && (
+    <ul class="era-bd__legend">
+      {colored.map((s) => (
+        <li class="era-bd__item">
+          <span class="era-bd__dot" style={`background: ${s.color};`} />
+          <span class="era-bd__lb">{s.label}</span>
+          <span class="era-bd__n mono-sm muted">{s.count}</span>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+<style>
+  .era-bd { display: flex; flex-direction: column; gap: .8rem; }
+  .era-bd__bar {
+    display: flex; width: 100%; height: 22px; overflow: hidden;
+    border: 1px solid var(--rule); background: var(--bg-3);
+  }
+  .era-bd__bar--compact { height: 6px; border: 0; }
+  .era-bd__seg { display: block; min-width: 2px; transition: filter .2s; }
+  .era-bd__seg:hover { filter: brightness(1.25); }
+  .era-bd__legend {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem 1.2rem;
+  }
+  .era-bd__item { display: flex; align-items: center; gap: .5rem; font-size: 13px; }
+  .era-bd__dot { width: 8px; height: 8px; flex: 0 0 auto; }
+  .era-bd__lb { color: var(--ink-2); flex: 1; min-width: 0; }
+  .era-bd__n { flex: 0 0 auto; }
+</style>

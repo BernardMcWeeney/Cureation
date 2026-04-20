@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import Crumbs from '../components/ui/Crumbs.astro';
-import Chip from '../components/ui/Chip.astro';
+import Select from '../components/ui/Select.astro';
 import { listVenues } from '../lib/directus';
 
 const venues = await listVenues();
@@ -53,33 +53,35 @@ const facts: Array<[string, string]> = [
   </section>
 
   <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
-    <div class="filter-grid">
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Country</div>
-        <div class="cluster filter-chips" data-filter-group="country">
-          <Chip active={true} data-fval="all">All</Chip>
-          {byCountry.map((c) => <Chip data-fval={c}>{c}</Chip>)}
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Capacity</div>
-        <div class="cluster filter-chips" data-filter-group="cap">
-          <Chip active={true} data-fval="all">Any</Chip>
-          <Chip data-fval="small">&lt; 1k</Chip>
-          <Chip data-fval="mid">1k–5k</Chip>
-          <Chip data-fval="large">5k–20k</Chip>
-          <Chip data-fval="huge">20k+</Chip>
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Search</div>
-        <input class="filter-search" type="search" placeholder="Venue, city…" data-filter-search />
-      </div>
+    <div class="filter-grid filter-grid--3">
+      <Select
+        name="country"
+        label="Country"
+        options={[{ value: 'all', label: 'All countries' }, ...byCountry.map((c) => ({ value: c!, label: c! }))]}
+      />
+      <Select
+        name="cap"
+        label="Capacity"
+        options={[
+          { value: 'all', label: 'Any capacity' },
+          { value: 'small', label: 'Under 1,000' },
+          { value: 'mid', label: '1,000 – 5,000' },
+          { value: 'large', label: '5,000 – 20,000' },
+          { value: 'huge', label: '20,000+' },
+        ]}
+      />
+      <label class="select">
+        <span class="select__label">Search</span>
+        <span class="select__wrap">
+          <input class="filter-search" type="search" placeholder="Venue, city…" data-filter-search />
+        </span>
+      </label>
     </div>
   </section>
 
   <IssueSection kicker="Ranked ledger" title="Rooms" meta="Most-visited first">
     <div class="mono-sm muted" data-match-count style="margin-bottom:.8rem;">{venues.length} venues</div>
+    <div class="table-wrap">
     <table class="data data--airy" data-venue-table>
       <thead><tr><th style="width:50px;">№</th><th>Venue</th><th>City</th><th>Country</th><th class="num" style="text-align:right;">Capacity</th><th class="num" style="text-align:right;">Cure shows</th></tr></thead>
       <tbody>
@@ -100,6 +102,7 @@ const facts: Array<[string, string]> = [
         })}
       </tbody>
     </table>
+    </div>
   </IssueSection>
 </Layout>
 
@@ -122,26 +125,25 @@ const facts: Array<[string, string]> = [
       });
       if (counter) counter.textContent = `${m} venues`;
     };
-    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
-      const key = group.getAttribute('data-filter-group') || '';
-      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
-      chips.forEach((chip) => chip.addEventListener('click', () => {
-        state[key] = chip.getAttribute('data-fval') || 'all';
-        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
-        apply();
-      }));
+    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+      const key = sel.getAttribute('data-filter-select') || '';
+      sel.addEventListener('change', () => { state[key] = sel.value || 'all'; apply(); });
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
     document.querySelectorAll<HTMLElement>('[data-country-jump]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const c = btn.getAttribute('data-country-jump') || '';
-        const chip = Array.from(document.querySelectorAll<HTMLElement>('[data-filter-group="country"] [data-fval]'))
-          .find((x) => x.getAttribute('data-fval') === c);
-        if (chip) chip.click();
+        const sel = document.querySelector<HTMLSelectElement>('[data-filter-select="country"]');
+        if (sel) { sel.value = c; sel.dispatchEvent(new Event('change')); }
       });
     });
   }
   wire();
   document.addEventListener('astro:page-load', wire);
 </script>
+
+<style is:global>
+  .filter-grid--3 { grid-template-columns: 1fr 1fr 1fr !important; }
+  @media (max-width: 720px) { .filter-grid--3 { grid-template-columns: 1fr !important; } }
+</style>

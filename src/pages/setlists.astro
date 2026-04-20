@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import Crumbs from '../components/ui/Crumbs.astro';
-import Chip from '../components/ui/Chip.astro';
+import Select from '../components/ui/Select.astro';
 import { listSetlists } from '../lib/directus';
 
 const setlists = await listSetlists({ limit: 1000 });
@@ -53,56 +53,54 @@ const facts: Array<[string, string]> = [
 
   <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
     <div class="filter-grid">
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Year</div>
-        <div class="cluster filter-chips" data-filter-group="year">
-          <Chip active={true} data-fval="all">All</Chip>
-          {years.map((y) => <Chip data-fval={y}>{y}</Chip>)}
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Country</div>
-        <div class="cluster filter-chips" data-filter-group="country">
-          <Chip active={true} data-fval="all">All</Chip>
-          {countries.map((c) => <Chip data-fval={c}>{c}</Chip>)}
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Tour</div>
-        <div class="cluster filter-chips" data-filter-group="tour">
-          <Chip active={true} data-fval="all">All</Chip>
-          {tours.slice(0, 40).map((t) => <Chip data-fval={t}>{t}</Chip>)}
-        </div>
-      </div>
-      <div class="filter-grid__block">
-        <div class="mono-sm muted">Search</div>
-        <input class="filter-search" type="search" placeholder="Venue, city, tour…" data-filter-search />
-      </div>
+      <Select
+        name="year"
+        label="Year"
+        options={[{ value: 'all', label: 'All years' }, ...years.map((y) => ({ value: y!, label: y! }))]}
+      />
+      <Select
+        name="country"
+        label="Country"
+        options={[{ value: 'all', label: 'All countries' }, ...countries.map((c) => ({ value: c!, label: c! }))]}
+      />
+      <Select
+        name="tour"
+        label="Tour"
+        options={[{ value: 'all', label: 'All tours' }, ...tours.map((t) => ({ value: t!, label: t! }))]}
+      />
+      <label class="select">
+        <span class="select__label">Search</span>
+        <span class="select__wrap">
+          <input class="filter-search" type="search" placeholder="Venue, city, tour…" data-filter-search />
+        </span>
+      </label>
     </div>
   </section>
 
   <IssueSection kicker="The ledger" title="Every show" meta={`${setlists.length} entries`}>
     <div class="mono-sm muted" data-match-count style="margin-bottom: .8rem;">{setlists.length} shows</div>
-    <table class="data data--airy" data-setlist-table>
-      <thead><tr><th style="width:120px;">Date</th><th>Venue</th><th>City</th><th>Country</th><th>Tour</th><th class="num" style="text-align:right; width:80px;">Songs</th></tr></thead>
-      <tbody>
-        {setlists.map((s) => (
-          <tr data-clickable
-              data-year={s.date?.slice(0, 4) || ''}
-              data-country={s.country || ''}
-              data-tour={s.tour_name || ''}
-              data-search={`${s.venue || ''} ${s.city || ''} ${s.country || ''} ${s.tour_name || ''}`.toLowerCase()}
-              onclick={`location.href='/setlists/${s.slug}'`}>
-            <td class="mono-sm" style="color: var(--ink);">{s.date || '—'}</td>
-            <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{s.venue || '—'}</span></td>
-            <td class="mono-sm muted">{[s.city, s.state_province].filter(Boolean).join(', ') || '—'}</td>
-            <td class="mono-sm muted">{s.country || '—'}</td>
-            <td class="mono-sm" style="color: var(--accent-3);">{s.tour_name || '—'}</td>
-            <td class="num">{s.song_count || '—'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="data data--airy" data-setlist-table>
+        <thead><tr><th style="width:120px;">Date</th><th>Venue</th><th>City</th><th>Country</th><th>Tour</th><th class="num" style="text-align:right; width:80px;">Songs</th></tr></thead>
+        <tbody>
+          {setlists.map((s) => (
+            <tr data-clickable
+                data-year={s.date?.slice(0, 4) || ''}
+                data-country={s.country || ''}
+                data-tour={s.tour_name || ''}
+                data-search={`${s.venue || ''} ${s.city || ''} ${s.country || ''} ${s.tour_name || ''}`.toLowerCase()}
+                onclick={`location.href='/setlists/${s.slug}'`}>
+              <td class="mono-sm" style="color: var(--ink);">{s.date || '—'}</td>
+              <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{s.venue || '—'}</span></td>
+              <td class="mono-sm muted">{[s.city, s.state_province].filter(Boolean).join(', ') || '—'}</td>
+              <td class="mono-sm muted">{s.country || '—'}</td>
+              <td class="mono-sm" style="color: var(--accent-3);">{s.tour_name || '—'}</td>
+              <td class="num">{s.song_count || '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </IssueSection>
 </Layout>
 
@@ -128,14 +126,9 @@ const facts: Array<[string, string]> = [
       });
       if (counter) counter.textContent = `${matched} shows`;
     };
-    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
-      const key = group.getAttribute('data-filter-group') || '';
-      const chips = group.querySelectorAll<HTMLElement>('[data-fval]');
-      chips.forEach((chip) => chip.addEventListener('click', () => {
-        state[key] = chip.getAttribute('data-fval') || 'all';
-        chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
-        apply();
-      }));
+    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+      const key = sel.getAttribute('data-filter-select') || '';
+      sel.addEventListener('change', () => { state[key] = sel.value || 'all'; apply(); });
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
@@ -143,10 +136,10 @@ const facts: Array<[string, string]> = [
       btn.addEventListener('click', () => {
         const d = btn.getAttribute('data-decade-jump') || '';
         const yearPrefix = d.slice(0, 3);
-        const yearGroup = document.querySelector<HTMLElement>('[data-filter-group="year"]');
-        if (!yearGroup) return;
-        const chip = Array.from(yearGroup.querySelectorAll<HTMLElement>('[data-fval]')).find((c) => (c.getAttribute('data-fval') || '').startsWith(yearPrefix));
-        if (chip) chip.click();
+        const yearSel = document.querySelector<HTMLSelectElement>('[data-filter-select="year"]');
+        if (!yearSel) return;
+        const opt = Array.from(yearSel.options).find((o) => o.value.startsWith(yearPrefix));
+        if (opt) { yearSel.value = opt.value; yearSel.dispatchEvent(new Event('change')); }
       });
     });
   }
@@ -155,18 +148,15 @@ const facts: Array<[string, string]> = [
 </script>
 
 <style is:global>
-  .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(12px, 2vw, 24px); align-items: start; }
+  .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); align-items: end; }
   @media (max-width: 960px) { .filter-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 560px) { .filter-grid { grid-template-columns: 1fr; } }
-  .filter-grid__block { border-left: 1px solid var(--rule); padding: .2rem 0 .2rem 1rem; }
-  .filter-grid__block > .mono-sm { margin-bottom: .5rem; }
-  .filter-chips { gap: 6px; max-height: 140px; overflow-y: auto; scrollbar-width: thin; }
   .filter-search {
-    width: 100%; background: var(--bg-2); border: 1px solid var(--rule); color: var(--ink);
-    font-family: var(--f-serif); font-style: italic; font-size: 15px;
-    padding: .55rem .8rem; border-radius: 2px; margin-top: .2rem;
+    width: 100%; background: transparent; border: 1px solid var(--rule); color: var(--ink);
+    font-family: var(--f-serif); font-style: italic; font-size: 15.5px;
+    padding: .65rem .9rem; border-radius: 2px;
   }
-  .filter-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-tint); }
+  .filter-search:focus { outline: none; border-color: var(--accent); }
 
   table.data--airy thead th { padding: 14px 16px; }
   table.data--airy tbody td { padding: 18px 16px; line-height: 1.5; }

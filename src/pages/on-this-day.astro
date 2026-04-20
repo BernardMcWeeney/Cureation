@@ -46,6 +46,7 @@ const facts: Array<[string, string]> = [
     </IssueSection>
   ) : decades.map((dec) => (
     <IssueSection kicker={dec} title={`${dec} · ${byDecade[dec].length} entries`}>
+      <div class="table-wrap">
       <table class="data">
         <thead><tr><th style="width:80px;">Year</th><th style="width:140px;">Kind</th><th>Entry</th><th></th></tr></thead>
         <tbody>
@@ -62,6 +63,7 @@ const facts: Array<[string, string]> = [
           ))}
         </tbody>
       </table>
+      </div>
     </IssueSection>
   ))}
 </Layout>

@@ -3,6 +3,7 @@ export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import Crumbs from '../../../components/ui/Crumbs.astro';
 import Tag from '../../../components/ui/Tag.astro';
+import Bookmark from '../../../components/ui/Bookmark.astro';
 import { getMemberBySlug, listAlbums } from '../../../lib/directus';
 import { asset } from '../../../lib/assets';
 
@@ -24,13 +25,14 @@ const facts: Array<[string, string]> = [
   ['Born', member.birth_date || '—'],
 ];
 ---
-<Layout title={`${member.name} · The band · Cureation`}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+<Layout title={`${member.name} · The band · Cureation`} description={member.bio || `${member.name}, ${member.is_current_member ? 'current' : 'former'} member of The Cure.`} ogImage={member.photo_file && !String(member.photo_file).startsWith('http') ? asset(member.photo_file, 'og') : undefined}>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'The band', href: '/band' },
       { label: member.name },
     ]} />
+    <Bookmark kind="member" id={member.id} label={member.name} href={`/band/members/${member.slug}`} />
   </div>
 
   <section class="container dossier">

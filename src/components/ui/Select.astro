@@ -1,0 +1,90 @@
+---
+/**
+ * Editorial dropdown — styled native <select>.
+ * Use for filters in place of chip grids when value list is long.
+ */
+interface Option { value: string; label: string; }
+interface Props {
+  label?: string;
+  name: string;
+  value?: string;
+  options: Option[];
+  class?: string;
+  width?: string;
+}
+const { label, name, value = '', options, class: klass = '', width } = Astro.props;
+---
+<label class={`select ${klass}`} style={width ? `--select-w: ${width};` : undefined}>
+  {label && <span class="select__label">{label}</span>}
+  <span class="select__wrap">
+    <select name={name} data-filter-select={name}>
+      {options.map((o) => (
+        <option value={o.value} selected={o.value === value}>{o.label}</option>
+      ))}
+    </select>
+    <svg class="select__caret" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true">
+      <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+</label>
+
+<style>
+  .select {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    min-width: 0;
+    width: var(--select-w, 100%);
+  }
+  .select__label {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .select__wrap {
+    position: relative;
+    display: block;
+  }
+  .select select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    padding: .65rem 2rem .65rem .9rem;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--f-serif);
+    font-style: italic;
+    font-size: 15.5px;
+    letter-spacing: -.005em;
+    line-height: 1.2;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: border-color .18s, color .18s;
+  }
+  .select select:hover { border-color: var(--rule-strong); }
+  .select select:focus {
+    outline: none;
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+  .select__caret {
+    position: absolute;
+    right: .8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--muted);
+  }
+  .select:hover .select__caret { color: var(--ink); }
+  /* Native option list — render in theme color where the platform permits. */
+  .select option {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-serif);
+  }
+  /* Papers — make sure caret/border read on cream */
+  :root[data-theme='papers'] .select select { background: var(--bg-2); }
+</style>

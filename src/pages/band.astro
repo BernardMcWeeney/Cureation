@@ -55,6 +55,7 @@ const facts: Array<[string, string]> = [
 
   {former.length > 0 && (
     <IssueSection kicker="Former members" title="Alumni" meta={`${former.length} past`}>
+      <div class="table-wrap">
       <table class="data">
         <thead><tr><th style="width:50px;">№</th><th>Name</th><th>Instruments</th><th>Tenure</th></tr></thead>
         <tbody>
@@ -68,11 +69,13 @@ const facts: Array<[string, string]> = [
           ))}
         </tbody>
       </table>
+      </div>
     </IssueSection>
   )}
 
   {timeline.length > 0 && (
     <IssueSection kicker="Recent history" title="Timeline" href="/band/history" meta={`${timeline.length} entries`}>
+      <div class="table-wrap">
       <table class="data">
         <thead><tr><th style="width:80px;">Date</th><th style="width:110px;">Kind</th><th>Event</th></tr></thead>
         <tbody>
@@ -88,6 +91,7 @@ const facts: Array<[string, string]> = [
           ))}
         </tbody>
       </table>
+      </div>
     </IssueSection>
   )}
 </Layout>

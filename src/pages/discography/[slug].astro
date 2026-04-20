@@ -4,11 +4,13 @@ import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
 import Button from '../../components/ui/Button.astro';
+import Bookmark from '../../components/ui/Bookmark.astro';
 import {
   getAlbumBySlug,
   listAlbumTrivia,
   listAlbumCharts,
   listEras,
+  fetchRaw,
 } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 
@@ -18,10 +20,16 @@ if (!slug) return Astro.redirect('/discography');
 const album = await getAlbumBySlug(slug);
 if (!album) return new Response('Not found', { status: 404 });
 
-const [trivia, charts, eras] = await Promise.all([
+const [trivia, charts, eras, variants] = await Promise.all([
   listAlbumTrivia(album.id),
   listAlbumCharts(album.id),
   listEras(),
+  fetchRaw('cover_variants', {
+    'filter[album][_eq]': album.id,
+    fields: 'id,format,territory,catalog_number,release_year,label,image,notes,sort',
+    sort: 'sort,release_year',
+    limit: -1,
+  }).catch(() => []) as Promise<any[]>,
 ]);
 
 const songs = (album.songs || []).slice().sort((a, b) => (a.track_number || 0) - (b.track_number || 0));
@@ -96,13 +104,14 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   ogImage={asset(album.cover_art, 'og')}
 >
 
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
     <Crumbs items={[
       { label: 'Home',        href: '/' },
       { label: 'Discography', href: '/discography' },
       ...(era ? [{ label: era.name, href: `/band/history#${era.slug}` }] : []),
       { label: album.title },
     ]} />
+    <Bookmark kind="album" id={album.id} label={album.title} href={`/discography/${album.slug}`} />
   </div>
 
   <!-- HEADER -->
@@ -211,6 +220,11 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
       {totalLivePlays > 0 && (
         <button class="album-tab" role="tab" data-target="live">
           Live performances <span class="album-tab__count">{totalLivePlays.toLocaleString()}</span>
+        </button>
+      )}
+      {variants.length > 0 && (
+        <button class="album-tab" role="tab" data-target="variants">
+          Pressings <span class="album-tab__count">{variants.length}</span>
         </button>
       )}
     </div>
@@ -468,6 +482,33 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
     </section>
   )}
 
+  {variants.length > 0 && (
+    <section class="container album-section" data-panel="variants" hidden>
+      <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px;">
+        <div class="mono muted">Regional pressings & sleeve variants on file</div>
+        <div style="flex: 1; border-top: 1px solid var(--rule);"></div>
+        <div class="mono-sm muted">{variants.length} VARIANT{variants.length === 1 ? '' : 'S'}</div>
+      </div>
+      <div class="variants-grid">
+        {variants.map((v: any) => (
+          <figure class="variant">
+            <div class="variant__img">
+              {v.image
+                ? <img src={asset(v.image, 'card')} alt={`${album.title} · ${v.territory || ''}`} loading="lazy" />
+                : <div class="placeholder" style="aspect-ratio: 1/1;">No sleeve</div>}
+              {v.format && <span class="variant__format mono-sm">{String(v.format).toUpperCase()}</span>}
+            </div>
+            <figcaption>
+              <div class="serif variant__title">{v.territory || '—'}{v.release_year ? ` · ${v.release_year}` : ''}</div>
+              {v.catalog_number && <div class="mono-sm muted">{v.catalog_number}{v.label ? ` · ${v.label}` : ''}</div>}
+              {v.notes && <div class="variant__notes">{v.notes}</div>}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  )}
+
 </Layout>
 
 <style>
@@ -611,6 +652,15 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   .live-bar__fill { transition: background .2s; min-height: 2px; }
   .live-bar__label { font-size: 9px; margin-top: 6px; letter-spacing: 0.06em; }
   .live-bar__count { font-size: 9px; margin-top: 2px; color: var(--accent-3); }
+
+  /* Variants */
+  .variants-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(16px, 2vw, 28px); }
+  .variant { margin: 0; }
+  .variant__img { position: relative; aspect-ratio: 1/1; overflow: hidden; border: 1px solid var(--rule); background: var(--bg-2); }
+  .variant__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .variant__format { position: absolute; top: 8px; left: 8px; background: var(--bg); padding: 3px 6px; border: 1px solid var(--rule); font-size: 9.5px; letter-spacing: .18em; }
+  .variant__title { font-size: 18px; font-style: italic; margin-top: .5rem; }
+  .variant__notes { font-family: var(--f-serif); font-size: 14px; color: var(--ink-2); line-height: 1.5; margin-top: .3rem; }
 </style>
 
 <script>

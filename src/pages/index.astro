@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import StatHero from '../components/ui/StatHero.astro';
 import BarChart from '../components/ui/BarChart.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PullQuote from '../components/ui/PullQuote.astro';
@@ -21,6 +20,7 @@ import {
   getPhotoOfDay,
   getNextConcert,
   getLatestConcert,
+  fetchRaw,
 } from '../lib/directus';
 import { asset } from '../lib/assets';
 
@@ -31,7 +31,7 @@ const [issue, albums, eras, topSongs, figures, otd, news, editorial, quotes, son
   topLivePlayedSongs(10).catch(() => []),
   getRunningFigures(),
   getOnThisDay(),
-  listNews(3),
+  listNews(7),
   listEditorial(1),
   listQuotes(4),
   getSongOfDay().catch(() => null),
@@ -40,6 +40,8 @@ const [issue, albums, eras, topSongs, figures, otd, news, editorial, quotes, son
   getNextConcert().catch(() => null),
   getLatestConcert().catch(() => null),
 ]);
+
+const songAlbum = songOfDay?.album ? albums.find((a) => a.id === songOfDay.album) : null;
 
 const now = new Date();
 const today = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
@@ -67,10 +69,88 @@ const issueFacts = issue ? [
   ['Type', (issue.type || '—').toString().toUpperCase()],
 ] : [];
 
-const songAlbum = songOfDay?.album ? albums.find(a => a.id === songOfDay.album) : null;
 const concert = nextConcert || latestConcert;
 const concertIsFuture = !!nextConcert;
 const concertTarget = concert?.date ? new Date(concert.date).toISOString() : null;
+
+const mm = String(now.getMonth() + 1).padStart(2, '0');
+const monthSetlists = await fetchRaw('setlists', {
+  fields: 'id,slug,date,venue,city,country,tour_name',
+  'filter[date][_contains]': `-${mm}-`,
+  sort: 'date',
+  limit: 400,
+}).catch(() => []);
+const anniversariesShows = (monthSetlists as any[])
+  .map((s) => ({ ...s, yearsAgo: mastYear - Number((s.date || '').slice(0, 4) || 0) }))
+  .filter((s) => s.yearsAgo >= 1 && (s.yearsAgo % 5 === 0 || s.yearsAgo % 10 === 0))
+  .sort((a, b) => b.yearsAgo - a.yearsAgo)
+  .slice(0, 6);
+
+const anniversariesAlbums = albums
+  .filter((a: any) => a.release_date && a.release_date.slice(5, 7) === mm)
+  .map((a: any) => ({ ...a, yearsAgo: mastYear - Number(a.release_date.slice(0, 4)) }))
+  .sort((a: any, b: any) => b.yearsAgo - a.yearsAgo)
+  .slice(0, 8);
+
+// "By the numbers, today" — derived live counters for the right-hand column.
+const mostPlayed = topSongs[0] || null;
+
+const studiosByDate = [...albums]
+  .filter((a) => a.release_date)
+  .sort((a, b) => (a.release_date || '').localeCompare(b.release_date || ''));
+let longestGap: { a: typeof studiosByDate[number]; b: typeof studiosByDate[number]; days: number } | null = null;
+for (let i = 1; i < studiosByDate.length; i++) {
+  const prev = studiosByDate[i - 1];
+  const curr = studiosByDate[i];
+  const days = Math.round(
+    (new Date(curr.release_date!).getTime() - new Date(prev.release_date!).getTime()) / 86400000
+  );
+  if (!longestGap || days > longestGap.days) longestGap = { a: prev, b: curr, days };
+}
+const gapYears = longestGap ? Math.round(longestGap.days / 365) : null;
+
+const newestAlbum = studiosByDate[studiosByDate.length - 1] || null;
+
+const rarestPlayed = topSongs
+  .filter((s: any) => typeof s.times_played_live === 'number' && s.times_played_live > 0)
+  .sort((a: any, b: any) => (a.times_played_live || 0) - (b.times_played_live || 0))[0] || null;
+const rarestPlayedAlbum = rarestPlayed?.album ? albums.find((a) => a.id === rarestPlayed.album) : null;
+
+type Counter = { k: string; v: string; sub: string; href?: string | null };
+const counters: Counter[] = [];
+if (mostPlayed) counters.push({
+  k: 'Most-played song',
+  v: mostPlayed.title,
+  sub: `${(mostPlayed.times_played_live || 0).toLocaleString()} performances`,
+  href: mostPlayed.slug ? `/songs/${mostPlayed.slug}` : null,
+});
+if (newestAlbum) counters.push({
+  k: 'Newest studio record',
+  v: newestAlbum.title,
+  sub: newestAlbum.release_date?.slice(0, 4) || '',
+  href: newestAlbum.slug ? `/discography/${newestAlbum.slug}` : null,
+});
+if (longestGap && gapYears && gapYears > 0) counters.push({
+  k: 'Longest gap between releases',
+  v: `${gapYears} year${gapYears === 1 ? '' : 's'}`,
+  sub: `${longestGap.a.title} → ${longestGap.b.title}`,
+});
+if (rarestPlayed) counters.push({
+  k: 'Rarest in rotation',
+  v: rarestPlayed.title,
+  sub: `${(rarestPlayed.times_played_live || 0).toLocaleString()} plays on file${rarestPlayedAlbum ? ` · ${rarestPlayedAlbum.title}` : ''}`,
+  href: rarestPlayed.slug ? `/songs/${rarestPlayed.slug}` : null,
+});
+
+// "Running figures" cells — derive from counts with editorial sub-captions.
+const firstReleaseYear = studiosByDate[0]?.release_date?.slice(0, 4);
+type FigureCell = { v: string | number; lb: string; sub?: string | null };
+const figureCells: FigureCell[] = [
+  { v: figures.setlists, lb: 'Shows indexed', sub: firstReleaseYear ? `since ${firstReleaseYear}` : null },
+  { v: figures.songs,    lb: 'Distinct songs', sub: `${figures.albums} studio albums` },
+  { v: figures.venues,   lb: 'Rooms played', sub: null },
+  { v: figures.photos,   lb: 'Photos on file', sub: `${figures.members} members catalogued` },
+];
 ---
 <Layout title="Cureation · An editorial archive of The Cure">
 
@@ -90,15 +170,15 @@ const concertTarget = concert?.date ? new Date(concert.date).toISOString() : nul
 
   {concert && concertTarget && (
     <section class="container" style="padding: clamp(24px, 4vw, 48px) 0; border-bottom: 1px solid var(--rule);">
-      <div class="panel-head" style="border: 1px solid var(--accent);">
+      <div class="panel-head" style="border: 1px solid var(--accent); border-bottom-color: var(--accent);">
         <span><span class="pip"></span>{concertIsFuture ? 'Next concert' : 'Most recent concert'}</span>
         <span>{concert.city || ''}{concert.country ? ` · ${concert.country}` : ''}</span>
       </div>
-      <div class="panel" style="border-top: 0; border-color: var(--rule); padding: clamp(20px, 3vw, 36px); background: var(--bg-2);">
+      <div class="panel" style="border: 1px solid var(--accent); border-top: 0; padding: clamp(20px, 3vw, 36px); background: var(--bg-2);">
         <div class="concert-head">
           <div>
             <div class="mono-sm muted">{concert.tour_name || 'Live'}</div>
-            <h3 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; margin: .4rem 0; font-style: italic;">
+            <h3 class="serif" style="font-size: clamp(28px, 4.4vw, 56px); line-height: 1.02; margin: .4rem 0; font-style: italic;">
               {concert.venue_link ? (
                 <a href={`/setlists/${concert.slug}`} style="border:none;">{concert.venue || 'TBA'}</a>
               ) : concert.venue || 'TBA'}
@@ -178,50 +258,131 @@ const concertTarget = concert?.date ? new Date(concert.date).toISOString() : nul
     </section>
   )}
 
-  {(lyricOfDay || photoOfDay || songOfDay) && (
-    <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-bottom: 1px solid var(--rule);">
-      <div class="panel-head" style="border: 1px solid var(--rule); border-bottom: 0;">
-        <span><span class="pip pip--gold"></span>Daily</span>
-        <span>{today.toUpperCase()}</span>
+  <section class="container figures">
+    <div class="figures__head">
+      <div class="issue-label">The archive, measured</div>
+      <div class="mono-sm muted">Updated live</div>
+    </div>
+    <div class="figures__grid">
+      {figureCells.map((c) => (
+        <div class="figures__cell">
+          <div class="figures__val">{typeof c.v === 'number' ? c.v.toLocaleString() : c.v}</div>
+          <div class="figures__lb">{c.lb}</div>
+          {c.sub && <div class="figures__sub mono-sm">{c.sub}</div>}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {(otd.length > 0 || counters.length > 0) && (
+    <section class="issue-section container otd-wrap">
+      <div class="otd-wrap__grid">
+        <div class="otd-col">
+          <div class="issue-label">On this day · {todayShort}</div>
+          <h2 class="issue-hed">
+            <em>{otd.length || 'No'} entr{otd.length === 1 ? 'y' : 'ies'}, across the archive.</em>
+          </h2>
+          {otd.length > 0 && (
+            <ol class="otd__list">
+              {otd.slice(0, 5).map((e: any) => {
+                const href = e.link_collection && e.link_slug ? `/${e.link_collection}/${e.link_slug}` : null;
+                const Inner = (
+                  <>
+                    <div class="otd__year mono">{e.year}</div>
+                    <div class="otd__kind"><span class="tag">{(e.kind || 'entry').toUpperCase()}</span></div>
+                    <div class="otd__body">
+                      <div class="serif otd__title">{e.title}</div>
+                      {e.subtitle && <div class="otd__sub">{e.subtitle}</div>}
+                    </div>
+                  </>
+                );
+                return (
+                  <li class="otd__row">
+                    {href ? <a href={href}>{Inner}</a> : <div>{Inner}</div>}
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
+
+        {counters.length > 0 && (
+          <aside class="otd-col">
+            <div class="issue-label">By the numbers, today</div>
+            <div class="counters">
+              <div class="counters__head">
+                <span class="mono"><span class="pip"></span>Live counters</span>
+                <span class="mono muted">{today}</span>
+              </div>
+              <ul class="counters__list">
+                {counters.map((c) => {
+                  const inner = (
+                    <>
+                      <div class="counters__row-main">
+                        <div class="mono-sm muted counters__k">{c.k}</div>
+                        <div class="serif counters__v">{c.v}</div>
+                      </div>
+                      <div class="mono counters__sub">{c.sub}</div>
+                    </>
+                  );
+                  return (
+                    <li class="counters__row">
+                      {c.href ? <a href={c.href}>{inner}</a> : <div>{inner}</div>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <a class="btn btn--ghost counters__cta" href="/stats">Enter the figures →</a>
+          </aside>
+        )}
       </div>
-      <div class="daily-grid">
+    </section>
+  )}
+
+  {(lyricOfDay || photoOfDay || songOfDay) && (
+    <section class="issue-section container daily">
+      <div class="daily__head">
+        <div class="issue-label">Today's pages</div>
+        <div class="mono-sm muted">{today}</div>
+      </div>
+      <div class="daily__grid">
         {photoOfDay && (
-          <a href={photoOfDay.album_slug ? `/discography/${photoOfDay.album_slug}` : '#'} class="daily-photo" style="text-decoration:none;">
+          <a class="daily__photo" href={photoOfDay.album_slug ? `/discography/${photoOfDay.album_slug}` : '#'}>
             <img src={photoOfDay.image_file ? asset(photoOfDay.image_file, 'hero') : photoOfDay.image_url} alt={photoOfDay.title || 'Photo of the day'} />
-            <div class="daily-photo__overlay">
-              <div class="mono-sm" style="color: var(--accent-ink); margin-bottom:.4rem;"><span class="pip pip--hot"></span>PHOTO OF THE DAY</div>
-              <div class="serif" style="font-size: clamp(22px, 2.6vw, 30px); font-style: italic; line-height: 1.15; color: var(--accent-ink);">{photoOfDay.title || 'Untitled'}</div>
-              <div class="mono-sm" style="margin-top:.4rem; color: rgba(240, 232, 247, 0.7);">
+            <div class="daily__photo-over">
+              <div class="mono-sm daily__photo-kind">Photo of the day</div>
+              <div class="serif daily__photo-title">{photoOfDay.title || 'Untitled'}</div>
+              <div class="mono-sm daily__photo-meta">
                 {[photoOfDay.formatted_date || photoOfDay.date_taken, photoOfDay.location, photoOfDay.photographer].filter(Boolean).join(' · ').toUpperCase()}
               </div>
             </div>
           </a>
         )}
-        <div class="daily-text stack" style="--gap: 0;">
+        <div class="daily__words">
           {lyricOfDay && (
-            <a class="lyric-card daily-lyric" href={lyricOfDay.song.slug ? `/songs/${lyricOfDay.song.slug}` : '#'} style="text-decoration:none; display:block; border: 1px solid var(--rule); border-bottom: 0;">
-              <div class="lyric-card__mark">"</div>
-              <div class="mono-sm muted" style="margin-bottom: .8rem;"><span class="pip pip--gold"></span>LYRIC OF THE DAY</div>
-              <blockquote class="lyric-card__body">{lyricOfDay.line}</blockquote>
-              <div class="lyric-card__cite">— {lyricOfDay.song.title}{songAlbum ? `, ${songAlbum.title}` : ''}</div>
+            <a class="daily__lyric" href={lyricOfDay.song.slug ? `/songs/${lyricOfDay.song.slug}` : '#'}>
+              <div class="mono-sm muted">Lyric of the day</div>
+              <blockquote class="daily__lyric-body">
+                <span class="daily__lyric-mark">&ldquo;</span>{lyricOfDay.line}<span class="daily__lyric-mark">&rdquo;</span>
+              </blockquote>
+              <div class="mono-sm muted">— {lyricOfDay.song.title}{songAlbum ? `, ${songAlbum.title}` : ''}</div>
             </a>
           )}
           {songOfDay && (
-            <a href={songOfDay.slug ? `/songs/${songOfDay.slug}` : '#'} style="display:grid; grid-template-columns: 88px 1fr auto; gap: 14px; align-items:center; border: 1px solid var(--rule); background: var(--bg-2); padding: 14px 16px; text-decoration:none;">
+            <a class="daily__song" href={songOfDay.slug ? `/songs/${songOfDay.slug}` : '#'}>
               {songAlbum?.cover_art ? (
-                <img src={asset(songAlbum.cover_art, 'card')} alt={songAlbum.title} style="width:88px; height:88px; object-fit:cover; border:1px solid var(--rule);" />
-              ) : <div class="placeholder" style="width:88px; height:88px;">—</div>}
-              <div>
-                <div class="mono-sm muted" style="margin-bottom:.3rem;"><span class="pip pip--cool"></span>SONG OF THE DAY</div>
-                <div class="serif" style="font-size: clamp(22px, 2.4vw, 28px); font-style: italic; line-height: 1.05;">{songOfDay.title}</div>
-                <div class="mono-sm muted" style="margin-top:.25rem;">
-                  {songAlbum ? songAlbum.title.toUpperCase() : ''}
-                </div>
+                <img src={asset(songAlbum.cover_art, 'card')} alt={songAlbum.title} />
+              ) : <div class="placeholder daily__song-ph">—</div>}
+              <div class="daily__song-meta">
+                <div class="mono-sm muted">Song of the day</div>
+                <div class="serif daily__song-title">{songOfDay.title}</div>
+                <div class="mono-sm muted">{songAlbum ? songAlbum.title.toUpperCase() : ''}</div>
               </div>
               {songOfDay.times_played_live ? (
-                <div style="text-align:right;">
-                  <div class="serif" style="font-size: 26px; font-style: italic; color: var(--gold); line-height: 1;">{songOfDay.times_played_live.toLocaleString()}</div>
-                  <div class="mono-sm muted" style="margin-top:.2rem;">PLAYS LIVE</div>
+                <div class="daily__song-count">
+                  <div class="serif daily__song-n">{songOfDay.times_played_live.toLocaleString()}</div>
+                  <div class="mono-sm muted">plays live</div>
                 </div>
               ) : null}
             </a>
@@ -231,45 +392,46 @@ const concertTarget = concert?.date ? new Date(concert.date).toISOString() : nul
     </section>
   )}
 
-  <section class="container" style="margin-top: clamp(24px, 4vw, 48px);">
-    <div class="panel-head" style="margin-bottom: 0; border: 1px solid var(--rule);">
-      <span>Running figures</span>
-      <span>Live · the archive</span>
-    </div>
-    <StatHero stats={[
-      { label: 'Studio albums', value: figures.albums },
-      { label: 'Songs catalogued', value: figures.songs },
-      { label: 'Setlists on file', value: figures.setlists },
-      { label: 'Venues visited', value: figures.venues },
-      { label: 'Archive photos', value: figures.photos },
-      { label: 'Band members', value: figures.members },
-    ]} />
-  </section>
-
-  {otd.length > 0 && (
-    <IssueSection kicker="On this day" title={todayShort} href="/on-this-day" meta={`${otd.length} entries`}>
-      <table class="data">
-        <thead>
-          <tr><th style="width:80px;">Year</th><th style="width:140px;">Kind</th><th>Entry</th><th></th></tr>
-        </thead>
-        <tbody>
-          {otd.slice(0, 6).map((e: any) => (
-            <tr>
-              <td class="num" style="text-align:left; font-size:14px; color: var(--gold);">{e.year}</td>
-              <td class="idx">{(e.kind || '').toUpperCase()}</td>
-              <td>
-                <span class="serif" style="font-size:17px;">{e.title}</span>
-                {e.subtitle && <div class="muted" style="font-family:var(--f-serif); font-style:italic; font-size:14px;">{e.subtitle}</div>}
-              </td>
-              <td class="num">
-                {e.link_collection && e.link_slug && (
-                  <a href={`/${e.link_collection}/${e.link_slug}`} style="color: var(--accent-3);">→</a>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+  {(anniversariesAlbums.length > 0 || anniversariesShows.length > 0) && (
+    <IssueSection kicker={`This month · ${monthName}`} title="Anniversaries" meta="Records & shows, this month in Cure history">
+      <div class="anniv">
+        {anniversariesAlbums.length > 0 && (
+          <div class="anniv__col">
+            <div class="mono-sm muted" style="margin-bottom:.6rem;">Records released</div>
+            <ul class="anniv__list">
+              {anniversariesAlbums.map((a: any) => (
+                <li>
+                  <a href={`/discography/${a.slug}`}>
+                    {a.cover_art && <img src={asset(a.cover_art, 'thumb')} alt={a.title} />}
+                    <div>
+                      <div class="serif anniv__t">{a.title}</div>
+                      <div class="mono-sm muted">{a.release_date?.slice(0, 10)} · {a.yearsAgo} year{a.yearsAgo === 1 ? '' : 's'} ago</div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {anniversariesShows.length > 0 && (
+          <div class="anniv__col">
+            <div class="mono-sm muted" style="margin-bottom:.6rem;">Shows, milestone years</div>
+            <ul class="anniv__list">
+              {anniversariesShows.map((s: any) => (
+                <li>
+                  <a href={`/setlists/${s.slug}`}>
+                    <div class="anniv__badge mono-sm">{s.yearsAgo}y</div>
+                    <div>
+                      <div class="serif anniv__t">{s.venue || s.city || '—'}</div>
+                      <div class="mono-sm muted">{s.date} · {[s.city, s.country].filter(Boolean).join(', ')}{s.tour_name ? ` · ${s.tour_name}` : ''}</div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </IssueSection>
   )}
 
@@ -301,15 +463,55 @@ const concertTarget = concert?.date ? new Date(concert.date).toISOString() : nul
     </div>
   </IssueSection>
 
-  {editorial[0] && (
-    <IssueSection kicker="Editorial" title={editorial[0].title || 'From the editor'} href={editorial[0].slug ? `/news/${editorial[0].slug}` : '/news'}>
-      <div class="editorial">
-        {editorial[0].subtitle && <p class="deck">{editorial[0].subtitle}</p>}
-        {editorial[0].excerpt && <p class="deck" style="color: var(--ink-2);">{editorial[0].excerpt}</p>}
-        <Button href={editorial[0].slug ? `/news/${editorial[0].slug}` : '/news'} variant="ghost">Continue reading →</Button>
-      </div>
-    </IssueSection>
-  )}
+  {editorial[0] && (() => {
+    const e = editorial[0];
+    const href = e.slug ? `/news/${e.slug}` : '/news';
+    // Strip HTML to plain paragraphs — take the first 2 for the home page excerpt.
+    const stripTags = (s: string) => s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const raw = e.excerpt || (e.content ? stripTags(e.content) : '') || e.subtitle || '';
+    const paraSplit = new RegExp('\\n\\n+|(?<=\\.)\\s\\s+');
+    const paragraphs = raw
+      .split(paraSplit)
+      .map(stripTags)
+      .filter(Boolean)
+      .slice(0, 2);
+    const firstPara = paragraphs[0] || '';
+    const firstChar = firstPara.charAt(0);
+    const restFirst = firstPara.slice(1);
+    const tags = Array.isArray(e.tags) ? e.tags : [];
+    const filedUnder = tags.length ? tags.slice(0, 6).join(' · ') : (e.category ? e.category.toUpperCase() : null);
+    const essayNum = String(e.id).padStart(3, '0');
+    return (
+      <section class="issue-section container essay">
+        <div class="essay__grid">
+          <aside class="essay__meta">
+            <div class="issue-label">Essay № {essayNum}</div>
+            <div class="mono-sm muted">{e.author_name ? `By ${e.author_name}` : 'By the archive editors'}</div>
+            <div class="mono-sm muted">
+              {e.reading_time ? `${e.reading_time} min` : '—'}
+              {(e.published_date || e.date_created) && ` · ${(e.published_date || e.date_created).slice(0, 10)}`}
+            </div>
+            {filedUnder && (
+              <div class="essay__filed">
+                <div class="mono-sm muted">Filed under</div>
+                <div class="essay__filed-body">{filedUnder}</div>
+              </div>
+            )}
+          </aside>
+          <div class="essay__body">
+            <h2 class="essay__head serif">{e.title || 'From the editor'}</h2>
+            {firstPara && (
+              <p class="essay__p">
+                <span class="essay__drop">{firstChar}</span>{restFirst}
+              </p>
+            )}
+            {paragraphs[1] && <p class="essay__p">{paragraphs[1]}</p>}
+            <a class="btn btn--ghost essay__cta" href={href}>Continue reading →</a>
+          </div>
+        </div>
+      </section>
+    );
+  })()}
 
   {quotes.length > 0 && (
     <IssueSection kicker="In their words" title="Epigraphs">
@@ -322,37 +524,55 @@ const concertTarget = concert?.date ? new Date(concert.date).toISOString() : nul
   )}
 
   {eras.length > 0 && (
-    <section class="container" style="padding: clamp(20px, 3vw, 32px) 0; border-bottom: 1px solid var(--rule);">
-      <div class="eras-strip">
-        <div class="eras-strip__lead">
-          <div class="mono-sm muted">Chronology</div>
-          <a href="/band/history" class="eras-strip__link serif">Six eras →</a>
-        </div>
-        <div class="eras-strip__rail">
-          {eras.map((e: any, i: number) => (
-            <a href={`/band/history#${e.slug}`} class="eras-strip__item">
-              <div class="mono-sm" style="color: var(--cool); font-size: 9.5px;">{String(i + 1).padStart(2, '0')} · {e.year_start}–{e.year_end && e.year_end < 2099 ? e.year_end : 'now'}</div>
-              <div class="serif" style="font-style: italic; font-size: 15px; line-height: 1.1; margin-top: .15rem;">{e.name}</div>
+    <IssueSection kicker={`${eras.length} eras`} title="A catalog, divided." href="/band/history">
+      <div class="era-cards">
+        {eras.map((e: any) => {
+          const hue = typeof e.hue === 'number' ? e.hue : 320;
+          const range = e.year_end && e.year_end < 2099 ? `${e.year_start}–${e.year_end}` : `${e.year_start}–present`;
+          return (
+            <a class="era-card" href={`/band/history#${e.slug}`}>
+              <span class="era-card__dot" style={`background: oklch(0.6 0.15 ${hue});`}></span>
+              <div class="serif era-card__title">{e.name}</div>
+              <div class="mono-sm muted era-card__range">{range}</div>
+              {e.description && <p class="era-card__body">{e.description}</p>}
+              <div class="mono-sm era-card__cue">
+                <span>Read →</span>
+              </div>
             </a>
-          ))}
-        </div>
+          );
+        })}
+      </div>
+    </IssueSection>
+  )}
+
+  {news.length > 0 && (
+    <section class="issue-section container dispatches">
+      <div class="dispatches__head">
+        <div class="issue-label">Dispatches from the archive</div>
+        <a class="mono-sm dispatches__all" href="/news">All {news.length} dispatches →</a>
+      </div>
+      <div class="dispatches__grid">
+        {news.slice(0, 6).map((n: any) => (
+          <article class="dispatch">
+            <a href={n.slug ? `/news/${n.slug}` : '#'} class="dispatch__link">
+              <div class="dispatch__meta">
+                {n.category && <span class="tag">{String(n.category).toUpperCase()}</span>}
+                <time class="mono-sm muted">
+                  {new Date(n.published_date || n.date_created || Date.now())
+                    .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                    .toUpperCase()}
+                </time>
+              </div>
+              <h3 class="dispatch__title serif">{n.title}</h3>
+              {n.excerpt && <p class="dispatch__excerpt">{n.excerpt}</p>}
+              <div class="mono-sm dispatch__cue">Read dispatch →</div>
+            </a>
+          </article>
+        ))}
       </div>
     </section>
   )}
 
-  {news.length > 0 && (
-    <IssueSection kicker="Dispatches" title="Recent news" href="/news" meta={`${news.length} latest`}>
-      <div class="news-grid">
-        {news.map((n: any, i: number) => (
-          <article class="news-entry">
-            <div class="mono-sm muted" style="margin-bottom:.4rem;">№ {String(i + 1).padStart(2, '0')} · <time>{n.date_created?.slice(0, 10)}</time></div>
-            <a class="news-entry__title serif" href={n.slug ? `/news/${n.slug}` : '#'}>{n.title}</a>
-            {n.excerpt && <p class="news-entry__excerpt">{n.excerpt}</p>}
-          </article>
-        ))}
-      </div>
-    </IssueSection>
-  )}
 
 </Layout>
 
@@ -366,26 +586,352 @@ const concertTarget = concert?.date ? new Date(concert.date).toISOString() : nul
   .concert-head { display: grid; grid-template-columns: 1fr auto; gap: clamp(16px, 3vw, 40px); align-items: center; }
   @media (max-width: 780px) { .concert-head { grid-template-columns: 1fr; } }
 
-  .daily-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0; border: 1px solid var(--rule); border-top: 0; }
-  .daily-photo { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--bg-2); display: block; border-right: 1px solid var(--rule); }
-  .daily-photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.08); transition: transform .6s ease; }
-  .daily-photo:hover img { transform: scale(1.03); }
-  .daily-photo__overlay { position: absolute; inset: auto 0 0 0; padding: clamp(16px, 2.4vw, 26px); background: linear-gradient(to top, rgba(0,0,0,0.9) 10%, rgba(0,0,0,0.55) 60%, transparent); }
-  .daily-text { display: flex; flex-direction: column; }
-  .daily-lyric { flex: 1; }
-  @media (max-width: 900px) {
-    .daily-grid { grid-template-columns: 1fr; }
-    .daily-photo { aspect-ratio: 16/9; border-right: 0; border-bottom: 1px solid var(--rule); }
+  /* Running figures — 4-col strip, editorial tabular numerals, mono sub-caption */
+  .figures {
+    padding-top: clamp(36px, 5vw, 72px);
+    padding-bottom: clamp(36px, 5vw, 72px);
+    border-top: 1px solid var(--rule-strong);
   }
+  .figures__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; margin-bottom: clamp(20px, 3vw, 36px); flex-wrap: wrap;
+  }
+  .figures__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--ink-2);
+  }
+  .figures__cell {
+    padding: clamp(18px, 2.6vw, 30px) clamp(12px, 1.8vw, 24px) clamp(18px, 2.6vw, 30px) 0;
+    border-right: 1px solid var(--rule);
+    display: flex; flex-direction: column; gap: .35rem;
+    min-width: 0;
+  }
+  .figures__cell:last-child { border-right: 0; }
+  .figures__val {
+    font-family: var(--f-display); font-style: italic; font-weight: 500;
+    font-size: clamp(40px, 5.6vw, 84px); line-height: .95;
+    letter-spacing: -.015em; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  :root[data-theme='papers'] .figures__val { color: var(--accent); }
+  .figures__lb {
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .figures__sub {
+    color: var(--accent-3); letter-spacing: .14em; font-size: 10.5px;
+    text-transform: uppercase;
+  }
+  :root[data-theme='papers'] .figures__sub { color: var(--accent); }
+  @media (max-width: 720px) { .figures__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .figures__cell:nth-child(2n) { border-right: 0; } .figures__cell:nth-child(n+3) { border-top: 1px solid var(--rule); padding-top: clamp(20px, 3vw, 32px); } }
+
+  /* On this day + By the numbers today — 2-col split. */
+  .otd-wrap__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
+  }
+  @media (max-width: 960px) { .otd-wrap__grid { grid-template-columns: 1fr; } }
+  .otd-col { display: flex; flex-direction: column; gap: clamp(16px, 2.4vw, 28px); min-width: 0; }
+  .otd-col .issue-hed { margin: 0; }
+
+  .otd__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink-2); }
+  .otd__row { border-bottom: 1px solid var(--rule); }
+  .otd__row > a,
+  .otd__row > div {
+    display: grid;
+    grid-template-columns: 72px 120px 1fr;
+    gap: clamp(12px, 2vw, 22px);
+    padding: clamp(18px, 2.4vw, 26px) 0;
+    align-items: baseline;
+    color: inherit; border: none;
+    min-width: 0;
+  }
+  .otd__row > a:hover .otd__title { color: var(--accent-3); }
+  :root[data-theme='papers'] .otd__row > a:hover .otd__title { color: var(--accent); }
+  .otd__year { color: var(--accent-3); font-size: 13px; letter-spacing: .14em; }
+  :root[data-theme='papers'] .otd__year { color: var(--accent); }
+  .otd__title { font-family: var(--f-serif); font-style: italic; font-size: clamp(18px, 2.2vw, 24px); line-height: 1.25; color: var(--ink); }
+  .otd__sub { font-family: var(--f-serif); font-size: 14.5px; line-height: 1.55; color: var(--muted); margin-top: .25rem; max-width: 60ch; }
+  @media (max-width: 720px) {
+    .otd__row > a,
+    .otd__row > div { grid-template-columns: 72px 1fr; row-gap: .4rem; }
+    .otd__kind { grid-column: 1 / 3; }
+    .otd__body { grid-column: 1 / 3; }
+  }
+
+  /* By-the-numbers-today panel */
+  .counters {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  .counters__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 14px 20px; border-bottom: 1px solid var(--rule);
+    background: var(--bg-2);
+  }
+  .counters__list { list-style: none; margin: 0; padding: 0; }
+  .counters__row { border-bottom: 1px solid var(--rule-2); }
+  .counters__row:last-child { border-bottom: 0; }
+  .counters__row > a,
+  .counters__row > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    padding: clamp(14px, 2vw, 20px) clamp(16px, 2.2vw, 24px);
+    align-items: baseline;
+    color: inherit; border: none; min-width: 0;
+  }
+  .counters__row-main { min-width: 0; }
+  .counters__k { margin-bottom: 4px; }
+  .counters__v { font-size: clamp(18px, 2vw, 22px); font-style: italic; line-height: 1.2; color: var(--ink); }
+  .counters__row > a:hover .counters__v { color: var(--accent-3); }
+  :root[data-theme='papers'] .counters__row > a:hover .counters__v { color: var(--accent); }
+  .counters__sub {
+    color: var(--accent-3);
+    letter-spacing: .14em; font-size: 10.5px;
+    white-space: nowrap; align-self: center;
+    font-family: var(--f-mono); text-transform: uppercase;
+    max-width: 42ch;
+  }
+  :root[data-theme='papers'] .counters__sub { color: var(--accent); }
+  @media (max-width: 520px) {
+    .counters__row > a,
+    .counters__row > div { grid-template-columns: 1fr; }
+    .counters__sub { white-space: normal; }
+  }
+  .counters__cta { align-self: stretch; justify-content: center; text-decoration: none; }
+
+  /* Daily — photo (left) + lyric/song stack (right) */
+  .daily__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; margin-bottom: clamp(16px, 2.4vw, 28px);
+  }
+  .daily__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(20px, 3vw, 40px);
+    align-items: stretch;
+  }
+  @media (max-width: 900px) { .daily__grid { grid-template-columns: 1fr; } }
+
+  .daily__photo {
+    position: relative; overflow: hidden;
+    aspect-ratio: 4/3;
+    border: 1px solid var(--rule); background: var(--bg-2);
+    display: block; color: inherit;
+  }
+  .daily__photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.88) contrast(1.08); transition: transform .6s ease; }
+  .daily__photo:hover img { transform: scale(1.03); }
+  .daily__photo-over {
+    position: absolute; inset: auto 0 0 0;
+    padding: clamp(16px, 2.4vw, 26px);
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 10%, rgba(0,0,0,0.5) 60%, transparent);
+    color: #F1E9F9;
+  }
+  .daily__photo-kind { letter-spacing: .22em; color: var(--accent-3); }
+  :root[data-theme='papers'] .daily__photo-kind { color: #F3EEDF; }
+  .daily__photo-title { font-size: clamp(22px, 2.6vw, 32px); font-style: italic; line-height: 1.15; color: #F1E9F9; margin-top: .3rem; }
+  .daily__photo-meta { color: rgba(241, 233, 249, 0.7); margin-top: .3rem; letter-spacing: .18em; }
+
+  .daily__words { display: grid; grid-template-rows: 1fr auto; gap: 0; }
+
+  .daily__lyric {
+    display: block; color: inherit;
+    padding: clamp(24px, 3.6vw, 44px);
+    border: 1px solid var(--rule);
+    background:
+      radial-gradient(600px 300px at 20% 0%, var(--accent-tint-2), transparent 70%),
+      var(--bg-2);
+    position: relative;
+    text-decoration: none;
+  }
+  .daily__lyric-body {
+    font-family: var(--f-display); font-style: italic;
+    font-size: clamp(22px, 2.6vw, 36px); line-height: 1.2; margin: .8rem 0;
+    color: var(--ink);
+  }
+  .daily__lyric-mark { color: var(--accent); font-family: var(--f-display); }
+  .daily__lyric:hover .daily__lyric-body { color: var(--accent-3); }
+  :root[data-theme='papers'] .daily__lyric:hover .daily__lyric-body { color: var(--accent); }
+
+  .daily__song {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-top: 0;
+    background: var(--bg-2);
+    color: inherit;
+    text-decoration: none;
+  }
+  .daily__song img,
+  .daily__song-ph { width: 96px; height: 96px; object-fit: cover; border: 1px solid var(--rule); }
+  .daily__song-meta { min-width: 0; }
+  .daily__song-title { font-size: clamp(20px, 2.2vw, 26px); font-style: italic; line-height: 1.1; margin: .25rem 0; }
+  .daily__song:hover .daily__song-title { color: var(--accent-3); }
+  :root[data-theme='papers'] .daily__song:hover .daily__song-title { color: var(--accent); }
+  .daily__song-count { text-align: right; white-space: nowrap; }
+  .daily__song-n { font-size: 26px; font-style: italic; color: var(--accent-3); line-height: 1; }
+  :root[data-theme='papers'] .daily__song-n { color: var(--accent); }
+  @media (max-width: 520px) {
+    .daily__song { grid-template-columns: 72px 1fr; }
+    .daily__song img, .daily__song-ph { width: 72px; height: 72px; }
+    .daily__song-count { grid-column: 1 / 3; text-align: left; padding-top: .4rem; border-top: 1px solid var(--rule-2); }
+  }
+
+  /* Era cards — 3-col grid with dot, title, range, excerpt, cue */
+  .era-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(12px, 1.8vw, 20px);
+  }
+  @media (max-width: 900px) { .era-cards { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .era-cards { grid-template-columns: 1fr; } }
+  .era-card {
+    display: flex; flex-direction: column; gap: .5rem;
+    padding: clamp(20px, 2.6vw, 28px);
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    color: inherit; text-decoration: none;
+    min-height: 200px;
+    position: relative;
+    transition: border-color .2s;
+  }
+  .era-card:hover { border-color: var(--rule-strong); }
+  .era-card__dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    box-shadow: 0 0 14px currentColor;
+    margin-bottom: .6rem;
+  }
+  .era-card__title { font-size: clamp(24px, 2.6vw, 32px); font-style: italic; line-height: 1.05; letter-spacing: -.005em; }
+  .era-card:hover .era-card__title { color: var(--accent-3); }
+  :root[data-theme='papers'] .era-card:hover .era-card__title { color: var(--accent); }
+  .era-card__range { letter-spacing: .2em; }
+  .era-card__body { font-family: var(--f-serif); font-size: 14px; line-height: 1.55; color: var(--muted); margin: .2rem 0 2.4rem; text-wrap: pretty; }
+  .era-card__cue {
+    position: absolute; left: clamp(20px, 2.6vw, 28px); right: clamp(20px, 2.6vw, 28px); bottom: 18px;
+    display: flex; justify-content: flex-end; color: var(--accent-3);
+    letter-spacing: .18em;
+  }
+  :root[data-theme='papers'] .era-card__cue { color: var(--accent); }
 
   .editorial { display: flex; flex-direction: column; gap: 1rem; max-width: 68ch; }
   .quotes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(24px, 3vw, 48px); }
 
-  .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(20px, 2.8vw, 40px); border-top: 1px solid var(--ink); padding-top: clamp(18px, 2vw, 28px); }
-  .news-entry { display: flex; flex-direction: column; gap: .5rem; }
-  .news-entry__title { font-size: clamp(22px, 2vw, 28px); font-style: italic; color: var(--ink); border: none; line-height: 1.15; }
-  .news-entry__title:hover { color: var(--accent-3); }
-  .news-entry__excerpt { font-family: var(--f-serif); color: var(--ink-2); margin: 0; font-size: 15px; line-height: 1.55; }
+  /* Essay № N — 1/2 col layout with drop-cap leader paragraph */
+  .essay__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: clamp(28px, 4vw, 64px);
+    align-items: start;
+  }
+  @media (max-width: 820px) { .essay__grid { grid-template-columns: 1fr; } }
+  .essay__meta { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+  .essay__filed { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: .3rem; }
+  .essay__filed-body { font-family: var(--f-serif); font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
+  .essay__head {
+    font-size: clamp(36px, 4.4vw, 58px);
+    font-style: italic; line-height: 1.05;
+    letter-spacing: -.015em;
+    margin: 0 0 1.2rem;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .essay__p {
+    font-family: var(--f-serif);
+    font-size: clamp(17px, 1.5vw, 19px);
+    line-height: 1.65;
+    color: var(--ink-2);
+    margin: 0 0 1.1rem;
+    text-wrap: pretty;
+  }
+  .essay__p:first-of-type::first-letter,
+  .essay__drop {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 5.4em;
+    line-height: .72;
+    float: left;
+    margin: .08em .12em 0 0;
+    color: var(--accent);
+  }
+  :root[data-theme='papers'] .essay__drop { color: var(--accent-2); }
+  .essay__cta { margin-top: .4rem; text-decoration: none; }
+
+  /* Dispatches from the archive — 3-col card grid */
+  .dispatches__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 1rem; margin-bottom: clamp(14px, 2vw, 22px); flex-wrap: wrap;
+  }
+  .dispatches__all {
+    color: var(--accent-3); border: none;
+    letter-spacing: .18em; text-transform: uppercase;
+  }
+  :root[data-theme='papers'] .dispatches__all { color: var(--accent); }
+  .dispatches__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(20px, 3vw, 44px);
+  }
+  @media (max-width: 900px) { .dispatches__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .dispatches__grid { grid-template-columns: 1fr; } }
+  .dispatch { border-top: 1px solid var(--rule-strong); padding-top: clamp(14px, 2vw, 20px); }
+  .dispatch__link { display: flex; flex-direction: column; gap: .6rem; color: inherit; border: none; }
+  .dispatch__meta { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .dispatch__title {
+    font-size: clamp(22px, 2.2vw, 28px); font-style: italic; line-height: 1.2;
+    color: var(--ink); margin: .1rem 0 .2rem; text-wrap: balance;
+  }
+  .dispatch__link:hover .dispatch__title { color: var(--accent-3); }
+  :root[data-theme='papers'] .dispatch__link:hover .dispatch__title { color: var(--accent); }
+  .dispatch__excerpt {
+    font-family: var(--f-serif); font-size: 14.5px; line-height: 1.55;
+    color: var(--muted); margin: 0; text-wrap: pretty;
+  }
+  .dispatch__cue { color: var(--accent-3); letter-spacing: .22em; margin-top: .2rem; }
+  :root[data-theme='papers'] .dispatch__cue { color: var(--accent); }
+
+  .frontpage { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr); gap: 0; border-top: 1px solid var(--ink); }
+  .frontpage__lead { border-right: 1px solid var(--rule); padding: clamp(16px, 2.4vw, 28px) clamp(20px, 3vw, 36px) clamp(20px, 3vw, 32px) 0; }
+  .frontpage__lead-link { display: block; color: inherit; border: none; }
+  .frontpage__lead-hero { aspect-ratio: 16/9; overflow: hidden; background: var(--bg-2); margin-bottom: clamp(14px, 2vw, 20px); }
+  .frontpage__lead-hero img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.92) contrast(1.04); transition: transform .6s ease; }
+  .frontpage__lead-link:hover .frontpage__lead-hero img { transform: scale(1.02); }
+  .frontpage__lead-title { font-size: clamp(34px, 5vw, 64px); font-style: italic; line-height: 1; letter-spacing: -.01em; margin: .4rem 0 .6rem; color: var(--ink); }
+  .frontpage__lead-link:hover .frontpage__lead-title { color: var(--accent-3); }
+  .frontpage__lead-deck { font-family: var(--f-serif); font-size: 18px; line-height: 1.55; color: var(--ink-2); max-width: 56ch; margin: 0; }
+  .frontpage__rail { display: flex; flex-direction: column; padding: clamp(16px, 2vw, 24px) 0 clamp(16px, 2vw, 24px) clamp(18px, 2.4vw, 28px); }
+  .frontpage__rail-head { letter-spacing: .22em; border-bottom: 1px solid var(--rule); padding-bottom: .5rem; margin-bottom: .8rem; }
+  .frontpage__item { display: block; color: inherit; border: none; padding: .9rem 0; border-bottom: 1px solid var(--rule-2); }
+  .frontpage__item:last-of-type { border-bottom: 0; }
+  .frontpage__item-meta { font-size: 10px; letter-spacing: .16em; margin-bottom: .25rem; }
+  .frontpage__item-title { font-size: clamp(17px, 1.6vw, 20px); font-style: italic; line-height: 1.2; color: var(--ink); }
+  .frontpage__item:hover .frontpage__item-title { color: var(--accent-3); }
+  .frontpage__item-excerpt { font-family: var(--f-serif); font-size: 14px; line-height: 1.5; color: var(--muted); margin-top: .3rem; max-width: 40ch; }
+  .frontpage__more { color: var(--accent-3); border: none; margin-top: 1rem; letter-spacing: .22em; align-self: flex-start; }
+  @media (max-width: 900px) {
+    .frontpage { grid-template-columns: 1fr; }
+    .frontpage__lead { border-right: 0; border-bottom: 1px solid var(--rule); padding-right: 0; }
+    .frontpage__rail { padding-left: 0; }
+  }
+
+  .anniv { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2.4vw, 40px); }
+  @media (max-width: 820px) { .anniv { grid-template-columns: 1fr; } }
+  .anniv__col { border-top: 1px solid var(--rule); padding-top: 1rem; }
+  .anniv__list { list-style: none; margin: 0; padding: 0; }
+  .anniv__list li + li { margin-top: .5rem; }
+  .anniv__list a { display: grid; grid-template-columns: 56px 1fr; gap: .8rem; align-items: center; padding: .5rem; border: 1px solid transparent; border-radius: 2px; text-decoration: none; }
+  .anniv__list a:hover { border-color: var(--rule); background: var(--bg-2); }
+  .anniv__list img { width: 56px; height: 56px; object-fit: cover; border: 1px solid var(--rule); }
+  .anniv__badge { width: 56px; height: 56px; display:grid; place-items:center; border: 1px solid var(--accent); color: var(--accent-3); background: var(--accent-tint); font-size: 12px; letter-spacing: .1em; }
+  .anniv__t { font-size: 17px; font-style: italic; color: var(--ink); }
 </style>
 
 <script>

@@ -2,6 +2,7 @@
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
+import Bookmark from '../../components/ui/Bookmark.astro';
 import Tag from '../../components/ui/Tag.astro';
 import { getVenueBySlug, listSetlists } from '../../lib/directus';
 import { asset } from '../../lib/assets';
@@ -40,13 +41,14 @@ const facts: Array<[string, string]> = [
 const heroSrc = venue.photo_file ? asset(venue.photo_file, 'hero') : null;
 const country = (venue.country || 'ROOM').toUpperCase();
 ---
-<Layout title={`${venue.name} · Venues · Cureation`}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+<Layout title={`${venue.name} · Venues · Cureation`} description={venue.description || `${venue.name}, ${[venue.city, venue.country].filter(Boolean).join(', ')}.`} ogImage={venue.photo_file ? asset(venue.photo_file, 'og') : undefined}>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'Venues', href: '/venues' },
       { label: venue.name },
     ]} />
+    <Bookmark kind="venue" id={venue.id} label={venue.name} href={`/venues/${venue.slug}`} />
   </div>
 
   <section class="container dossier">

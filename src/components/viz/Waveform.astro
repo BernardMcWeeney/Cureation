@@ -1,0 +1,74 @@
+---
+/**
+ * Decorative waveform. We don't have audio stems — this generates a deterministic
+ * shape from a seed (song title / id) so every song's "signature" is stable.
+ * Not a scientific reading. Visual metaphor for tempo, dynamics, runtime.
+ */
+interface Props {
+  seed: string;
+  bars?: number;
+  height?: number;
+  class?: string;
+  duration?: string | null;
+  title?: string;
+}
+const { seed, bars = 84, height = 56, class: klass = '', duration = null, title = 'waveform' } = Astro.props;
+
+// Deterministic PRNG from string seed.
+function hash(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mulberry32(a: number) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const rand = mulberry32(hash(seed));
+// Build an amplitude envelope — loud intro, quiet verse, swell, chorus peaks, tail.
+const heights: number[] = [];
+for (let i = 0; i < bars; i++) {
+  const t = i / (bars - 1);
+  // Envelope: small ease-in, two swells, fade out.
+  const env = Math.min(
+    1,
+    0.35 + 0.45 * Math.sin(Math.PI * t) + 0.25 * Math.sin(Math.PI * 3 * t)
+  );
+  const noise = 0.55 + rand() * 0.45;
+  heights.push(Math.max(0.12, env * noise));
+}
+const barW = 2;
+const gap = 2;
+const totalW = bars * (barW + gap) - gap;
+---
+<figure class={`waveform ${klass}`} aria-label={`${title} waveform`}>
+  <svg viewBox={`0 0 ${totalW} ${height}`} preserveAspectRatio="none" width="100%" height={height} role="img">
+    {heights.map((h, i) => {
+      const bh = h * (height - 4);
+      const y = (height - bh) / 2;
+      return (
+        <rect
+          x={i * (barW + gap)}
+          y={y}
+          width={barW}
+          height={bh}
+          fill="currentColor"
+          opacity={0.55 + h * 0.4}
+        />
+      );
+    })}
+  </svg>
+  {duration && <figcaption class="waveform__cap mono-sm muted">{duration}</figcaption>}
+</figure>
+
+<style>
+  .waveform { margin: 0; display: flex; flex-direction: column; gap: .35rem; color: var(--accent-3); }
+  :root[data-theme='papers'] .waveform { color: var(--accent); }
+  .waveform svg { display: block; }
+  .waveform__cap { font-size: 10px; letter-spacing: .16em; }
+</style>

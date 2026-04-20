@@ -1,0 +1,92 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import { listVenues } from '../../lib/directus';
+
+export const prerender = false;
+
+const venues = await listVenues();
+const withCoords = venues.filter((v) => v.latitude && v.longitude);
+const points = withCoords.map((v) => ({
+  id: v.id,
+  slug: v.slug,
+  name: v.name,
+  city: v.city,
+  country: v.country,
+  lat: Number(v.latitude),
+  lng: Number(v.longitude),
+  shows: v.cure_show_count || 1,
+  capacity: v.capacity || null,
+}));
+---
+<Layout title="Venues — map · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Venues', href: '/venues' }, { label: 'Map' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">SECTION · GEOGRAPHY</div>
+      <h1 class="serif" style="font-size: clamp(44px, 6.5vw, 80px); line-height:.95; font-style: italic; margin: 0;">Venues, mapped.</h1>
+      <p class="deck" style="max-width: 62ch;">Every venue with coordinates on file. Pin size scales with show count; click a pin to open the venue record.</p>
+      <div class="facts">
+        <div class="facts__item"><div class="facts__k">On map</div><div class="facts__v">{points.length}</div></div>
+        <div class="facts__item"><div class="facts__k">Total venues</div><div class="facts__v">{venues.length}</div></div>
+        <div class="facts__item"><div class="facts__k">With capacity</div><div class="facts__v">{points.filter((p) => p.capacity).length}</div></div>
+      </div>
+    </div>
+  </div>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <section class="container" style="padding: clamp(20px, 3vw, 32px) 0 clamp(48px, 6vw, 80px);">
+    <div id="venues-map" class="venues-map" data-points={JSON.stringify(points)}></div>
+  </section>
+</Layout>
+
+<script>
+  async function boot() {
+    const el = document.getElementById('venues-map');
+    if (!el || (el as any)._booted) return;
+    (el as any)._booted = true;
+    const L = (await import('https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js' as any)).default;
+    const points = JSON.parse(el.getAttribute('data-points') || '[]');
+    const map = L.map(el, { worldCopyJump: true, scrollWheelZoom: false }).setView([30, 10], 2);
+    const darkUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    const lightUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    const pickUrl = () => (document.documentElement.getAttribute('data-theme') === 'papers' ? lightUrl : darkUrl);
+    let tiles = L.tileLayer(pickUrl(), {
+      attribution: '&copy; OpenStreetMap, &copy; CARTO',
+      subdomains: 'abcd', maxZoom: 18,
+    }).addTo(map);
+    const refreshTiles = () => {
+      const next = pickUrl();
+      if (tiles._url === next) return;
+      map.removeLayer(tiles);
+      tiles = L.tileLayer(next, { attribution: '&copy; OpenStreetMap, &copy; CARTO', subdomains: 'abcd', maxZoom: 18 }).addTo(map);
+      el.style.background = next === lightUrl ? '#F6F1E4' : '#0b0b12';
+    };
+    new MutationObserver(refreshTiles).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const max = Math.max(1, ...points.map((p: any) => p.shows));
+    points.forEach((p: any) => {
+      const r = 4 + Math.round((p.shows / max) * 14);
+      const marker = L.circleMarker([p.lat, p.lng], {
+        radius: r,
+        color: '#C89B4A',
+        weight: 1,
+        fillColor: '#7746B0',
+        fillOpacity: 0.72,
+      }).addTo(map);
+      marker.bindPopup(`
+        <div style="font-family: var(--f-display); font-style: italic; font-size: 18px;">${p.name}</div>
+        <div style="font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: #888;">${[p.city, p.country].filter(Boolean).join(', ')}</div>
+        <div style="margin-top:.3rem; font-family: var(--f-mono); font-size: 11px;">${p.shows} show${p.shows === 1 ? '' : 's'}</div>
+        <a href="/venues/${p.slug}" style="display:inline-block; margin-top:.4rem; font-family: var(--f-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #7746B0;">Open venue →</a>
+      `);
+    });
+  }
+  boot();
+  document.addEventListener('astro:page-load', boot);
+</script>
+
+<style is:global>
+  .venues-map { width: 100%; height: 640px; border: 1px solid var(--rule); background: #0b0b12; }
+  .leaflet-popup-content-wrapper { background: var(--bg); color: var(--ink); border-radius: 0; }
+  .leaflet-popup-tip { background: var(--bg); }
+</style>

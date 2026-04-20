@@ -29,6 +29,7 @@ const decades = Object.keys(byDecade).sort();
   </div>
 
   <IssueSection kicker="Six eras" title="Periodisation">
+    <div class="table-wrap">
     <table class="data">
       <thead><tr><th style="width:60px;">№</th><th style="width:160px;">Years</th><th>Era</th><th>Short name</th></tr></thead>
       <tbody>
@@ -45,10 +46,12 @@ const decades = Object.keys(byDecade).sort();
         ))}
       </tbody>
     </table>
+    </div>
   </IssueSection>
 
   {decades.map((dec) => (
     <IssueSection kicker={dec} title={`The ${dec}`} meta={`${byDecade[dec].length} entries`}>
+      <div class="table-wrap">
       <table class="data">
         <thead><tr><th style="width:90px;">Date</th><th style="width:110px;">Kind</th><th>Event</th></tr></thead>
         <tbody>
@@ -64,6 +67,7 @@ const decades = Object.keys(byDecade).sort();
           ))}
         </tbody>
       </table>
+      </div>
     </IssueSection>
   ))}
 </Layout>

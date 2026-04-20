@@ -1,0 +1,141 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import { listSetlists, getSetlistBySlug, getSetlistSongs } from '../../lib/directus';
+
+export const prerender = false;
+
+const url = Astro.url;
+const aSlug = url.searchParams.get('a') || '';
+const bSlug = url.searchParams.get('b') || '';
+
+const all = await listSetlists({ limit: 1500 });
+
+async function load(slug: string) {
+  if (!slug) return null;
+  const s = await getSetlistBySlug(slug).catch(() => null);
+  if (!s) return null;
+  const songs = await getSetlistSongs(s.id).catch(() => []);
+  return { setlist: s, songs };
+}
+
+const [a, b] = await Promise.all([load(aSlug), load(bSlug)]);
+
+const key = (row: any) => ((row.song?.slug || row.song_title || '') + '').toLowerCase();
+const aKeys = new Set<string>((a?.songs || []).map(key));
+const bKeys = new Set<string>((b?.songs || []).map(key));
+const both = new Set<string>();
+const onlyA = new Set<string>();
+const onlyB = new Set<string>();
+aKeys.forEach((k) => { if (bKeys.has(k)) both.add(k); else onlyA.add(k); });
+bKeys.forEach((k) => { if (!aKeys.has(k)) onlyB.add(k); });
+
+const pct = aKeys.size && bKeys.size
+  ? Math.round((both.size / new Set([...aKeys, ...bKeys]).size) * 100)
+  : 0;
+---
+<Layout title="Compare setlists · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Setlists', href: '/setlists' }, { label: 'Compare' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">TOOL · DIFFERENCE</div>
+      <h1 class="serif" style="font-size: clamp(44px, 6.5vw, 80px); line-height:.95; font-style: italic; margin: 0;">Compare two shows.</h1>
+      <p class="deck" style="max-width: 62ch;">Pick any two Cure concerts and see the songs they shared, the openers, the encores — and everything unique to each.</p>
+    </div>
+  </div>
+
+  <section class="container" style="padding: clamp(20px, 3vw, 32px) 0;">
+    <form class="compare-form" method="get">
+      <label>
+        <div class="mono-sm muted">Show A</div>
+        <select name="a" class="filter-search compare-select">
+          <option value="">— choose —</option>
+          {all.map((s) => (
+            <option value={s.slug} selected={s.slug === aSlug}>{s.date} · {s.venue || s.city || '?'}{s.country ? ` (${s.country})` : ''}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <div class="mono-sm muted">Show B</div>
+        <select name="b" class="filter-search compare-select">
+          <option value="">— choose —</option>
+          {all.map((s) => (
+            <option value={s.slug} selected={s.slug === bSlug}>{s.date} · {s.venue || s.city || '?'}{s.country ? ` (${s.country})` : ''}</option>
+          ))}
+        </select>
+      </label>
+      <button type="submit" class="btn">Compare →</button>
+    </form>
+  </section>
+
+  {a && b && (
+    <section class="container" style="padding: clamp(16px, 2vw, 28px) 0 clamp(48px, 6vw, 80px);">
+      <div class="panel-head" style="border: 1px solid var(--accent);">
+        <span><span class="pip"></span>Overlap: {both.size} shared song{both.size === 1 ? '' : 's'} · {pct}% similar</span>
+        <span>{a.songs.length} vs {b.songs.length}</span>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-col">
+          <div class="mono-sm muted">A · {a.setlist.date}</div>
+          <h2 class="serif" style="font-size: clamp(24px, 3vw, 36px); font-style: italic; line-height: 1.05; margin: .3rem 0;"><a href={`/setlists/${a.setlist.slug}`}>{a.setlist.venue || a.setlist.city}</a></h2>
+          <div class="mono-sm muted">{[a.setlist.city, a.setlist.country].filter(Boolean).join(', ')}{a.setlist.tour_name ? ` · ${a.setlist.tour_name}` : ''}</div>
+          <ol class="compare-list">
+            {a.songs.map((row: any, i: number) => {
+              const k = key(row);
+              const shared = both.has(k);
+              return (
+                <li class={shared ? 'is-shared' : 'is-unique'}>
+                  <span class="mono-sm compare-pos">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="serif compare-title">{row.song?.title || row.song_title || '—'}</span>
+                  {row.is_debut && <span class="tag" style="background: var(--hot-tint); color: var(--hot); font-size: 9px;">DEBUT</span>}
+                  {row.is_cover && <span class="tag" style="background: var(--cool-tint); color: var(--cool); font-size: 9px;">COVER</span>}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+        <div class="compare-col">
+          <div class="mono-sm muted">B · {b.setlist.date}</div>
+          <h2 class="serif" style="font-size: clamp(24px, 3vw, 36px); font-style: italic; line-height: 1.05; margin: .3rem 0;"><a href={`/setlists/${b.setlist.slug}`}>{b.setlist.venue || b.setlist.city}</a></h2>
+          <div class="mono-sm muted">{[b.setlist.city, b.setlist.country].filter(Boolean).join(', ')}{b.setlist.tour_name ? ` · ${b.setlist.tour_name}` : ''}</div>
+          <ol class="compare-list">
+            {b.songs.map((row: any, i: number) => {
+              const k = key(row);
+              const shared = both.has(k);
+              return (
+                <li class={shared ? 'is-shared' : 'is-unique'}>
+                  <span class="mono-sm compare-pos">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="serif compare-title">{row.song?.title || row.song_title || '—'}</span>
+                  {row.is_debut && <span class="tag" style="background: var(--hot-tint); color: var(--hot); font-size: 9px;">DEBUT</span>}
+                  {row.is_cover && <span class="tag" style="background: var(--cool-tint); color: var(--cool); font-size: 9px;">COVER</span>}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
+      <div class="compare-legend mono-sm muted">
+        <span><span class="legend-dot" style="background: var(--accent);"></span>Shared</span>
+        <span><span class="legend-dot" style="background: var(--hot);"></span>Unique to this show</span>
+      </div>
+    </section>
+  )}
+</Layout>
+
+<style is:global>
+  .compare-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end; }
+  @media (max-width: 780px) { .compare-form { grid-template-columns: 1fr; } }
+  .compare-select { font-family: var(--f-mono); font-size: 13px; padding: .55rem .6rem; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 3vw, 40px); margin-top: clamp(16px, 2vw, 28px); }
+  @media (max-width: 780px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-col { border-top: 1px solid var(--rule); padding-top: 1rem; }
+  .compare-list { list-style: none; margin: 1rem 0 0; padding: 0; }
+  .compare-list li { display: grid; grid-template-columns: 36px 1fr auto; gap: .6rem; align-items: baseline; padding: .5rem 0; border-bottom: 1px solid var(--rule-2); }
+  .compare-list .compare-pos { color: var(--muted); }
+  .compare-list .compare-title { font-size: 17px; font-style: italic; color: var(--ink); }
+  .compare-list li.is-shared { background: var(--accent-tint); padding-left: .5rem; padding-right: .5rem; }
+  .compare-list li.is-shared .compare-title { color: var(--accent-3); }
+  .compare-list li.is-unique .compare-pos { color: var(--hot); }
+  .compare-legend { display: flex; gap: 1.2rem; padding: 1rem 0 0; border-top: 1px solid var(--rule); margin-top: 1rem; }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: .3rem; }
+</style>

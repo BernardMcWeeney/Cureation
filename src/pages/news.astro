@@ -28,6 +28,7 @@ const categories = Array.from(new Set(news.map((n) => n.category).filter(Boolean
   </div>
 
   <IssueSection kicker={`${news.length} entries`} title="Archive">
+    <div class="table-wrap">
     <table class="data" data-news>
       <thead><tr><th style="width:110px;">Date</th><th style="width:120px;">Category</th><th>Entry</th><th class="num" style="text-align:right; width:70px;">Read</th></tr></thead>
       <tbody>
@@ -44,6 +45,7 @@ const categories = Array.from(new Set(news.map((n) => n.category).filter(Boolean
         ))}
       </tbody>
     </table>
+    </div>
   </IssueSection>
 </Layout>
 

@@ -1,0 +1,160 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Crumbs from '../components/ui/Crumbs.astro';
+import Chip from '../components/ui/Chip.astro';
+---
+<Layout title="My archive · Cureation">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'My archive' }]} />
+    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
+      <div class="mono-sm muted">PRIVATE · LOCAL TO THIS DEVICE</div>
+      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">My archive</h1>
+      <p class="deck" style="max-width: 62ch;">A private reading list — everything you've saved, kept in your browser (nothing is sent to a server). Click the ☆ on any record, song, or setlist to add it here.</p>
+    </div>
+  </div>
+
+  <section class="container my-ar__toolbar">
+    <div class="my-ar__filters" data-kind-filters>
+      <Chip active={true} class="k-chip" data-kind="all">All</Chip>
+      <Chip class="k-chip" data-kind="album">Records</Chip>
+      <Chip class="k-chip" data-kind="song">Songs</Chip>
+      <Chip class="k-chip" data-kind="setlist">Setlists</Chip>
+      <Chip class="k-chip" data-kind="venue">Venues</Chip>
+      <Chip class="k-chip" data-kind="tour">Tours</Chip>
+      <Chip class="k-chip" data-kind="member">Members</Chip>
+      <Chip class="k-chip" data-kind="news">Dispatches</Chip>
+    </div>
+    <div class="my-ar__meta">
+      <span class="mono-sm muted" data-count>0 items</span>
+      <button class="mono-sm my-ar__clear" data-clear-all>Clear</button>
+    </div>
+  </section>
+
+  <section class="container my-ar__body">
+    <div class="bookmarks" data-bookmarks-root>
+      <div class="bookmarks__empty" data-empty>
+        <div class="mono-sm muted">Nothing saved yet</div>
+        <p class="bookmarks__empty-body">Every record, song, setlist, venue, and dispatch page carries a ☆ bookmark in its header. Tap one to begin a reading list here — stored in this browser only.</p>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const KEY = 'cureation:bookmarks';
+  type BM = { kind: string; id: string; label: string; href: string; added: number };
+  function read(): BM[] { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
+  function write(v: BM[]) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} }
+
+  const kindLabel: Record<string, string> = { album: 'RECORD', song: 'SONG', setlist: 'SETLIST', venue: 'VENUE', tour: 'TOUR', member: 'MEMBER', news: 'DISPATCH', source: 'SOURCE' };
+  let activeKind = 'all';
+
+  function render() {
+    const root = document.querySelector<HTMLElement>('[data-bookmarks-root]');
+    const count = document.querySelector<HTMLElement>('[data-count]');
+    if (!root || !count) return;
+    const list = read().sort((a, b) => b.added - a.added);
+    const filtered = activeKind === 'all' ? list : list.filter((b) => b.kind === activeKind);
+    count.textContent = filtered.length
+      ? `${filtered.length} item${filtered.length === 1 ? '' : 's'}`
+      : '';
+    count.style.display = filtered.length ? '' : 'none';
+    root.querySelectorAll('.bookmarks__item').forEach((el) => el.remove());
+    const empty = root.querySelector<HTMLElement>('[data-empty]');
+    if (empty) empty.style.display = filtered.length === 0 ? '' : 'none';
+    for (const b of filtered) {
+      const el = document.createElement('a');
+      el.className = 'bookmarks__item';
+      el.href = b.href || '#';
+      el.innerHTML = `
+        <div class="bookmarks__meta mono-sm">${kindLabel[b.kind] || b.kind.toUpperCase()} · <time>${new Date(b.added).toISOString().slice(0, 10)}</time></div>
+        <div class="bookmarks__title serif">${b.label.replace(/</g, '&lt;')}</div>
+        <button class="bookmarks__remove mono-sm" data-remove data-k="${b.kind}" data-id="${b.id}" aria-label="Remove">×</button>
+      `;
+      el.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('[data-remove]')) { e.preventDefault(); return; }
+      });
+      el.querySelector<HTMLElement>('[data-remove]')?.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const cur = read().filter((x) => !(x.kind === b.kind && x.id === b.id));
+        write(cur); render();
+      });
+      root.appendChild(el);
+    }
+  }
+
+  function wire() {
+    render();
+    document.querySelectorAll<HTMLElement>('[data-kind-filters] .k-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        activeKind = chip.getAttribute('data-kind') || 'all';
+        document.querySelectorAll<HTMLElement>('[data-kind-filters] .k-chip').forEach((c) => {
+          c.classList.toggle('is-active', c === chip);
+          c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+        });
+        render();
+      });
+    });
+    const clear = document.querySelector<HTMLButtonElement>('[data-clear-all]');
+    if (clear) clear.addEventListener('click', () => {
+      if (confirm('Clear all bookmarks?')) { write([]); render(); }
+    });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>
+
+<style is:global>
+  .my-ar__toolbar {
+    padding-top: clamp(20px, 3vw, 32px);
+    padding-bottom: clamp(20px, 3vw, 32px);
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.2rem;
+    align-items: center;
+  }
+  @media (max-width: 720px) {
+    .my-ar__toolbar { grid-template-columns: 1fr; align-items: stretch; }
+  }
+  .my-ar__filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .my-ar__meta { display: flex; align-items: center; gap: 14px; justify-self: end; }
+  @media (max-width: 720px) { .my-ar__meta { justify-self: start; } }
+  .my-ar__clear {
+    border: 1px solid var(--rule); padding: .5rem .9rem; background: transparent;
+    color: var(--muted); cursor: pointer; letter-spacing: .18em; text-transform: uppercase;
+    font-size: 10px; font-family: var(--f-mono);
+  }
+  .my-ar__clear:hover { color: var(--accent-3); border-color: var(--accent); }
+  :root[data-theme='papers'] .my-ar__clear:hover { color: var(--accent); }
+  .my-ar__body { padding-top: clamp(24px, 4vw, 56px); padding-bottom: clamp(48px, 7vw, 96px); }
+
+  .bookmarks { }
+  .bookmarks__empty {
+    padding: clamp(40px, 7vw, 88px) 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: flex; flex-direction: column; align-items: flex-start; gap: .6rem;
+  }
+  .bookmarks__empty-body {
+    font-family: var(--f-serif); font-style: italic;
+    font-size: clamp(18px, 2vw, 22px); line-height: 1.55;
+    color: var(--ink-2); max-width: 54ch; margin: 0;
+  }
+  .bookmarks__item {
+    display: grid; grid-template-columns: 1fr 40px; gap: 1rem; align-items: baseline;
+    padding: 1rem 0; border-bottom: 1px solid var(--rule-2);
+    color: inherit; border-left: none; border-right: none; border-top: none;
+  }
+  .bookmarks__item:hover { background: var(--bg-2); }
+  .bookmarks__item .bookmarks__title { grid-column: 1; font-size: clamp(20px, 2.4vw, 28px); font-style: italic; line-height: 1.15; color: var(--ink); }
+  .bookmarks__item:hover .bookmarks__title { color: var(--accent-3); }
+  .bookmarks__meta { grid-column: 1; color: var(--muted); letter-spacing: .18em; }
+  .bookmarks__remove {
+    grid-column: 2; grid-row: 1 / span 2;
+    background: transparent; border: 1px solid var(--rule); color: var(--muted);
+    font-size: 14px; width: 32px; height: 32px; cursor: pointer; border-radius: 2px;
+    justify-self: end;
+  }
+  .bookmarks__remove:hover { border-color: var(--accent); color: var(--accent-3); }
+</style>

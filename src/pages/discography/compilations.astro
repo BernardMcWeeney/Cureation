@@ -3,7 +3,6 @@ import Layout from '../../layouts/Layout.astro';
 import AlbumCard from '../../components/album/AlbumCard.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
-import Chip from '../../components/ui/Chip.astro';
 import { listAlbums } from '../../lib/directus';
 
 const comps = await listAlbums({ type: ['compilation', 'live', 'boxset', 'deluxe'] });
@@ -21,14 +20,20 @@ const tabs = [
       <div class="mono-sm muted">SECTION · COMPILATIONS & LIVE</div>
       <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Compilations & live</h1>
       <p class="deck" style="max-width: 62ch;">Anthologies, live records, deluxe reissues and boxsets — how the catalogue was repackaged across decades.</p>
-      <div class="cluster" style="gap: 6px; flex-wrap: wrap;">
-        {tabs.map((t) => <Chip href={t.href} active={t.active}>{t.label}</Chip>)}
-      </div>
     </div>
   </div>
 
+  <nav class="container disc-tabs" aria-label="Record type">
+    {tabs.map((t) => (
+      <a href={t.href} class={`disc-tabs__tab${t.active ? ' is-active' : ''}`} aria-current={t.active ? 'page' : undefined}>
+        {t.label}
+      </a>
+    ))}
+  </nav>
+
   <IssueSection kicker={`${comps.length} records`} title="Ledger">
     {comps.length > 0 ? (
+      <div class="table-wrap">
       <table class="data">
         <thead><tr><th style="width:50px;">№</th><th style="width:80px;">Year</th><th>Record</th><th>Kind</th></tr></thead>
         <tbody>
@@ -42,6 +47,7 @@ const tabs = [
           ))}
         </tbody>
       </table>
+      </div>
     ) : (
       <p class="deck">No compilations catalogued yet.</p>
     )}
