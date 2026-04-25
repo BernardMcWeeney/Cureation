@@ -1,17 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Chip from '../components/ui/Chip.astro';
 ---
 <Layout title="My archive · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'My archive' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">PRIVATE · LOCAL TO THIS DEVICE</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">My archive</h1>
-      <p class="deck" style="max-width: 62ch;">A private reading list — everything you've saved, kept in your browser (nothing is sent to a server). Click the ☆ on any record, song, or setlist to add it here.</p>
-    </div>
-  </div>
+  <PageHero
+    section="Private · Local to this device"
+    title="My archive"
+    deck="A private reading list — everything you've saved, kept in your browser (nothing is sent to a server). Click the ☆ on any record, song, or setlist to add it here."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'My archive' }]}
+    flush
+  />
 
   <section class="container my-ar__toolbar">
     <div class="my-ar__filters" data-kind-filters>

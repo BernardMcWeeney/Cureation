@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import { listMembers, listTimeline } from '../lib/directus';
 import { asset } from '../lib/assets';
 
@@ -17,22 +17,13 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="The band · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'The band' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · THE BAND</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">The band</h1>
-      <p class="deck" style="max-width: 62ch;">Members past and present — their instruments, their tenures, and the shape of the lineup across forty-plus years.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="The band"
+    title="The band"
+    deck="Members past and present — their instruments, their tenures, and the shape of the lineup across forty-plus years."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'The band' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+  />
 
   <IssueSection kicker="Current lineup" title="On stage now" meta={`${current.length} members`}>
     <div class="member-grid">

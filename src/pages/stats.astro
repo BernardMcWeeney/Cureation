@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import BarChart from '../components/ui/BarChart.astro';
 import { listAlbums, listSongs, listSetlists, listTours, listEras, getRunningFigures } from '../lib/directus';
 
@@ -61,25 +61,16 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="Statistics · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Statistics' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · BY THE NUMBERS</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Statistics</h1>
-      <p class="deck" style="max-width: 62ch;">The archive, quantified — live frequencies, tour cadence, catalogue distribution — stacked against decades and geography.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="By the numbers"
+    title="Statistics"
+    deck="The archive, quantified — live frequencies, tour cadence, catalogue distribution — stacked against decades and geography."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Statistics' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+  />
 
   <IssueSection kicker="Live frequency" title="Most-played songs" meta="Top 10 by live count">
-    <BarChart bars={topSongs.map((s) => {
+    <BarChart unit="plays" bars={topSongs.map((s) => {
       const alb = s.album ? albumsById[s.album] : null;
       return { label: s.title || '—', sub: alb?.title || '', value: s.times_played_live || 0, href: s.slug ? `/songs/${s.slug}` : undefined };
     })} />
@@ -112,7 +103,7 @@ const facts: Array<[string, string]> = [
 
   {eraEntries.length > 0 && (
     <IssueSection kicker="Chronology" title="Records per era" meta="Catalogue distribution">
-      <BarChart bars={eraEntries.map(([k, v]) => ({ label: k, value: v }))} height={160} />
+      <BarChart bars={eraEntries.map(([k, v]) => ({ label: k, value: v }))} />
     </IssueSection>
   )}
 

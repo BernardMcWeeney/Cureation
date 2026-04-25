@@ -1,17 +1,23 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
-import Crumbs from '../../components/ui/Crumbs.astro';
+import PageHero from '../../components/ui/PageHero.astro';
 import Select from '../../components/ui/Select.astro';
+import SearchField from '../../components/ui/SearchField.astro';
 import { fetchRaw } from '../../lib/directus';
 
 export const prerender = false;
 
 const sources: any[] = await fetchRaw('sources', { limit: -1, sort: '-reliability,name' }).catch(() => []);
 
+const sourceFilterParams = (coll: string, id: number) =>
+  coll === 'setlists'
+    ? { 'filter[source_id][_eq]': id }
+    : { 'filter[source][_eq]': id };
+
 const collectionCount = async (coll: string, id: number) => {
   try {
-    const res: any[] = await fetchRaw(coll, { limit: -1, fields: 'id', filter: { source: { _eq: id } } as any });
+    const res: any[] = await fetchRaw(coll, { limit: -1, fields: 'id', ...sourceFilterParams(coll, id) });
     return res.length;
   } catch { return 0; }
 };
@@ -39,22 +45,21 @@ const types = Array.from(new Set(sources.map((s) => s.type).filter(Boolean))).so
 const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
 ---
 <Layout title="Sources · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Sources' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · PROVENANCE</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Sources</h1>
-      <p class="deck" style="max-width: 62ch;">Every claim traces back to something. This is the ledger of where the archive's facts came from — cited, counted, and ranked by reliability.</p>
-      <div class="facts">
-        <div class="facts__item"><div class="facts__k">Sources on file</div><div class="facts__v">{sources.length}</div></div>
-        <div class="facts__item"><div class="facts__k">Records sourced</div><div class="facts__v">{totalRecords.toLocaleString()}</div></div>
-        <div class="facts__item"><div class="facts__k">Types</div><div class="facts__v">{types.length}</div></div>
-        <div class="facts__item"><div class="facts__k">Ranking</div><div class="facts__v">RELIABILITY</div></div>
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="Provenance"
+    title="Sources"
+    deck="Every claim traces back to something. This is the ledger of where the archive's facts came from — cited, counted, and ranked by reliability."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Sources' }]}
+    facts={[
+      { k: 'Sources on file', v: sources.length },
+      { k: 'Records sourced', v: totalRecords.toLocaleString() },
+      { k: 'Types', v: types.length },
+      { k: 'Ranking', v: 'RELIABILITY' },
+    ]}
+    flush
+  />
 
-  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+  <section class="container filter-strip">
     <div class="filter-grid filter-grid--3">
       <Select
         name="type"
@@ -70,12 +75,7 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
           { value: 'no', label: 'Independent' },
         ]}
       />
-      <label class="select">
-        <span class="select__label">Search</span>
-        <span class="select__wrap">
-          <input class="filter-search" type="search" placeholder="Name, author…" data-filter-search />
-        </span>
-      </label>
+      <SearchField placeholder="Name, author…" />
     </div>
   </section>
 
@@ -92,14 +92,15 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
       </tr></thead>
       <tbody>
         {enriched.map((s, i) => (
-          <tr data-clickable
+          <tr data-clickable={s.url ? '' : undefined}
               data-type={s.type || ''}
               data-official={s.is_official ? 'yes' : 'no'}
               data-search={`${s.name || ''} ${s.author || ''} ${s.description || ''}`.toLowerCase()}
-              onclick={`location.href='/sources/${s.id}'`}>
+              onclick={s.url ? `window.open('${s.url}','_blank','noopener,noreferrer')` : undefined}>
             <td class="idx">{String(i + 1).padStart(2, '0')}</td>
             <td>
               <span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{s.name}</span>
+              {s.url && <span class="mono-sm" style="margin-left:.5rem; color: var(--accent-3);">↗</span>}
               {s.is_official && <span class="tag" style="margin-left:.5rem; font-size:9px; background: var(--accent-tint);">OFFICIAL</span>}
               {s.description && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem; max-width: 60ch;">{s.description}</div>}
             </td>

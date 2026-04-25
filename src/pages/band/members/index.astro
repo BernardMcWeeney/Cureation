@@ -1,25 +1,27 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import IssueSection from '../../../components/ui/IssueSection.astro';
-import Crumbs from '../../../components/ui/Crumbs.astro';
+import PageHero from '../../../components/ui/PageHero.astro';
 import { listMembers } from '../../../lib/directus';
 import { asset } from '../../../lib/assets';
 
 const members = await listMembers();
 ---
 <Layout title="Members · The band · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[
+  <PageHero
+    section="Members"
+    title="Every member"
+    deck="Every musician who has passed through The Cure, in one index."
+    crumbs={[
       { label: 'Home', href: '/' },
       { label: 'The band', href: '/band' },
       { label: 'Members' },
-    ]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · MEMBERS</div>
-      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">Every member</h1>
-      <p class="deck" style="max-width: 62ch;">Every musician who has passed through The Cure, in one index.</p>
-    </div>
-  </div>
+    ]}
+    facts={[
+      { k: 'On file', v: members.length },
+      { k: 'Current', v: members.filter((m) => m.is_current_member).length },
+    ]}
+  />
 
   <IssueSection kicker={`${members.length} on file`} title="Catalogue">
     <div class="grid">

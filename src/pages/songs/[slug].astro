@@ -7,6 +7,7 @@ import Bookmark from '../../components/ui/Bookmark.astro';
 import Waveform from '../../components/viz/Waveform.astro';
 import { getSongBySlug, listAlbums, fetchRaw } from '../../lib/directus';
 import { asset } from '../../lib/assets';
+import { normalizeStructuredLyrics } from '../../lib/lyrics-helpers';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/songs');
@@ -16,7 +17,7 @@ if (!song) return new Response('Not found', { status: 404 });
 const albums = await listAlbums();
 const album = song.album ? albums.find((a) => a.id === song.album) : null;
 
-const structured: any[] = Array.isArray(song.lyrics_structured) ? song.lyrics_structured : [];
+const structured: any[] = normalizeStructuredLyrics(song.lyrics_structured, song.lyrics) || [];
 
 const annotations: any[] = await fetchRaw('lyric_annotations', {
   'filter[song_id][_eq]': song.id,
@@ -29,6 +30,16 @@ for (const a of annotations) {
   if (!k) continue;
   (annByLine[k] = annByLine[k] || []).push(a);
 }
+const annotatedLines = structured.flatMap((section: any) => (
+  (section.lines || [])
+    .map((line: any) => {
+      const lineId = String(line.line_id || line.lineId || line.id || '');
+      const notes = annByLine[lineId] || [];
+      return notes.length ? { lineId, text: line.text || line.line || '', notes } : null;
+    })
+    .filter(Boolean)
+));
+const firstAnnotatedLine: any = annotatedLines[0] || null;
 
 const facts: Array<[string, string]> = [
   ['Record', album?.title || '—'],
@@ -98,10 +109,10 @@ const year = album?.release_date?.slice(0, 4);
             <div class="lyric-section">
               {section.label && <div class="mono-sm muted lyric-section__label">{String(section.label).toUpperCase()}</div>}
               {(section.lines || []).map((line: any) => {
-                const lid = String(line.line_id || line.id || '');
+                const lid = String(line.line_id || line.lineId || line.id || '');
                 const notes = annByLine[lid] || [];
                 return (
-                  <div class={`lyric-line${notes.length ? ' has-note' : ''}`} data-line-id={lid} data-notes={notes.length ? JSON.stringify(notes) : undefined}>
+                  <div class={`lyric-line${notes.length ? ' has-note' : ''}${firstAnnotatedLine?.lineId === lid ? ' is-active' : ''}`} data-line-id={lid} data-notes={notes.length ? JSON.stringify(notes) : undefined}>
                     <span class="lyric-line__text">{typeof line === 'string' ? line : (line.text || line.line || '')}</span>
                     {notes.length > 0 && <span class="lyric-line__pip" aria-label={`${notes.length} annotation${notes.length === 1 ? '' : 's'}`}>◉</span>}
                   </div>
@@ -115,6 +126,38 @@ const year = album?.release_date?.slice(0, 4);
       </article>
 
       <aside class="stack" style="--gap: 1.4rem;">
+        {annotations.length > 0 && (
+          <div class="panel--bare annot-focus" data-annot-focus>
+            <div class="panel-head">
+              <span>Literary links</span>
+              <span data-annot-count>{annotations.length} NOTES</span>
+            </div>
+            <div class="annot-focus__body" data-annot-body>
+              {firstAnnotatedLine ? (
+                <>
+                  <blockquote class="annot-focus__line" data-annot-line>{firstAnnotatedLine.text}</blockquote>
+                  <div class="annot-focus__items" data-annot-items>
+                    {firstAnnotatedLine.notes.map((n: any) => (
+                      <div class="annot-item">
+                        <p>{n.note}</p>
+                        {(n.source || n.url) && (
+                          <div class="mono-sm muted">
+                            {n.source}
+                            {n.source && n.url ? ' · ' : ''}
+                            {n.url && <a href={n.url} target="_blank" rel="noopener">source →</a>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p class="muted">Hover an annotated lyric line to preview its literary link.</p>
+              )}
+            </div>
+          </div>
+        )}
+
         {album && (
           <a class="panel--bare" href={`/discography/${album.slug}`} style="border: 1px solid var(--rule); display:flex; gap: 1rem; padding: 14px; align-items:center; text-decoration: none;">
             {album.cover_art && <img src={asset(album.cover_art, 'thumb')} alt={album.title} style="width: 72px; height: 72px; object-fit: cover; border: 1px solid var(--rule);" />}
@@ -157,38 +200,47 @@ const year = album?.release_date?.slice(0, 4);
       </aside>
     </div>
   </section>
-  <div class="annot-drawer" data-annot-drawer aria-hidden="true">
-    <div class="annot-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="annot-title">
-      <button class="annot-drawer__close" data-annot-close aria-label="Close">×</button>
-      <div class="mono-sm muted" id="annot-title">Annotation</div>
-      <blockquote class="annot-drawer__line"></blockquote>
-      <div class="annot-drawer__body"></div>
-    </div>
-  </div>
 </Layout>
 
 <script>
   function wireAnnot() {
-    const drawer = document.querySelector<HTMLElement>('[data-annot-drawer]');
-    if (!drawer) return;
-    const body = drawer.querySelector<HTMLElement>('.annot-drawer__body')!;
-    const lineEl = drawer.querySelector<HTMLElement>('.annot-drawer__line')!;
-    const close = () => drawer.setAttribute('aria-hidden', 'true');
-    drawer.addEventListener('click', (e) => { if (e.target === drawer) close(); });
-    drawer.querySelector('[data-annot-close]')?.addEventListener('click', close);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-    document.querySelectorAll<HTMLElement>('.lyric-line.has-note').forEach((el) => {
+    const focus = document.querySelector<HTMLElement>('[data-annot-focus]');
+    const lineEl = document.querySelector<HTMLElement>('[data-annot-line]');
+    const itemsEl = document.querySelector<HTMLElement>('[data-annot-items]');
+    const lines = document.querySelectorAll<HTMLElement>('.lyric-line.has-note');
+    if (!focus || !lineEl || !itemsEl || !lines.length) return;
+
+    const escapeHtml = (value: string) => value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const render = (el: HTMLElement) => {
+      const raw = el.getAttribute('data-notes') || '[]';
+      const notes = JSON.parse(raw) as Array<{ note: string; source?: string; url?: string }>;
+      lineEl.textContent = el.querySelector('.lyric-line__text')?.textContent || '';
+      itemsEl.innerHTML = notes.map((n) => {
+        const source = n.source ? escapeHtml(n.source) : '';
+        const url = n.url ? escapeHtml(n.url) : '';
+        return `
+          <div class="annot-item">
+            <p>${escapeHtml(n.note || '')}</p>
+            ${source || url ? `<div class="mono-sm muted">${source}${source && url ? ' · ' : ''}${url ? `<a href="${url}" target="_blank" rel="noopener">source →</a>` : ''}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+      lines.forEach((line) => line.classList.toggle('is-active', line === el));
+    };
+
+    lines.forEach((el) => {
+      el.setAttribute('tabindex', '0');
+      el.addEventListener('mouseenter', () => render(el));
+      el.addEventListener('focus', () => render(el));
       el.addEventListener('click', () => {
         const raw = el.getAttribute('data-notes') || '[]';
-        const notes = JSON.parse(raw) as Array<{ note: string; source?: string; url?: string }>;
-        lineEl.textContent = el.querySelector('.lyric-line__text')?.textContent || '';
-        body.innerHTML = notes.map((n) => `
-          <div class="annot-item">
-            <p>${(n.note || '').replace(/</g, '&lt;')}</p>
-            ${n.source || n.url ? `<div class="mono-sm muted">${n.source ? n.source.replace(/</g, '&lt;') : ''}${n.url ? ` · <a href="${n.url}" target="_blank" rel="noopener">source →</a>` : ''}</div>` : ''}
-          </div>
-        `).join('');
-        drawer.setAttribute('aria-hidden', 'false');
+        if (raw !== '[]') render(el);
       });
     });
   }
@@ -209,14 +261,16 @@ const year = album?.release_date?.slice(0, 4);
   .lyrics__plain { font-family: var(--f-serif); font-size: 17px; line-height: 1.7; color: var(--ink); white-space: pre-wrap; margin: 0; }
   .lyric-line { display: flex; align-items: baseline; gap: .4rem; }
   .lyric-line.has-note { color: var(--accent-3); }
-  .lyric-line.has-note:hover { color: var(--accent); background: transparent; }
+  .lyric-line.has-note:hover,
+  .lyric-line.has-note:focus,
+  .lyric-line.has-note.is-active { color: var(--accent); background: transparent; outline: none; }
   .lyric-line__pip { font-size: 10px; opacity: .75; }
 
-  .annot-drawer { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; justify-content: flex-end; z-index: 80; opacity: 1; transition: opacity .2s; }
-  .annot-drawer[aria-hidden="true"] { opacity: 0; pointer-events: none; }
-  .annot-drawer__panel { width: min(480px, 100%); height: 100%; background: var(--bg); border-left: 1px solid var(--rule); padding: clamp(20px, 3vw, 32px); overflow-y: auto; position: relative; }
-  .annot-drawer__close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 28px; color: var(--ink-2); cursor: pointer; }
-  .annot-drawer__line { font-family: var(--f-display); font-style: italic; font-size: clamp(22px, 3vw, 32px); line-height: 1.2; color: var(--accent-3); border-left: 2px solid var(--accent); padding-left: 1rem; margin: 1rem 0 1.2rem; }
-  .annot-drawer__body .annot-item { padding: 1rem 0; border-top: 1px solid var(--rule); }
-  .annot-drawer__body p { font-family: var(--f-serif); font-size: 16px; line-height: 1.7; color: var(--ink); margin: 0 0 .4rem; }
+  .annot-focus { position: sticky; top: 88px; }
+  .annot-focus__body { padding: 14px 16px; }
+  .annot-focus__line { font-family: var(--f-display); font-style: italic; font-size: 24px; line-height: 1.2; color: var(--accent-3); border-left: 2px solid var(--accent); padding-left: .9rem; margin: 0 0 1rem; }
+  .annot-item { padding: .9rem 0; border-top: 1px solid var(--rule); }
+  .annot-item:first-child { padding-top: 0; border-top: none; }
+  .annot-item p { font-family: var(--f-serif); font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0 0 .45rem; }
+  .annot-item a { color: var(--accent-3); }
 </style>

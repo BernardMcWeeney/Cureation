@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
-import Crumbs from '../../components/ui/Crumbs.astro';
+import PageHero from '../../components/ui/PageHero.astro';
 import { listEras, listTimeline } from '../../lib/directus';
 
 const [eras, timeline] = await Promise.all([listEras(), listTimeline()]);
@@ -15,18 +15,21 @@ const byDecade = byYear.reduce((acc: Record<string, any[]>, t: any) => {
 const decades = Object.keys(byDecade).sort();
 ---
 <Layout title="History · The band · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[
+  <PageHero
+    section="History"
+    title="A chronology"
+    deck="The Cure, year by year — divided into six identifying eras and annotated with the events that defined each."
+    crumbs={[
       { label: 'Home', href: '/' },
       { label: 'The band', href: '/band' },
       { label: 'History' },
-    ]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · HISTORY</div>
-      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">A chronology</h1>
-      <p class="deck" style="max-width: 62ch;">The Cure, year by year — divided into six identifying eras and annotated with the events that defined each.</p>
-    </div>
-  </div>
+    ]}
+    facts={[
+      { k: 'Eras', v: eras.length },
+      { k: 'Timeline events', v: timeline.length },
+      { k: 'Years covered', v: '1978 → present' },
+    ]}
+  />
 
   <IssueSection kicker="Six eras" title="Periodisation">
     <div class="table-wrap">

@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
+import SearchField from '../components/ui/SearchField.astro';
 import { listTours, listAlbums } from '../lib/directus';
 
 const [tours, albums] = await Promise.all([listTours(), listAlbums()]);
@@ -35,25 +36,17 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="Tours · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Tours' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · TOURING</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">The tours</h1>
-      <p class="deck" style="max-width: 62ch;">Every run, in order — from the earliest club dates to the arena cycles — with associated records and lineups on file.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="Touring"
+    title="The tours"
+    deck="Every run, in order — from the earliest club dates to the arena cycles — with associated records and lineups on file."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Tours' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+    flush
+  />
 
-  <section class="container" style="padding: clamp(28px, 4vw, 48px) 0; border-top: 1px solid var(--rule);">
-    <div class="mono-sm muted" style="margin-bottom:.6rem;">SHOWS PER DECADE</div>
+  <section class="container" style="padding: clamp(36px, 4.5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted" style="margin-bottom: 1rem; letter-spacing: 0.22em;">SHOWS PER DECADE</div>
     <div class="decade-bars">
       {decadeEntries.map(([d, v]) => (
         <button class="decade-bar" data-decade-jump={d} style={`--h: ${Math.round((v.shows / maxShows) * 100)}%;`}>
@@ -66,19 +59,14 @@ const facts: Array<[string, string]> = [
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+  <section class="container filter-strip">
     <div class="filter-grid filter-grid--2">
       <Select
         name="decade"
         label="Decade"
         options={[{ value: 'all', label: 'All decades' }, ...decadeEntries.map(([d]) => ({ value: d, label: d }))]}
       />
-      <label class="select">
-        <span class="select__label">Search</span>
-        <span class="select__wrap">
-          <input class="filter-search" type="search" placeholder="Tour, record…" data-filter-search />
-        </span>
-      </label>
+      <SearchField placeholder="Tour, record…" />
     </div>
   </section>
 
@@ -143,8 +131,3 @@ const facts: Array<[string, string]> = [
   document.addEventListener('astro:page-load', wire);
 </script>
 
-<style is:global>
-  .decade-bar__sub { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
-  .filter-grid--2 { grid-template-columns: 1fr 2fr !important; }
-  @media (max-width: 560px) { .filter-grid--2 { grid-template-columns: 1fr !important; } }
-</style>

@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Chip from '../components/ui/Chip.astro';
 import { fetchRaw } from '../lib/directus';
 
@@ -14,18 +14,18 @@ const news: any[] = await fetchRaw('news', {
 const categories = Array.from(new Set(news.map((n) => n.category).filter(Boolean))).sort();
 ---
 <Layout title="News · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'News' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · DISPATCHES</div>
-      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">Dispatches</h1>
-      <p class="deck" style="max-width: 62ch;">News, editorials, and archive additions — filed chronologically.</p>
-      <div class="cluster" style="gap:6px; flex-wrap:wrap;" data-cat-filters>
-        <Chip active={true} class="cat-chip" data-cat="all">All</Chip>
-        {categories.map((c) => <Chip class="cat-chip" data-cat={c}>{c}</Chip>)}
-      </div>
+  <PageHero
+    section="Dispatches"
+    title="Dispatches"
+    deck="News, editorials, and archive additions — filed chronologically."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'News' }]}
+    flush
+  >
+    <div class="cluster" style="gap:6px; flex-wrap:wrap; margin-top: clamp(20px, 3vw, 32px);" data-cat-filters>
+      <Chip active={true} class="cat-chip" data-cat="all">All</Chip>
+      {categories.map((c) => <Chip class="cat-chip" data-cat={c}>{c}</Chip>)}
     </div>
-  </div>
+  </PageHero>
 
   <IssueSection kicker={`${news.length} entries`} title="Archive">
     <div class="table-wrap">

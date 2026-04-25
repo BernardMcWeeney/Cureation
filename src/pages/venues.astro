@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
+import SearchField from '../components/ui/SearchField.astro';
 import { listVenues } from '../lib/directus';
 
 const venues = await listVenues();
@@ -22,25 +23,17 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="Venues · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Venues' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · VENUES</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Venues</h1>
-      <p class="deck" style="max-width: 62ch;">Every room the band has played — ranked by repeat visits, annotated with capacity and first/last Cure appearance.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="Venues"
+    title="Venues"
+    deck="Every room the band has played — ranked by repeat visits, annotated with capacity and first/last Cure appearance."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Venues' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+    flush
+  />
 
-  <section class="container" style="padding: clamp(28px, 4vw, 48px) 0; border-top: 1px solid var(--rule);">
-    <div class="mono-sm muted" style="margin-bottom:.6rem;">TOP 10 COUNTRIES BY SHOWS</div>
+  <section class="container" style="padding: clamp(36px, 4.5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted" style="margin-bottom: 1rem; letter-spacing: 0.22em;">TOP 10 COUNTRIES BY SHOWS</div>
     <div class="decade-bars">
       {topCountries.map(([c, count]) => (
         <button class="decade-bar" data-country-jump={c} style={`--h: ${Math.round((count / maxCountry) * 100)}%;`}>
@@ -52,7 +45,7 @@ const facts: Array<[string, string]> = [
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+  <section class="container filter-strip">
     <div class="filter-grid filter-grid--3">
       <Select
         name="country"
@@ -70,12 +63,7 @@ const facts: Array<[string, string]> = [
           { value: 'huge', label: '20,000+' },
         ]}
       />
-      <label class="select">
-        <span class="select__label">Search</span>
-        <span class="select__wrap">
-          <input class="filter-search" type="search" placeholder="Venue, city…" data-filter-search />
-        </span>
-      </label>
+      <SearchField placeholder="Venue, city…" />
     </div>
   </section>
 
@@ -143,7 +131,3 @@ const facts: Array<[string, string]> = [
   document.addEventListener('astro:page-load', wire);
 </script>
 
-<style is:global>
-  .filter-grid--3 { grid-template-columns: 1fr 1fr 1fr !important; }
-  @media (max-width: 720px) { .filter-grid--3 { grid-template-columns: 1fr !important; } }
-</style>

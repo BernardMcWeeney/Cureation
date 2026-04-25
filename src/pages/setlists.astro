@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
+import SearchField from '../components/ui/SearchField.astro';
 import { listSetlists } from '../lib/directus';
 
 const setlists = await listSetlists({ limit: 1000 });
@@ -21,25 +22,17 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="Setlists · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Setlists' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · LIVE ARCHIVE</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Setlists</h1>
-      <p class="deck" style="max-width: 62ch;">Every documented performance — date, city, venue — cross-referenced to tours, songs, and contemporaneous press.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="Live archive"
+    title="Setlists"
+    deck="Every documented performance — date, city, venue — cross-referenced to tours, songs, and contemporaneous press."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Setlists' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+    flush
+  />
 
-  <section class="container" style="padding: clamp(28px, 4vw, 48px) 0; border-top: 1px solid var(--rule);">
-    <div class="mono-sm muted" style="margin-bottom:.6rem;">BY THE DECADE · CLICK TO JUMP</div>
+  <section class="container" style="padding: clamp(36px, 4.5vw, 64px) 0; border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted" style="margin-bottom: 1rem; letter-spacing: 0.22em;">BY THE DECADE · CLICK TO JUMP</div>
     <div class="decade-bars">
       {Object.entries(byDecade).sort((a, b) => a[0].localeCompare(b[0])).map(([d, c]) => (
         <button class="decade-bar" data-decade-jump={d} style={`--h: ${Math.round((c / maxDecade) * 100)}%;`}>
@@ -51,7 +44,7 @@ const facts: Array<[string, string]> = [
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+  <section class="container filter-strip">
     <div class="filter-grid">
       <Select
         name="year"
@@ -68,12 +61,7 @@ const facts: Array<[string, string]> = [
         label="Tour"
         options={[{ value: 'all', label: 'All tours' }, ...tours.map((t) => ({ value: t!, label: t! }))]}
       />
-      <label class="select">
-        <span class="select__label">Search</span>
-        <span class="select__wrap">
-          <input class="filter-search" type="search" placeholder="Venue, city, tour…" data-filter-search />
-        </span>
-      </label>
+      <SearchField placeholder="Venue, city, tour…" />
     </div>
   </section>
 
@@ -148,24 +136,7 @@ const facts: Array<[string, string]> = [
 </script>
 
 <style is:global>
-  .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); align-items: end; }
-  @media (max-width: 960px) { .filter-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .filter-grid { grid-template-columns: 1fr; } }
-  .filter-search {
-    width: 100%; background: transparent; border: 1px solid var(--rule); color: var(--ink);
-    font-family: var(--f-serif); font-style: italic; font-size: 15.5px;
-    padding: .65rem .9rem; border-radius: 2px;
-  }
-  .filter-search:focus { outline: none; border-color: var(--accent); }
-
   table.data--airy thead th { padding: 14px 16px; }
   table.data--airy tbody td { padding: 18px 16px; line-height: 1.5; }
   table.data--airy tbody td:first-child { padding-left: 2px; }
-
-  .decade-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(60px, 1fr); gap: clamp(6px, 1vw, 14px); align-items: end; height: 160px; }
-  .decade-bar { background: transparent; border: 0; display: grid; grid-template-rows: auto 1fr auto; cursor: pointer; padding: 0; color: inherit; text-align: center; }
-  .decade-bar__val { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .12em; color: var(--accent-3); margin-bottom: 4px; }
-  .decade-bar__fill { align-self: end; height: var(--h); background: linear-gradient(to top, var(--accent-2), var(--accent)); box-shadow: var(--glow); opacity: .75; min-height: 2px; transition: opacity .2s; }
-  .decade-bar:hover .decade-bar__fill { opacity: 1; }
-  .decade-bar__label { font-family: var(--f-display); font-style: italic; font-size: 14px; margin-top: 8px; color: var(--ink); }
 </style>

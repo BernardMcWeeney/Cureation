@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Chip from '../components/ui/Chip.astro';
 import { listSongs, listAlbums } from '../lib/directus';
 
@@ -19,26 +19,19 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="Lyrics · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Lyrics' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · LYRICS</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Lyrics</h1>
-      <p class="deck" style="max-width: 62ch;">Every documented lyric — sortable alphabetically, by record, or by era. Line-by-line annotations live on each song page.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-      <div class="cluster" style="gap:6px; flex-wrap:wrap;" data-letter-filters>
-        <Chip active={true} class="l-chip" data-l="all">All</Chip>
-        {letters.map((l) => <Chip class="l-chip" data-l={l}>{l}</Chip>)}
-      </div>
+  <PageHero
+    section="Lyrics"
+    title="Lyrics"
+    deck="Every documented lyric — sortable alphabetically, by record, or by era. Line-by-line annotations live on each song page."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Lyrics' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+    flush
+  >
+    <div class="cluster" style="gap:6px; flex-wrap:wrap; margin-top: clamp(20px, 3vw, 32px);" data-letter-filters>
+      <Chip active={true} class="l-chip" data-l="all">All</Chip>
+      {letters.map((l) => <Chip class="l-chip" data-l={l}>{l}</Chip>)}
     </div>
-  </div>
+  </PageHero>
 
   <IssueSection kicker="A–Z index" title="Catalogue">
     <div class="table-wrap">

@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
+import SearchField from '../components/ui/SearchField.astro';
 import { listSongs, listAlbums } from '../lib/directus';
 
 const [songs, albums] = await Promise.all([listSongs(), listAlbums()]);
@@ -23,24 +24,16 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="Songs · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Songs' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · SONGS</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Songs</h1>
-      <p class="deck" style="max-width: 62ch;">Every documented composition in the catalogue — with live-play counts, album links, and annotations.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="Songs"
+    title="Songs"
+    deck="Every documented composition in the catalogue — with live-play counts, album links, and annotations."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Songs' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+    flush
+  />
 
-  <section class="container" style="padding: clamp(24px, 3vw, 32px) 0; border-top: 1px solid var(--rule);">
+  <section class="container filter-strip">
     <div class="filter-grid">
       <Select
         name="album"
@@ -68,12 +61,7 @@ const facts: Array<[string, string]> = [
           { value: 'date', label: 'Chronological' },
         ]}
       />
-      <label class="select">
-        <span class="select__label">Search</span>
-        <span class="select__wrap">
-          <input class="filter-search" type="search" placeholder="Title…" data-filter-search />
-        </span>
-      </label>
+      <SearchField placeholder="Title…" />
     </div>
   </section>
 

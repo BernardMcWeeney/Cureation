@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import { fetchRaw } from '../lib/directus';
 
 const articles: any[] = await fetchRaw('news', {
@@ -12,14 +12,13 @@ const articles: any[] = await fetchRaw('news', {
 }).catch(() => []);
 ---
 <Layout title="The wiki · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'The wiki' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · REFERENCE</div>
-      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">The wiki</h1>
-      <p class="deck" style="max-width: 62ch;">Long-form reference articles — deeper than a liner note, shorter than a biography — cross-referenced to everything else in the archive.</p>
-    </div>
-  </div>
+  <PageHero
+    section="Reference"
+    title="The wiki"
+    deck="Long-form reference articles — deeper than a liner note, shorter than a biography — cross-referenced to everything else in the archive."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'The wiki' }]}
+    facts={[{ k: 'Articles', v: articles.length || '—' }, { k: 'Sort', v: 'A–Z' }]}
+  />
 
   <IssueSection kicker={articles.length > 0 ? `${articles.length} articles` : 'In progress'} title="Articles">
     {articles.length === 0 ? (

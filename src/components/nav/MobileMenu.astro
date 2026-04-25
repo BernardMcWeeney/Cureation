@@ -4,36 +4,45 @@ const sections: Array<{ title: string; links: Array<{ href: string; label: strin
   { title: 'Records', links: [
     { href: '/discography', label: 'Discography' },
     { href: '/discography/ep', label: 'EPs' },
-    { href: '/discography/compilations', label: 'Compilations' },
     { href: '/discography/singles', label: 'Singles' },
-    { href: '/songs', label: 'Songs' },
+    { href: '/discography/compilations', label: 'Compilations' },
+    { href: '/songs', label: 'All songs' },
     { href: '/lyrics', label: 'Lyrics' },
   ]},
   { title: 'Live', links: [
-    { href: '/setlists', label: 'Setlists' },
+    { href: '/setlists', label: 'Live archive' },
+    { href: '/setlists/compare', label: 'Compare shows' },
     { href: '/tours', label: 'Tours' },
     { href: '/venues', label: 'Venues' },
+    { href: '/venues/map', label: 'Venue map' },
     { href: '/on-this-day', label: 'On this day' },
   ]},
-  { title: 'Words & images', links: [
-    { href: '/news', label: 'News' },
-    { href: '/photos', label: 'Photos' },
+  { title: 'Media', links: [
+    { href: '/photos', label: 'Photographs' },
     { href: '/videos', label: 'Videos' },
-    { href: '/newsletter', label: 'Newsletter' },
   ]},
   { title: 'The band', links: [
     { href: '/band', label: 'Members' },
     { href: '/band/history', label: 'History' },
     { href: '/band/gear', label: 'Gear' },
-    { href: '/band/quotes', label: 'Quotes' },
+    { href: '/band/quotes', label: 'Quotations' },
   ]},
-  { title: 'Archive', links: [
-    { href: '/wiki', label: 'Wiki' },
+  { title: 'Dispatches', links: [
+    { href: '/news', label: 'Dispatches' },
+    { href: '/newsletter', label: 'Newsletter' },
+    { href: '/rss.xml', label: 'RSS feed' },
+    { href: '/wiki', label: 'The wiki' },
+  ]},
+  { title: 'Figures', links: [
     { href: '/stats', label: 'Stats' },
     { href: '/curiosities', label: 'Curiosities' },
-    { href: '/community', label: 'Community' },
-    { href: '/sources', label: 'Sources' },
+  ]},
+  { title: 'Archive', links: [
     { href: '/about', label: 'About' },
+    { href: '/sources', label: 'Sources' },
+    { href: '/community', label: 'Community' },
+    { href: '/my-archive', label: 'My archive' },
+    { href: '/calendar.ics', label: 'Tour dates (iCal)' },
   ]},
 ];
 function isActive(href: string) {

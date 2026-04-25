@@ -1,0 +1,134 @@
+---
+import Crumbs from './Crumbs.astro';
+
+interface Crumb { label: string; href?: string; }
+interface Fact { k: string; v: string | number; sub?: string }
+interface Props {
+  /** Section name shown in the small mono kicker (e.g. "Records"). */
+  section?: string;
+  /** Big italic page title. Use the magazine voice — "The discography", "The setlists". */
+  title: string;
+  /** Italic deck paragraph. */
+  deck?: string;
+  /** Breadcrumb items (Home → … → current). */
+  crumbs?: Crumb[];
+  /** Quick-fact strip rendered under the deck. */
+  facts?: Fact[];
+  /** Hide the bottom rule (when next section already provides one). */
+  flush?: boolean;
+}
+const { section, title, deck, crumbs = [], facts = [], flush = false } = Astro.props;
+---
+<section class={`page-hero${flush ? ' page-hero--flush' : ''}`}>
+  <div class="container">
+    {crumbs.length > 0 && <Crumbs items={crumbs} />}
+    {section && <div class="page-hero__kicker mono-sm">SECTION · {section.toUpperCase()}</div>}
+    <h1 class="page-hero__title">{title}</h1>
+    {deck && <p class="page-hero__deck deck">{deck}</p>}
+    {facts.length > 0 && (
+      <dl class="page-hero__facts">
+        {facts.map((f) => (
+          <div class="page-hero__fact">
+            <dt class="mono-sm">{f.k}</dt>
+            <dd class="page-hero__fact-v">
+              {typeof f.v === 'number' ? f.v.toLocaleString() : f.v}
+              {f.sub && <span class="page-hero__fact-sub mono-sm muted">{f.sub}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    )}
+    <slot />
+  </div>
+</section>
+
+<style is:global>
+  .page-hero {
+    padding: clamp(40px, 4.4vw, 72px) 0 clamp(40px, 4.4vw, 72px);
+    border-bottom: 1px solid var(--rule-strong);
+    position: relative;
+  }
+  .page-hero--flush { border-bottom: 0; padding-bottom: clamp(28px, 3vw, 48px); }
+  .page-hero .crumbs { margin-bottom: clamp(16px, 2vw, 24px); }
+  .page-hero__kicker {
+    color: var(--accent-3);
+    letter-spacing: 0.24em;
+    margin-bottom: clamp(14px, 1.8vw, 22px);
+  }
+  :root[data-theme='papers'] .page-hero__kicker { color: var(--accent); }
+
+  .page-hero__title {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(36px, 5.4vw, 72px);
+    line-height: 0.96;
+    letter-spacing: -0.015em;
+    margin: 0 0 clamp(16px, 2.2vw, 24px);
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .page-hero__title em { color: var(--accent-3); font-style: italic; }
+  :root[data-theme='papers'] .page-hero__title em { color: var(--accent); }
+
+  .page-hero__deck {
+    margin: 0 0 clamp(24px, 3vw, 36px);
+    max-width: 62ch;
+    font-size: clamp(16px, 1.3vw, 19px);
+    line-height: 1.5;
+  }
+
+  .page-hero__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0;
+    margin: clamp(16px, 2vw, 24px) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .page-hero__fact {
+    padding: clamp(16px, 2vw, 22px) clamp(14px, 1.6vw, 20px);
+    border-right: 1px solid var(--rule);
+    min-width: 0;
+  }
+  .page-hero__fact:first-child { padding-left: 0; }
+  .page-hero__fact:last-child { border-right: 0; padding-right: 0; }
+  .page-hero__fact dt {
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.2em;
+  }
+  .page-hero__fact-v {
+    margin: 0;
+    font-family: var(--f-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(26px, 3.2vw, 40px);
+    line-height: 1;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  :root[data-theme='papers'] .page-hero__fact-v { color: var(--accent); }
+  .page-hero__fact-sub {
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    color: var(--accent-3);
+    font-size: 10.5px;
+  }
+  :root[data-theme='papers'] .page-hero__fact-sub { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    .page-hero__facts { grid-template-columns: repeat(2, 1fr); }
+    .page-hero__fact:nth-child(2n) { border-right: 0; padding-right: 0; }
+    .page-hero__fact:nth-child(2n+1) { padding-left: 0; }
+    .page-hero__fact:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  }
+  @media (max-width: 420px) {
+    .page-hero__facts { grid-template-columns: 1fr; }
+    .page-hero__fact { border-right: 0; border-top: 1px solid var(--rule); padding-left: 0; padding-right: 0; }
+    .page-hero__fact:first-child { border-top: 0; }
+  }
+</style>

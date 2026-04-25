@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Tag from '../components/ui/Tag.astro';
 import { fetchRaw, getPhotoOfDay } from '../lib/directus';
 import { asset } from '../lib/assets';
@@ -35,21 +35,19 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
 }
 ---
 <Layout title="Photographs · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Photographs' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · ARCHIVE</div>
-      <h1 class="serif" style="font-size: clamp(44px, 7vw, 112px); line-height:.92; font-style: italic; margin: 0;">Photographs</h1>
-      <p class="deck" style="max-width: 62ch;">An archive of pictures — stage, street, studio, sleeve. Filed by decade, tagged to tours and records.</p>
-    </div>
-
-    <div class="facts" style="margin-top: 1.4rem;">
-      <div class="facts__item"><div class="facts__k">On file</div><div class="facts__v" style="color: var(--gold);">{withImage.length.toLocaleString()}</div></div>
-      <div class="facts__item"><div class="facts__k">Decades covered</div><div class="facts__v">{decades.length}</div></div>
-      <div class="facts__item"><div class="facts__k">Featured</div><div class="facts__v">{featured.length || '—'}</div></div>
-      <div class="facts__item"><div class="facts__k">Tours tagged</div><div class="facts__v">{tours.length}+</div></div>
-    </div>
-  </div>
+  <PageHero
+    section="Archive"
+    title="Photographs"
+    deck="An archive of pictures — stage, street, studio, sleeve. Filed by decade, tagged to tours and records."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Photographs' }]}
+    facts={[
+      { k: 'On file', v: withImage.length.toLocaleString() },
+      { k: 'Decades covered', v: decades.length },
+      { k: 'Featured', v: featured.length || '—' },
+      { k: 'Tours tagged', v: `${tours.length}+` },
+    ]}
+    flush
+  />
 
   {hero && (
     <section class="container" style="padding: clamp(24px, 4vw, 48px) 0; margin-top: 2rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">

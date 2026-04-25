@@ -24,6 +24,13 @@ import {
 } from '../lib/directus';
 import { asset } from '../lib/assets';
 
+export const prerender = false;
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
+);
+
 const [issue, albums, eras, topSongs, figures, otd, news, editorial, quotes, songOfDay, lyricOfDay, photoOfDay, nextConcert, latestConcert] = await Promise.all([
   getAlbumOfMonth(),
   listAlbums({ type: 'studio' }),
@@ -80,9 +87,13 @@ const monthSetlists = await fetchRaw('setlists', {
   sort: 'date',
   limit: 400,
 }).catch(() => []);
-const anniversariesShows = (monthSetlists as any[])
+// Show every show in this month, prioritising round-number anniversaries first
+// then any others — so the section always has content.
+const monthShows = (monthSetlists as any[])
   .map((s) => ({ ...s, yearsAgo: mastYear - Number((s.date || '').slice(0, 4) || 0) }))
-  .filter((s) => s.yearsAgo >= 1 && (s.yearsAgo % 5 === 0 || s.yearsAgo % 10 === 0))
+  .filter((s) => s.yearsAgo >= 1);
+const milestoneShows = monthShows.filter((s) => s.yearsAgo % 5 === 0 || s.yearsAgo % 10 === 0);
+const anniversariesShows = (milestoneShows.length >= 3 ? milestoneShows : monthShows)
   .sort((a, b) => b.yearsAgo - a.yearsAgo)
   .slice(0, 6);
 
@@ -207,9 +218,11 @@ const figureCells: FigureCell[] = [
           <div class="cover-plate__corner cover-plate__corner--tl">
             <span class="mono-sm muted">{monthName} · RECORD OF THE MONTH</span>
           </div>
-          <div class="cover-plate__corner cover-plate__corner--tr">
-            <span class="mono-sm muted">FIX · {issue.catalog_number || '—'}</span>
-          </div>
+          {issue.catalog_number && (
+            <div class="cover-plate__corner cover-plate__corner--tr">
+              <span class="mono-sm muted">CAT · {issue.catalog_number}</span>
+            </div>
+          )}
           {issue.cover_art ? (
             <a href={`/discography/${issue.slug}`}>
               <img src={asset(issue.cover_art, 'card')} alt={`${issue.title} cover`} />
@@ -260,8 +273,7 @@ const figureCells: FigureCell[] = [
 
   <section class="container figures">
     <div class="figures__head">
-      <div class="issue-label">The archive, measured</div>
-      <div class="mono-sm muted">Updated live</div>
+      <div class="issue-label">The archive</div>
     </div>
     <div class="figures__grid">
       {figureCells.map((c) => (
@@ -274,9 +286,9 @@ const figureCells: FigureCell[] = [
     </div>
   </section>
 
-  {(otd.length > 0 || counters.length > 0) && (
+  {otd.length > 0 && (
     <section class="issue-section container otd-wrap">
-      <div class="otd-wrap__grid">
+      <div class="otd-wrap__grid otd-wrap__grid--single">
         <div class="otd-col">
           <div class="issue-label">On this day · {todayShort}</div>
           <h2 class="issue-hed">
@@ -306,36 +318,6 @@ const figureCells: FigureCell[] = [
           )}
         </div>
 
-        {counters.length > 0 && (
-          <aside class="otd-col">
-            <div class="issue-label">By the numbers, today</div>
-            <div class="counters">
-              <div class="counters__head">
-                <span class="mono"><span class="pip"></span>Live counters</span>
-                <span class="mono muted">{today}</span>
-              </div>
-              <ul class="counters__list">
-                {counters.map((c) => {
-                  const inner = (
-                    <>
-                      <div class="counters__row-main">
-                        <div class="mono-sm muted counters__k">{c.k}</div>
-                        <div class="serif counters__v">{c.v}</div>
-                      </div>
-                      <div class="mono counters__sub">{c.sub}</div>
-                    </>
-                  );
-                  return (
-                    <li class="counters__row">
-                      {c.href ? <a href={c.href}>{inner}</a> : <div>{inner}</div>}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-            <a class="btn btn--ghost counters__cta" href="/stats">Enter the figures →</a>
-          </aside>
-        )}
       </div>
     </section>
   )}
@@ -393,7 +375,7 @@ const figureCells: FigureCell[] = [
   )}
 
   {(anniversariesAlbums.length > 0 || anniversariesShows.length > 0) && (
-    <IssueSection kicker={`This month · ${monthName}`} title="Anniversaries" meta="Records & shows, this month in Cure history">
+    <IssueSection kicker={`This month · ${monthName}`} title="Anniversaries" meta={`${anniversariesAlbums.length} record${anniversariesAlbums.length === 1 ? '' : 's'} · ${anniversariesShows.length} show${anniversariesShows.length === 1 ? '' : 's'}`}>
       <div class="anniv">
         {anniversariesAlbums.length > 0 && (
           <div class="anniv__col">
@@ -524,7 +506,7 @@ const figureCells: FigureCell[] = [
   )}
 
   {eras.length > 0 && (
-    <IssueSection kicker={`${eras.length} eras`} title="A catalog, divided." href="/band/history">
+    <IssueSection kicker={`${eras.length} eras`} title="The Eras" href="/band/history">
       <div class="era-cards">
         {eras.map((e: any) => {
           const hue = typeof e.hue === 'number' ? e.hue : 320;
@@ -577,10 +559,10 @@ const figureCells: FigureCell[] = [
 </Layout>
 
 <style>
-  .issue { padding: clamp(32px, 5vw, 72px) 0; border-bottom: 1px solid var(--rule); }
-  .issue__grid { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: start; }
-  .issue__title { font-size: clamp(56px, 9vw, 112px); line-height: .95; font-style: italic; font-weight: 400; letter-spacing: -.01em; margin: 0; }
-  .issue__lede { font-family: var(--f-serif); font-size: 18px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; }
+  .issue { padding: var(--section-y) 0; border-bottom: 1px solid var(--rule); }
+  .issue__grid { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: clamp(24px, 3vw, 48px); align-items: start; }
+  .issue__title { font-size: clamp(40px, 6vw, 80px); line-height: .95; font-style: italic; font-weight: 500; letter-spacing: -.015em; margin: 0; }
+  .issue__lede { font-family: var(--f-serif); font-size: 17px; line-height: 1.55; color: var(--ink-2); max-width: 58ch; }
   @media (max-width: 900px) { .issue__grid { grid-template-columns: 1fr; } }
 
   .concert-head { display: grid; grid-template-columns: 1fr auto; gap: clamp(16px, 3vw, 40px); align-items: center; }
@@ -588,30 +570,31 @@ const figureCells: FigureCell[] = [
 
   /* Running figures — 4-col strip, editorial tabular numerals, mono sub-caption */
   .figures {
-    padding-top: clamp(36px, 5vw, 72px);
-    padding-bottom: clamp(36px, 5vw, 72px);
-    border-top: 1px solid var(--rule-strong);
+    padding-top: var(--section-y);
+    padding-bottom: var(--section-y);
+    border-top: 1px solid var(--rule);
   }
   .figures__head {
     display: flex; justify-content: space-between; align-items: baseline;
-    gap: 1rem; margin-bottom: clamp(20px, 3vw, 36px); flex-wrap: wrap;
+    gap: 1rem; margin-bottom: clamp(16px, 2vw, 24px); flex-wrap: wrap;
   }
   .figures__grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0;
-    border-top: 1px solid var(--ink-2);
+    border-top: 1px solid var(--rule-strong);
   }
   .figures__cell {
-    padding: clamp(18px, 2.6vw, 30px) clamp(12px, 1.8vw, 24px) clamp(18px, 2.6vw, 30px) 0;
+    padding: clamp(16px, 2vw, 22px) clamp(14px, 1.6vw, 20px);
     border-right: 1px solid var(--rule);
     display: flex; flex-direction: column; gap: .35rem;
     min-width: 0;
   }
-  .figures__cell:last-child { border-right: 0; }
+  .figures__cell:first-child { padding-left: 0; }
+  .figures__cell:last-child { border-right: 0; padding-right: 0; }
   .figures__val {
     font-family: var(--f-display); font-style: italic; font-weight: 500;
-    font-size: clamp(40px, 5.6vw, 84px); line-height: .95;
+    font-size: clamp(28px, 3.4vw, 44px); line-height: .95;
     letter-spacing: -.015em; color: var(--ink);
     font-variant-numeric: tabular-nums;
   }
@@ -625,27 +608,40 @@ const figureCells: FigureCell[] = [
     text-transform: uppercase;
   }
   :root[data-theme='papers'] .figures__sub { color: var(--accent); }
-  @media (max-width: 720px) { .figures__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .figures__cell:nth-child(2n) { border-right: 0; } .figures__cell:nth-child(n+3) { border-top: 1px solid var(--rule); padding-top: clamp(20px, 3vw, 32px); } }
+  @media (max-width: 720px) {
+    .figures__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .figures__cell:nth-child(2n) { border-right: 0; padding-right: 0; }
+    .figures__cell:nth-child(2n+1) { padding-left: 0; }
+    .figures__cell:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  }
 
-  /* On this day + By the numbers today — 2-col split. */
+  /* On this day list. */
   .otd-wrap__grid {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     gap: clamp(28px, 4vw, 56px);
     align-items: start;
   }
+  .otd-wrap__grid--single { grid-template-columns: 1fr; }
   @media (max-width: 960px) { .otd-wrap__grid { grid-template-columns: 1fr; } }
   .otd-col { display: flex; flex-direction: column; gap: clamp(16px, 2.4vw, 28px); min-width: 0; }
+  .issue-hed {
+    font-family: var(--f-display); font-style: italic; font-weight: 500;
+    font-size: clamp(26px, 3vw, 40px); line-height: 1.05; letter-spacing: -.01em;
+    margin: 0; color: var(--ink); text-wrap: balance;
+  }
+  .issue-hed em { color: var(--accent-3); font-style: italic; }
+  :root[data-theme='papers'] .issue-hed em { color: var(--accent); }
   .otd-col .issue-hed { margin: 0; }
 
-  .otd__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink-2); }
+  .otd__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule-strong); }
   .otd__row { border-bottom: 1px solid var(--rule); }
   .otd__row > a,
   .otd__row > div {
     display: grid;
     grid-template-columns: 72px 120px 1fr;
     gap: clamp(12px, 2vw, 22px);
-    padding: clamp(18px, 2.4vw, 26px) 0;
+    padding: clamp(14px, 1.8vw, 20px) 0;
     align-items: baseline;
     color: inherit; border: none;
     min-width: 0;
@@ -708,12 +704,12 @@ const figureCells: FigureCell[] = [
   /* Daily — photo (left) + lyric/song stack (right) */
   .daily__head {
     display: flex; justify-content: space-between; align-items: baseline;
-    gap: 1rem; margin-bottom: clamp(16px, 2.4vw, 28px);
+    gap: 1rem; margin-bottom: clamp(16px, 2vw, 24px);
   }
   .daily__grid {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    gap: clamp(20px, 3vw, 40px);
+    gap: clamp(16px, 2vw, 28px);
     align-items: stretch;
   }
   @media (max-width: 900px) { .daily__grid { grid-template-columns: 1fr; } }
@@ -741,7 +737,7 @@ const figureCells: FigureCell[] = [
 
   .daily__lyric {
     display: block; color: inherit;
-    padding: clamp(24px, 3.6vw, 44px);
+    padding: clamp(20px, 2.4vw, 32px);
     border: 1px solid var(--rule);
     background:
       radial-gradient(600px 300px at 20% 0%, var(--accent-tint-2), transparent 70%),
@@ -751,7 +747,7 @@ const figureCells: FigureCell[] = [
   }
   .daily__lyric-body {
     font-family: var(--f-display); font-style: italic;
-    font-size: clamp(22px, 2.6vw, 36px); line-height: 1.2; margin: .8rem 0;
+    font-size: clamp(20px, 2.2vw, 28px); line-height: 1.25; margin: .6rem 0;
     color: var(--ink);
   }
   .daily__lyric-mark { color: var(--accent); font-family: var(--f-display); }
@@ -789,33 +785,48 @@ const figureCells: FigureCell[] = [
   .era-cards {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(12px, 1.8vw, 20px);
+    gap: 0;
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule);
   }
   @media (max-width: 900px) { .era-cards { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 600px) { .era-cards { grid-template-columns: 1fr; } }
   .era-card {
-    display: flex; flex-direction: column; gap: .5rem;
-    padding: clamp(20px, 2.6vw, 28px);
-    border: 1px solid var(--rule);
-    background: var(--bg-2);
+    display: flex; flex-direction: column; gap: .4rem;
+    padding: clamp(20px, 2.2vw, 28px) clamp(16px, 1.8vw, 24px) clamp(44px, 4vw, 60px);
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
     color: inherit; text-decoration: none;
-    min-height: 200px;
     position: relative;
-    transition: border-color .2s;
+    min-height: 0;
+    transition: background .2s, border-color .2s;
   }
-  .era-card:hover { border-color: var(--rule-strong); }
+  .era-card:hover { background: var(--bg-2); }
+  .era-card:nth-child(3n) { border-right: 0; }
+  .era-card:nth-last-child(-n+3) { border-bottom: 0; }
+  @media (max-width: 900px) {
+    .era-card { border-right: 1px solid var(--rule); }
+    .era-card:nth-child(3n) { border-right: 1px solid var(--rule); }
+    .era-card:nth-child(2n) { border-right: 0; }
+    .era-card:nth-last-child(-n+2) { border-bottom: 0; }
+  }
+  @media (max-width: 600px) {
+    .era-card { border-right: 0; border-bottom: 1px solid var(--rule); }
+    .era-card:last-child { border-bottom: 0; }
+  }
   .era-card__dot {
-    width: 14px; height: 14px; border-radius: 50%;
-    box-shadow: 0 0 14px currentColor;
-    margin-bottom: .6rem;
+    width: 10px; height: 10px; border-radius: 50%;
+    box-shadow: 0 0 10px currentColor;
+    margin-bottom: .4rem;
   }
-  .era-card__title { font-size: clamp(24px, 2.6vw, 32px); font-style: italic; line-height: 1.05; letter-spacing: -.005em; }
+  .era-card__title { font-size: clamp(22px, 2.4vw, 30px); font-style: italic; line-height: 1.1; letter-spacing: -.005em; }
   .era-card:hover .era-card__title { color: var(--accent-3); }
   :root[data-theme='papers'] .era-card:hover .era-card__title { color: var(--accent); }
   .era-card__range { letter-spacing: .2em; }
-  .era-card__body { font-family: var(--f-serif); font-size: 14px; line-height: 1.55; color: var(--muted); margin: .2rem 0 2.4rem; text-wrap: pretty; }
+  .era-card__body { font-family: var(--f-serif); font-size: 14.5px; line-height: 1.55; color: var(--muted); margin: .4rem 0 0; text-wrap: pretty; }
   .era-card__cue {
-    position: absolute; left: clamp(20px, 2.6vw, 28px); right: clamp(20px, 2.6vw, 28px); bottom: 18px;
+    position: absolute; left: clamp(18px, 2vw, 28px); right: clamp(18px, 2vw, 28px); bottom: clamp(16px, 2vw, 22px);
     display: flex; justify-content: flex-end; color: var(--accent-3);
     letter-spacing: .18em;
   }
@@ -836,10 +847,10 @@ const figureCells: FigureCell[] = [
   .essay__filed { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: .3rem; }
   .essay__filed-body { font-family: var(--f-serif); font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
   .essay__head {
-    font-size: clamp(36px, 4.4vw, 58px);
+    font-size: clamp(28px, 3.6vw, 44px);
     font-style: italic; line-height: 1.05;
     letter-spacing: -.015em;
-    margin: 0 0 1.2rem;
+    margin: 0 0 1rem;
     text-wrap: balance;
     color: var(--ink);
   }
@@ -886,7 +897,7 @@ const figureCells: FigureCell[] = [
   .dispatch__link { display: flex; flex-direction: column; gap: .6rem; color: inherit; border: none; }
   .dispatch__meta { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
   .dispatch__title {
-    font-size: clamp(22px, 2.2vw, 28px); font-style: italic; line-height: 1.2;
+    font-size: clamp(20px, 2vw, 26px); font-style: italic; line-height: 1.2;
     color: var(--ink); margin: .1rem 0 .2rem; text-wrap: balance;
   }
   .dispatch__link:hover .dispatch__title { color: var(--accent-3); }

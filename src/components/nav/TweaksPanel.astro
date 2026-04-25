@@ -1,0 +1,308 @@
+---
+const ACCENTS: Array<{ id: string; color: string; alt: string }> = [
+  { id: 'plum',    color: '#7746B0', alt: 'Plum' },
+  { id: 'wine',    color: '#B8354A', alt: 'Wine' },
+  { id: 'oxblood', color: '#8C2638', alt: 'Oxblood' },
+  { id: 'navy',    color: '#3A4A6B', alt: 'Navy' },
+  { id: 'gold',    color: '#A88344', alt: 'Gold' },
+  { id: 'rust',    color: '#A6462A', alt: 'Rust' },
+];
+---
+<aside class="tweaks" data-tweaks hidden role="dialog" aria-label="Tweaks">
+  <div class="tweaks__hd">
+    <h4 class="tweaks__title">Tweaks</h4>
+    <button class="tweaks__close" data-tweaks-close aria-label="Close tweaks">×</button>
+  </div>
+
+  <section class="tweaks__sec tweaks__sec--mode">
+    <div class="tweaks__h">Mode</div>
+    <div class="tweaks__toggle" data-tweaks-mode role="group" aria-label="Light or dark mode">
+      <button class="tweaks__toggle-btn" data-mode="dark" aria-pressed="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+        </svg>
+        <span>Dark</span>
+      </button>
+      <button class="tweaks__toggle-btn" data-mode="light" aria-pressed="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <span>Light</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="tweaks__sec">
+    <div class="tweaks__h">Theme</div>
+    <div class="tweaks__row">
+      <button class="chip" data-tweak="theme" data-value="dark">Twilight</button>
+      <button class="chip" data-tweak="theme" data-value="midnight">Midnight</button>
+      <button class="chip" data-tweak="theme" data-value="papers">Papers</button>
+    </div>
+  </section>
+
+  <section class="tweaks__sec">
+    <div class="tweaks__h">Accent</div>
+    <div class="tweaks__row">
+      {ACCENTS.map((a) => (
+        <button
+          class="tweaks__sw"
+          data-tweak="accent"
+          data-value={a.id}
+          data-color={a.color}
+          style={`background:${a.color}`}
+          aria-label={a.alt}
+          title={a.alt}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="tweaks__sec">
+    <div class="tweaks__h">Display type</div>
+    <div class="tweaks__row">
+      <button class="chip" data-tweak="display" data-value="cormorant">Cormorant</button>
+      <button class="chip" data-tweak="display" data-value="eb">EB Garamond</button>
+    </div>
+  </section>
+
+  <section class="tweaks__sec">
+    <div class="tweaks__h">Atmosphere</div>
+    <div class="tweaks__row" style="margin-bottom: 8px;">
+      <button class="chip" data-tweak="atmos" data-value="off">Off</button>
+      <button class="chip" data-tweak="atmos" data-value="soft">Soft</button>
+      <button class="chip" data-tweak="atmos" data-value="heavy">Heavy</button>
+    </div>
+    <label class="tweaks__check">
+      <input type="checkbox" data-tweak="grain" />
+      <span class="mono-sm">Film grain</span>
+    </label>
+  </section>
+
+  <section class="tweaks__sec">
+    <div class="tweaks__h">Density</div>
+    <div class="tweaks__row">
+      <button class="chip" data-tweak="density" data-value="airy">Airy</button>
+      <button class="chip" data-tweak="density" data-value="balanced">Balanced</button>
+      <button class="chip" data-tweak="density" data-value="dense">Dense</button>
+    </div>
+  </section>
+
+  <section class="tweaks__sec">
+    <div class="tweaks__h">Headlines</div>
+    <div class="tweaks__row">
+      <button class="chip" data-tweak="headline" data-value="italic">Italic</button>
+      <button class="chip" data-tweak="headline" data-value="upright">Upright</button>
+    </div>
+  </section>
+
+  <div class="tweaks__ft">
+    <button class="chip" data-tweaks-reset>Reset</button>
+    <span class="mono-sm muted">live · saves locally</span>
+  </div>
+</aside>
+
+<style>
+  .tweaks {
+    position: fixed; bottom: 20px; right: 20px; z-index: 180;
+    width: 300px; max-height: 86vh; overflow: auto;
+    background: var(--surface); border: 1px solid var(--rule-strong);
+    box-shadow: var(--shadow-2), var(--glow);
+    padding: 16px 18px;
+    font-family: var(--f-mono); font-size: 11px;
+  }
+  .tweaks[hidden] { display: none; }
+  .tweaks__hd { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .tweaks__title {
+    margin: 0; font-family: var(--f-mono); font-weight: 500;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent-3);
+  }
+  :root[data-theme='papers'] .tweaks__title { color: var(--accent); }
+  .tweaks__close {
+    border: 1px solid var(--rule); background: transparent;
+    color: var(--ink-2); cursor: pointer;
+    width: 28px; height: 28px; line-height: 1; font-size: 18px;
+  }
+  .tweaks__close:hover { color: var(--accent-3); border-color: var(--accent); }
+  .tweaks__sec { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--rule); }
+  .tweaks__sec:last-of-type { border-bottom: 0; }
+  .tweaks__h {
+    font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--ink-2); margin-bottom: 8px;
+  }
+  .tweaks__row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tweaks__toggle {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--rule);
+    border-radius: 2px; overflow: hidden;
+  }
+  .tweaks__toggle-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; color: var(--ink-2);
+    border: 0; padding: 10px 12px;
+    font-family: var(--f-mono); font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    cursor: pointer; transition: background .18s, color .18s;
+  }
+  .tweaks__toggle-btn + .tweaks__toggle-btn { border-left: 1px solid var(--rule); }
+  .tweaks__toggle-btn:hover { color: var(--ink); }
+  .tweaks__toggle-btn[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  :root[data-theme='papers'] .tweaks__toggle-btn[aria-pressed='true'] { color: var(--accent-ink); }
+  .tweaks__sw {
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; padding: 0;
+  }
+  .tweaks__sw[aria-pressed='true'] { border-color: var(--ink); }
+  .tweaks__check {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--ink-2); cursor: pointer; padding: 4px 0;
+  }
+  .tweaks__check input { accent-color: var(--accent); }
+  .tweaks__ft { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+
+  @media (max-width: 600px) {
+    .tweaks { right: 12px; bottom: 12px; width: calc(100vw - 24px); }
+  }
+</style>
+
+<script>
+  type Tweaks = {
+    theme: 'dark' | 'midnight' | 'papers';
+    accent: string;
+    display: 'cormorant' | 'eb';
+    atmos: 'off' | 'soft' | 'heavy';
+    grain: boolean;
+    density: 'airy' | 'balanced' | 'dense';
+    headline: 'italic' | 'upright';
+  };
+  const KEY = 'cureation:tweaks';
+  const ACCENT_MAP: Record<string, string> = {
+    plum: '#7746B0', wine: '#B8354A', oxblood: '#8C2638',
+    navy: '#3A4A6B', gold: '#A88344', rust: '#A6462A',
+  };
+  const DEFAULTS: Tweaks = {
+    theme: 'midnight', accent: 'plum',
+    display: 'cormorant', atmos: 'soft', grain: false,
+    density: 'balanced', headline: 'italic',
+  };
+
+  function readTweaks(): Tweaks {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Tweaks>) };
+    } catch (e) {}
+    const t = document.documentElement.getAttribute('data-theme');
+    return { ...DEFAULTS, theme: (t as Tweaks['theme']) || DEFAULTS.theme };
+  }
+
+  function applyTweaks(t: Tweaks) {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', t.theme);
+    html.setAttribute('data-display', t.display);
+    html.setAttribute('data-atmos', t.atmos);
+    html.setAttribute('data-grain', t.grain ? 'on' : 'off');
+    html.setAttribute('data-density', t.density);
+    html.setAttribute('data-headline', t.headline);
+    const c = ACCENT_MAP[t.accent] || ACCENT_MAP.plum;
+    html.style.setProperty('--accent', c);
+    html.style.setProperty('--accent-tint', c + '1A');
+    html.style.setProperty('--accent-tint-2', c + '33');
+    try { localStorage.setItem(KEY, JSON.stringify(t)); } catch (e) {}
+  }
+
+  function paintPanel(t: Tweaks, panel: HTMLElement) {
+    panel.querySelectorAll<HTMLElement>('[data-tweak]').forEach((el) => {
+      const key = el.getAttribute('data-tweak') as keyof Tweaks;
+      const val = el.getAttribute('data-value');
+      if (key === 'grain' && el instanceof HTMLInputElement) {
+        el.checked = !!t.grain;
+        return;
+      }
+      const active = String((t as any)[key]) === val;
+      el.setAttribute('aria-pressed', active ? 'true' : 'false');
+      el.classList.toggle('is-active', active);
+    });
+    // Light/dark quick toggle: papers = light; dark or midnight = dark.
+    const isLight = t.theme === 'papers';
+    panel.querySelectorAll<HTMLElement>('[data-mode]').forEach((el) => {
+      const m = el.getAttribute('data-mode');
+      const active = (m === 'light' && isLight) || (m === 'dark' && !isLight);
+      el.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  function wireTweaks() {
+    const panel = document.querySelector<HTMLElement>('[data-tweaks]');
+    if (!panel) return;
+    let state = readTweaks();
+    applyTweaks(state);
+    paintPanel(state, panel);
+
+    if ((panel as any).__wired) return;
+    (panel as any).__wired = true;
+
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      const opener = t.closest<HTMLElement>('[data-tweaks-toggle]');
+      if (opener) { e.preventDefault(); panel.hidden = !panel.hidden; return; }
+      const closer = t.closest<HTMLElement>('[data-tweaks-close]');
+      if (closer && panel.contains(closer)) { e.preventDefault(); panel.hidden = true; return; }
+      const reset = t.closest<HTMLElement>('[data-tweaks-reset]');
+      if (reset && panel.contains(reset)) {
+        state = { ...DEFAULTS };
+        applyTweaks(state);
+        paintPanel(state, panel);
+        return;
+      }
+      const tw = t.closest<HTMLElement>('[data-tweak]');
+      if (tw && panel.contains(tw) && tw.tagName !== 'INPUT') {
+        const key = tw.getAttribute('data-tweak') as keyof Tweaks;
+        const val = tw.getAttribute('data-value');
+        if (!key || !val) return;
+        (state as any)[key] = val;
+        applyTweaks(state);
+        paintPanel(state, panel);
+      }
+      const mode = t.closest<HTMLElement>('[data-mode]');
+      if (mode && panel.contains(mode)) {
+        const m = mode.getAttribute('data-mode');
+        // Light → papers. Dark → midnight (or keep current dark theme if already non-papers).
+        if (m === 'light') state.theme = 'papers';
+        else state.theme = state.theme === 'papers' ? 'midnight' : state.theme;
+        applyTweaks(state);
+        paintPanel(state, panel);
+      }
+    });
+    panel.addEventListener('change', (e) => {
+      const inp = e.target as HTMLInputElement;
+      if (inp.matches('[data-tweak="grain"]')) {
+        state.grain = inp.checked;
+        applyTweaks(state);
+        paintPanel(state, panel);
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hidden) panel.hidden = true;
+    });
+
+    // Legacy theme-toggle button cycles theme through tweaks state.
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
+      if ((btn as any).__tweaksWired) return;
+      (btn as any).__tweaksWired = true;
+      btn.addEventListener('click', () => {
+        const order: Array<Tweaks['theme']> = ['dark', 'midnight', 'papers'];
+        state.theme = order[(order.indexOf(state.theme) + 1) % order.length];
+        applyTweaks(state);
+        paintPanel(state, panel);
+      });
+    });
+  }
+  wireTweaks();
+  document.addEventListener('astro:page-load', wireTweaks);
+</script>

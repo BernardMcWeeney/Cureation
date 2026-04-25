@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import Chip from '../components/ui/Chip.astro';
 import { fetchRaw } from '../lib/directus';
 
@@ -9,24 +9,24 @@ const items: any[] = await fetchRaw('did_you_know', { limit: -1, sort: '-id' }).
 const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean))).sort();
 ---
 <Layout title="Curiosities · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Curiosities' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · DID YOU KNOW</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Curiosities</h1>
-      <p class="deck" style="max-width: 62ch;">Footnotes, trivia, and the minor observations — the marginalia that keep an archive honest about what it knows.</p>
-      <div class="facts">
-        <div class="facts__item"><div class="facts__k">On file</div><div class="facts__v">{items.length}</div></div>
-        <div class="facts__item"><div class="facts__k">Categories</div><div class="facts__v">{categories.length}</div></div>
+  <PageHero
+    section="Did you know"
+    title="Curiosities"
+    deck="Footnotes, trivia, and the minor observations — the marginalia that keep an archive honest about what it knows."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Curiosities' }]}
+    facts={[
+      { k: 'On file', v: items.length },
+      { k: 'Categories', v: categories.length },
+    ]}
+    flush
+  >
+    {categories.length > 0 && (
+      <div class="cluster" style="gap:6px; flex-wrap:wrap; margin-top: clamp(20px, 3vw, 32px);" data-cat-filters>
+        <Chip active={true} class="cat-chip" data-cat="all">All</Chip>
+        {categories.map((c) => <Chip class="cat-chip" data-cat={c}>{c}</Chip>)}
       </div>
-      {categories.length > 0 && (
-        <div class="cluster" style="gap:6px; flex-wrap:wrap;" data-cat-filters>
-          <Chip active={true} class="cat-chip" data-cat="all">All</Chip>
-          {categories.map((c) => <Chip class="cat-chip" data-cat={c}>{c}</Chip>)}
-        </div>
-      )}
-    </div>
-  </div>
+    )}
+  </PageHero>
 
   <IssueSection kicker="Marginalia" title="Annotations">
     <div class="curios" data-curios>

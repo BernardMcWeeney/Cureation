@@ -2,10 +2,11 @@
 import Layout from '../../layouts/Layout.astro';
 import AlbumCard from '../../components/album/AlbumCard.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
-import Crumbs from '../../components/ui/Crumbs.astro';
+import PageHero from '../../components/ui/PageHero.astro';
 import { listAlbums } from '../../lib/directus';
 
 const eps = await listAlbums({ type: 'ep' });
+const yearsSorted = eps.map((a) => Number(a.release_date?.slice(0, 4))).filter(Boolean).sort();
 const tabs = [
   { href: '/discography',              label: 'Studio',      active: false },
   { href: '/discography/ep',           label: 'EPs',         active: true  },
@@ -14,14 +15,18 @@ const tabs = [
 ];
 ---
 <Layout title="EPs · Discography · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Discography', href: '/discography' }, { label: 'EPs' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · EXTENDED PLAYS</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Extended plays</h1>
-      <p class="deck" style="max-width: 62ch;">Short-form releases and interstitial records — the missives between albums.</p>
-    </div>
-  </div>
+  <PageHero
+    section="Extended plays"
+    title="Extended plays"
+    deck="Short-form releases and interstitial records — the missives between albums."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Discography', href: '/discography' }, { label: 'EPs' }]}
+    facts={[
+      { k: 'On file', v: eps.length },
+      { k: 'First', v: yearsSorted[0] || '—' },
+      { k: 'Latest', v: yearsSorted[yearsSorted.length - 1] || '—' },
+    ]}
+    flush
+  />
 
   <nav class="container disc-tabs" aria-label="Record type">
     {tabs.map((t) => (
@@ -31,37 +36,13 @@ const tabs = [
     ))}
   </nav>
 
-  <IssueSection kicker={`${eps.length} records`} title="EPs">
+  <IssueSection kicker="Cover plates" title="Sleeves" meta={`${eps.length} extended plays`}>
     {eps.length > 0 ? (
-      <div class="table-wrap">
-      <table class="data">
-        <thead><tr><th style="width:50px;">№</th><th style="width:80px;">Year</th><th>Record</th><th class="num" style="text-align:right;">Tracks</th></tr></thead>
-        <tbody>
-          {eps.map((a, i) => (
-            <tr data-clickable onclick={`location.href='/discography/${a.slug}'`}>
-              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-              <td class="mono-sm muted">{a.release_date?.slice(0, 4) || '—'}</td>
-              <td><span class="serif" style="font-size:22px; font-style:italic;">{a.title}</span></td>
-              <td class="num">{a.track_count || '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div class="records-grid">
+        {eps.map((a) => <AlbumCard album={a} size="md" />)}
       </div>
     ) : (
       <p class="deck">No EPs catalogued yet.</p>
     )}
   </IssueSection>
-
-  {eps.length > 0 && (
-    <IssueSection kicker="Cover plates" title="Sleeves">
-      <div class="records-grid">
-        {eps.map((a) => <AlbumCard album={a} size="md" />)}
-      </div>
-    </IssueSection>
-  )}
 </Layout>
-
-<style>
-  .records-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(20px, 2.4vw, 36px); }
-</style>

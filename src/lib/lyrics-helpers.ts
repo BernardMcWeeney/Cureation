@@ -130,6 +130,14 @@ export function buildStructuredLyricsFromRaw(lyrics: string | null | undefined):
 }
 
 export function normalizeStructuredLyrics(structured: any, fallbackLyrics?: string): StructuredSection[] | null {
+  if (typeof structured === 'string' && structured.trim()) {
+    try {
+      structured = JSON.parse(structured);
+    } catch {
+      structured = null;
+    }
+  }
+
   if (Array.isArray(structured) && structured.length > 0) {
     const sections = structured.map((section: any, index: number) => {
       const lines = Array.isArray(section?.lines)

@@ -8,101 +8,115 @@ interface Bar {
 interface Props {
   bars: Bar[];
   unit?: string;
-  height?: number;
+  /** Maximum bars to render. Defaults to all. */
+  limit?: number;
+  /** Show numeric ranks. */
+  showRank?: boolean;
 }
-const { bars, unit = '', height = 260 } = Astro.props as Props;
-const max = Math.max(1, ...bars.map(b => b.value));
+const { bars, unit = '', limit, showRank = true } = Astro.props as Props;
+const list = limit ? bars.slice(0, limit) : bars;
+const max = Math.max(1, ...list.map(b => b.value));
 ---
-<div class="bar-chart" style={`--h: ${height}px;`}>
-  <div class="bar-chart__inner" role="list">
-    {bars.map((b, i) => {
-      const h = (b.value / max) * 100;
-      const Tag: any = b.href ? 'a' : 'div';
-      return (
-        <Tag
-          class={`bar bar--${i < 3 ? 'top' : 'rest'}`}
-          href={b.href}
-          style={`--bar-h: ${h}%;`}
-          role="listitem"
-          data-label={b.label}
-          data-value={b.value.toLocaleString() + (unit ? ` ${unit}` : '')}
-        >
-          <div class="bar__val">{b.value.toLocaleString()}</div>
-          <div class="bar__fill"></div>
-          <div class="bar__label">{b.label}</div>
-          {b.sub && <div class="bar__sub">{b.sub}</div>}
+<ol class="hbar" role="list">
+  {list.map((b, i) => {
+    const pct = (b.value / max) * 100;
+    const Tag: any = b.href ? 'a' : 'div';
+    return (
+      <li class={`hbar__row${i < 3 ? ' hbar__row--top' : ''}`}>
+        <Tag href={b.href} class="hbar__link">
+          {showRank && <span class="hbar__rank mono-sm">{String(i + 1).padStart(2, '0')}</span>}
+          <div class="hbar__body">
+            <div class="hbar__head">
+              <span class="hbar__label serif">{b.label}</span>
+              {b.sub && <span class="hbar__sub mono-sm muted">{b.sub}</span>}
+            </div>
+            <div class="hbar__track" aria-hidden="true">
+              <span class="hbar__fill" style={`width: ${pct}%`}></span>
+            </div>
+          </div>
+          <span class="hbar__val mono">
+            {b.value.toLocaleString()}{unit ? <span class="hbar__unit">{` ${unit}`}</span> : ''}
+          </span>
         </Tag>
-      );
-    })}
-  </div>
-</div>
+      </li>
+    );
+  })}
+</ol>
 
 <style>
-  .bar-chart { padding: 1.5rem 0 .5rem; }
-  .bar-chart__inner {
+  .hbar { list-style: none; margin: 0; padding: 0; }
+  .hbar__row { border-bottom: 1px solid var(--rule-2); }
+  .hbar__row:first-child { border-top: 1px solid var(--ink); }
+  .hbar__link {
     display: grid;
-    grid-template-columns: repeat(var(--cols, 10), minmax(0, 1fr));
-    gap: clamp(6px, 1vw, 14px);
-    align-items: end;
-    height: calc(var(--h) + 90px);
-  }
-  .bar {
-    display: grid;
-    grid-template-rows: auto var(--h) auto auto;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    border: none;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: clamp(14px, 2vw, 24px);
+    padding: clamp(14px, 1.8vw, 20px) 0;
     color: inherit;
-    align-self: stretch;
-    transition: transform .22s ease;
+    border: none;
+    text-decoration: none;
+    transition: color .18s;
   }
-  .bar:hover { transform: translateY(-3px); }
-  .bar__val {
-    font-family: var(--f-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.12em;
-    color: var(--accent-3);
-    margin-bottom: 6px;
-    opacity: 0.85;
-    transition: opacity .2s;
+  .hbar__link:hover { color: var(--accent-3); }
+  :root[data-theme='papers'] .hbar__link:hover { color: var(--accent); }
+
+  .hbar__rank {
+    color: var(--muted);
+    letter-spacing: 0.16em;
+    text-align: right;
   }
-  .bar:hover .bar__val { opacity: 1; color: var(--accent-ink); }
-  .bar__fill {
-    height: var(--bar-h);
-    background: linear-gradient(to top, var(--accent-2), var(--accent));
-    box-shadow: var(--glow);
-    opacity: 0.72;
-    transition: opacity .2s, box-shadow .2s;
-    min-height: 2px;
-    align-self: end;
+  .hbar__row--top .hbar__rank { color: var(--accent-3); }
+  :root[data-theme='papers'] .hbar__row--top .hbar__rank { color: var(--accent); }
+
+  .hbar__body { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .hbar__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .hbar__label {
+    font-style: italic;
+    font-size: clamp(17px, 1.6vw, 21px);
+    line-height: 1.25;
+    color: var(--ink);
+  }
+  .hbar__link:hover .hbar__label { color: var(--accent-3); }
+  :root[data-theme='papers'] .hbar__link:hover .hbar__label { color: var(--accent); }
+  .hbar__sub { letter-spacing: 0.16em; }
+
+  .hbar__track {
+    height: 4px;
+    background: var(--rule-2);
+    overflow: hidden;
     position: relative;
   }
-  .bar--top .bar__fill { opacity: 1; background: linear-gradient(to top, var(--accent), var(--gold)); }
-  .bar:hover .bar__fill { opacity: 1; box-shadow: 0 0 48px var(--accent); }
-  .bar__label {
-    font-family: var(--f-display);
-    font-style: italic;
-    font-size: clamp(12px, 1.1vw, 15px);
-    line-height: 1.15;
-    margin-top: 10px;
-    color: var(--ink);
-    min-height: 2.2em;
-    padding: 0 2px;
+  .hbar__fill {
+    display: block; height: 100%;
+    background: linear-gradient(to right, var(--accent-2), var(--accent));
+    box-shadow: var(--glow);
+    opacity: 0.78;
+    transition: opacity .25s, box-shadow .25s;
   }
-  .bar__sub {
+  .hbar__row--top .hbar__fill {
+    background: linear-gradient(to right, var(--accent), var(--gold));
+    opacity: 1;
+  }
+  .hbar__link:hover .hbar__fill { opacity: 1; box-shadow: 0 0 24px var(--accent); }
+
+  .hbar__val {
     font-family: var(--f-mono);
-    font-size: 9.5px;
-    letter-spacing: 0.14em;
-    color: var(--muted);
-    margin-top: 3px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 64px;
+    align-self: center;
   }
-  @media (max-width: 780px) {
-    .bar-chart__inner { grid-template-columns: repeat(5, 1fr); grid-auto-rows: auto; height: auto; }
-    .bar { grid-template-rows: auto 120px auto auto; }
+  .hbar__unit { color: var(--muted); margin-left: 4px; }
+
+  @media (max-width: 540px) {
+    .hbar__link { grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; }
+    .hbar__label { font-size: 16px; }
   }
 </style>

@@ -293,7 +293,7 @@ export async function getRunningFigures(): Promise<{
   }
   const [albums, songs, setlists, venues, photos, members] = await Promise.all([
     count('discography', { 'filter[type][_eq]': 'studio' }),
-    count('songs'),
+    count('songs', { 'filter[slug][_nnull]': true }),
     count('setlists'),
     count('venues'),
     count('photos'),
@@ -362,20 +362,28 @@ export async function getOnThisDay(date = new Date()): Promise<any[]> {
 
 /** Generic cross-collection search for the ⌘K overlay. */
 export async function searchAll(q: string): Promise<{
-  albums: Array<{ id: number; title: string; slug: string; type: string }>;
-  songs: Array<{ id: number; title: string; slug: string; album: number | null }>;
-  setlists: Array<{ id: number; date: string | null; venue_link: any }>;
+  albums: Array<{ id: number; title: string; slug: string; type: string; cover_art: string | null }>;
+  songs: Array<{ id: number; title: string; slug: string; album: number | null; cover_art: string | null; album_title: string | null }>;
+  lyrics: Array<{ id: number; title: string; slug: string; album: number | null; cover_art: string | null; album_title: string | null; snippet: string }>;
+  setlists: Array<{ id: number; date: string | null; venue: string | null; venue_link: any }>;
   venues: Array<{ id: number; name: string; slug: string | null; city: string | null; country: string | null }>;
 }> {
   const limit = 6;
-  const [albums, songs, setlists, venues] = await Promise.all([
+  const [albums, songs, lyricsHits, setlists, venues] = await Promise.all([
     directusFetch<any[]>('/items/discography', {
       limit, 'filter[title][_icontains]': q,
-      fields: 'id,title,slug,type', sort: '-release_date',
+      fields: 'id,title,slug,type,cover_art', sort: '-release_date',
     }).catch(() => []),
     directusFetch<any[]>('/items/songs', {
       limit, 'filter[title][_icontains]': q,
-      fields: 'id,title,slug,album',
+      'filter[slug][_nnull]': true,
+      fields: 'id,title,slug,album,album.cover_art,album.title',
+    }).catch(() => []),
+    directusFetch<any[]>('/items/songs', {
+      limit, 'filter[lyrics][_icontains]': q,
+      'filter[slug][_nnull]': true,
+      'filter[title][_nicontains]': q,
+      fields: 'id,title,slug,album,lyrics,album.cover_art,album.title',
     }).catch(() => []),
     directusFetch<any[]>('/items/setlists', {
       limit, 'filter[venue][_icontains]': q,
@@ -386,7 +394,33 @@ export async function searchAll(q: string): Promise<{
       fields: 'id,name,slug,city,country',
     }).catch(() => []),
   ]);
-  return { albums, songs, setlists, venues };
+
+  const flattenSong = (s: any) => ({
+    id: s.id,
+    title: s.title,
+    slug: s.slug,
+    album: typeof s.album === 'object' ? s.album?.id ?? null : s.album,
+    cover_art: s.album?.cover_art ?? null,
+    album_title: s.album?.title ?? null,
+  });
+
+  const lyricsLine = (text: string, query: string): string => {
+    const lines = String(text || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const ql = query.toLowerCase();
+    const hit = lines.find((l) => l.toLowerCase().includes(ql)) || '';
+    return hit.length > 140 ? hit.slice(0, 137) + '…' : hit;
+  };
+
+  return {
+    albums,
+    songs: songs.map(flattenSong),
+    lyrics: lyricsHits.map((s: any) => ({
+      ...flattenSong(s),
+      snippet: lyricsLine(s.lyrics, q),
+    })).filter((x) => x.snippet),
+    setlists,
+    venues,
+  };
 }
 
 /** Did-you-know / trivia entries attached to an album. */
@@ -592,6 +626,7 @@ export async function listSongs(opts: { limit?: number; album?: number; q?: stri
     limit: opts.limit ?? -1,
     fields: 'id,title,slug,album,duration,track_number,times_played_live,first_played_live,is_single,music_video_url',
     sort: 'title',
+    'filter[slug][_nnull]': true,
   };
   if (opts.album) params['filter[album][_eq]'] = opts.album;
   if (opts.q) params['search'] = opts.q;

@@ -5,6 +5,7 @@ import Nav from '../components/nav/Nav.astro';
 import MobileMenu from '../components/nav/MobileMenu.astro';
 import SearchOverlay from '../components/nav/SearchOverlay.astro';
 import Footer from '../components/nav/Footer.astro';
+import TweaksPanel from '../components/nav/TweaksPanel.astro';
 import Fog from '../components/atmosphere/Fog.astro';
 
 interface Props {
@@ -46,14 +47,30 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString(
   <ClientRouter />
 
   <script is:inline>
-    // Restore stored theme before paint to avoid flash.
+    // Restore stored tweaks before paint to avoid flash.
     (function () {
+      var html = document.documentElement;
+      var ACC = { plum: '#7746B0', wine: '#B8354A', oxblood: '#8C2638', navy: '#3A4A6B', gold: '#A88344', rust: '#A6462A' };
+      var defaults = { theme: 'midnight', accent: 'plum', display: 'cormorant', atmos: 'soft', grain: false, density: 'balanced', headline: 'italic' };
+      var t = defaults;
       try {
-        var t = localStorage.getItem('cureation:theme');
-        if (t === 'midnight' || t === 'papers' || t === 'dark') {
-          document.documentElement.setAttribute('data-theme', t);
+        var raw = localStorage.getItem('cureation:tweaks');
+        if (raw) t = Object.assign({}, defaults, JSON.parse(raw));
+        else {
+          var legacy = localStorage.getItem('cureation:theme');
+          if (legacy === 'dark' || legacy === 'midnight' || legacy === 'papers') t.theme = legacy;
         }
       } catch (e) {}
+      html.setAttribute('data-theme', t.theme);
+      html.setAttribute('data-display', t.display);
+      html.setAttribute('data-atmos', t.atmos);
+      html.setAttribute('data-grain', t.grain ? 'on' : 'off');
+      html.setAttribute('data-density', t.density);
+      html.setAttribute('data-headline', t.headline);
+      var c = ACC[t.accent] || ACC.plum;
+      html.style.setProperty('--accent', c);
+      html.style.setProperty('--accent-tint', c + '1A');
+      html.style.setProperty('--accent-tint-2', c + '33');
     })();
   </script>
 </head>
@@ -70,25 +87,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString(
   </main>
 
   <Footer />
-
-  <script>
-    function wireTheme() {
-      const btns = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
-      if (!btns.length) return;
-      const order: Array<'dark' | 'midnight' | 'papers'> = ['dark', 'midnight', 'papers'];
-      btns.forEach((btn) => {
-        if ((btn as any).__wired) return;
-        (btn as any).__wired = true;
-        btn.addEventListener('click', () => {
-          const current = (document.documentElement.getAttribute('data-theme') as any) || 'dark';
-          const next = order[(order.indexOf(current) + 1) % order.length];
-          document.documentElement.setAttribute('data-theme', next);
-          try { localStorage.setItem('cureation:theme', next); } catch (e) {}
-        });
-      });
-    }
-    wireTheme();
-    document.addEventListener('astro:page-load', wireTheme);
-  </script>
+  <TweaksPanel />
 </body>
 </html>

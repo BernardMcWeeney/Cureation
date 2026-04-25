@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
-import Crumbs from '../../components/ui/Crumbs.astro';
+import PageHero from '../../components/ui/PageHero.astro';
 import { fetchRaw, listAlbums, type Single, type Album } from '../../lib/directus';
 
 const [singles, albums] = await Promise.all([
@@ -37,22 +37,14 @@ const facts: Array<[string, string]> = [
 ];
 ---
 <Layout title="Singles · Discography · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Discography', href: '/discography' }, { label: 'Singles' }]} />
-    <div class="stack" style="--gap: 1rem; margin-top: 1rem;">
-      <div class="mono-sm muted">SECTION · SINGLES</div>
-      <h1 class="serif" style="font-size: clamp(48px, 7.5vw, 96px); line-height:.95; font-style: italic; margin: 0;">Singles</h1>
-      <p class="deck" style="max-width: 62ch;">Every standalone release, annotated with its charted position where the record exists.</p>
-      <div class="facts">
-        {facts.map(([k, v]) => (
-          <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  <PageHero
+    section="Singles"
+    title="Singles"
+    deck="Every standalone release, annotated with its charted position where the record exists."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Discography', href: '/discography' }, { label: 'Singles' }]}
+    facts={facts.map(([k, v]) => ({ k, v }))}
+    flush
+  />
 
   <nav class="container disc-tabs" aria-label="Record type">
     {tabs.map((t) => (
