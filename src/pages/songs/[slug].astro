@@ -41,19 +41,27 @@ const annotatedLines = structured.flatMap((section: any) => (
 ));
 const firstAnnotatedLine: any = annotatedLines[0] || null;
 
-const facts: Array<[string, string]> = [
-  ['Record', album?.title || '—'],
-  ['Track №', song.track_number ? String(song.track_number) : '—'],
-  ['Length', song.duration || '—'],
-  ['Writer', song.writer || '—'],
-  ['Composer', song.composer || song.writer || '—'],
-  ['Key', song.musical_key || '—'],
-  ['BPM', song.bpm ? String(song.bpm) : '—'],
-  ['Tuning', song.guitar_tuning || '—'],
-  ['First played', song.first_played_live || '—'],
-  ['Last played', song.last_played_live || '—'],
-  ['Live plays', (song.times_played_live || 0).toLocaleString()],
-  ['Released as single', song.is_single ? 'Yes' : 'No'],
+const facts: Array<{ k: string; v: string; href?: string }> = [
+  { k: 'Record', v: album?.title || '—' },
+  { k: 'Track №', v: song.track_number ? String(song.track_number) : '—' },
+  { k: 'Length', v: song.duration || '—' },
+  { k: 'Writer', v: song.writer || '—' },
+  { k: 'Composer', v: song.composer || song.writer || '—' },
+  { k: 'Key', v: song.musical_key || '—' },
+  { k: 'BPM', v: song.bpm ? String(song.bpm) : '—' },
+  { k: 'Tuning', v: song.guitar_tuning || '—' },
+  {
+    k: 'First played',
+    v: song.first_played_live || '—',
+    href: song.first_played_setlist_slug ? `/setlists/${song.first_played_setlist_slug}` : undefined,
+  },
+  {
+    k: 'Last played',
+    v: song.last_played_live || '—',
+    href: song.last_played_setlist_slug ? `/setlists/${song.last_played_setlist_slug}` : undefined,
+  },
+  { k: 'Live plays', v: (song.times_played_live || 0).toLocaleString() },
+  { k: 'Released as single', v: song.is_single ? 'Yes' : 'No' },
 ];
 
 const listenLinks: any[] = Array.isArray(song.listen_links) ? song.listen_links : [];
@@ -88,10 +96,10 @@ const year = album?.release_date?.slice(0, 4);
       <Waveform seed={song.slug || song.title || String(song.id)} bars={120} height={70} duration={song.duration} title={song.title} />
     </div>
     <div class="facts" style="margin-top: 1.4rem;">
-      {facts.map(([k, v]) => (
+      {facts.map(({ k, v, href }) => (
         <div class="facts__item">
           <div class="facts__k">{k}</div>
-          <div class="facts__v">{v}</div>
+          <div class="facts__v">{href ? <a href={href} class="facts__link">{v}</a> : v}</div>
         </div>
       ))}
     </div>
@@ -139,7 +147,7 @@ const year = album?.release_date?.slice(0, 4);
                   <div class="annot-focus__items" data-annot-items>
                     {firstAnnotatedLine.notes.map((n: any) => (
                       <div class="annot-item">
-                        <p>{n.note}</p>
+                        <div class="annot-note">{n.note}</div>
                         {(n.source || n.url) && (
                           <div class="mono-sm muted">
                             {n.source}
@@ -226,7 +234,7 @@ const year = album?.release_date?.slice(0, 4);
         const url = n.url ? escapeHtml(n.url) : '';
         return `
           <div class="annot-item">
-            <p>${escapeHtml(n.note || '')}</p>
+            <div class="annot-note">${escapeHtml(n.note || '')}</div>
             ${source || url ? `<div class="mono-sm muted">${source}${source && url ? ' · ' : ''}${url ? `<a href="${url}" target="_blank" rel="noopener">source →</a>` : ''}</div>` : ''}
           </div>
         `;
@@ -249,7 +257,7 @@ const year = album?.release_date?.slice(0, 4);
 </script>
 
 <style>
-  .song-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: clamp(24px, 3vw, 48px); align-items: start; }
+  .song-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); gap: clamp(24px, 3vw, 48px); align-items: start; }
   @media (max-width: 900px) { .song-grid { grid-template-columns: 1fr; } }
 
   .lyrics__body { padding: clamp(18px, 2.4vw, 32px); border: 1px solid var(--rule); border-top: none; background: var(--bg-2); }
@@ -266,11 +274,11 @@ const year = album?.release_date?.slice(0, 4);
   .lyric-line.has-note.is-active { color: var(--accent); background: transparent; outline: none; }
   .lyric-line__pip { font-size: 10px; opacity: .75; }
 
-  .annot-focus { position: sticky; top: 88px; }
+  .annot-focus { max-height: 70vh; overflow: auto; }
   .annot-focus__body { padding: 14px 16px; }
   .annot-focus__line { font-family: var(--f-display); font-style: italic; font-size: 24px; line-height: 1.2; color: var(--accent-3); border-left: 2px solid var(--accent); padding-left: .9rem; margin: 0 0 1rem; }
   .annot-item { padding: .9rem 0; border-top: 1px solid var(--rule); }
   .annot-item:first-child { padding-top: 0; border-top: none; }
-  .annot-item p { font-family: var(--f-serif); font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0 0 .45rem; }
+  .annot-note { font-family: var(--f-serif); font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0 0 .6rem; white-space: pre-wrap; }
   .annot-item a { color: var(--accent-3); }
 </style>

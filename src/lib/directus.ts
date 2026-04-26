@@ -147,6 +147,10 @@ export interface Song {
   first_played_live: string | null;
   last_played_live: string | null;
   times_played_live: number | null;
+  /** Computed: setlist slug for the song's first live play. Populated by enrichSongsWithLivePlays. */
+  first_played_setlist_slug?: string | null;
+  /** Computed: setlist slug for the song's most recent live play. Populated by enrichSongsWithLivePlays. */
+  last_played_setlist_slug?: string | null;
   listen_link: string | null;
   listen_links: any;
 }
@@ -223,7 +227,7 @@ async function enrichAlbum(album: Album): Promise<Album> {
       fields: SONG_FIELDS,
       sort: 'track_number',
       limit: -1,
-    }),
+    }).then(enrichSongsWithLivePlays),
     directusFetch<Single[]>('/items/singles', {
       'filter[album][_eq]': album.id,
       fields: 'id,title,release_date,chart_position,album',
@@ -258,14 +262,18 @@ export async function getFeaturedIssue(): Promise<Album | null> {
   return newest?.[0] || null;
 }
 
-/** Top N songs by live-play count. */
+/** Top N songs by live-play count. Stats are computed from setlist_songs. */
 export async function topLivePlayedSongs(limit = 10): Promise<Song[]> {
-  return await directusFetch<Song[]>('/items/songs', {
-    limit,
-    'filter[times_played_live][_nnull]': true,
-    sort: '-times_played_live',
-    fields: 'id,title,slug,album,times_played_live,first_played_live,last_played_live',
+  const songs = await directusFetch<Song[]>('/items/songs', {
+    limit: -1,
+    'filter[slug][_nnull]': true,
+    fields: 'id,title,slug,album',
   });
+  await enrichSongsWithLivePlays(songs);
+  return songs
+    .filter((s) => (s.times_played_live || 0) > 0)
+    .sort((a, b) => (b.times_played_live || 0) - (a.times_played_live || 0))
+    .slice(0, limit);
 }
 
 /** Raw counts for stat-hero. */
@@ -307,9 +315,9 @@ export async function listNews(limit = 3): Promise<any[]> {
   try {
     return await directusFetch<any[]>('/items/news', {
       limit,
-      sort: '-date_created',
+      sort: '-published_date',
       fields:
-        'id,title,slug,subtitle,excerpt,date_created,reading_time,is_editorial,featured_image_file,featured_image',
+        'id,title,slug,excerpt,published_date,category,reading_time,is_editorial,featured_image_file,featured_image',
     });
   } catch {
     return [];
@@ -322,8 +330,8 @@ export async function listEditorial(limit = 1): Promise<any[]> {
     return await directusFetch<any[]>('/items/news', {
       limit,
       'filter[is_editorial][_eq]': true,
-      sort: '-date_created',
-      fields: 'id,title,slug,subtitle,excerpt,content,date_created,published_date,reading_time,author_name,category,tags',
+      sort: '-published_date',
+      fields: 'id,title,slug,excerpt,content,published_date,reading_time,author_name,category,tags',
     });
   } catch {
     return [];
@@ -457,6 +465,69 @@ export function tracksLivePlays(songs: Song[]): Record<number, number> {
   const out: Record<number, number> = {};
   for (const s of songs) out[s.id] = s.times_played_live || 0;
   return out;
+}
+
+let _playCountsPromise: Promise<Map<number, number>> | null = null;
+
+/** Map of song id -> live play count.
+ *  Uses Directus's count + groupBy aggregate so the response is one row
+ *  per song (~250) instead of one row per performance (~27k). Cached at
+ *  the module level (per isolate) and at the Cloudflare edge. */
+export async function getAllSongPlayCounts(): Promise<Map<number, number>> {
+  if (_playCountsPromise) return _playCountsPromise;
+  _playCountsPromise = (async () => {
+    const rows = await directusFetch<Array<{ song: number | null; count: { id: number } }>>(
+      '/items/setlist_songs',
+      {
+        'aggregate[count]': 'id',
+        'groupBy[]': 'song',
+        'filter[song][_nnull]': 'true',
+        limit: -1,
+      },
+      { ttl: 600 }
+    );
+    const out = new Map<number, number>();
+    for (const r of rows) {
+      if (r.song != null) out.set(r.song, Number(r.count?.id) || 0);
+    }
+    return out;
+  })();
+  return _playCountsPromise;
+}
+
+async function enrichSongsWithLivePlays<T extends { id: number } & Partial<Pick<Song, 'times_played_live'>>>(songs: T[]): Promise<T[]> {
+  const counts = await getAllSongPlayCounts().catch(() => new Map<number, number>());
+  for (const s of songs) {
+    s.times_played_live = counts.get(s.id) ?? 0;
+  }
+  return songs;
+}
+
+/** Populate first/last play date + setlist slug on a single song. Two tiny
+ *  Directus queries (top-1 by setlist.date asc/desc) plus the cached count map. */
+async function enrichSongWithLiveDetail(song: Song): Promise<void> {
+  type Row = { setlist: { date: string | null; slug: string | null } | null };
+  const baseFields = 'setlist.date,setlist.slug';
+  const [counts, firstRows, lastRows] = await Promise.all([
+    getAllSongPlayCounts().catch(() => new Map<number, number>()),
+    directusFetch<Row[]>('/items/setlist_songs', {
+      limit: 1,
+      'filter[song][_eq]': song.id,
+      fields: baseFields,
+      sort: 'setlist.date',
+    }, { ttl: 600 }).catch(() => [] as Row[]),
+    directusFetch<Row[]>('/items/setlist_songs', {
+      limit: 1,
+      'filter[song][_eq]': song.id,
+      fields: baseFields,
+      sort: '-setlist.date',
+    }, { ttl: 600 }).catch(() => [] as Row[]),
+  ]);
+  song.times_played_live = counts.get(song.id) ?? 0;
+  song.first_played_live = firstRows[0]?.setlist?.date ?? null;
+  song.first_played_setlist_slug = firstRows[0]?.setlist?.slug ?? null;
+  song.last_played_live = lastRows[0]?.setlist?.date ?? null;
+  song.last_played_setlist_slug = lastRows[0]?.setlist?.slug ?? null;
 }
 
 /** Fetch any single entity by its collection + slug or id. Used by nav prefetch. */
@@ -618,19 +689,23 @@ export async function getSongBySlug(slug: string): Promise<Song | null> {
     'filter[slug][_eq]': slug,
     fields: '*',
   });
-  return rows?.[0] || null;
+  const song = rows?.[0] || null;
+  if (!song) return null;
+  await enrichSongWithLiveDetail(song);
+  return song;
 }
 
 export async function listSongs(opts: { limit?: number; album?: number; q?: string } = {}): Promise<Song[]> {
   const params: Params = {
     limit: opts.limit ?? -1,
-    fields: 'id,title,slug,album,duration,track_number,times_played_live,first_played_live,is_single,music_video_url',
+    fields: 'id,title,slug,album,duration,track_number,is_single,music_video_url',
     sort: 'title',
     'filter[slug][_nnull]': true,
   };
   if (opts.album) params['filter[album][_eq]'] = opts.album;
   if (opts.q) params['search'] = opts.q;
-  return await directusFetch<Song[]>('/items/songs', params);
+  const songs = await directusFetch<Song[]>('/items/songs', params);
+  return enrichSongsWithLivePlays(songs);
 }
 
 export interface Member {
@@ -694,11 +769,13 @@ export async function getAlbumOfMonth(): Promise<Album | null> {
 export async function getSongOfDay(): Promise<Song | null> {
   const rows = await directusFetch<Song[]>('/items/songs', {
     limit: -1,
-    fields: 'id,title,slug,album,lyrics,lyrics_structured,times_played_live',
+    fields: 'id,title,slug,album,lyrics,lyrics_structured',
     'filter[lyrics][_nnull]': 'true',
   });
   if (!rows.length) return null;
-  return rows[dayIndex() % rows.length];
+  const song = rows[dayIndex() % rows.length];
+  await enrichSongsWithLivePlays([song]);
+  return song;
 }
 
 /** Lyric of the day — picks a single memorable line from song of the day. */

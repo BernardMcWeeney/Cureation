@@ -132,8 +132,8 @@
   --space-7: 48px;
   --space-8: 64px;
   --space-9: 96px;
-  --section-y: clamp(40px, 5vw, 80px);
-  --section-y-sm: clamp(24px, 3vw, 44px);
+  --section-y: clamp(56px, 7vw, 112px);
+  --section-y-sm: clamp(28px, 4vw, 56px);
 
   /* Breakpoints (reference; CSS can't consume these) */
   --bp-mobile: 640px;
@@ -572,7 +572,6 @@ video {
 /* Masthead */
 .masthead {
   padding: clamp(32px, 6vw, 88px) 0 clamp(20px, 3.6vw, 44px);
-  border-bottom: 1px solid var(--rule);
 }
 .masthead-rule {
   display: flex;

@@ -233,7 +233,17 @@ import { DIRECTUS_URL } from '../../lib/directus';
     if ((root as any).__wired) return;
     (root as any).__wired = true;
 
+    const closeOpenMenu = () => {
+      document.querySelectorAll<HTMLElement>('[data-menu]').forEach((menu) => {
+        menu.hidden = true;
+      });
+      document.querySelectorAll<HTMLElement>('[data-menu-open]').forEach((button) => {
+        button.setAttribute('aria-expanded', 'false');
+      });
+    };
+
     const open = () => {
+      closeOpenMenu();
       root.hidden = false;
       document.body.style.overflow = 'hidden';
       setTimeout(() => input.focus(), 0);

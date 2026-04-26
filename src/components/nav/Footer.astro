@@ -106,22 +106,6 @@ const issueNumber = Math.floor((Date.now() - startOfYear) / 86400000);
       </div>
     </div>
 
-    <div class="foot-figures">
-      {[
-        ['Records', fig.albums],
-        ['Songs', fig.songs],
-        ['Setlists', fig.setlists],
-        ['Venues', fig.venues],
-        ['Photos', fig.photos],
-        ['Members', fig.members],
-      ].map(([k, v]) => (
-        <div class="foot-figure">
-          <div class="foot-figure__v">{(v as number).toLocaleString()}</div>
-          <div class="foot-figure__k">{k}</div>
-        </div>
-      ))}
-    </div>
-
     <div class="foot-base">
       <span class="mono-sm">© {year} CUREATION · UNOFFICIAL FAN ARCHIVE</span>
       <span class="mono-sm muted">Not affiliated with The Cure, Fiction Records, or Universal Music</span>
@@ -170,16 +154,6 @@ const issueNumber = Math.floor((Date.now() - startOfYear) / 86400000);
   .foot-col a:hover { color: var(--accent-3); }
   :root[data-theme='papers'] .foot-col a:hover { color: var(--accent); }
 
-  .foot-figures {
-    display: grid; grid-template-columns: repeat(6, 1fr);
-    gap: 1px; background: var(--rule);
-    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
-    margin-top: clamp(28px, 4vw, 48px);
-  }
-  .foot-figure { background: var(--bg); padding: clamp(14px, 2vw, 22px) clamp(8px, 1.4vw, 16px); }
-  .foot-figure__v { font-family: var(--f-display); font-style: italic; font-size: clamp(24px, 3vw, 40px); line-height: 1; color: var(--accent-ink); }
-  .foot-figure__k { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
-
   .foot-base {
     display: flex; flex-wrap: wrap; gap: 1.4rem;
     justify-content: space-between; align-items: baseline;
@@ -188,6 +162,6 @@ const issueNumber = Math.floor((Date.now() - startOfYear) / 86400000);
   }
 
   @media (max-width: 1180px) { .foot-cols { grid-template-columns: repeat(4, 1fr); } }
-  @media (max-width: 860px) { .foot-cols { grid-template-columns: repeat(2, 1fr); } .foot-figures { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 860px) { .foot-cols { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 520px) { .foot-cols { grid-template-columns: 1fr; } }
 </style>
