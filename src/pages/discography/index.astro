@@ -5,32 +5,136 @@ import IssueSection from '../../components/ui/IssueSection.astro';
 import PageHero from '../../components/ui/PageHero.astro';
 import Select from '../../components/ui/Select.astro';
 import SearchField from '../../components/ui/SearchField.astro';
-import { listAlbums, listEras } from '../../lib/directus';
+import { fetchRaw, listAlbums, type Album } from '../../lib/directus';
+import { asset } from '../../lib/assets';
 
-const [all, eras] = await Promise.all([listAlbums({ type: 'studio' }), listEras()]);
-const erasById = Object.fromEntries(eras.map((e) => [e.id, e]));
+const [albums, singles] = await Promise.all([
+  listAlbums(),
+  fetchRaw<any>('singles', {
+    limit: -1,
+    fields: '*',
+    sort: 'release_date',
+  }).catch(() => []),
+]);
 
-const yearsSorted = all.map((a) => Number(a.release_date?.slice(0, 4))).filter(Boolean).sort();
-const firstYear = yearsSorted[0];
-const lastYear  = yearsSorted[yearsSorted.length - 1];
-const erasInRange = new Set(all.map((a) => a.era_id).filter(Boolean)).size;
+const albumsById = new Map(albums.map((a) => [a.id, a]));
+const compilationTypes = new Set(['compilation', 'live', 'boxset', 'deluxe', 'reissue', 'soundtrack', 'remix']);
 
-// Longest gap between studio releases — a real magazine "Did you know" stat.
-const sorted = [...all].filter((a) => a.release_date).sort((a, b) => (a.release_date || '').localeCompare(b.release_date || ''));
-let longestGap = { from: '', to: '', days: 0 };
-for (let i = 1; i < sorted.length; i++) {
-  const days = Math.round(
-    (new Date(sorted[i].release_date!).getTime() - new Date(sorted[i - 1].release_date!).getTime()) / 86_400_000
-  );
-  if (days > longestGap.days) longestGap = { from: sorted[i - 1].title, to: sorted[i].title, days };
+type FilterType = 'studio' | 'ep' | 'compilation' | 'single';
+type Release = {
+  key: string;
+  id: number;
+  title: string;
+  date: string | null;
+  sortDate: string;
+  year: string;
+  filterType: FilterType;
+  typeLabel: string;
+  coverArt: string | null;
+  href: string;
+  record: string;
+  label: string;
+  peak: string;
+  search: string;
+};
+
+function titleCase(v: string | null | undefined): string {
+  return String(v || '')
+    .replace(/[_-]/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
-const longestGapYears = Math.round(longestGap.days / 365);
+
+function filterTypeForAlbum(a: Album): FilterType {
+  if (a.type === 'studio') return 'studio';
+  if (a.type === 'ep') return 'ep';
+  if (compilationTypes.has(a.type)) return 'compilation';
+  return 'compilation';
+}
+
+function fileId(v: any): string | null {
+  if (!v) return null;
+  if (typeof v === 'string') return v;
+  if (typeof v === 'object') return v.id || v.filename_disk || null;
+  return null;
+}
+
+function peakChart(cp: any): string {
+  if (!Array.isArray(cp) || cp.length === 0) return '—';
+  const peaks = cp
+    .map((c) => Number(c.peak ?? c.chart_position ?? c.position))
+    .filter((n) => !Number.isNaN(n));
+  if (!peaks.length) return '—';
+  return `#${Math.min(...peaks)}`;
+}
+
+const albumReleases: Release[] = albums
+  .filter((a) => a.type !== 'single')
+  .map((a) => {
+    const filterType = filterTypeForAlbum(a);
+    const date = a.release_date || null;
+    const typeLabel = filterType === 'compilation' ? titleCase(a.type) : filterType;
+    const href = a.slug ? `/discography/${a.slug}` : '#';
+    return {
+      key: `album-${a.id}`,
+      id: a.id,
+      title: a.title,
+      date,
+      sortDate: date || '9999-99-99',
+      year: date?.slice(0, 4) || '—',
+      filterType,
+      typeLabel,
+      coverArt: a.cover_art,
+      href,
+      record: a.label || '—',
+      label: a.label || '',
+      peak: '—',
+      search: `${a.title || ''} ${a.label || ''} ${a.type || ''} ${date || ''}`.toLowerCase(),
+    };
+  });
+
+const singleReleases: Release[] = singles.map((s: any) => {
+  const rawAlbum = typeof s.album === 'object' ? s.album?.id : s.album;
+  const album = rawAlbum ? albumsById.get(Number(rawAlbum)) : null;
+  const date = s.release_date || null;
+  const directCover = fileId(s.cover_art) || fileId(s.cover) || fileId(s.artwork) || fileId(s.image) || fileId(s.image_file);
+  const href = album?.slug ? `/discography/${album.slug}` : '#';
+  return {
+    key: `single-${s.id}`,
+    id: Number(s.id) || 0,
+    title: s.title || 'Untitled single',
+    date,
+    sortDate: date || '9999-99-99',
+    year: date?.slice(0, 4) || '—',
+    filterType: 'single',
+    typeLabel: 'single',
+    coverArt: directCover || album?.cover_art || null,
+    href,
+    record: album?.title || '—',
+    label: s.label || album?.label || '',
+    peak: peakChart(s.chart_position),
+    search: `${s.title || ''} ${album?.title || ''} ${s.label || ''} single ${date || ''}`.toLowerCase(),
+  };
+});
+
+const releases = [...albumReleases, ...singleReleases].sort((a, b) => a.sortDate.localeCompare(b.sortDate));
+const dated = releases.filter((r) => r.date);
+const firstYear = dated[0]?.year || '—';
+const latestYear = dated[dated.length - 1]?.year || '—';
+
+const counts = {
+  all: releases.length,
+  studio: releases.filter((r) => r.filterType === 'studio').length,
+  ep: releases.filter((r) => r.filterType === 'ep').length,
+  compilation: releases.filter((r) => r.filterType === 'compilation').length,
+  single: releases.filter((r) => r.filterType === 'single').length,
+};
 
 const tabs = [
-  { href: '/discography',               label: 'Studio',       active: true },
-  { href: '/discography/ep',            label: 'EPs',          active: false },
-  { href: '/discography/compilations',  label: 'Compilations', active: false },
-  { href: '/discography/singles',       label: 'Singles',      active: false },
+  { value: 'all', label: 'All', count: counts.all, href: '/discography' },
+  { value: 'studio', label: 'Studio', count: counts.studio, href: '/discography?type=studio' },
+  { value: 'ep', label: 'EPs', count: counts.ep, href: '/discography?type=ep' },
+  { value: 'compilation', label: 'Compilations', count: counts.compilation, href: '/discography?type=compilation' },
+  { value: 'single', label: 'Singles', count: counts.single, href: '/discography?type=single' },
 ];
 ---
 <Layout title="Discography · Cureation">
@@ -38,177 +142,344 @@ const tabs = [
   <PageHero
     section="Discography"
     title="The discography"
-    deck="Every studio record, EP, compilation and single — chronologically arranged, annotated by era, and cross-referenced to the live archive."
+    deck="Every studio record, EP, compilation and single — filtered in one archive, with sleeves up front and a chronological ledger underneath."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Discography' }]}
     facts={[
-      { k: 'Records', v: all.length },
-      { k: 'First issue', v: firstYear ? String(firstYear) : '—' },
-      { k: 'Latest issue', v: lastYear ? String(lastYear) : '—' },
-      { k: 'Eras in range', v: erasInRange },
+      { k: 'Releases', v: counts.all },
+      { k: 'Studio records', v: counts.studio },
+      { k: 'Singles', v: counts.single },
+      { k: 'Years covered', v: `${firstYear}–${latestYear}` },
     ]}
     flush
   />
 
-  <nav class="container disc-tabs" aria-label="Record type">
-    {tabs.map((t) => (
-      <a href={t.href} class={`disc-tabs__tab${t.active ? ' is-active' : ''}`} aria-current={t.active ? 'page' : undefined}>
-        {t.label}
-      </a>
-    ))}
-  </nav>
+  <div data-discography-archive>
+    <section class="container disc-controls" aria-label="Discography filters">
+      <div class="disc-controls__bar">
+        <div class="disc-controls__group">
+          <div class="disc-controls__label">Release type</div>
+          <nav class="disc-type-tabs" aria-label="Record type">
+            {tabs.map((t) => (
+              <a href={t.href} class={`disc-type-tab${t.value === 'all' ? ' is-active' : ''}`} data-type-filter={t.value} aria-current={t.value === 'all' ? 'page' : undefined}>
+                <span>{t.label}</span>
+                <span class="disc-type-tab__count">{t.count}</span>
+              </a>
+            ))}
+          </nav>
+        </div>
 
-  <section class="container filter-strip">
-    <div class="filter-grid filter-grid--3">
-      <Select
-        name="era"
-        label="Era"
-        options={[
-          { value: 'all', label: 'All eras' },
-          ...eras.map((e) => ({ value: e.id, label: e.short_name || e.name })),
-        ]}
-      />
-      <Select
-        name="sort"
-        label="Sort"
-        value="chron"
-        options={[
-          { value: 'chron', label: 'Chronological' },
-          { value: 'rchron', label: 'Reverse chronological' },
-          { value: 'alpha', label: 'A–Z' },
-        ]}
-      />
-      <SearchField placeholder="Title, label, era…" />
-    </div>
-  </section>
-
-  <IssueSection kicker="Cover plates" title="Records in sequence" meta={`${all.length} studio records`}>
-    <div class="mono-sm muted" data-match-count style="margin-bottom:1.2rem; letter-spacing: .2em;">{all.length} records</div>
-    <div class="records-grid" data-records>
-      {all.map((a) => {
-        const era = a.era_id ? erasById[a.era_id] : null;
-        const year = a.release_date?.slice(0, 4) || '';
-        return (
-          <div class="record-wrap"
-               data-era={a.era_id || ''}
-               data-year={year}
-               data-title={(a.title || '').toLowerCase()}
-               data-search={`${a.title || ''} ${a.label || ''} ${era?.name || ''}`.toLowerCase()}>
-            <AlbumCard album={a} size="lg" />
-            {era && (
-              <div class="record-wrap__era kicker">
-                <span class="record-wrap__era-dot" style={`background: oklch(0.6 0.15 ${typeof era.hue === 'number' ? era.hue : 320});`}></span>
-                {era.short_name || era.name}
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </IssueSection>
-
-  {longestGap.days > 0 && (
-    <section class="container disc-trivia">
-      <div class="disc-trivia__inner">
-        <div class="kicker disc-trivia__k">Did you know</div>
-        <p class="disc-trivia__body">
-          The longest gap between two studio records was <em>{longestGapYears} years</em> — between
-          <a href="/discography" class="disc-trivia__link">{longestGap.from}</a> and
-          <a href="/discography" class="disc-trivia__link">{longestGap.to}</a>.
-        </p>
+        <div class="disc-controls__filters">
+          <Select
+            name="sort"
+            label="Sort"
+            value="chron"
+            options={[
+              { value: 'chron', label: 'Chronological' },
+              { value: 'rchron', label: 'Reverse chronological' },
+              { value: 'alpha', label: 'A-Z' },
+            ]}
+          />
+          <SearchField placeholder="Title, release, label..." />
+        </div>
       </div>
     </section>
-  )}
+
+    <IssueSection kicker="Cover plates" title="Sleeves" meta={`${releases.length} releases`}>
+      <div class="mono-sm muted" data-match-count style="margin-bottom:1.2rem; letter-spacing: .2em;">{releases.length} releases</div>
+      <div class="records-grid" data-records>
+        {releases.map((r) => (
+          <div class="record-wrap"
+               data-release-card
+               data-key={r.key}
+               data-type={r.filterType}
+               data-date={r.sortDate}
+               data-title={r.title.toLowerCase()}
+               data-search={r.search}>
+            <AlbumCard
+              album={{
+                id: r.id,
+                title: r.title,
+                slug: null,
+                cover_art: r.coverArt,
+                release_date: r.date,
+                type: r.typeLabel as any,
+              }}
+              href={r.href}
+              typeLabel={r.typeLabel}
+              size="lg"
+            />
+          </div>
+        ))}
+      </div>
+    </IssueSection>
+
+    <IssueSection kicker="Chronology" title="Release table" meta="Oldest first">
+      <div class="table-wrap">
+        <table class="data data--airy" data-release-table>
+          <thead>
+            <tr>
+              <th style="width:72px;">Sleeve</th>
+              <th style="width:120px;">Date</th>
+              <th style="width:150px;">Type</th>
+              <th>Title</th>
+              <th>Record / label</th>
+              <th class="num" style="text-align:right; width:80px;">Peak</th>
+            </tr>
+          </thead>
+          <tbody>
+            {releases.map((r) => (
+              <tr data-release-row
+                  data-key={r.key}
+                  data-type={r.filterType}
+                  data-date={r.sortDate}
+                  data-title={r.title.toLowerCase()}
+                  data-search={r.search}
+                  data-clickable={r.href !== '#' ? '' : undefined}
+                  onclick={r.href !== '#' ? `location.href='${r.href}'` : undefined}>
+                <td>
+                  <a class="release-thumb" href={r.href} aria-label={r.title}>
+                    {r.coverArt ? (
+                      <img src={asset(r.coverArt, 'thumb')} alt={`${r.title} cover`} loading="lazy" decoding="async" />
+                    ) : (
+                      <span class="release-thumb__fallback" aria-hidden="true"></span>
+                    )}
+                  </a>
+                </td>
+                <td class="mono-sm" style="color: var(--ink);">{r.date || '—'}</td>
+                <td class="mono-sm muted">{r.typeLabel}</td>
+                <td><span class="serif" style="font-size:20px; font-style:italic;">{r.title}</span></td>
+                <td class="mono-sm" style="color: var(--ink-2);">{r.record}</td>
+                <td class="num" style="color: var(--accent-3);">{r.peak}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </IssueSection>
+  </div>
 
 </Layout>
 
 <style is:global>
   .records-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: clamp(28px, 3.2vw, 48px) clamp(20px, 2.4vw, 32px);
   }
-  .record-wrap { display: flex; flex-direction: column; }
-  .record-wrap__era {
-    margin-top: .5rem;
-    color: var(--accent-3);
-    display: inline-flex; align-items: center; gap: 8px;
-    letter-spacing: 0.22em;
-  }
-  :root[data-theme='papers'] .record-wrap__era { color: var(--accent); }
-  .record-wrap__era-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    box-shadow: 0 0 6px currentColor;
-  }
+  .record-wrap { display: flex; flex-direction: column; min-width: 0; }
 
-  /* Did-you-know trivia card */
-  .disc-trivia { padding-bottom: clamp(48px, 6vw, 96px); }
-  .disc-trivia__inner {
-    border-top: 1px solid var(--rule-strong);
-    padding: clamp(28px, 4vw, 56px) 0;
-    max-width: 70ch;
-    margin: 0 auto;
-    text-align: center;
+  .disc-controls {
+    padding: clamp(18px, 2.4vw, 32px) 0 clamp(10px, 1.6vw, 20px);
   }
-  .disc-trivia__k { color: var(--accent-3); margin-bottom: 1rem; letter-spacing: 0.3em; }
-  :root[data-theme='papers'] .disc-trivia__k { color: var(--accent); }
-  .disc-trivia__body {
-    font-family: var(--f-display); font-style: italic;
-    font-size: clamp(22px, 2.6vw, 34px);
-    line-height: 1.3; margin: 0; color: var(--ink-2);
-    text-wrap: balance;
+  .disc-controls + .issue-section {
+    border-top: 0;
+    padding-top: clamp(34px, 4.5vw, 64px);
   }
-  .disc-trivia__body em { color: var(--accent-3); font-style: italic; }
-  :root[data-theme='papers'] .disc-trivia__body em { color: var(--accent); }
-  .disc-trivia__link { color: var(--ink); border-bottom: 1px solid var(--rule); padding-bottom: 1px; }
-  .disc-trivia__link:hover { color: var(--accent-3); border-color: var(--accent); }
-  :root[data-theme='papers'] .disc-trivia__link:hover { color: var(--accent); }
+  .disc-controls__bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+    gap: clamp(16px, 2.6vw, 36px);
+    align-items: end;
+    padding: clamp(14px, 1.8vw, 20px);
+    background: color-mix(in oklab, var(--surface), transparent 24%);
+  }
+  .disc-controls__group,
+  .disc-controls__filters {
+    min-width: 0;
+  }
+  .disc-controls__label {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .disc-type-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .disc-type-tab {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    min-height: 36px;
+    padding: 9px 12px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-2);
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .disc-type-tab:hover {
+    border-color: var(--rule);
+    color: var(--ink);
+  }
+  .disc-type-tab.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  :root[data-theme='papers'] .disc-type-tab.is-active {
+    color: #F9F1DC;
+  }
+  .disc-type-tab__count {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    opacity: .72;
+  }
+  .disc-controls__filters {
+    display: grid;
+    grid-template-columns: minmax(170px, 220px) minmax(220px, 1fr);
+    gap: 12px;
+    align-items: end;
+  }
+  .disc-controls .select__label {
+    font-size: 9.5px;
+    letter-spacing: 0.2em;
+  }
+  .disc-controls .select select,
+  .disc-controls .filter-search {
+    background: color-mix(in oklab, var(--bg), var(--surface) 28%);
+    border-color: var(--rule);
+  }
+  :root[data-theme='papers'] .disc-controls .select select,
+  :root[data-theme='papers'] .disc-controls .filter-search {
+    background: var(--bg);
+  }
+  .release-thumb {
+    display: block;
+    width: 46px;
+    height: 46px;
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    overflow: hidden;
+  }
+  .release-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .release-thumb__fallback {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(135deg, transparent 48%, var(--rule) 49%, var(--rule) 51%, transparent 52%),
+      var(--bg-2);
+  }
+  @media (max-width: 720px) {
+    .records-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .disc-controls__bar { grid-template-columns: 1fr; }
+    .disc-controls__filters { grid-template-columns: 1fr; }
+    .disc-type-tab { flex: 1 1 calc(50% - 6px); justify-content: center; }
+  }
 </style>
 
 <script>
-  function wireDisc() {
-    const records = Array.from(document.querySelectorAll<HTMLElement>('[data-records] .record-wrap'));
-    if (!records.length) return;
-    const recordsParent = records[0].parentElement;
-    const counter = document.querySelector<HTMLElement>('[data-match-count]');
-    const state = { era: 'all', sort: 'chron', search: '' };
+  function wireDiscography() {
+    const archive = document.querySelector<HTMLElement>('[data-discography-archive]');
+    if (!archive || archive.dataset.filtersWired === 'true') return;
+    archive.dataset.filtersWired = 'true';
 
-    const matches = (el: HTMLElement) => {
-      const era = el.getAttribute('data-era') || '';
-      const s = el.getAttribute('data-search') || '';
-      if (state.era !== 'all' && era !== state.era) return false;
-      if (state.search && !s.includes(state.search)) return false;
-      return true;
+    const cards = Array.from(archive.querySelectorAll<HTMLElement>('[data-release-card]'));
+    const rows = Array.from(archive.querySelectorAll<HTMLElement>('[data-release-row]'));
+    const recordsParent = archive.querySelector<HTMLElement>('[data-records]');
+    const tableBody = archive.querySelector<HTMLElement>('[data-release-table] tbody');
+    const counter = archive.querySelector<HTMLElement>('[data-match-count]');
+    const tabs = Array.from(archive.querySelectorAll<HTMLAnchorElement>('[data-type-filter]'));
+    const sortSelect = archive.querySelector<HTMLSelectElement>('[data-filter-select="sort"]');
+    const searchInput = archive.querySelector<HTMLInputElement>('[data-filter-search]');
+
+    const normalizeType = (value: string | null) => {
+      if (value === 'eps') return 'ep';
+      if (value === 'compilations') return 'compilation';
+      if (value === 'singles') return 'single';
+      if (value === 'studio' || value === 'ep' || value === 'compilation' || value === 'single') return value;
+      return 'all';
     };
 
-    const cmp = (a: HTMLElement, b: HTMLElement) => {
+    const params = new URLSearchParams(window.location.search);
+    const state: Record<string, string> = {
+      type: normalizeType(params.get('type')),
+      sort: sortSelect?.value || 'chron',
+      search: '',
+    };
+
+    const matches = (el: HTMLElement) => {
+      const type = el.getAttribute('data-type') || '';
+      const search = el.getAttribute('data-search') || '';
+      return (state.type === 'all' || type === state.type) &&
+        (!state.search || search.includes(state.search));
+    };
+
+    const compare = (a: HTMLElement, b: HTMLElement) => {
       if (state.sort === 'alpha') {
         return (a.getAttribute('data-title') || '').localeCompare(b.getAttribute('data-title') || '');
       }
-      const ay = a.getAttribute('data-year') || '';
-      const by = b.getAttribute('data-year') || '';
-      return state.sort === 'rchron' ? by.localeCompare(ay) : ay.localeCompare(by);
+      const ad = a.getAttribute('data-date') || '';
+      const bd = b.getAttribute('data-date') || '';
+      return state.sort === 'rchron' ? bd.localeCompare(ad) : ad.localeCompare(bd);
     };
 
-    const apply = () => {
-      if (!recordsParent) return;
-      const sorted = [...records].sort(cmp);
-      sorted.forEach((r) => recordsParent.appendChild(r));
-      sorted.forEach((r) => { r.style.display = matches(r) ? '' : 'none'; });
-      if (counter) {
-        const matched = records.filter(matches).length;
-        counter.textContent = `${matched} record${matched === 1 ? '' : 's'}`;
-      }
+    const syncUrl = () => {
+      const url = state.type === 'all' ? '/discography' : `/discography?type=${encodeURIComponent(state.type)}`;
+      window.history.replaceState({}, '', url);
     };
 
-    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
-      const key = sel.getAttribute('data-filter-select') || '';
-      sel.addEventListener('change', () => { (state as any)[key] = sel.value; apply(); });
+    const apply = (updateUrl = false) => {
+      const sortedCards = [...cards].sort(compare);
+      const sortedRows = [...rows].sort(compare);
+      if (recordsParent) sortedCards.forEach((r) => recordsParent.appendChild(r));
+      if (tableBody) sortedRows.forEach((r) => tableBody.appendChild(r));
+
+      let matched = 0;
+      sortedCards.forEach((r) => {
+        const ok = matches(r);
+        r.style.display = ok ? '' : 'none';
+        if (ok) matched++;
+      });
+      sortedRows.forEach((r) => { r.style.display = matches(r) ? '' : 'none'; });
+      if (counter) counter.textContent = `${matched} release${matched === 1 ? '' : 's'}`;
+      tabs.forEach((tab) => {
+        const active = tab.dataset.typeFilter === state.type;
+        tab.classList.toggle('is-active', active);
+        if (active) tab.setAttribute('aria-current', 'page');
+        else tab.removeAttribute('aria-current');
+      });
+      if (updateUrl) syncUrl();
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', (event) => {
+        event.preventDefault();
+        state.type = normalizeType(tab.dataset.typeFilter || 'all');
+        apply(true);
+      });
     });
-    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
-    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    if (sortSelect) {
+      sortSelect.addEventListener('change', () => {
+        state.sort = sortSelect.value || 'chron';
+        apply();
+      });
+    }
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        state.search = searchInput.value.trim().toLowerCase();
+        apply();
+      });
+    }
 
-    apply();
+    apply(false);
   }
-  wireDisc();
-  document.addEventListener('astro:page-load', wireDisc);
+
+  wireDiscography();
+  document.addEventListener('astro:page-load', wireDiscography);
 </script>

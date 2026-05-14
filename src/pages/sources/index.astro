@@ -59,27 +59,29 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
     flush
   />
 
-  <section class="container filter-strip">
-    <div class="filter-grid filter-grid--3">
-      <Select
-        name="type"
-        label="Type"
-        options={[{ value: 'all', label: 'All types' }, ...types.map((t) => ({ value: t!, label: String(t).toUpperCase() }))]}
-      />
-      <Select
-        name="official"
-        label="Status"
-        options={[
-          { value: 'all', label: 'Any status' },
-          { value: 'yes', label: 'Official' },
-          { value: 'no', label: 'Independent' },
-        ]}
-      />
-      <SearchField placeholder="Name, author…" />
-    </div>
-  </section>
-
   <IssueSection kicker="Citations" title="The ledger" meta={`${enriched.length} sources`}>
+    <div class="table-controls" aria-label="Sources table filters">
+      <div class="table-controls__grid table-controls__grid--3">
+        <Select
+          name="type"
+          label="Type"
+          options={[{ value: 'all', label: 'All types' }, ...types.map((t) => ({ value: t!, label: String(t).toUpperCase() }))]}
+        />
+        <Select
+          name="official"
+          label="Status"
+          options={[
+            { value: 'all', label: 'Any status' },
+            { value: 'yes', label: 'Official' },
+            { value: 'no', label: 'Independent' },
+          ]}
+        />
+        <SearchField placeholder="Name, author..." />
+      </div>
+    </div>
+    <div class="table-results-bar">
+      <span data-match-count>{enriched.length} sources</span>
+    </div>
     <div class="table-wrap">
     <table class="data data--airy" data-sources-table>
       <thead><tr>
@@ -119,8 +121,13 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
 <script>
   function wire() {
     const state: Record<string, string> = { type: 'all', official: 'all', search: '' };
-    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-sources-table] tbody tr'));
+    const table = document.querySelector<HTMLElement>('[data-sources-table]');
+    if (!table || table.dataset.filtersWired === 'true') return;
+    table.dataset.filtersWired = 'true';
+    const rows = Array.from(table.querySelectorAll<HTMLElement>('tbody tr'));
+    const counter = document.querySelector<HTMLElement>('[data-match-count]');
     const apply = () => {
+      let m = 0;
       rows.forEach((r) => {
         const t = r.getAttribute('data-type') || '';
         const o = r.getAttribute('data-official') || '';
@@ -129,7 +136,9 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
                    (state.official === 'all' || o === state.official) &&
                    (!state.search || s.includes(state.search));
         r.style.display = ok ? '' : 'none';
+        if (ok) m++;
       });
+      if (counter) counter.textContent = `${m} sources`;
     };
     document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
       const key = sel.getAttribute('data-filter-select') || '';
@@ -137,6 +146,7 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    apply();
   }
   wire();
   document.addEventListener('astro:page-load', wire);

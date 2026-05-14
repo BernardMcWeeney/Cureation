@@ -4,7 +4,7 @@ import { listAlbums, listNews, listSetlists, listVenues, listTours, listSongs, l
 export const prerender = false;
 
 const STATIC = [
-  '/', '/discography', '/discography/ep', '/discography/singles', '/discography/compilations',
+  '/', '/discography',
   '/songs', '/lyrics', '/setlists', '/setlists/compare', '/tours', '/venues', '/venues/map',
   '/band', '/band/history', '/band/gear', '/band/quotes',
   '/news', '/newsletter', '/wiki', '/stats', '/photos', '/videos',

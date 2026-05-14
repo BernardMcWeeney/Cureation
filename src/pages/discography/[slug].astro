@@ -584,6 +584,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   }
   .album-tab:hover { color: var(--ink-2); }
   .album-tab.is-active { color: var(--accent-ink); border-bottom-color: var(--accent); }
+  :root[data-theme='papers'] .album-tab.is-active { color: var(--accent); }
   .album-tab__count { font-size: 10px; opacity: 0.5; letter-spacing: 0.1em; }
 
   .album-section {

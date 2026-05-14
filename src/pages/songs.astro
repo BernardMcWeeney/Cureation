@@ -33,40 +33,41 @@ const facts: Array<[string, string]> = [
     flush
   />
 
-  <section class="container filter-strip">
-    <div class="filter-grid">
-      <Select
-        name="album"
-        label="Record"
-        options={[{ value: 'all', label: 'All records' }, ...albumOptions.map((a: any) => ({ value: String(a.id), label: a.title }))]}
-      />
-      <Select
-        name="live"
-        label="Live status"
-        options={[
-          { value: 'all', label: 'Any' },
-          { value: 'played', label: 'Played live' },
-          { value: 'unplayed', label: 'Never played' },
-          { value: 'rare', label: 'Fewer than 10' },
-          { value: 'common', label: '100+ plays' },
-        ]}
-      />
-      <Select
-        name="sort"
-        label="Sort"
-        value="title"
-        options={[
-          { value: 'title', label: 'A–Z' },
-          { value: 'plays', label: 'Most played' },
-          { value: 'date', label: 'Chronological' },
-        ]}
-      />
-      <SearchField placeholder="Title…" />
-    </div>
-  </section>
-
   <IssueSection kicker={`${songs.length} songs`} title="Catalogue" meta="Filtered">
-    <div class="mono-sm muted" data-match-count style="margin-bottom:.8rem;">{songs.length} songs</div>
+    <div class="table-controls" aria-label="Song table filters">
+      <div class="table-controls__grid table-controls__grid--4">
+        <Select
+          name="album"
+          label="Record"
+          options={[{ value: 'all', label: 'All records' }, ...albumOptions.map((a: any) => ({ value: String(a.id), label: a.title }))]}
+        />
+        <Select
+          name="live"
+          label="Live status"
+          options={[
+            { value: 'all', label: 'Any' },
+            { value: 'played', label: 'Played live' },
+            { value: 'unplayed', label: 'Never played' },
+            { value: 'rare', label: 'Fewer than 10' },
+            { value: 'common', label: '100+ plays' },
+          ]}
+        />
+        <Select
+          name="sort"
+          label="Sort"
+          value="title"
+          options={[
+            { value: 'title', label: 'A-Z' },
+            { value: 'plays', label: 'Most played' },
+            { value: 'date', label: 'Chronological' },
+          ]}
+        />
+        <SearchField placeholder="Title..." />
+      </div>
+    </div>
+    <div class="table-results-bar">
+      <span data-match-count>{songs.length} songs</span>
+    </div>
     <div class="table-wrap">
     <table class="data data--airy" data-songs-table>
       <thead><tr><th style="width:50px;">№</th><th>Title</th><th>Record</th><th class="num" style="text-align:right; width:80px;">Length</th><th class="num" style="text-align:right; width:100px;">Plays</th></tr></thead>
@@ -100,8 +101,11 @@ const facts: Array<[string, string]> = [
 <script>
   function wire() {
     const state: Record<string, string> = { album: 'all', live: 'all', sort: 'title', search: '' };
-    const tbody = document.querySelector<HTMLElement>('[data-songs-table] tbody');
-    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-songs-table] tbody tr'));
+    const table = document.querySelector<HTMLElement>('[data-songs-table]');
+    if (!table || table.dataset.filtersWired === 'true') return;
+    table.dataset.filtersWired = 'true';
+    const tbody = table.querySelector<HTMLElement>('tbody');
+    const rows = Array.from(table.querySelectorAll<HTMLElement>('tbody tr'));
     const counter = document.querySelector<HTMLElement>('[data-match-count]');
     if (!tbody) return;
     const sortRows = () => {

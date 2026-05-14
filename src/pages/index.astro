@@ -113,7 +113,7 @@ const figureCells: Array<[string, number]> = [
 ---
 <Layout title="Cureation · An editorial archive of The Cure">
 
-  <section class="masthead">
+  <section class="masthead masthead--hero">
     <div class="container">
       <div class="masthead-rule">
         <span>Vol. {volume} · №{issueNumber}</span>
@@ -508,6 +508,27 @@ const figureCells: Array<[string, number]> = [
 <style>
   :global(main > .issue-section) {
     padding-block: clamp(44px, 5.6vw, 88px);
+  }
+
+  .masthead--hero {
+    position: relative;
+    isolation: isolate;
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+      url('/The-Cure-Live-2.avif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding-block: clamp(60px, 10vw, 140px);
+  }
+  .masthead--hero :global(.masthead-rule) { color: #fff; }
+  .masthead--hero :global(.masthead-rule)::before,
+  .masthead--hero :global(.masthead-rule)::after {
+    border-top-color: rgba(255, 255, 255, 0.6);
+  }
+  .masthead--hero :global(.masthead-wordmark) {
+    color: #fff;
+    opacity: 1;
   }
 
   .issue__grid { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: clamp(24px, 3vw, 48px); align-items: start; }

@@ -5,11 +5,14 @@ import type { Album } from '../../lib/directus';
 interface Props {
   album: Pick<Album, 'id' | 'title' | 'slug' | 'cover_art' | 'release_date' | 'type'>;
   size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  typeLabel?: string;
 }
-const { album, size = 'md' } = Astro.props;
+const { album, size = 'md', href: hrefProp, typeLabel } = Astro.props;
 const year = album.release_date?.slice(0, 4) || '—';
-const href = album.slug ? `/discography/${album.slug}` : '#';
+const href = hrefProp || (album.slug ? `/discography/${album.slug}` : '#');
 const img = asset(album.cover_art, 'card');
+const releaseType = typeLabel ?? (album.type && album.type !== 'studio' ? album.type : '');
 ---
 <a href={href} class={`album-card album-card--${size}`}>
   <figure class="album-card__art" style={`view-transition-name: album-${album.slug || album.id}`}>
@@ -23,7 +26,7 @@ const img = asset(album.cover_art, 'card');
     <h3 class="album-card__title">{album.title}</h3>
     <div class="album-card__sub">
       <span>{year}</span>
-      {album.type && album.type !== 'studio' && <span class="album-card__type">{album.type}</span>}
+      {releaseType && <span class="album-card__type">{releaseType}</span>}
     </div>
   </div>
 </a>

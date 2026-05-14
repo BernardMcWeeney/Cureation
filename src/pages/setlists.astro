@@ -11,8 +11,8 @@ const years = Array.from(new Set(setlists.map((s) => s.date?.slice(0, 4)).filter
 const countries = Array.from(new Set(setlists.map((s) => s.country).filter(Boolean))).sort();
 const tours = Array.from(new Set(setlists.map((s) => s.tour_name).filter(Boolean))).sort();
 const byDecade: Record<string, number> = {};
-years.forEach((y) => { if (!y) return; const d = `${y.slice(0, 3)}0s`; byDecade[d] = (byDecade[d] || 0) + setlists.filter((s) => s.date?.startsWith(y)).length; });
-const maxDecade = Math.max(1, ...Object.values(byDecade));
+setlists.forEach((s) => { const y = s.date?.slice(0, 4); if (!y) return; const d = `${y.slice(0, 3)}0s`; byDecade[d] = (byDecade[d] || 0) + 1; });
+const decadeEntries = Object.entries(byDecade).sort((a, b) => a[0].localeCompare(b[0]));
 
 const facts: Array<[string, string]> = [
   ['Shows on file', String(setlists.length)],
@@ -31,42 +31,35 @@ const facts: Array<[string, string]> = [
     flush
   />
 
-  <section class="container" style="padding: clamp(36px, 4.5vw, 64px) 0; border-top: 1px solid var(--rule);">
-    <div class="mono-sm muted" style="margin-bottom: 1rem; letter-spacing: 0.22em;">BY THE DECADE · CLICK TO JUMP</div>
-    <div class="decade-bars">
-      {Object.entries(byDecade).sort((a, b) => a[0].localeCompare(b[0])).map(([d, c]) => (
-        <button class="decade-bar" data-decade-jump={d} style={`--h: ${Math.round((c / maxDecade) * 100)}%;`}>
-          <div class="decade-bar__val">{c}</div>
-          <div class="decade-bar__fill"></div>
-          <div class="decade-bar__label">{d}</div>
-        </button>
-      ))}
-    </div>
-  </section>
-
-  <section class="container filter-strip">
-    <div class="filter-grid">
-      <Select
-        name="year"
-        label="Year"
-        options={[{ value: 'all', label: 'All years' }, ...years.map((y) => ({ value: y!, label: y! }))]}
-      />
-      <Select
-        name="country"
-        label="Country"
-        options={[{ value: 'all', label: 'All countries' }, ...countries.map((c) => ({ value: c!, label: c! }))]}
-      />
-      <Select
-        name="tour"
-        label="Tour"
-        options={[{ value: 'all', label: 'All tours' }, ...tours.map((t) => ({ value: t!, label: t! }))]}
-      />
-      <SearchField placeholder="Venue, city, tour…" />
-    </div>
-  </section>
-
   <IssueSection kicker="The ledger" title="Every show" meta={`${setlists.length} entries`}>
-    <div class="mono-sm muted" data-match-count style="margin-bottom: .8rem;">{setlists.length} shows</div>
+    <div class="table-controls" aria-label="Setlist table filters">
+      <div class="table-controls__grid table-controls__grid--5">
+        <Select
+          name="decade"
+          label="Decade"
+          options={[{ value: 'all', label: 'All decades' }, ...decadeEntries.map(([d]) => ({ value: d, label: d }))]}
+        />
+        <Select
+          name="year"
+          label="Year"
+          options={[{ value: 'all', label: 'All years' }, ...years.map((y) => ({ value: y!, label: y! }))]}
+        />
+        <Select
+          name="country"
+          label="Country"
+          options={[{ value: 'all', label: 'All countries' }, ...countries.map((c) => ({ value: c!, label: c! }))]}
+        />
+        <Select
+          name="tour"
+          label="Tour"
+          options={[{ value: 'all', label: 'All tours' }, ...tours.map((t) => ({ value: t!, label: t! }))]}
+        />
+        <SearchField placeholder="Venue, city, tour..." />
+      </div>
+    </div>
+    <div class="table-results-bar">
+      <span data-match-count>{setlists.length} shows</span>
+    </div>
     <div class="table-wrap">
       <table class="data data--airy" data-setlist-table>
         <thead><tr><th style="width:120px;">Date</th><th>Venue</th><th>City</th><th>Country</th><th>Tour</th><th class="num" style="text-align:right; width:80px;">Songs</th></tr></thead>
@@ -74,6 +67,7 @@ const facts: Array<[string, string]> = [
           {setlists.map((s) => (
             <tr data-clickable
                 data-year={s.date?.slice(0, 4) || ''}
+                data-decade={s.date ? `${s.date.slice(0, 3)}0s` : ''}
                 data-country={s.country || ''}
                 data-tour={s.tour_name || ''}
                 data-search={`${s.venue || ''} ${s.city || ''} ${s.country || ''} ${s.tour_name || ''}`.toLowerCase()}
@@ -94,18 +88,23 @@ const facts: Array<[string, string]> = [
 
 <script>
   function wire() {
-    const state: Record<string, string> = { year: 'all', country: 'all', tour: 'all', search: '' };
-    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-setlist-table] tbody tr'));
+    const state: Record<string, string> = { year: 'all', decade: 'all', country: 'all', tour: 'all', search: '' };
+    const table = document.querySelector<HTMLElement>('[data-setlist-table]');
+    if (!table || table.dataset.filtersWired === 'true') return;
+    table.dataset.filtersWired = 'true';
+    const rows = Array.from(table.querySelectorAll<HTMLElement>('tbody tr'));
     const counter = document.querySelector<HTMLElement>('[data-match-count]');
     const apply = () => {
       let matched = 0;
       rows.forEach((r) => {
         const y = r.getAttribute('data-year') || '';
+        const d = r.getAttribute('data-decade') || '';
         const c = r.getAttribute('data-country') || '';
         const t = r.getAttribute('data-tour') || '';
         const s = r.getAttribute('data-search') || '';
         const ok =
           (state.year === 'all' || y === state.year) &&
+          (state.decade === 'all' || d === state.decade) &&
           (state.country === 'all' || c === state.country) &&
           (state.tour === 'all' || t === state.tour) &&
           (!state.search || s.includes(state.search));
@@ -116,27 +115,15 @@ const facts: Array<[string, string]> = [
     };
     document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
       const key = sel.getAttribute('data-filter-select') || '';
-      sel.addEventListener('change', () => { state[key] = sel.value || 'all'; apply(); });
+      sel.addEventListener('change', () => {
+        state[key] = sel.value || 'all';
+        apply();
+      });
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
-    document.querySelectorAll<HTMLElement>('[data-decade-jump]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const d = btn.getAttribute('data-decade-jump') || '';
-        const yearPrefix = d.slice(0, 3);
-        const yearSel = document.querySelector<HTMLSelectElement>('[data-filter-select="year"]');
-        if (!yearSel) return;
-        const opt = Array.from(yearSel.options).find((o) => o.value.startsWith(yearPrefix));
-        if (opt) { yearSel.value = opt.value; yearSel.dispatchEvent(new Event('change')); }
-      });
-    });
+    apply();
   }
   wire();
   document.addEventListener('astro:page-load', wire);
 </script>
-
-<style is:global>
-  table.data--airy thead th { padding: 14px 16px; }
-  table.data--airy tbody td { padding: 18px 16px; line-height: 1.5; }
-  table.data--airy tbody td:first-child { padding-left: 2px; }
-</style>

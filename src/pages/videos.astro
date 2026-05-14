@@ -37,23 +37,25 @@ const ytId = (url: string): string | null => {
     </section>
   ) : (
     <>
-      <section class="container filter-strip">
-        <div class="filter-grid filter-grid--3">
-          <Select
-            name="type"
-            label="Type"
-            options={[{ value: 'all', label: 'All types' }, ...types.map((t) => ({ value: t!, label: String(t).toUpperCase() }))]}
-          />
-          <Select
-            name="year"
-            label="Year"
-            options={[{ value: 'all', label: 'All years' }, ...years.map((y) => ({ value: y!, label: y! }))]}
-          />
-          <SearchField placeholder="Title, director…" />
-        </div>
-      </section>
-
       <IssueSection kicker="Catalogue" title="Every film" meta={`${videos.length} entries`}>
+        <div class="table-controls" aria-label="Video catalogue filters">
+          <div class="table-controls__grid table-controls__grid--3">
+            <Select
+              name="type"
+              label="Type"
+              options={[{ value: 'all', label: 'All types' }, ...types.map((t) => ({ value: t!, label: String(t).toUpperCase() }))]}
+            />
+            <Select
+              name="year"
+              label="Year"
+              options={[{ value: 'all', label: 'All years' }, ...years.map((y) => ({ value: y!, label: y! }))]}
+            />
+            <SearchField placeholder="Title, director..." />
+          </div>
+        </div>
+        <div class="table-results-bar">
+          <span data-match-count>{videos.length} videos</span>
+        </div>
         <div class="video-grid" data-video-grid>
           {videos.map((v) => {
             const yid = ytId(v.url || v.video_url || '');
@@ -87,15 +89,22 @@ const ytId = (url: string): string | null => {
 <script>
   function wire() {
     const state: Record<string, string> = { type: 'all', year: 'all', search: '' };
-    const cards = Array.from(document.querySelectorAll<HTMLElement>('[data-video-grid] .video-card'));
+    const grid = document.querySelector<HTMLElement>('[data-video-grid]');
+    if (!grid || grid.dataset.filtersWired === 'true') return;
+    grid.dataset.filtersWired = 'true';
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.video-card'));
+    const counter = document.querySelector<HTMLElement>('[data-match-count]');
     const apply = () => {
+      let m = 0;
       cards.forEach((r) => {
         const t = r.getAttribute('data-type') || '';
         const y = r.getAttribute('data-year') || '';
         const s = r.getAttribute('data-search') || '';
         const ok = (state.type === 'all' || t === state.type) && (state.year === 'all' || y === state.year) && (!state.search || s.includes(state.search));
         r.style.display = ok ? '' : 'none';
+        if (ok) m++;
       });
+      if (counter) counter.textContent = `${m} videos`;
     };
     document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
       const key = sel.getAttribute('data-filter-select') || '';
@@ -103,6 +112,7 @@ const ytId = (url: string): string | null => {
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    apply();
   }
   wire();
   document.addEventListener('astro:page-load', wire);

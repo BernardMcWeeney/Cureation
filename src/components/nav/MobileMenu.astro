@@ -3,9 +3,9 @@ const current = Astro.url.pathname;
 const sections: Array<{ title: string; links: Array<{ href: string; label: string }> }> = [
   { title: 'Records', links: [
     { href: '/discography', label: 'Discography' },
-    { href: '/discography/ep', label: 'EPs' },
-    { href: '/discography/singles', label: 'Singles' },
-    { href: '/discography/compilations', label: 'Compilations' },
+    { href: '/discography?type=ep', label: 'EPs' },
+    { href: '/discography?type=single', label: 'Singles' },
+    { href: '/discography?type=compilation', label: 'Compilations' },
     { href: '/songs', label: 'All songs' },
     { href: '/lyrics', label: 'Lyrics' },
   ]},

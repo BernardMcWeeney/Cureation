@@ -10,11 +10,6 @@ const venues = await listVenues();
 const byCountry = Array.from(new Set(venues.map((v) => v.country).filter(Boolean))).sort();
 const withCoords = venues.filter((v) => v.latitude && v.longitude).length;
 
-const countryCounts: Record<string, number> = {};
-venues.forEach((v) => { if (v.country) countryCounts[v.country] = (countryCounts[v.country] || 0) + (v.cure_show_count || 1); });
-const topCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-const maxCountry = Math.max(1, ...topCountries.map(([, c]) => c));
-
 const facts: Array<[string, string]> = [
   ['Venues on file', String(venues.length)],
   ['Countries', String(byCountry.length)],
@@ -32,43 +27,31 @@ const facts: Array<[string, string]> = [
     flush
   />
 
-  <section class="container" style="padding: clamp(36px, 4.5vw, 64px) 0; border-top: 1px solid var(--rule);">
-    <div class="mono-sm muted" style="margin-bottom: 1rem; letter-spacing: 0.22em;">TOP 10 COUNTRIES BY SHOWS</div>
-    <div class="decade-bars">
-      {topCountries.map(([c, count]) => (
-        <button class="decade-bar" data-country-jump={c} style={`--h: ${Math.round((count / maxCountry) * 100)}%;`}>
-          <div class="decade-bar__val">{count}</div>
-          <div class="decade-bar__fill"></div>
-          <div class="decade-bar__label">{c}</div>
-        </button>
-      ))}
-    </div>
-  </section>
-
-  <section class="container filter-strip">
-    <div class="filter-grid filter-grid--3">
-      <Select
-        name="country"
-        label="Country"
-        options={[{ value: 'all', label: 'All countries' }, ...byCountry.map((c) => ({ value: c!, label: c! }))]}
-      />
-      <Select
-        name="cap"
-        label="Capacity"
-        options={[
-          { value: 'all', label: 'Any capacity' },
-          { value: 'small', label: 'Under 1,000' },
-          { value: 'mid', label: '1,000 – 5,000' },
-          { value: 'large', label: '5,000 – 20,000' },
-          { value: 'huge', label: '20,000+' },
-        ]}
-      />
-      <SearchField placeholder="Venue, city…" />
-    </div>
-  </section>
-
   <IssueSection kicker="Ranked ledger" title="Rooms" meta="Most-visited first">
-    <div class="mono-sm muted" data-match-count style="margin-bottom:.8rem;">{venues.length} venues</div>
+    <div class="table-controls" aria-label="Venue table filters">
+      <div class="table-controls__grid table-controls__grid--3">
+        <Select
+          name="country"
+          label="Country"
+          options={[{ value: 'all', label: 'All countries' }, ...byCountry.map((c) => ({ value: c!, label: c! }))]}
+        />
+        <Select
+          name="cap"
+          label="Capacity"
+          options={[
+            { value: 'all', label: 'Any capacity' },
+            { value: 'small', label: 'Under 1,000' },
+            { value: 'mid', label: '1,000-5,000' },
+            { value: 'large', label: '5,000-20,000' },
+            { value: 'huge', label: '20,000+' },
+          ]}
+        />
+        <SearchField placeholder="Venue, city..." />
+      </div>
+    </div>
+    <div class="table-results-bar">
+      <span data-match-count>{venues.length} venues</span>
+    </div>
     <div class="table-wrap">
     <table class="data data--airy" data-venue-table>
       <thead><tr><th style="width:50px;">№</th><th>Venue</th><th>City</th><th>Country</th><th class="num" style="text-align:right;">Capacity</th><th class="num" style="text-align:right;">Cure shows</th></tr></thead>
@@ -97,7 +80,10 @@ const facts: Array<[string, string]> = [
 <script>
   function wire() {
     const state: Record<string, string> = { country: 'all', cap: 'all', search: '' };
-    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-venue-table] tbody tr'));
+    const table = document.querySelector<HTMLElement>('[data-venue-table]');
+    if (!table || table.dataset.filtersWired === 'true') return;
+    table.dataset.filtersWired = 'true';
+    const rows = Array.from(table.querySelectorAll<HTMLElement>('tbody tr'));
     const counter = document.querySelector<HTMLElement>('[data-match-count]');
     const apply = () => {
       let m = 0;
@@ -119,15 +105,8 @@ const facts: Array<[string, string]> = [
     });
     const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
-    document.querySelectorAll<HTMLElement>('[data-country-jump]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const c = btn.getAttribute('data-country-jump') || '';
-        const sel = document.querySelector<HTMLSelectElement>('[data-filter-select="country"]');
-        if (sel) { sel.value = c; sel.dispatchEvent(new Event('change')); }
-      });
-    });
+    apply();
   }
   wire();
   document.addEventListener('astro:page-load', wire);
 </script>
-

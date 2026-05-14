@@ -7,13 +7,14 @@
     "build": "astro build && npx pagefind --site dist",
     "preview": "astro preview",
     "deploy": "astro build && npx pagefind --site dist && wrangler deploy",
-    "astro": "astro"
+    "astro": "astro",
+    "directus:social-migrate": "node scripts/social-migrate.mjs"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.1.8",
+    "@astrojs/cloudflare": "^13.5.1",
     "@astrojs/rss": "^4.0.18",
     "@tailwindcss/vite": "^4.1.18",
-    "astro": "^6.1.5",
+    "astro": "^6.3.3",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
