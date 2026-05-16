@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
-import PullQuote from '../components/ui/PullQuote.astro';
 import Tag from '../components/ui/Tag.astro';
 import Button from '../components/ui/Button.astro';
 import {
@@ -12,7 +11,6 @@ import {
   getOnThisDay,
   listNews,
   listEditorial,
-  listQuotes,
   getSongOfDay,
   getLyricOfDay,
   getPhotoOfDay,
@@ -29,7 +27,7 @@ Astro.response.headers.set(
   'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
 );
 
-const [issue, albums, eras, figures, otd, news, editorial, quotes, songOfDay, lyricOfDay, photoOfDay, nextConcert, latestConcert] = await Promise.all([
+const [issue, albums, eras, figures, otd, news, editorial, songOfDay, lyricOfDay, photoOfDay, nextConcert, latestConcert] = await Promise.all([
   getAlbumOfMonth(),
   listAlbums({ type: 'studio' }),
   listEras(),
@@ -37,7 +35,6 @@ const [issue, albums, eras, figures, otd, news, editorial, quotes, songOfDay, ly
   getOnThisDay(),
   listNews(7),
   listEditorial(1),
-  listQuotes(4),
   getSongOfDay().catch(() => null),
   getLyricOfDay().catch(() => null),
   getPhotoOfDay().catch(() => null),
@@ -440,16 +437,6 @@ const figureCells: Array<[string, number]> = [
     );
   })()}
 
-  {quotes.length > 0 && (
-    <IssueSection kicker="In their words" title="Epigraphs">
-      <div class="quotes-grid">
-        {quotes.map((q: any) => (
-          <PullQuote cite={q.attribution || q.source || undefined}>{q.text}</PullQuote>
-        ))}
-      </div>
-    </IssueSection>
-  )}
-
   {eras.length > 0 && (
     <IssueSection kicker={`${eras.length} eras`} title="The Eras" href="/band/history">
       <div class="era-cards">
@@ -762,7 +749,6 @@ const figureCells: Array<[string, number]> = [
   :root[data-theme='papers'] .era-card__cue { color: var(--accent); }
 
   .editorial { display: flex; flex-direction: column; gap: 1rem; max-width: 68ch; }
-  .quotes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: clamp(24px, 3vw, 48px); }
 
   /* Essay № N — 1/2 col layout with drop-cap leader paragraph */
   .essay__grid {
