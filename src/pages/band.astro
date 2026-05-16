@@ -2,25 +2,54 @@
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
-import { listMembers, listTimeline } from '../lib/directus';
+import {
+  compareMembersByDeparture,
+  getRunningFigures,
+  listMemberPhotos,
+  listMembers,
+  listTimeline,
+  memberActiveYears,
+  memberLastDepartureYear,
+  memberPhoto,
+  memberRoleLabel,
+  memberTenureLabel,
+} from '../lib/directus';
 import { asset } from '../lib/assets';
 
-const [members, timeline] = await Promise.all([listMembers(), listTimeline({ limit: 40 })]);
+const [members, timeline, figures] = await Promise.all([
+  listMembers(),
+  listTimeline({ limit: 40 }),
+  getRunningFigures(),
+]);
 const current = members.filter((m) => m.is_current_member);
-const former = members.filter((m) => !m.is_current_member);
+const former = members.filter((m) => !m.is_current_member).sort(compareMembersByDeparture);
+const alumniThumbEntries = await Promise.all(
+  former.map(async (m) => {
+    const fallback = await listMemberPhotos(m, { limit: 1 }).catch(() => []);
+    const photo = memberPhoto(m) || fallback[0]?.image_file || fallback[0]?.image_url || null;
+    return [m.id, photo] as const;
+  })
+);
+const alumniThumbs = new Map(alumniThumbEntries);
+const timelineRecent = timeline.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).slice(0, 8);
+const timelineLead = timelineRecent[0] || null;
 
 const facts: Array<[string, string]> = [
   ['Total members', String(members.length)],
   ['Current lineup', String(current.length)],
   ['Former members', String(former.length)],
-  ['Founded', '1978'],
+  ['Setlists', figures.setlists.toLocaleString()],
 ];
+
+const thumbSrc = (value: string | null | undefined) =>
+  value ? (String(value).startsWith('http') ? value : asset(value, 'thumb')) : null;
+const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2);
 ---
 <Layout title="The band · Cureation">
   <PageHero
     section="The band"
     title="The band"
-    deck="Members past and present — their instruments, their tenures, and the shape of the lineup across forty-plus years."
+    deck="Members past and present — their instruments, their tenures, the live archive, and the chronology that shaped the lineup."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'The band' }]}
     facts={facts.map(([k, v]) => ({ k, v }))}
   />
@@ -30,58 +59,68 @@ const facts: Array<[string, string]> = [
       {current.map((m) => (
         <a href={`/band/members/${m.slug}`} class="member-card">
           <figure class="member-card__art">
-            {m.photo_file ? (
-              <img src={asset(m.photo_file, 'card')} alt={m.name} loading="lazy" />
+            {memberPhoto(m) ? (
+              <img src={asset(memberPhoto(m), 'card')} alt={m.name} loading="lazy" />
             ) : (
               <div class="placeholder">No photo</div>
             )}
           </figure>
-          <div class="mono-sm muted" style="margin-top:.5rem;">{m.tenure || '—'}</div>
+          <div class="mono-sm muted" style="margin-top:.5rem;">{memberTenureLabel(m)}</div>
           <h3 class="serif" style="font-size: 22px; font-style: italic; margin: .2rem 0 0;">{m.name}</h3>
-          <div class="mono-sm" style="color: var(--accent-3);">{Array.isArray(m.instruments) ? m.instruments.slice(0, 3).join(' · ').toUpperCase() : ''}</div>
+          <div class="mono-sm" style="color: var(--accent-3);">{(memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ')).toUpperCase()}</div>
         </a>
       ))}
     </div>
   </IssueSection>
 
   {former.length > 0 && (
-    <IssueSection kicker="Former members" title="Alumni" meta={`${former.length} past`}>
-      <div class="table-wrap">
-      <table class="data">
-        <thead><tr><th style="width:50px;">№</th><th>Name</th><th>Instruments</th><th>Tenure</th></tr></thead>
-        <tbody>
-          {former.map((m, i) => (
-            <tr data-clickable onclick={`location.href='/band/members/${m.slug}'`}>
-              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-              <td><span class="serif" style="font-size: 18px; font-style: italic;">{m.name}</span></td>
-              <td class="mono-sm muted">{Array.isArray(m.instruments) ? m.instruments.join(' · ') : ''}</td>
-              <td class="mono-sm" style="color: var(--accent-3);">{m.tenure || `${m.tenure_start || ''}–${m.tenure_end || ''}`}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <IssueSection kicker="Former members" title="Alumni" meta="latest departures first">
+      <div class="alumni-grid">
+        {former.map((m, i) => {
+          const photo = thumbSrc(alumniThumbs.get(m.id));
+          const departure = memberLastDepartureYear(m);
+          const years = memberActiveYears(m);
+          return (
+            <a href={`/band/members/${m.slug}`} class="alumni-card">
+              <figure class="alumni-card__thumb">
+                {photo ? <img src={photo} alt={m.name} loading="lazy" /> : <span>{initials(m.name)}</span>}
+              </figure>
+              <div class="alumni-card__body">
+                <div class="mono-sm muted">№ {String(i + 1).padStart(2, '0')}</div>
+                <h3 class="serif">{m.name}</h3>
+                <p>{memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ') || 'Role to be filed'}</p>
+              </div>
+              <div class="alumni-card__meta">
+                <span>{departure ? `Left ${departure}` : 'Departure TBC'}</span>
+                <strong>{memberTenureLabel(m)}</strong>
+                {years && <small>{years} active year{years === 1 ? '' : 's'}</small>}
+              </div>
+            </a>
+          );
+        })}
       </div>
     </IssueSection>
   )}
 
   {timeline.length > 0 && (
-    <IssueSection kicker="Recent history" title="Timeline" href="/band/history" meta={`${timeline.length} entries`}>
-      <div class="table-wrap">
-      <table class="data">
-        <thead><tr><th style="width:80px;">Date</th><th style="width:110px;">Kind</th><th>Event</th></tr></thead>
-        <tbody>
-          {timeline.slice(-15).reverse().map((t) => (
-            <tr>
-              <td class="mono-sm" style="color: var(--ink);">{t.formatted_date || t.date || t.year || '—'}</td>
-              <td class="mono-sm muted">{(t.type || '').toUpperCase()}</td>
-              <td>
-                <span class="serif" style="font-size: 17px; font-style: italic;">{t.title}</span>
-                {t.description && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{t.description}</div>}
-              </td>
-            </tr>
+    <IssueSection kicker="Band history" title="Timeline" href="/band/history" meta={`${timeline.length} archive entries`}>
+      <div class="history-board">
+        {timelineLead && (
+          <a href="/band/history" class="history-lead">
+            <span class="mono-sm muted">{(timelineLead.type || 'event').toUpperCase()} · {timelineLead.formatted_date || timelineLead.year || '—'}</span>
+            <h3 class="serif">{timelineLead.title}</h3>
+            {timelineLead.description && <p>{timelineLead.description}</p>}
+          </a>
+        )}
+        <div class="history-list">
+          {timelineRecent.slice(1).map((t) => (
+            <a href="/band/history" class="history-row">
+              <span>{t.formatted_date || t.date || t.year || '—'}</span>
+              <strong>{t.title}</strong>
+              <small>{(t.type || 'event').toUpperCase()}</small>
+            </a>
           ))}
-        </tbody>
-      </table>
+        </div>
       </div>
     </IssueSection>
   )}
@@ -93,4 +132,31 @@ const facts: Array<[string, string]> = [
   .member-card__art { aspect-ratio: 1 / 1; margin: 0; overflow: hidden; background: var(--bg-2); border: 1px solid var(--rule); }
   .member-card__art img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.05); transition: transform .6s ease, filter .3s; }
   .member-card:hover .member-card__art img { transform: scale(1.03); filter: saturate(1) contrast(1.1); }
+  .alumni-grid { display: grid; gap: 10px; }
+  .alumni-card { display: grid; grid-template-columns: 86px minmax(0, 1fr) minmax(180px, .55fr); gap: 18px; align-items: center; padding: 12px; color: inherit; background: color-mix(in oklab, var(--bg-2), transparent 42%); border: 1px solid var(--rule-2); transition: border-color .18s, background .18s; }
+  .alumni-card:hover { border-color: var(--rule); background: var(--bg-2); }
+  .alumni-card__thumb { width: 86px; aspect-ratio: 1 / 1; margin: 0; overflow: hidden; border: 1px solid var(--rule); background: var(--bg-3); display: grid; place-items: center; }
+  .alumni-card__thumb img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.04); }
+  .alumni-card__thumb span { color: var(--accent-3); font-family: var(--f-serif); font-size: 28px; font-style: italic; }
+  .alumni-card__body h3 { margin: 3px 0 0; font-size: 24px; font-style: italic; font-weight: 400; line-height: 1.1; }
+  .alumni-card__body p { margin: 6px 0 0; color: var(--ink-2); font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .alumni-card__meta { display: grid; gap: 5px; justify-items: end; text-align: right; }
+  .alumni-card__meta span,
+  .alumni-card__meta small { color: var(--muted); font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+  .alumni-card__meta strong { color: var(--accent-3); font-family: var(--f-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; line-height: 1.35; font-weight: 400; }
+  .history-board { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(24px, 3vw, 46px); }
+  .history-lead { min-height: 340px; display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; color: inherit; background: var(--bg-2); border: 1px solid var(--rule); }
+  .history-lead h3 { margin: 12px 0 0; font-size: 42px; font-style: italic; font-weight: 400; line-height: 1; }
+  .history-lead p { margin: 16px 0 0; color: var(--ink-2); font-family: var(--f-serif); font-size: 16px; line-height: 1.55; }
+  .history-list { border-top: 1px solid var(--rule); }
+  .history-row { display: grid; grid-template-columns: minmax(112px, .42fr) minmax(0, 1fr) 90px; gap: 16px; align-items: baseline; padding: 15px 0; color: inherit; border: none; border-bottom: 1px solid var(--rule-2); }
+  .history-row span,
+  .history-row small { color: var(--muted); font-family: var(--f-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+  .history-row strong { color: var(--ink); font-family: var(--f-serif); font-size: 18px; font-style: italic; font-weight: 400; line-height: 1.25; }
+  @media (max-width: 820px) {
+    .alumni-card,
+    .history-board { grid-template-columns: 1fr; }
+    .alumni-card__meta { justify-items: start; text-align: left; }
+    .history-row { grid-template-columns: 1fr; gap: 5px; }
+  }
 </style>

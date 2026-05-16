@@ -2,10 +2,36 @@
 import Layout from '../../../layouts/Layout.astro';
 import IssueSection from '../../../components/ui/IssueSection.astro';
 import PageHero from '../../../components/ui/PageHero.astro';
-import { listMembers } from '../../../lib/directus';
+import {
+  compareMembersByDeparture,
+  listMemberPhotos,
+  listMembers,
+  memberActiveYears,
+  memberLastDepartureYear,
+  memberPhoto,
+  memberRoleLabel,
+  memberTenureLabel,
+} from '../../../lib/directus';
 import { asset } from '../../../lib/assets';
 
 const members = await listMembers();
+const current = members.filter((m) => m.is_current_member);
+const alumni = members.filter((m) => !m.is_current_member).sort(compareMembersByDeparture);
+const alumniThumbEntries = await Promise.all(
+  alumni.map(async (m) => {
+    const fallback = await listMemberPhotos(m, { limit: 1 }).catch(() => []);
+    const photo = memberPhoto(m) || fallback[0]?.image_file || fallback[0]?.image_url || null;
+    return [m.id, photo] as const;
+  })
+);
+const alumniThumbs = new Map(alumniThumbEntries);
+const portraitMembers = members
+  .filter((m) => memberPhoto(m))
+  .sort((a, b) => Number(b.is_featured_member) - Number(a.is_featured_member))
+  .slice(0, 12);
+const thumbSrc = (value: string | null | undefined) =>
+  value ? (String(value).startsWith('http') ? value : asset(value, 'thumb')) : null;
+const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2);
 ---
 <Layout title="Members · The band · Cureation">
   <PageHero
@@ -19,24 +45,67 @@ const members = await listMembers();
     ]}
     facts={[
       { k: 'On file', v: members.length },
-      { k: 'Current', v: members.filter((m) => m.is_current_member).length },
+      { k: 'Current', v: current.length },
+      { k: 'Alumni', v: alumni.length },
     ]}
   />
 
-  <IssueSection kicker={`${members.length} on file`} title="Catalogue">
+  {portraitMembers.length > 0 && (
+    <IssueSection kicker="Portrait file" title="Figures in frame" meta={`${portraitMembers.length} portraits`}>
+      <div class="portrait-strip">
+        {portraitMembers.map((m) => (
+          <a href={`/band/members/${m.slug}`} class="portrait-strip__item">
+            <img src={asset(memberPhoto(m), 'card')} alt={m.name} loading="lazy" />
+            <span>{m.name}</span>
+          </a>
+        ))}
+      </div>
+    </IssueSection>
+  )}
+
+  <IssueSection kicker="Current lineup" title="On stage now" meta={`${current.length} members`}>
     <div class="grid">
-      {members.map((m) => (
+      {current.map((m) => (
         <a href={`/band/members/${m.slug}`} class="card">
           <figure class="card__art">
-            {m.photo_file ? <img src={asset(m.photo_file, 'card')} alt={m.name} loading="lazy" /> : <div class="placeholder">No photo</div>}
+            {memberPhoto(m) ? <img src={asset(memberPhoto(m), 'card')} alt={m.name} loading="lazy" /> : <div class="placeholder">No photo</div>}
           </figure>
-          <div class="mono-sm muted" style="margin-top:.5rem;">{m.tenure || '—'}</div>
+          <div class="mono-sm muted" style="margin-top:.5rem;">{memberTenureLabel(m)}</div>
           <h3 class="serif" style="font-size: 20px; font-style: italic; margin: .2rem 0 0;">{m.name}</h3>
-          <div class="mono-sm" style="color: var(--accent-3);">{Array.isArray(m.instruments) ? m.instruments.slice(0, 2).join(' · ').toUpperCase() : ''}</div>
+          <div class="mono-sm" style="color: var(--accent-3);">{(memberRoleLabel(m) || m.instruments.slice(0, 2).join(' · ')).toUpperCase()}</div>
         </a>
       ))}
     </div>
   </IssueSection>
+
+  {alumni.length > 0 && (
+    <IssueSection kicker="Alumni" title="Past members" meta="latest departures first">
+      <div class="alumni-grid">
+        {alumni.map((m, i) => {
+          const photo = thumbSrc(alumniThumbs.get(m.id));
+          const departure = memberLastDepartureYear(m);
+          const years = memberActiveYears(m);
+          return (
+            <a href={`/band/members/${m.slug}`} class="alumni-card">
+              <figure class="alumni-card__thumb">
+                {photo ? <img src={photo} alt={m.name} loading="lazy" /> : <span>{initials(m.name)}</span>}
+              </figure>
+              <div class="alumni-card__body">
+                <div class="mono-sm muted">№ {String(i + 1).padStart(2, '0')}</div>
+                <h3 class="serif">{m.name}</h3>
+                <p>{memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ') || 'Role to be filed'}</p>
+              </div>
+              <div class="alumni-card__meta">
+                <span>{departure ? `Left ${departure}` : 'Departure TBC'}</span>
+                <strong>{memberTenureLabel(m)}</strong>
+                {years && <small>{years} active year{years === 1 ? '' : 's'}</small>}
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </IssueSection>
+  )}
 </Layout>
 
 <style>
@@ -45,4 +114,25 @@ const members = await listMembers();
   .card__art { aspect-ratio: 1 / 1; margin: 0; background: var(--bg-2); border: 1px solid var(--rule); overflow: hidden; }
   .card__art img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9); transition: transform .5s; }
   .card:hover .card__art img { transform: scale(1.04); }
+  .portrait-strip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 210px); gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
+  .portrait-strip__item { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid var(--rule); background: var(--bg-2); scroll-snap-align: start; }
+  .portrait-strip__item img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.04); transition: transform .5s ease; }
+  .portrait-strip__item:hover img { transform: scale(1.03); }
+  .portrait-strip__item span { position: absolute; inset: auto 0 0; padding: 34px 10px 10px; background: linear-gradient(to top, rgba(0,0,0,.74), transparent); color: #fff; font-family: var(--f-serif); font-size: 18px; font-style: italic; }
+  .alumni-grid { display: grid; gap: 10px; }
+  .alumni-card { display: grid; grid-template-columns: 86px minmax(0, 1fr) minmax(180px, .55fr); gap: 18px; align-items: center; padding: 12px; color: inherit; background: color-mix(in oklab, var(--bg-2), transparent 42%); border: 1px solid var(--rule-2); transition: border-color .18s, background .18s; }
+  .alumni-card:hover { border-color: var(--rule); background: var(--bg-2); }
+  .alumni-card__thumb { width: 86px; aspect-ratio: 1 / 1; margin: 0; overflow: hidden; border: 1px solid var(--rule); background: var(--bg-3); display: grid; place-items: center; }
+  .alumni-card__thumb img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.04); }
+  .alumni-card__thumb span { color: var(--accent-3); font-family: var(--f-serif); font-size: 28px; font-style: italic; }
+  .alumni-card__body h3 { margin: 3px 0 0; font-size: 24px; font-style: italic; font-weight: 400; line-height: 1.1; }
+  .alumni-card__body p { margin: 6px 0 0; color: var(--ink-2); font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .alumni-card__meta { display: grid; gap: 5px; justify-items: end; text-align: right; }
+  .alumni-card__meta span,
+  .alumni-card__meta small { color: var(--muted); font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+  .alumni-card__meta strong { color: var(--accent-3); font-family: var(--f-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; line-height: 1.35; font-weight: 400; }
+  @media (max-width: 700px) {
+    .alumni-card { grid-template-columns: 1fr; }
+    .alumni-card__meta { justify-items: start; text-align: left; }
+  }
 </style>

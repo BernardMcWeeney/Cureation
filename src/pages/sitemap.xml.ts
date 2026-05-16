@@ -5,8 +5,8 @@ export const prerender = false;
 
 const STATIC = [
   '/', '/discography',
-  '/songs', '/lyrics', '/setlists', '/setlists/compare', '/tours', '/venues', '/venues/map',
-  '/band', '/band/history', '/band/gear', '/band/quotes',
+  '/songs', '/lyrics', '/setlists', '/setlists/compare', '/tours', '/tours/map', '/venues',
+  '/band', '/band/history', '/band/gear',
   '/news', '/newsletter', '/wiki', '/stats', '/photos', '/videos',
   '/on-this-day', '/curiosities', '/community', '/about', '/sources', '/colophon',
 ];

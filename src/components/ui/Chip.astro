@@ -3,14 +3,15 @@ interface Props {
   href?: string;
   active?: boolean;
   class?: string;
+  [key: string]: any;
 }
-const { href, active = false, class: klass = '' } = Astro.props;
+const { href, active = false, class: klass = '', ...attrs } = Astro.props;
 const classes = ['chip', active ? 'is-active' : '', klass].filter(Boolean).join(' ');
 ---
 {href ? (
-  <a href={href} class={classes} aria-pressed={active ? 'true' : 'false'}><slot /></a>
+  <a {...attrs} href={href} class={classes} aria-pressed={active ? 'true' : 'false'}><slot /></a>
 ) : (
-  <button type="button" class={classes} aria-pressed={active ? 'true' : 'false'}><slot /></button>
+  <button {...attrs} type="button" class={classes} aria-pressed={active ? 'true' : 'false'}><slot /></button>
 )}
 
 <style>

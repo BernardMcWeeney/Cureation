@@ -1,5 +1,5 @@
 import type { APIContext } from 'astro';
-import { listSetlists } from '../lib/directus';
+import { listSetlists, listTours } from '../lib/directus';
 
 export const prerender = false;
 
@@ -15,9 +15,15 @@ const stamp = () => {
 const esc = (s: string) => (s || '').replace(/[,;\\]/g, (m) => '\\' + m).replace(/\n/g, '\\n');
 
 export async function GET(context: APIContext) {
-  const all = await listSetlists({ limit: 500 }).catch(() => []);
-  const today = new Date().toISOString().slice(0, 10);
-  const upcoming = all.filter((s) => s.date && s.date >= today).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  const tours = await listTours().catch(() => []);
+  const latestTour = tours.find((tour) => tour.id && tour.start_date) || tours[0] || null;
+  const shows = latestTour
+    ? await listSetlists({ tour: latestTour.id, limit: 500 }).catch(() => [])
+    : await listSetlists({ limit: 500 }).catch(() => []);
+  const tourDates = shows.filter((s) => s.date).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  const calendarName = latestTour?.name
+    ? `The Cure — ${latestTour.name} (Cureation)`
+    : 'The Cure — tour dates (Cureation)';
 
   const site = (context.site?.toString() || 'https://cureation.net').replace(/\/$/, '');
   const lines = [
@@ -26,10 +32,12 @@ export async function GET(context: APIContext) {
     'PRODID:-//Cureation//Tour dates//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:The Cure — tour dates (Cureation)',
-    'X-WR-CALDESC:Upcoming Cure shows as tracked by Cureation.',
+    `X-WR-CALNAME:${esc(calendarName)}`,
+    `X-WR-CALDESC:${esc(latestTour?.name ? `Latest tour dates for ${latestTour.name}, as tracked by Cureation.` : 'Latest Cure tour dates as tracked by Cureation.')}`,
+    'X-PUBLISHED-TTL:PT1H',
+    'REFRESH-INTERVAL;VALUE=DURATION:PT1H',
   ];
-  for (const s of upcoming) {
+  for (const s of tourDates) {
     const d = fmtDate(s.date!);
     const end = fmtDate(new Date(new Date(s.date!).getTime() + 86400000).toISOString());
     const summary = `The Cure — ${s.venue || s.city || 'Show'}`;
@@ -52,7 +60,6 @@ export async function GET(context: APIContext) {
   return new Response(lines.join('\r\n'), {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': 'inline; filename="cureation-tour-dates.ics"',
       'Cache-Control': 'public, max-age=3600',
     },
   });

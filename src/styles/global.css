@@ -1,2 +1,12 @@
 @import "tailwindcss";
 @import "./tokens.css";
+
+/* Override Tailwind v4's built-in `.container` utility with our editorial one.
+   Tailwind's default container sets only width + breakpoint-based max-widths,
+   stripping the padding we set in tokens.css. */
+@utility container {
+  width: 100%;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}

@@ -1,11 +1,11 @@
 ---
 const ACCENTS: Array<{ id: string; color: string; alt: string }> = [
-  { id: 'plum',    color: '#7746B0', alt: 'Plum' },
-  { id: 'wine',    color: '#B8354A', alt: 'Wine' },
-  { id: 'oxblood', color: '#8C2638', alt: 'Oxblood' },
-  { id: 'navy',    color: '#3A4A6B', alt: 'Navy' },
-  { id: 'gold',    color: '#A88344', alt: 'Gold' },
-  { id: 'rust',    color: '#A6462A', alt: 'Rust' },
+  { id: 'disintegration',   color: '#7746B0', alt: 'Disintegration' },
+  { id: 'wish',             color: '#B8354A', alt: 'Wish' },
+  { id: 'pornography',      color: '#8C2638', alt: 'Pornography' },
+  { id: 'faith',            color: '#3A4A6B', alt: 'Faith' },
+  { id: 'head-on-the-door', color: '#A88344', alt: 'Head on the Door' },
+  { id: 'bloodflowers',     color: '#A6462A', alt: 'Bloodflowers' },
 ];
 ---
 <aside class="tweaks" data-tweaks hidden role="dialog" aria-label="Tweaks">
@@ -34,66 +34,21 @@ const ACCENTS: Array<{ id: string; color: string; alt: string }> = [
   </section>
 
   <section class="tweaks__sec">
-    <div class="tweaks__h">Theme</div>
-    <div class="tweaks__row">
-      <button class="chip" data-tweak="theme" data-value="dark">Twilight</button>
-      <button class="chip" data-tweak="theme" data-value="midnight">Midnight</button>
-      <button class="chip" data-tweak="theme" data-value="papers">Papers</button>
-    </div>
-  </section>
-
-  <section class="tweaks__sec">
     <div class="tweaks__h">Accent</div>
-    <div class="tweaks__row">
+    <div class="tweaks__accents">
       {ACCENTS.map((a) => (
         <button
-          class="tweaks__sw"
+          class="tweaks__accent"
           data-tweak="accent"
           data-value={a.id}
           data-color={a.color}
-          style={`background:${a.color}`}
           aria-label={a.alt}
           title={a.alt}
-        />
+        >
+          <span class="tweaks__accent-sw" style={`background:${a.color}`} aria-hidden="true"></span>
+          <span class="tweaks__accent-name">{a.alt}</span>
+        </button>
       ))}
-    </div>
-  </section>
-
-  <section class="tweaks__sec">
-    <div class="tweaks__h">Display type</div>
-    <div class="tweaks__row">
-      <button class="chip" data-tweak="display" data-value="cormorant">Cormorant</button>
-      <button class="chip" data-tweak="display" data-value="eb">EB Garamond</button>
-    </div>
-  </section>
-
-  <section class="tweaks__sec">
-    <div class="tweaks__h">Atmosphere</div>
-    <div class="tweaks__row" style="margin-bottom: 8px;">
-      <button class="chip" data-tweak="atmos" data-value="off">Off</button>
-      <button class="chip" data-tweak="atmos" data-value="soft">Soft</button>
-      <button class="chip" data-tweak="atmos" data-value="heavy">Heavy</button>
-    </div>
-    <label class="tweaks__check">
-      <input type="checkbox" data-tweak="grain" />
-      <span class="mono-sm">Film grain</span>
-    </label>
-  </section>
-
-  <section class="tweaks__sec">
-    <div class="tweaks__h">Density</div>
-    <div class="tweaks__row">
-      <button class="chip" data-tweak="density" data-value="airy">Airy</button>
-      <button class="chip" data-tweak="density" data-value="balanced">Balanced</button>
-      <button class="chip" data-tweak="density" data-value="dense">Dense</button>
-    </div>
-  </section>
-
-  <section class="tweaks__sec">
-    <div class="tweaks__h">Headlines</div>
-    <div class="tweaks__row">
-      <button class="chip" data-tweak="headline" data-value="italic">Italic</button>
-      <button class="chip" data-tweak="headline" data-value="upright">Upright</button>
     </div>
   </section>
 
@@ -132,7 +87,6 @@ const ACCENTS: Array<{ id: string; color: string; alt: string }> = [
     font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.22em;
     text-transform: uppercase; color: var(--ink-2); margin-bottom: 8px;
   }
-  .tweaks__row { display: flex; flex-wrap: wrap; gap: 6px; }
   .tweaks__toggle {
     display: grid; grid-template-columns: 1fr 1fr;
     border: 1px solid var(--rule);
@@ -153,85 +107,129 @@ const ACCENTS: Array<{ id: string; color: string; alt: string }> = [
     color: var(--accent-ink);
   }
   :root[data-theme='papers'] .tweaks__toggle-btn[aria-pressed='true'] { color: var(--accent-ink); }
-  .tweaks__sw {
-    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
-    border: 2px solid transparent; padding: 0;
+
+  .tweaks__accents {
+    display: flex; flex-direction: column; gap: 2px;
   }
-  .tweaks__sw[aria-pressed='true'] { border-color: var(--ink); }
-  .tweaks__check {
-    display: flex; align-items: center; gap: 8px;
-    color: var(--ink-2); cursor: pointer; padding: 4px 0;
+  .tweaks__accent {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: transparent; border: 1px solid transparent;
+    color: var(--ink-2); cursor: pointer;
+    padding: 6px 8px; text-align: left;
+    font-family: var(--f-mono); font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    transition: color .18s, border-color .18s, background .18s;
   }
-  .tweaks__check input { accent-color: var(--accent); }
+  .tweaks__accent:hover { color: var(--ink); border-color: var(--rule); }
+  .tweaks__accent[aria-pressed='true'] {
+    color: var(--ink); border-color: var(--accent);
+    background: var(--accent-tint);
+  }
+  .tweaks__accent-sw {
+    width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  :root[data-theme='papers'] .tweaks__accent-sw { border-color: rgba(0,0,0,0.2); }
+  .tweaks__accent-name {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
   .tweaks__ft { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
 
   @media (max-width: 600px) {
-    .tweaks { right: 12px; bottom: 12px; width: calc(100vw - 24px); }
+    .tweaks {
+      left: 12px;
+      right: 12px;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      width: auto;
+      max-height: min(76vh, 560px);
+    }
+    .tweaks__ft {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
   }
 </style>
 
 <script>
-  type Tweaks = {
-    theme: 'dark' | 'midnight' | 'papers';
-    accent: string;
-    display: 'cormorant' | 'eb';
-    atmos: 'off' | 'soft' | 'heavy';
-    grain: boolean;
-    density: 'airy' | 'balanced' | 'dense';
-    headline: 'italic' | 'upright';
-  };
+  type Mode = 'dark' | 'light';
+  type Tweaks = { mode: Mode; accent: string };
+  type AccentTone = { accent: string; accent2: string; accent3: string; ink: string };
+  type AccentPalette = { dark: AccentTone; light: AccentTone };
+
   const KEY = 'cureation:tweaks';
-  const ACCENT_MAP: Record<string, string> = {
-    plum: '#7746B0', wine: '#B8354A', oxblood: '#8C2638',
-    navy: '#3A4A6B', gold: '#A88344', rust: '#A6462A',
+  const ACCENT_MAP: Record<string, AccentPalette> = {
+    disintegration: {
+      dark: { accent: '#7746B0', accent2: '#5A3389', accent3: '#B089E0', ink: '#F1E9F9' },
+      light: { accent: '#4E2677', accent2: '#351753', accent3: '#6A3AA0', ink: '#F9F1DC' },
+    },
+    wish: {
+      dark: { accent: '#B8354A', accent2: '#842839', accent3: '#E37A8A', ink: '#FFF1F3' },
+      light: { accent: '#8F2638', accent2: '#5B1423', accent3: '#A9384C', ink: '#FFF4E8' },
+    },
+    pornography: {
+      dark: { accent: '#8C2638', accent2: '#641B2B', accent3: '#D36A7E', ink: '#FDECEF' },
+      light: { accent: '#711C2B', accent2: '#4B111C', accent3: '#942D41', ink: '#FFF4E8' },
+    },
+    faith: {
+      dark: { accent: '#4D638E', accent2: '#2F3D5A', accent3: '#92A6D0', ink: '#EEF2FA' },
+      light: { accent: '#2F405F', accent2: '#1F2A40', accent3: '#485D84', ink: '#F4F1E7' },
+    },
+    'head-on-the-door': {
+      dark: { accent: '#A88344', accent2: '#73572B', accent3: '#DAB86E', ink: '#FFF8E7' },
+      light: { accent: '#76551F', accent2: '#4C3511', accent3: '#8E682C', ink: '#FFF4E2' },
+    },
+    bloodflowers: {
+      dark: { accent: '#A6462A', accent2: '#78311E', accent3: '#D8795F', ink: '#FFF1EA' },
+      light: { accent: '#843518', accent2: '#57210D', accent3: '#A34A2B', ink: '#FFF3E5' },
+    },
   };
-  const DEFAULTS: Tweaks = {
-    theme: 'midnight', accent: 'plum',
-    display: 'cormorant', atmos: 'soft', grain: false,
-    density: 'balanced', headline: 'italic',
-  };
+  const DEFAULTS: Tweaks = { mode: 'dark', accent: 'disintegration' };
 
   function readTweaks(): Tweaks {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Tweaks>) };
+      if (raw) {
+        const parsed = JSON.parse(raw) as Partial<Tweaks> & { theme?: string };
+        // Migrate legacy state: old `theme` field -> new `mode`.
+        const mode: Mode = parsed.mode === 'light' || parsed.mode === 'dark'
+          ? parsed.mode
+          : parsed.theme === 'papers' ? 'light' : 'dark';
+        const accent = parsed.accent && ACCENT_MAP[parsed.accent] ? parsed.accent : DEFAULTS.accent;
+        return { mode, accent };
+      }
     } catch (e) {}
-    const t = document.documentElement.getAttribute('data-theme');
-    return { ...DEFAULTS, theme: (t as Tweaks['theme']) || DEFAULTS.theme };
+    return { ...DEFAULTS };
   }
 
   function applyTweaks(t: Tweaks) {
     const html = document.documentElement;
-    html.setAttribute('data-theme', t.theme);
-    html.setAttribute('data-display', t.display);
-    html.setAttribute('data-atmos', t.atmos);
-    html.setAttribute('data-grain', t.grain ? 'on' : 'off');
-    html.setAttribute('data-density', t.density);
-    html.setAttribute('data-headline', t.headline);
-    const c = ACCENT_MAP[t.accent] || ACCENT_MAP.plum;
-    html.style.setProperty('--accent', c);
-    html.style.setProperty('--accent-tint', c + '1A');
-    html.style.setProperty('--accent-tint-2', c + '33');
+    html.setAttribute('data-theme', t.mode === 'light' ? 'papers' : 'dark');
+    // Hardcoded visual choices.
+    html.setAttribute('data-display', 'cormorant');
+    html.setAttribute('data-atmos', 'heavy');
+    html.setAttribute('data-grain', 'off');
+    html.setAttribute('data-density', 'balanced');
+    html.setAttribute('data-headline', 'italic');
+    const palette = ACCENT_MAP[t.accent] || ACCENT_MAP.disintegration;
+    const tone = palette[t.mode === 'light' ? 'light' : 'dark'];
+    html.style.setProperty('--accent', tone.accent);
+    html.style.setProperty('--accent-2', tone.accent2);
+    html.style.setProperty('--accent-3', tone.accent3);
+    html.style.setProperty('--accent-ink', tone.ink);
+    html.style.setProperty('--accent-tint', tone.accent + '1A');
+    html.style.setProperty('--accent-tint-2', tone.accent + '33');
+    html.style.setProperty('--glow', `0 0 ${t.mode === 'light' ? '32px' : '40px'} ${tone.accent}40`);
     try { localStorage.setItem(KEY, JSON.stringify(t)); } catch (e) {}
   }
 
   function paintPanel(t: Tweaks, panel: HTMLElement) {
-    panel.querySelectorAll<HTMLElement>('[data-tweak]').forEach((el) => {
-      const key = el.getAttribute('data-tweak') as keyof Tweaks;
-      const val = el.getAttribute('data-value');
-      if (key === 'grain' && el instanceof HTMLInputElement) {
-        el.checked = !!t.grain;
-        return;
-      }
-      const active = String((t as any)[key]) === val;
+    panel.querySelectorAll<HTMLElement>('[data-tweak="accent"]').forEach((el) => {
+      const active = el.getAttribute('data-value') === t.accent;
       el.setAttribute('aria-pressed', active ? 'true' : 'false');
       el.classList.toggle('is-active', active);
     });
-    // Light/dark quick toggle: papers = light; dark or midnight = dark.
-    const isLight = t.theme === 'papers';
     panel.querySelectorAll<HTMLElement>('[data-mode]').forEach((el) => {
-      const m = el.getAttribute('data-mode');
-      const active = (m === 'light' && isLight) || (m === 'dark' && !isLight);
+      const active = el.getAttribute('data-mode') === t.mode;
       el.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
   }
@@ -246,13 +244,28 @@ const ACCENTS: Array<{ id: string; color: string; alt: string }> = [
     if ((panel as any).__wired) return;
     (panel as any).__wired = true;
 
+    let lastOpener: HTMLElement | null = null;
+
+    function setPanelOpen(open: boolean, opener?: HTMLElement) {
+      panel.hidden = !open;
+      if (opener) lastOpener = opener;
+      document.querySelectorAll<HTMLElement>('[data-tweaks-toggle]').forEach((btn) => {
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      if (!open) lastOpener?.focus();
+    }
+
     document.addEventListener('click', (e) => {
       const t = e.target as HTMLElement | null;
       if (!t) return;
       const opener = t.closest<HTMLElement>('[data-tweaks-toggle]');
-      if (opener) { e.preventDefault(); panel.hidden = !panel.hidden; return; }
+      if (opener) {
+        e.preventDefault();
+        setPanelOpen(panel.hidden, opener);
+        return;
+      }
       const closer = t.closest<HTMLElement>('[data-tweaks-close]');
-      if (closer && panel.contains(closer)) { e.preventDefault(); panel.hidden = true; return; }
+      if (closer && panel.contains(closer)) { e.preventDefault(); setPanelOpen(false); return; }
       const reset = t.closest<HTMLElement>('[data-tweaks-reset]');
       if (reset && panel.contains(reset)) {
         state = { ...DEFAULTS };
@@ -260,44 +273,35 @@ const ACCENTS: Array<{ id: string; color: string; alt: string }> = [
         paintPanel(state, panel);
         return;
       }
-      const tw = t.closest<HTMLElement>('[data-tweak]');
-      if (tw && panel.contains(tw) && tw.tagName !== 'INPUT') {
-        const key = tw.getAttribute('data-tweak') as keyof Tweaks;
-        const val = tw.getAttribute('data-value');
-        if (!key || !val) return;
-        (state as any)[key] = val;
-        applyTweaks(state);
-        paintPanel(state, panel);
+      const accent = t.closest<HTMLElement>('[data-tweak="accent"]');
+      if (accent && panel.contains(accent)) {
+        const val = accent.getAttribute('data-value');
+        if (val && ACCENT_MAP[val]) {
+          state.accent = val;
+          applyTweaks(state);
+          paintPanel(state, panel);
+        }
       }
       const mode = t.closest<HTMLElement>('[data-mode]');
       if (mode && panel.contains(mode)) {
-        const m = mode.getAttribute('data-mode');
-        // Light → papers. Dark → midnight (or keep current dark theme if already non-papers).
-        if (m === 'light') state.theme = 'papers';
-        else state.theme = state.theme === 'papers' ? 'midnight' : state.theme;
-        applyTweaks(state);
-        paintPanel(state, panel);
-      }
-    });
-    panel.addEventListener('change', (e) => {
-      const inp = e.target as HTMLInputElement;
-      if (inp.matches('[data-tweak="grain"]')) {
-        state.grain = inp.checked;
-        applyTweaks(state);
-        paintPanel(state, panel);
+        const m = mode.getAttribute('data-mode') as Mode | null;
+        if (m === 'light' || m === 'dark') {
+          state.mode = m;
+          applyTweaks(state);
+          paintPanel(state, panel);
+        }
       }
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !panel.hidden) panel.hidden = true;
+      if (e.key === 'Escape' && !panel.hidden) setPanelOpen(false);
     });
 
-    // Legacy theme-toggle button cycles theme through tweaks state.
+    // Legacy theme-toggle button toggles dark/light through tweaks state.
     document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
       if ((btn as any).__tweaksWired) return;
       (btn as any).__tweaksWired = true;
       btn.addEventListener('click', () => {
-        const order: Array<Tweaks['theme']> = ['dark', 'midnight', 'papers'];
-        state.theme = order[(order.indexOf(state.theme) + 1) % order.length];
+        state.mode = state.mode === 'light' ? 'dark' : 'light';
         applyTweaks(state);
         paintPanel(state, panel);
       });

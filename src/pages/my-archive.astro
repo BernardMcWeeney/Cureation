@@ -21,7 +21,7 @@ import Chip from '../components/ui/Chip.astro';
       <Chip class="k-chip" data-kind="venue">Venues</Chip>
       <Chip class="k-chip" data-kind="tour">Tours</Chip>
       <Chip class="k-chip" data-kind="member">Members</Chip>
-      <Chip class="k-chip" data-kind="news">Dispatches</Chip>
+      <Chip class="k-chip" data-kind="news">Journal</Chip>
     </div>
     <div class="my-ar__meta">
       <span class="mono-sm muted" data-count>0 items</span>
@@ -45,7 +45,7 @@ import Chip from '../components/ui/Chip.astro';
   function read(): BM[] { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
   function write(v: BM[]) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} }
 
-  const kindLabel: Record<string, string> = { album: 'RECORD', song: 'SONG', setlist: 'SETLIST', venue: 'VENUE', tour: 'TOUR', member: 'MEMBER', news: 'DISPATCH', source: 'SOURCE' };
+  const kindLabel: Record<string, string> = { album: 'RECORD', song: 'SONG', setlist: 'SETLIST', venue: 'VENUE', tour: 'TOUR', member: 'MEMBER', news: 'JOURNAL', source: 'SOURCE' };
   let activeKind = 'all';
 
   function render() {

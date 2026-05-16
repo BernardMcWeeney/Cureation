@@ -4,8 +4,9 @@ interface Props {
   id: string | number;
   label: string;
   href?: string;
+  actionLabel?: string;
 }
-const { kind, id, label, href } = Astro.props;
+const { kind, id, label, href, actionLabel = 'Save' } = Astro.props;
 ---
 <button class="bookmark" type="button"
   data-bookmark
@@ -16,7 +17,7 @@ const { kind, id, label, href } = Astro.props;
   aria-label={`Bookmark ${label}`}
   title="Save to My Archive">
   <span class="bookmark__icon" aria-hidden="true">☆</span>
-  <span class="bookmark__label">Save</span>
+  <span class="bookmark__label">{actionLabel}</span>
 </button>
 
 <style is:global>

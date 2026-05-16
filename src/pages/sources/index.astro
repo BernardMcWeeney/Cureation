@@ -23,7 +23,7 @@ const collectionCount = async (coll: string, id: number) => {
 };
 
 const enriched = await Promise.all(sources.map(async (s) => {
-  const [alb, sng, set, tur, mem, phs, nws, ap, dyk, tml] = await Promise.all([
+  const [alb, sng, set, tur, mem, phs, nws, dyk, tml] = await Promise.all([
     collectionCount('discography', s.id),
     collectionCount('songs', s.id),
     collectionCount('setlists', s.id),
@@ -31,12 +31,11 @@ const enriched = await Promise.all(sources.map(async (s) => {
     collectionCount('members', s.id),
     collectionCount('photos', s.id),
     collectionCount('news', s.id),
-    collectionCount('album_personnel', s.id),
     collectionCount('did_you_know', s.id),
     collectionCount('timeline', s.id),
   ]);
-  const total = alb + sng + set + tur + mem + phs + nws + ap + dyk + tml;
-  return { ...s, counts: { alb, sng, set, tur, mem, phs, nws, ap, dyk, tml, total } };
+  const total = alb + sng + set + tur + mem + phs + nws + dyk + tml;
+  return { ...s, counts: { alb, sng, set, tur, mem, phs, nws, dyk, tml, total } };
 }));
 
 enriched.sort((a, b) => b.counts.total - a.counts.total);

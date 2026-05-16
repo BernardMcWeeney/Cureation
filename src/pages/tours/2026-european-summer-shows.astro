@@ -1,0 +1,1201 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Bookmark from '../../components/ui/Bookmark.astro';
+import Button from '../../components/ui/Button.astro';
+import { fetchRaw, getSetlistSongs, getTourBySlug, listAlbums, listSongs } from '../../lib/directus';
+import { countryCentroid } from '../../lib/geo';
+
+const TOUR_SLUG = '2026-european-summer-shows';
+
+type TourShow = {
+  id: number;
+  slug: string;
+  date: string | null;
+  venue: string | null;
+  city: string | null;
+  state_province: string | null;
+  country: string | null;
+  country_code: string | null;
+  tour_name: string | null;
+  song_count: number | null;
+  notes?: string | null;
+  photo_assets?: unknown;
+  video_links?: unknown;
+  ticket_assets?: unknown;
+  ticket_status?: string | null;
+  sales_status?: string | null;
+  show_type?: string | null;
+  [key: string]: unknown;
+};
+
+const tour = await getTourBySlug(TOUR_SLUG);
+if (!tour) return new Response('Not found', { status: 404 });
+
+const [rawShows, albums] = await Promise.all([
+  fetchRaw<TourShow>('setlists', {
+    limit: -1,
+    fields: '*',
+    'filter[tour][_eq]': tour.id,
+    sort: 'date',
+  }).catch(() => []),
+  listAlbums({ type: 'studio' }).catch(() => []),
+]);
+
+const lostWorld = albums.find((album) => /songs of a lost world/i.test(album.title || '')) || null;
+const lostWorldSongs = lostWorld ? await listSongs({ album: lostWorld.id }).catch(() => []) : [];
+const shows = rawShows.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+const now = new Date();
+const todayIso = now.toISOString().slice(0, 10);
+const dateFmt = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: '2-digit', month: 'short' });
+const longDateFmt = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+const cityKey = (city?: string | null, countryCode?: string | null) =>
+  `${countryCode || ''}:${String(city || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()}`;
+
+const CITY_COORDS: Record<string, { lat: number; lon: number }> = {
+  'ES:barcelona': { lat: 41.3851, lon: 2.1734 },
+  'PT:maia': { lat: 41.2357, lon: -8.6199 },
+  'AT:nickelsdorf': { lat: 47.9406, lon: 17.0697 },
+  'IT:florence': { lat: 43.7696, lon: 11.2558 },
+  'NL:landgraaf': { lat: 50.8876, lon: 6.0116 },
+  'GB:newport': { lat: 50.7015, lon: -1.2912 },
+  'GB:cardiff': { lat: 51.4816, lon: -3.1791 },
+  'IE:dublin': { lat: 53.3498, lon: -6.2603 },
+  'GB:belfast': { lat: 54.5973, lon: -5.9301 },
+  'DK:roskilde': { lat: 55.6419, lon: 12.0878 },
+  'PL:gdynia': { lat: 54.5189, lon: 18.5305 },
+  'BE:werchter': { lat: 50.9692, lon: 4.7012 },
+  'SK:trencin': { lat: 48.8945, lon: 18.0444 },
+  'DE:berlin': { lat: 52.52, lon: 13.405 },
+  'GR:athens': { lat: 37.9838, lon: 23.7275 },
+  'RO:cluj': { lat: 46.7712, lon: 23.6236 },
+  'BG:plovdiv': { lat: 42.1354, lon: 24.7453 },
+  'CH:nyon': { lat: 46.3833, lon: 6.2396 },
+  'FR:nimes': { lat: 43.8367, lon: 4.3601 },
+  'LT:vilnius': { lat: 54.6872, lon: 25.2797 },
+  'EE:tallinn': { lat: 59.437, lon: 24.7536 },
+  'NO:oslo': { lat: 59.9139, lon: 10.7522 },
+  'SE:gothenburg': { lat: 57.7089, lon: 11.9746 },
+  'GB:manchester': { lat: 53.4808, lon: -2.2426 },
+  'GB:ingliston': { lat: 55.94, lon: -3.364 },
+  'FR:bordeaux': { lat: 44.8378, lon: -0.5792 },
+  'FR:saint-cloud': { lat: 48.8459, lon: 2.219 },
+};
+
+const parseDate = (value?: string | null) => (value ? new Date(`${value}T00:00:00Z`) : null);
+const formatDate = (value?: string | null) => {
+  const parsed = parseDate(value);
+  return parsed ? dateFmt.format(parsed) : 'Date TBC';
+};
+const formatLongDate = (value?: string | null) => {
+  const parsed = parseDate(value);
+  return parsed ? longDateFmt.format(parsed) : 'Date TBC';
+};
+const dayDiff = (a?: string | null, b?: string | null) => {
+  const da = parseDate(a);
+  const db = parseDate(b);
+  if (!da || !db) return 0;
+  return Math.round((db.getTime() - da.getTime()) / 86400000);
+};
+const isPast = (show: TourShow) => !!show.date && show.date < todayIso;
+const normalizeList = (value: unknown): unknown[] => {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    try {
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      return trimmed.split(/\n|,/).map((item) => item.trim()).filter(Boolean);
+    }
+  }
+  return [value];
+};
+
+const FESTIVAL_RE = /festival|primavera|north music|nova rock|firenze rocks|pinkpop|isle of wight|belsonic|roskilde|open'?er|werchter|pohoda|ejekt|electric castle|phillgood|paleo|pal[eé]o|nimes|nîmes|oyafestivalen|way out west|summer sessions|pagaille|rock en seine/i;
+const showKind = (show: TourShow) => {
+  const explicit = String(show.show_type || '').toLowerCase();
+  if (explicit.includes('festival')) return 'festival';
+  if (explicit.includes('headline')) return 'headline';
+  return FESTIVAL_RE.test(`${show.venue || ''} ${show.notes || ''}`) ? 'festival' : 'headline';
+};
+const ticketLabel = (show: TourShow) => {
+  const explicit = String(show.ticket_status || show.sales_status || '').trim();
+  if (explicit) return explicit;
+  if (isPast(show)) return (show.song_count || 0) > 0 ? 'Completed' : 'Setlist pending';
+  return 'Ticket TBC';
+};
+const ticketTone = (label: string) => {
+  const value = label.toLowerCase();
+  if (value.includes('sold')) return 'blood';
+  if (value.includes('available') || value.includes('on sale')) return 'cool';
+  if (value.includes('completed')) return 'gold';
+  return 'default';
+};
+
+const upcomingShows = shows.filter((show) => !isPast(show));
+const completedShows = shows.filter(isPast);
+const firstUpcoming = upcomingShows[0] || null;
+const lastCompleted = completedShows.length ? completedShows[completedShows.length - 1] : null;
+const lastCompletedIndex = lastCompleted ? completedShows.findIndex((show) => show.id === lastCompleted.id) : -1;
+const previousCompleted = lastCompletedIndex > 0 ? completedShows[lastCompletedIndex - 1] : null;
+
+const [lastSongs, previousSongs] = await Promise.all([
+  lastCompleted ? getSetlistSongs(lastCompleted.id).catch(() => []) : Promise.resolve([]),
+  previousCompleted ? getSetlistSongs(previousCompleted.id).catch(() => []) : Promise.resolve([]),
+]);
+
+const songTitle = (row: any) => row?.song?.title || row?.song_title || 'Unknown song';
+const lastSongTitles = lastSongs.map(songTitle).filter(Boolean);
+const previousTitleSet = new Set(previousSongs.map(songTitle).filter(Boolean));
+const lastTitleSet = new Set(lastSongTitles);
+const addedSongs = lastSongTitles.filter((title) => !previousTitleSet.has(title));
+const droppedSongs = previousSongs.map(songTitle).filter((title) => !lastTitleSet.has(title));
+const opener = lastSongTitles[0] || null;
+const closer = lastSongTitles[lastSongTitles.length - 1] || null;
+const encoreTypes = new Set(
+  lastSongs
+    .filter((row: any) => /encore/i.test(String(row?.set_type || '')))
+    .map((row: any) => String(row?.set_type || 'encore'))
+);
+const encoreCount = encoreTypes.size;
+const lostWorldInLastShow = lostWorld
+  ? lastSongs.filter((row: any) => Number(row?.song?.album) === Number(lostWorld.id)).length
+  : 0;
+const debutCount = lastSongs.filter((row: any) => row?.is_debut).length;
+const fanMediaCount = lastCompleted
+  ? normalizeList(lastCompleted.photo_assets).length + normalizeList(lastCompleted.video_links).length
+  : 0;
+
+const countries = Array.from(
+  new Map(
+    shows
+      .map((show) => {
+        const code = show.country_code || show.country || '';
+        return [code, { code, label: show.country || code }];
+      })
+      .filter(([, value]) => value.code)
+  ).values()
+).sort((a, b) => a.label.localeCompare(b.label));
+
+const festivalCount = shows.filter((show) => showKind(show) === 'festival').length;
+const headlineCount = shows.length - festivalCount;
+const averageSongCount = completedShows.length
+  ? Math.round(completedShows.reduce((sum, show) => sum + (show.song_count || 0), 0) / completedShows.length)
+  : 0;
+
+const gaps = shows.slice(1).map((show, index) => {
+  const previous = shows[index];
+  const days = Math.max(0, dayDiff(previous.date, show.date) - 1);
+  return { from: previous, to: show, days };
+});
+const notableGaps = gaps.filter((gap) => gap.days >= 4).sort((a, b) => b.days - a.days);
+const longestGap = notableGaps[0] || gaps.slice().sort((a, b) => b.days - a.days)[0] || null;
+
+const multiNightRuns: Array<{ venue: string; city: string; country: string; shows: TourShow[] }> = [];
+let run: TourShow[] = [];
+const flushRun = () => {
+  if (run.length > 1) {
+    multiNightRuns.push({
+      venue: run[0].venue || 'Venue TBC',
+      city: run[0].city || 'City TBC',
+      country: run[0].country || '',
+      shows: run.slice(),
+    });
+  }
+};
+for (const show of shows) {
+  const previous = run[run.length - 1];
+  const sameRoom = previous
+    && previous.venue === show.venue
+    && previous.city === show.city
+    && previous.country === show.country
+    && dayDiff(previous.date, show.date) <= 1;
+  if (sameRoom) {
+    run.push(show);
+  } else {
+    flushRun();
+    run = [show];
+  }
+}
+flushRun();
+
+const tourRoutePoints = shows
+  .map((show, index) => {
+    const coords = CITY_COORDS[cityKey(show.city, show.country_code)];
+    const fallback = coords ? null : countryCentroid(show.country_code, show.country);
+    if (!coords && !fallback) return null;
+    const lat = coords ? coords.lat : fallback![0];
+    const lng = coords ? coords.lon : fallback![1];
+    return {
+      id: String(show.id),
+      sequence: index + 1,
+      date: show.date,
+      slug: show.slug,
+      name: show.venue || show.city || 'Show',
+      place: [show.city, show.state_province, show.country].filter(Boolean).join(', '),
+      lat,
+      lng,
+      country: show.country_code || show.country || '',
+      kind: showKind(show),
+      coordinateKind: coords ? 'city' : 'country',
+    };
+  })
+  .filter(Boolean);
+const cityRouteCount = tourRoutePoints.filter((point: any) => point.coordinateKind === 'city').length;
+const tourCountryLabels = countries
+  .map((country) => {
+    const coords = countryCentroid(country.code, country.label);
+    if (!coords) return null;
+    return {
+      id: country.code || country.label,
+      name: country.label,
+      lat: coords[0],
+      lng: coords[1],
+    };
+  })
+  .filter(Boolean);
+
+const facts = [
+  { k: 'Shows', v: shows.length || tour.total_shows || 0, sub: `${completedShows.length} played` },
+  { k: 'Countries', v: countries.length, sub: 'summer route' },
+  { k: 'Next', v: firstUpcoming ? formatDate(firstUpcoming.date) : 'Complete', sub: firstUpcoming?.city || '' },
+  { k: 'Format', v: `${festivalCount}/${headlineCount}`, sub: 'festival/headline' },
+];
+
+const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
+const webcalUrl = calendarFeedUrl.replace(/^https?:/, 'webcal:');
+const completionPct = shows.length ? Math.round((completedShows.length / shows.length) * 100) : 0;
+---
+
+<Layout
+  title="2026 European Summer Shows - Cureation"
+  description="A live dashboard for The Cure's 2026 European Summer Shows: dates, map, country filters, setlist watch, calendar feed and fan archive actions."
+>
+  <main data-tour-tracker>
+    <section class="tracker-hero">
+      <div class="container tracker-hero__inner">
+        <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Tours', href: '/tours' }, { label: '2026 European Summer Shows' }]} />
+        <div class="tracker-hero__grid">
+          <div class="tracker-hero__copy">
+            <div class="mono-sm tracker-eyebrow">2026 Tour Tracker</div>
+            <h1 class="tracker-title">2026 European Summer Shows</h1>
+            <p class="tracker-deck">
+              One dashboard for the full run: dates, countries, festival/headline split, gaps between shows,
+              multi-night stands, saved shows, map view and setlist watch.
+            </p>
+            <div class="tracker-actions">
+              <Button href={webcalUrl} variant="accent">Add all dates to calendar</Button>
+              <Button href="/calendar.ics" variant="ghost">Open calendar feed</Button>
+              <button type="button" class="btn btn--ghost" data-near-me>Near me</button>
+            </div>
+            <div class="near-result mono-sm" data-near-result hidden></div>
+          </div>
+          <div class="tracker-facts" aria-label="Tour summary">
+            {facts.map((fact) => (
+              <div class="tracker-fact">
+                <div class="tracker-fact__k mono-sm">{fact.k}</div>
+                <div class="tracker-fact__v">{fact.v}</div>
+                {fact.sub && <div class="tracker-fact__sub mono-sm">{fact.sub}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container tracker-watch">
+      <article class="watch-card watch-card--primary">
+        <div class="panel-head">
+          <span>Setlist Watch</span>
+          <span>{completedShows.length} played - {upcomingShows.length} pending</span>
+        </div>
+        <div class="watch-card__body">
+          <div>
+            <div class="mono-sm muted">Current state</div>
+            <h2 class="watch-title">
+              {completedShows.length > 0
+                ? lastCompleted
+                  ? `Tracking ${lastCompleted.city || lastCompleted.venue || 'the last show'}`
+                  : 'Tour in motion'
+                : firstUpcoming
+                  ? `Waiting for ${firstUpcoming.city || firstUpcoming.venue || 'the first show'}`
+                  : 'Run complete'}
+            </h2>
+            <p class="watch-copy">
+              {completedShows.length > 0
+                ? 'Confirmed songs, changes and fan media will surface here as each show page fills in.'
+                : 'Track opener predictions, latest album watch and tour stats before Barcelona opens the run.'}
+            </p>
+          </div>
+          <div class="watch-meter" aria-label={`${completionPct}% complete`}>
+            <span style={`width: ${completionPct}%;`}></span>
+          </div>
+          <div class="watch-pills">
+            <span>Tour average: {averageSongCount || 'pending'}</span>
+            <span>{lostWorldSongs.length || 'Latest album'} songs watched</span>
+            <span>{longestGap ? `${longestGap.days} day longest gap` : 'Gaps pending'}</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="watch-card">
+        <div class="panel-head">
+          <span>{lastCompleted ? 'Last show' : 'First show'}</span>
+          <span>{lastCompleted ? formatDate(lastCompleted.date) : firstUpcoming ? formatDate(firstUpcoming.date) : 'TBC'}</span>
+        </div>
+        <div class="watch-card__body">
+          {lastCompleted ? (
+            <>
+              <h2 class="last-show-title">{lastCompleted.venue || 'Venue TBC'}</h2>
+              <div class="mono-sm muted">{[lastCompleted.city, lastCompleted.country].filter(Boolean).join(', ')}</div>
+              <div class="last-show-grid">
+                <div><span>Songs</span><strong>{lastSongs.length || lastCompleted.song_count || 'Pending'}</strong></div>
+                <div><span>Opener</span><strong>{opener || 'Pending'}</strong></div>
+                <div><span>Closer</span><strong>{closer || 'Pending'}</strong></div>
+                <div><span>Encore</span><strong>{encoreCount || 'Pending'}</strong></div>
+                <div><span>Lost World</span><strong>{lostWorldInLastShow || 'Pending'}</strong></div>
+                <div><span>Fan media</span><strong>{fanMediaCount || 'Open'}</strong></div>
+              </div>
+              <div class="change-strip">
+                <div><span class="mono-sm muted">Added</span>{addedSongs.slice(0, 4).join(', ') || 'Pending previous-show comparison'}</div>
+                <div><span class="mono-sm muted">Dropped</span>{droppedSongs.slice(0, 4).join(', ') || 'Pending previous-show comparison'}</div>
+                <div><span class="mono-sm muted">Debuts</span>{debutCount || 'None confirmed'}</div>
+              </div>
+            </>
+          ) : firstUpcoming ? (
+            <>
+              <h2 class="last-show-title">{firstUpcoming.venue || 'Venue TBC'}</h2>
+              <div class="mono-sm muted">{formatLongDate(firstUpcoming.date)} - {[firstUpcoming.city, firstUpcoming.country].filter(Boolean).join(', ')}</div>
+              <div class="pending-callout">
+                <span class="tag tag--gold">Opening night</span>
+                <span class="tag">Setlist pending</span>
+                <span class="tag tag--cool">{showKind(firstUpcoming)}</span>
+              </div>
+            </>
+          ) : (
+            <p class="watch-copy">The run is complete.</p>
+          )}
+        </div>
+      </article>
+    </section>
+
+    {tourRoutePoints.length > 0 && (
+      <>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+        <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+        <section class="container tracker-map-section">
+          <div class="tracker-section-head">
+            <div>
+              <div class="kicker">Routes</div>
+              <h2 class="section-title">Tour route</h2>
+            </div>
+            <div class="tracker-route-meta mono-sm">
+              <span>{tourRoutePoints.length} mapped stops</span>
+              <span>{cityRouteCount} city coordinates</span>
+            </div>
+          </div>
+          <div
+            id="tracker-route-map"
+            class="tracker-route-map"
+            data-tracker-route-map
+            data-route-points={JSON.stringify(tourRoutePoints)}
+            data-country-labels={JSON.stringify(tourCountryLabels)}
+            aria-label="Map of 2026 European Summer Shows"
+          >
+            <div class="tracker-route-map__loading mono-sm">LOADING OPENSTREETMAP</div>
+          </div>
+        </section>
+      </>
+    )}
+
+    <section class="container tracker-board">
+      <div class="tracker-section-head">
+        <div>
+          <div class="kicker">Date list</div>
+          <h2 class="section-title">Full itinerary</h2>
+        </div>
+        <div class="mono-sm muted" data-visible-count>{shows.length} shows</div>
+      </div>
+
+      <div class="country-filters" data-country-filters aria-label="Country filters">
+        <button type="button" class="chip is-active" aria-pressed="true" data-country="all">All countries</button>
+        {countries.map((country) => (
+          <button type="button" class="chip" aria-pressed="false" data-country={country.code}>{country.label}</button>
+        ))}
+      </div>
+
+      <div class="schedule-grid">
+        <div class="schedule-list">
+          {[
+            { key: 'upcoming', title: 'Upcoming', items: upcomingShows },
+            { key: 'completed', title: 'Completed', items: completedShows.slice().reverse() },
+          ].map((group) => group.items.length > 0 && (
+            <section class="schedule-group" data-group={group.key}>
+              <div class="schedule-group__head">
+                <h3>{group.title}</h3>
+                <span class="mono-sm">{group.items.length}</span>
+              </div>
+              <div class="show-list">
+                {group.items.map((show) => {
+                  const coords = CITY_COORDS[cityKey(show.city, show.country_code)];
+                  const kind = showKind(show);
+                  const label = ticketLabel(show);
+                  const tone = ticketTone(label);
+                  return (
+                    <article
+                      class="show-row"
+                      data-show-card
+                      data-country={show.country_code || show.country || ''}
+                      data-lat={coords?.lat ?? ''}
+                      data-lon={coords?.lon ?? ''}
+                      data-venue={show.venue || show.city || 'Show'}
+                      data-when={formatDate(show.date)}
+                    >
+                      <time class="show-row__date" datetime={show.date || undefined}>
+                        <span>{formatDate(show.date).split(' ').slice(1).join(' ') || 'TBC'}</span>
+                        <small>{show.date?.slice(0, 4) || '2026'}</small>
+                      </time>
+                      <div class="show-row__main">
+                        <a class="show-row__title" href={`/setlists/${show.slug}`}>{show.venue || 'Venue TBC'}</a>
+                        <div class="show-row__place mono-sm">
+                          {[show.city, show.state_province, show.country].filter(Boolean).join(', ')}
+                        </div>
+                        <div class="show-row__badges">
+                          <span class={`tag ${kind === 'festival' ? 'tag--hot' : 'tag--cool'}`}>{kind}</span>
+                          <span class={`tag ${tone === 'blood' ? 'tag--blood' : tone === 'gold' ? 'tag--gold' : tone === 'cool' ? 'tag--cool' : ''}`}>{label}</span>
+                          {(show.song_count || 0) > 0 && <span class="tag tag--gold">{show.song_count} songs</span>}
+                        </div>
+                      </div>
+                      <div class="show-row__actions">
+                        <Bookmark
+                          kind="setlist"
+                          id={show.id}
+                          label={`${show.venue || show.city || 'Show'} - ${show.date || '2026'}`}
+                          href={`/setlists/${show.slug}`}
+                          actionLabel={isPast(show) ? 'I was there' : "I'm going"}
+                        />
+                        <a class="mini-action" href="/calendar.ics">Reminder</a>
+                        <a class="mini-action" href="/community">{isPast(show) ? 'Memory' : 'Tips'}</a>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+
+        <aside class="run-panel">
+          <div class="panel-head"><span>Gaps</span><span>between shows</span></div>
+          <div class="run-panel__body">
+            {notableGaps.length > 0 ? notableGaps.slice(0, 5).map((gap) => (
+              <div class="run-line">
+                <strong>{gap.days} days</strong>
+                <span>{gap.from.city || gap.from.venue} to {gap.to.city || gap.to.venue}</span>
+                <small>{formatDate(gap.from.date)} - {formatDate(gap.to.date)}</small>
+              </div>
+            )) : (
+              <p class="muted">No large gaps yet.</p>
+            )}
+          </div>
+
+          <div class="panel-head"><span>Multi-night runs</span><span>{multiNightRuns.length}</span></div>
+          <div class="run-panel__body">
+            {multiNightRuns.length > 0 ? multiNightRuns.map((item) => (
+              <div class="run-line">
+                <strong>{item.shows.length} nights</strong>
+                <span>{item.venue} - {item.city}</span>
+                <small>{formatDate(item.shows[0].date)} - {formatDate(item.shows[item.shows.length - 1].date)}</small>
+              </div>
+            )) : (
+              <p class="muted">No multi-night stands on file.</p>
+            )}
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="container tracker-setlist-detail">
+      <div class="tracker-section-head">
+        <div>
+          <div class="kicker">Setlist watch</div>
+          <h2 class="section-title">What changes once the tour starts</h2>
+        </div>
+        <div class="mono-sm muted">{lostWorld?.title || 'Latest album'} watch</div>
+      </div>
+      <div class="setlist-cards">
+        <article class="setlist-card">
+          <div class="mono-sm muted">Songs of a Lost World</div>
+          <h3>{lostWorldSongs.filter((song) => (song.times_played_live || 0) === 0).length} never played live</h3>
+          <div class="song-bars">
+            {lostWorldSongs.slice(0, 8).map((song) => {
+              const plays = song.times_played_live || 0;
+              const width = Math.min(100, Math.max(8, plays * 3));
+              return (
+                <div class="song-bar">
+                  <span>{song.title}</span>
+                  <i style={`width: ${width}%;`}></i>
+                  <b>{plays}</b>
+                </div>
+              );
+            })}
+          </div>
+        </article>
+        <article class="setlist-card">
+          <div class="mono-sm muted">Changes from previous show</div>
+          <h3>{lastSongs.length ? `${addedSongs.length} added / ${droppedSongs.length} dropped` : 'Waiting for Barcelona'}</h3>
+          <p>{lastSongs.length ? `Latest comparison is ${lastCompleted?.city || 'the last show'} against ${previousCompleted?.city || 'the previous show'}.` : 'The comparison module will light up after two confirmed setlists.'}</p>
+        </article>
+        <article class="setlist-card">
+          <div class="mono-sm muted">Fan archive</div>
+          <h3>Going, went, remembered</h3>
+          <p>Each date has local saves for "I'm going" before the show and "I was there" after it, plus quick routes for reminders, tips and memories.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  function readTrackerRoutePoints(el: HTMLElement) {
+    try {
+      const raw = el.getAttribute('data-route-points') || '[]';
+      return JSON.parse(raw).filter((point: any) => Number.isFinite(point.lat) && Number.isFinite(point.lng));
+    } catch {
+      return [];
+    }
+  }
+
+  function readTrackerCountryLabels(el: HTMLElement) {
+    try {
+      const raw = el.getAttribute('data-country-labels') || '[]';
+      const labels = JSON.parse(raw);
+      return Array.isArray(labels)
+        ? labels.filter((label: any) => Number.isFinite(label.lat) && Number.isFinite(label.lng) && label.name)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function trackerMapEsc(value: unknown) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char] || char));
+  }
+
+  async function waitForTrackerLeaflet() {
+    for (let i = 0; i < 80; i += 1) {
+      const L = (window as any).L;
+      if (L) return L;
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
+    }
+    return null;
+  }
+
+  function addTrackerCountryLabels(L: any, map: any, labels: any[]) {
+    const layer = L.layerGroup().addTo(map);
+    labels.forEach((label) => {
+      L.marker([label.lat, label.lng], {
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({
+          className: 'english-country-label',
+          html: `<span>${trackerMapEsc(label.name)}</span>`,
+          iconSize: [0, 0],
+        }),
+      }).addTo(layer);
+    });
+    return layer;
+  }
+
+  function trackerRoutePopup(point: any) {
+    const source = point.coordinateKind === 'city' ? 'CITY COORDINATES' : 'COUNTRY-CENTRE FALLBACK';
+    const href = point.slug ? `/setlists/${trackerMapEsc(point.slug)}` : '';
+    return `
+      <div class="tracker-route-popup">
+        <div class="tracker-route-popup__eyebrow">SHOW ${String(point.sequence).padStart(2, '0')} · ${source}</div>
+        <div class="tracker-route-popup__title">${trackerMapEsc(point.name)}</div>
+        <div class="tracker-route-popup__place">${trackerMapEsc(point.place || '')}</div>
+        ${point.date ? `<div class="tracker-route-popup__date">${trackerMapEsc(point.date)}</div>` : ''}
+        ${href ? `<a class="tracker-route-popup__link" href="${href}">Open show</a>` : ''}
+      </div>
+    `;
+  }
+
+  async function bootTrackerRouteMap() {
+    const el = document.querySelector<HTMLElement>('[data-tracker-route-map]');
+    if (!el || el.dataset.booted === 'true') return;
+    el.dataset.booted = 'true';
+
+    const routePoints = readTrackerRoutePoints(el);
+    const L = await waitForTrackerLeaflet();
+    if (!L || routePoints.length === 0) {
+      el.innerHTML = '<div class="tracker-route-map__loading mono-sm">MAP UNAVAILABLE</div>';
+      return;
+    }
+
+    const rootStyles = getComputedStyle(document.documentElement);
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#7746B0';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#C89B4A';
+    const hot = rootStyles.getPropertyValue('--hot').trim() || '#C85C46';
+    const muted = rootStyles.getPropertyValue('--muted').trim() || '#888';
+
+    const map = L.map(el, {
+      worldCopyJump: true,
+      minZoom: 2,
+      scrollWheelZoom: false,
+      zoomControl: true,
+      attributionControl: true,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      maxZoom: 20,
+      subdomains: 'abcd',
+    }).addTo(map);
+    addTrackerCountryLabels(L, map, readTrackerCountryLabels(el));
+
+    const linePoints = routePoints.map((point: any) => [point.lat, point.lng]);
+    if (linePoints.length > 1) {
+      L.polyline(linePoints, {
+        color: accent,
+        weight: 2,
+        opacity: 0.72,
+        dashArray: '7 9',
+        lineCap: 'round',
+      }).addTo(map);
+    }
+
+    const markerLayer = L.layerGroup().addTo(map);
+    const markers = routePoints.map((point: any, index: number) => {
+      const cityPoint = point.coordinateKind === 'city';
+      const festival = point.kind === 'festival';
+      const firstOrLast = index === 0 || index === routePoints.length - 1;
+      const marker = L.circleMarker([point.lat, point.lng], {
+        radius: firstOrLast ? 8 : festival ? 6 : cityPoint ? 5 : 4,
+        color: festival ? hot : cityPoint ? accent2 : muted,
+        weight: firstOrLast ? 2 : 1.2,
+        fillColor: festival ? hot : cityPoint ? accent : muted,
+        fillOpacity: festival ? 0.72 : cityPoint ? 0.78 : 0.42,
+        opacity: festival || cityPoint ? 0.95 : 0.62,
+      }).bindPopup(trackerRoutePopup(point));
+      marker.addTo(markerLayer);
+      return { country: point.country || '', marker };
+    });
+
+    (el as any)._trackerRouteMapState = { map, markerLayer, markers };
+
+    const bounds = L.latLngBounds(linePoints);
+    if (bounds.isValid()) {
+      map.fitBounds(bounds.pad(0.18), { maxZoom: routePoints.length > 1 ? 6 : 4 });
+    } else {
+      map.setView([52, 8], 4);
+    }
+    window.setTimeout(() => map.invalidateSize(), 120);
+  }
+
+  function wireTourTracker() {
+    const root = document.querySelector<HTMLElement>('[data-tour-tracker]');
+    if (!root || root.dataset.wired === 'true') return;
+    root.dataset.wired = 'true';
+
+    const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-country-filters] [data-country]'));
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-show-card]'));
+    const mapEl = root.querySelector<HTMLElement>('[data-tracker-route-map]');
+    const counter = root.querySelector<HTMLElement>('[data-visible-count]');
+
+    const applyCountry = (country: string) => {
+      let shown = 0;
+      cards.forEach((card) => {
+        const ok = country === 'all' || card.dataset.country === country;
+        card.hidden = !ok;
+        if (ok) shown++;
+      });
+      const mapState = mapEl ? (mapEl as any)._trackerRouteMapState : null;
+      if (mapState) {
+        mapState.markerLayer.clearLayers();
+        mapState.markers.forEach(({ country: markerCountry, marker }: any) => {
+          if (country === 'all' || markerCountry === country) marker.addTo(mapState.markerLayer);
+        });
+      }
+      chips.forEach((chip) => {
+        const active = chip.dataset.country === country;
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      if (counter) counter.textContent = `${shown} show${shown === 1 ? '' : 's'}`;
+    };
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => applyCountry(chip.dataset.country || 'all'));
+    });
+
+    const nearButton = root.querySelector<HTMLButtonElement>('[data-near-me]');
+    const nearResult = root.querySelector<HTMLElement>('[data-near-result]');
+    const distanceKm = (aLat: number, aLon: number, bLat: number, bLon: number) => {
+      const toRad = (value: number) => (value * Math.PI) / 180;
+      const earth = 6371;
+      const dLat = toRad(bLat - aLat);
+      const dLon = toRad(bLon - aLon);
+      const s1 = Math.sin(dLat / 2) ** 2;
+      const s2 = Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLon / 2) ** 2;
+      return 2 * earth * Math.asin(Math.sqrt(s1 + s2));
+    };
+
+    nearButton?.addEventListener('click', () => {
+      if (!nearResult) return;
+      if (!('geolocation' in navigator)) {
+        nearResult.hidden = false;
+        nearResult.textContent = 'Location is not available in this browser.';
+        return;
+      }
+      nearResult.hidden = false;
+      nearResult.textContent = 'Checking nearest show...';
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const ranked = cards
+            .map((card) => {
+              const lat = Number(card.dataset.lat);
+              const lon = Number(card.dataset.lon);
+              if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+              return {
+                card,
+                km: distanceKm(position.coords.latitude, position.coords.longitude, lat, lon),
+              };
+            })
+            .filter(Boolean) as Array<{ card: HTMLElement; km: number }>;
+          ranked.sort((a, b) => a.km - b.km);
+          const nearest = ranked[0];
+          if (!nearest) {
+            nearResult.textContent = 'No mapped shows are available yet.';
+            return;
+          }
+          nearResult.textContent = `Nearest show: ${nearest.card.dataset.venue || 'show'} - ${nearest.card.dataset.when || 'date TBC'} - ${Math.round(nearest.km)} km away.`;
+          nearest.card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        },
+        () => {
+          nearResult.textContent = 'Location permission was not granted.';
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
+      );
+    });
+  }
+
+  wireTourTracker();
+  bootTrackerRouteMap();
+  document.addEventListener('astro:page-load', wireTourTracker);
+  document.addEventListener('astro:page-load', bootTrackerRouteMap);
+</script>
+
+<style>
+  .tracker-hero {
+    border-bottom: 1px solid var(--rule-strong);
+    background:
+      linear-gradient(135deg, color-mix(in oklab, var(--accent), transparent 86%), transparent 42%),
+      var(--bg);
+  }
+  .tracker-hero__inner { padding-top: clamp(28px, 4vw, 56px); padding-bottom: clamp(36px, 5vw, 72px); }
+  .tracker-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: clamp(24px, 4vw, 60px);
+    align-items: end;
+    margin-top: clamp(20px, 3vw, 40px);
+  }
+  .tracker-eyebrow { color: var(--accent-3); margin-bottom: 12px; }
+  .tracker-title {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: clamp(48px, 7vw, 104px);
+    line-height: .92;
+    letter-spacing: -0.015em;
+    margin: 0;
+    max-width: 10ch;
+  }
+  .tracker-deck {
+    font-family: var(--f-serif);
+    font-style: italic;
+    font-size: clamp(18px, 1.6vw, 22px);
+    color: var(--ink-2);
+    max-width: 58ch;
+    margin: clamp(18px, 2vw, 26px) 0 0;
+  }
+  .tracker-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: clamp(20px, 3vw, 32px); }
+  .near-result {
+    margin-top: 12px;
+    color: var(--accent-3);
+    border-left: 2px solid var(--accent);
+    padding-left: 12px;
+  }
+  .tracker-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--ink);
+  }
+  .tracker-fact { padding: 18px 14px 18px 0; border-bottom: 1px solid var(--rule); min-width: 0; }
+  .tracker-fact:nth-child(2n) { padding-left: 14px; border-left: 1px solid var(--rule); }
+  .tracker-fact__k { color: var(--muted); }
+  .tracker-fact__v {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: clamp(32px, 4vw, 54px);
+    line-height: 1;
+    color: var(--ink);
+    margin-top: 8px;
+  }
+  .tracker-fact__sub { color: var(--accent-3); margin-top: 8px; }
+
+  .tracker-watch {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+    gap: clamp(18px, 2.6vw, 32px);
+    padding-top: clamp(28px, 5vw, 64px);
+    padding-bottom: clamp(28px, 5vw, 64px);
+  }
+  .watch-card {
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    min-width: 0;
+  }
+  .watch-card--primary { background: color-mix(in oklab, var(--bg-2), var(--accent-tint) 40%); }
+  .watch-card__body { padding: clamp(18px, 2.4vw, 30px); }
+  .watch-title,
+  .last-show-title,
+  .section-title {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    margin: 0;
+  }
+  .watch-title { font-size: clamp(34px, 4.4vw, 66px); max-width: 11ch; margin-top: 10px; }
+  .watch-copy { color: var(--ink-2); font-family: var(--f-serif); font-size: 18px; max-width: 48ch; }
+  .watch-meter { height: 8px; background: var(--rule-2); margin-top: 24px; border: 1px solid var(--rule); }
+  .watch-meter span { display: block; height: 100%; background: linear-gradient(to right, var(--accent), var(--hot)); }
+  .watch-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .watch-pills span {
+    border: 1px solid var(--rule);
+    padding: 6px 10px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .last-show-title { font-size: clamp(28px, 3.2vw, 44px); margin-bottom: 8px; }
+  .last-show-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 18px;
+  }
+  .last-show-grid div { background: var(--bg); padding: 12px; min-width: 0; }
+  .last-show-grid span,
+  .change-strip span {
+    display: block;
+    margin-bottom: 4px;
+  }
+  .last-show-grid strong {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .change-strip { display: grid; gap: 10px; margin-top: 16px; color: var(--ink-2); }
+  .pending-callout { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+
+  .tracker-map-section,
+  .tracker-board,
+  .tracker-setlist-detail {
+    padding-top: clamp(32px, 5vw, 72px);
+    padding-bottom: clamp(32px, 5vw, 72px);
+    border-top: 1px solid var(--rule);
+  }
+  .tracker-section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: end;
+    flex-wrap: wrap;
+    margin-bottom: clamp(18px, 2.4vw, 30px);
+  }
+  .section-title { font-size: clamp(30px, 4vw, 56px); margin-top: 6px; }
+  .tracker-route-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    color: var(--muted);
+  }
+  .tracker-route-meta span {
+    border: 1px solid var(--rule);
+    padding: 7px 9px;
+  }
+  .tracker-route-map {
+    width: 100%;
+    height: clamp(420px, 58vh, 620px);
+    min-height: 420px;
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    isolation: isolate;
+  }
+  .tracker-route-map__loading {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    color: var(--muted);
+  }
+  :global(html:not([data-theme='papers']) .tracker-route-map .leaflet-tile-pane) {
+    filter: invert(.92) hue-rotate(180deg) saturate(.62) brightness(.72) contrast(1.06);
+  }
+  :global(.tracker-route-map .leaflet-control-attribution) {
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+  }
+  :global(.tracker-route-map .leaflet-control-attribution a) { color: var(--accent-3); }
+  :global(.tracker-route-map .english-country-label) {
+    background: transparent;
+    border: 0;
+    pointer-events: none;
+  }
+  :global(.tracker-route-map .english-country-label span) {
+    color: color-mix(in srgb, var(--ink) 72%, var(--accent) 28%);
+    display: inline-block;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    line-height: 1;
+    opacity: .78;
+    padding: 3px 5px;
+    text-shadow:
+      0 1px 0 var(--bg),
+      1px 0 0 var(--bg),
+      0 -1px 0 var(--bg),
+      -1px 0 0 var(--bg);
+    text-transform: uppercase;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+  :global(.tracker-route-map .leaflet-popup-content-wrapper) {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    color: var(--ink);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .28);
+  }
+  :global(.tracker-route-map .leaflet-popup-tip) { background: var(--bg); }
+  :global(.tracker-route-popup) { min-width: 190px; }
+  :global(.tracker-route-popup__eyebrow),
+  :global(.tracker-route-popup__place),
+  :global(.tracker-route-popup__date),
+  :global(.tracker-route-popup__link) {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  :global(.tracker-route-popup__eyebrow) { color: var(--accent-3); margin-bottom: .28rem; }
+  :global(.tracker-route-popup__title) {
+    font-family: var(--f-display);
+    font-size: 19px;
+    font-style: italic;
+    line-height: 1.1;
+  }
+  :global(.tracker-route-popup__place) { color: var(--muted); margin-top: .25rem; }
+  :global(.tracker-route-popup__date) { margin-top: .45rem; }
+  :global(.tracker-route-popup__link) {
+    border-bottom: 1px solid var(--accent);
+    color: var(--accent-3);
+    display: inline-block;
+    margin-top: .55rem;
+    text-decoration: none;
+  }
+
+  .country-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: clamp(18px, 2.4vw, 30px); }
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: clamp(20px, 3vw, 40px);
+    align-items: start;
+  }
+  .schedule-group + .schedule-group { margin-top: clamp(24px, 4vw, 48px); }
+  .schedule-group__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+  }
+  .schedule-group__head h3 {
+    margin: 0;
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: 30px;
+    line-height: 1;
+  }
+  .show-list { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .show-row {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr) auto;
+    gap: clamp(12px, 2vw, 22px);
+    align-items: center;
+    background: var(--bg);
+    padding: clamp(14px, 2vw, 20px);
+  }
+  .show-row[hidden] { display: none; }
+  .show-row__date {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: var(--f-mono);
+    color: var(--accent-3);
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    font-size: 11px;
+  }
+  .show-row__date small { color: var(--muted); font-size: 10px; }
+  .show-row__title {
+    display: inline;
+    border-bottom: 0;
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: clamp(22px, 2.4vw, 32px);
+    line-height: 1.05;
+  }
+  .show-row__place { margin-top: 6px; color: var(--muted); }
+  .show-row__badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .show-row__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: 260px;
+  }
+  .mini-action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    border: 1px solid var(--rule);
+    padding: 6px 9px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .mini-action:hover { border-color: var(--accent); color: var(--accent-3); }
+  :global(.show-row__actions .bookmark) { min-height: 32px; padding: 6px 9px; }
+
+  .run-panel {
+    position: sticky;
+    top: 86px;
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+  }
+  .run-panel__body { padding: 14px 16px 18px; display: grid; gap: 12px; }
+  .run-line {
+    display: grid;
+    gap: 3px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+  .run-line:last-child { border-bottom: 0; padding-bottom: 0; }
+  .run-line strong {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .run-line span { color: var(--ink-2); }
+  .run-line small {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .setlist-cards {
+    display: grid;
+    grid-template-columns: 1.1fr .95fr .95fr;
+    gap: clamp(14px, 2vw, 24px);
+  }
+  .setlist-card {
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    padding: clamp(16px, 2vw, 24px);
+    min-width: 0;
+  }
+  .setlist-card h3 {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: clamp(28px, 3vw, 44px);
+    line-height: 1;
+    margin: 10px 0 14px;
+  }
+  .setlist-card p { color: var(--ink-2); margin: 0; }
+  .song-bars { display: grid; gap: 8px; }
+  .song-bar {
+    display: grid;
+    grid-template-columns: minmax(120px, 1fr) minmax(80px, 160px) 34px;
+    gap: 10px;
+    align-items: center;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .song-bar i {
+    height: 5px;
+    background: linear-gradient(to right, var(--accent), var(--hot));
+    display: block;
+    min-width: 8px;
+  }
+  .song-bar b { color: var(--accent-3); text-align: right; }
+
+  @media (max-width: 980px) {
+    .tracker-hero__grid,
+    .tracker-watch,
+    .schedule-grid,
+    .setlist-cards {
+      grid-template-columns: 1fr;
+    }
+    .tracker-title { max-width: 12ch; }
+    .run-panel { position: static; }
+    .show-row { grid-template-columns: 74px minmax(0, 1fr); }
+    .show-row__actions { grid-column: 2; justify-content: flex-start; max-width: none; }
+  }
+  @media (max-width: 560px) {
+    .tracker-facts { grid-template-columns: 1fr; }
+    .tracker-fact:nth-child(2n) { padding-left: 0; border-left: 0; }
+    .show-row { grid-template-columns: 1fr; }
+    .show-row__actions { grid-column: auto; }
+    .song-bar { grid-template-columns: 1fr; gap: 5px; }
+    .song-bar b { text-align: left; }
+  }
+</style>

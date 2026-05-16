@@ -13,6 +13,8 @@ const toRoman = (n: number): string => {
 const volume = toRoman(Math.max(1, year - 2018));
 const startOfYear = Date.UTC(year, 0, 0);
 const issueNumber = Math.floor((Date.now() - startOfYear) / 86400000);
+const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
+const calendarSubscribeUrl = calendarFeedUrl.replace(/^https?:/, 'webcal:');
 ---
 <footer class="foot">
   <div class="container">
@@ -48,36 +50,35 @@ const issueNumber = Math.floor((Date.now() - startOfYear) / 86400000);
         <ul>
           <li><a href="/setlists">Live archive</a></li>
           <li><a href="/setlists">Setlists</a></li>
+          <li><a href="/tours/2026-european-summer-shows">2026 Tour Tracker</a></li>
           <li><a href="/setlists/compare">Compare shows</a></li>
           <li><a href="/tours">Tours</a></li>
+          <li><a href={calendarSubscribeUrl}>Tour calendar feed</a></li>
           <li><a href="/venues">Venues</a></li>
-          <li><a href="/venues/map">Venue map</a></li>
-        </ul>
-      </div>
-      <div class="foot-col">
-        <div class="mono-sm">Media</div>
-        <ul>
-          <li><a href="/photos">Photographs</a></li>
-          <li><a href="/videos">Videos</a></li>
+          <li><a href="/tours/map">World map</a></li>
           <li><a href="/on-this-day">On this day</a></li>
         </ul>
       </div>
       <div class="foot-col">
-        <div class="mono-sm">The band</div>
+        <div class="mono-sm">Wiki</div>
         <ul>
+          <li><a href="/wiki">All wiki pages</a></li>
+          <li><a href="/photos">Photographs</a></li>
+          <li><a href="/videos">Videos</a></li>
           <li><a href="/band">Members</a></li>
           <li><a href="/band/history">History</a></li>
           <li><a href="/band/gear">Gear</a></li>
-          <li><a href="/band/quotes">Quotations</a></li>
         </ul>
       </div>
       <div class="foot-col">
-        <div class="mono-sm">Dispatches</div>
+        <div class="mono-sm">Journal</div>
         <ul>
-          <li><a href="/news">Dispatches</a></li>
+          <li><a href="/news">All journal entries</a></li>
+          <li><a href="/news?category=news">News</a></li>
+          <li><a href="/news?category=blog">Blog</a></li>
+          <li><a href="/news?category=reviews">Reviews</a></li>
           <li><a href="/newsletter">Newsletter</a></li>
           <li><a href="/rss.xml">RSS feed</a></li>
-          <li><a href="/wiki">The wiki</a></li>
         </ul>
       </div>
       <div class="foot-col">
@@ -95,11 +96,10 @@ const issueNumber = Math.floor((Date.now() - startOfYear) / 86400000);
         </ul>
       </div>
       <div class="foot-col">
-        <div class="mono-sm">The archive</div>
+        <div class="mono-sm">About</div>
         <ul>
           <li><a href="/about">About</a></li>
           <li><a href="/sources">Sources</a></li>
-          <li><a href="/calendar.ics">Tour dates (iCal)</a></li>
           <li><a href="mailto:hello@cureation.net">Contact</a></li>
           <li><a href="https://bsky.app/profile/cureation.net" target="_blank" rel="noopener">Bluesky</a></li>
         </ul>

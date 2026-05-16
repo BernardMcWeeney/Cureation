@@ -3,6 +3,8 @@ import { getAlbumOfMonth, getNextConcert, getLatestConcert } from '../../lib/dir
 import { asset } from '../../lib/assets';
 
 const current = Astro.url.pathname;
+const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
+const calendarSubscribeUrl = calendarFeedUrl.replace(/^https?:/, 'webcal:');
 
 const [featuredAlbum, nextShow, lastShow] = await Promise.all([
   getAlbumOfMonth().catch(() => null),
@@ -64,15 +66,15 @@ const MEGA: MegaSection[] = [
       { title: 'The archive', links: [
         { href: '/setlists', label: 'Live archive', meta: 'all shows' },
         { href: '/setlists', label: 'Setlists', meta: 'by show' },
+        { href: '/tours/2026-european-summer-shows', label: '2026 Tour Tracker', meta: '31 dates' },
         { href: '/setlists/compare', label: 'Compare shows', meta: 'side-by-side' },
-        { href: '/tours', label: 'Tours' },
         { href: '/on-this-day', label: 'On this day' },
       ]},
       { title: 'Places', links: [
+        { href: '/tours', label: 'Tours' },
+        { href: calendarSubscribeUrl, label: 'Tour calendar feed', meta: 'latest tour' },
         { href: '/venues', label: 'Venues' },
-        { href: '/venues/map', label: 'Venue map', meta: 'global' },
-        { href: '/photos', label: 'Photographs' },
-        { href: '/videos', label: 'Videos' },
+        { href: '/tours/map', label: 'World map', meta: 'show geography' },
       ]},
     ],
     feature: featuredShow ? {
@@ -81,29 +83,28 @@ const MEGA: MegaSection[] = [
       meta: [featuredShow.date, featuredShow.city, featuredShow.country].filter(Boolean).join(' · '),
       href: featuredShow.slug ? `/setlists/${featuredShow.slug}` : '/setlists',
     } : { kind: 'FEATURED', title: 'The live archive', meta: 'Setlists, tours, venues', href: '/setlists' },
-    match: (p) => p.startsWith('/setlists') || p.startsWith('/tours') || p.startsWith('/venues') || p === '/on-this-day' || p.startsWith('/photos') || p.startsWith('/videos'),
+    match: (p) => p.startsWith('/setlists') || p.startsWith('/tours') || p.startsWith('/venues') || p === '/on-this-day',
   },
   {
-    id: 'essays', label: 'Essays', href: '/wiki',
+    id: 'wiki', label: 'Wiki', href: '/wiki',
     cols: [
       { title: 'The wiki', links: [
-        { href: '/wiki', label: 'All essays' },
-        { href: '/news', label: 'Dispatches' },
+        { href: '/wiki', label: 'All wiki pages' },
+        { href: '/photos', label: 'Photographs' },
+        { href: '/videos', label: 'Videos' },
         { href: '/curiosities', label: 'Curiosities' },
-        { href: '/newsletter', label: 'Newsletter' },
       ]},
       { title: 'The band', links: [
         { href: '/band', label: 'Members' },
         { href: '/band/history', label: 'History' },
         { href: '/band/gear', label: 'Gear' },
-        { href: '/band/quotes', label: 'Quotations' },
       ]},
     ],
-    feature: { kind: 'EDITORIAL', title: 'The reluctant gothic', meta: 'On the dark trilogy', href: '/wiki' },
-    match: (p) => p.startsWith('/wiki') || p.startsWith('/band') || p.startsWith('/news') || p === '/curiosities' || p === '/newsletter',
+    feature: { kind: 'WIKI', title: 'The archive wiki', meta: 'Pages · media · band files', href: '/wiki' },
+    match: (p) => p.startsWith('/wiki') || p.startsWith('/band') || p === '/curiosities' || p.startsWith('/photos') || p.startsWith('/videos'),
   },
   {
-    id: 'figures', label: 'Figures', href: '/stats',
+    id: 'stats', label: 'Stats', href: '/stats',
     cols: [
       { title: 'Stats', links: [
         { href: '/stats', label: 'Most performed', meta: 'top 10' },
@@ -122,23 +123,37 @@ const MEGA: MegaSection[] = [
     match: (p) => p.startsWith('/stats') || p === '/curiosities',
   },
   {
-    id: 'dispatches', label: 'Dispatches', href: '/news',
+    id: 'journal', label: 'Journal', href: '/news',
     cols: [
-      { title: 'Editorial', links: [
-        { href: '/news', label: 'Latest dispatch' },
+      { title: 'Stories', links: [
+        { href: '/news', label: 'All journal entries' },
+        { href: '/news?category=news', label: 'News' },
+        { href: '/news?category=blog', label: 'Blog' },
+        { href: '/news?category=reviews', label: 'Reviews' },
         { href: '/newsletter', label: 'Newsletter', meta: 'monthly' },
-        { href: '/rss.xml', label: 'RSS feed' },
-        { href: '/calendar.ics', label: 'Tour dates (iCal)' },
       ]},
+      { title: 'Feeds', links: [
+        { href: '/rss.xml', label: 'RSS feed' },
+        { href: '/news/rss.xml', label: 'Journal RSS' },
+      ]},
+    ],
+    feature: { kind: 'JOURNAL', title: 'Latest stories', meta: 'News · blog · reviews · newsletters', href: '/news' },
+    match: (p) => p.startsWith('/news') || p === '/newsletter',
+  },
+  {
+    id: 'community', label: 'Community', href: '/community',
+    cols: [
       { title: 'Community', links: [
         { href: '/community', label: 'Forums' },
         { href: '/my-archive', label: 'My archive' },
+      ]},
+      { title: 'About', links: [
         { href: '/sources', label: 'Sources' },
         { href: '/about', label: 'About' },
       ]},
     ],
-    feature: { kind: 'COLOPHON', title: 'About this archive', meta: 'Sources · Contact · Bluesky', href: '/about' },
-    match: (p) => p === '/about' || p === '/community' || p === '/my-archive' || p === '/sources' || p === '/newsletter' || p.startsWith('/news'),
+    feature: { kind: 'COMMUNITY', title: 'Help keep the archive alive', meta: 'Forums · sources · corrections', href: '/community' },
+    match: (p) => p === '/about' || p === '/community' || p === '/my-archive' || p === '/sources',
   },
 ];
 
@@ -149,7 +164,7 @@ const isHome = current === '/';
   <div class="container nav__row">
     <a href="/" class="nav__brand" aria-label="Cureation — home">
       <span class="nav__brand-mark" aria-hidden="true">
-        <img src="/logo.png" alt="" loading="eager" decoding="async" />
+        <img src="/logo.png" alt="" width="28" height="28" loading="eager" decoding="sync" />
       </span>
       <span class="nav__brand-name">Cureation</span>
     </a>
@@ -180,7 +195,7 @@ const isHome = current === '/';
         <span class="nav__search-label">Search the archive</span>
         <kbd class="nav__kbd">⌘K</kbd>
       </button>
-      <button class="nav__icon nav__icon--desk" data-tweaks-toggle aria-label="Open tweaks">
+      <button class="nav__icon nav__icon--tweaks" data-tweaks-toggle aria-label="Open tweaks" aria-haspopup="dialog" aria-expanded="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -236,7 +251,7 @@ const isHome = current === '/';
   .nav__row {
     display: grid; grid-template-columns: auto 1fr auto;
     align-items: center; gap: clamp(12px, 2vw, 28px);
-    padding: 14px 0; min-height: 64px;
+    padding-block: 14px; min-height: 64px;
   }
 
   /* Brand: circle mark + wordmark */
@@ -245,6 +260,7 @@ const isHome = current === '/';
     font-family: var(--f-display); font-style: italic; font-weight: 500;
     font-size: clamp(22px, 2.4vw, 26px);
     color: var(--ink); border: none; flex-shrink: 0; letter-spacing: -0.01em;
+    min-height: 28px;
   }
   .nav__brand-mark {
     width: 28px; height: 28px;
@@ -253,7 +269,7 @@ const isHome = current === '/';
     border-radius: 50%;
     background: var(--accent-tint);
     overflow: hidden;
-    box-shadow: 0 0 18px rgba(119, 70, 176, 0.18);
+    box-shadow: 0 0 18px color-mix(in oklab, var(--accent), transparent 82%);
     flex: 0 0 auto;
   }
   .nav__brand-mark img { width: 100%; height: 100%; object-fit: cover; }
@@ -331,7 +347,7 @@ const isHome = current === '/';
   @keyframes megaIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
   .mega__inner {
     display: grid; grid-template-columns: 1.1fr 1.1fr 1fr; gap: clamp(20px, 3vw, 48px);
-    padding: clamp(28px, 3.4vw, 40px) 0 clamp(32px, 3.8vw, 44px);
+    padding-block: clamp(28px, 3.4vw, 40px) clamp(32px, 3.8vw, 44px);
   }
   .mega__col { min-width: 0; }
   .mega__h {
@@ -410,34 +426,38 @@ const isHome = current === '/';
   }
   @media (max-width: 960px) {
     .nav__links { display: none; }
-    .nav__icon--desk { display: none; }
     .nav__search { display: none; }
     .nav__menu { display: inline-flex; }
     .nav__row {
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      padding: 12px 0;
-      min-height: 60px;
+      gap: 12px;
+      padding: 10px var(--gutter);
+      min-height: 56px;
     }
     .nav__brand {
       min-width: 0;
-      gap: 9px;
+      gap: 10px;
+      font-size: 22px;
     }
+    .nav__brand-mark { width: 26px; height: 26px; }
     .nav__brand-name {
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      line-height: 1;
     }
     .nav__utility { gap: 6px; }
+    .nav__icon { width: 40px; height: 40px; }
   }
   @media (max-width: 520px) {
     .nav__row {
-      padding: 9px 0;
-      min-height: 56px;
+      gap: 10px;
+      padding-block: 8px;
+      min-height: 52px;
     }
-    .nav__brand { gap: 8px; }
-    .nav__brand-mark { width: 26px; height: 26px; }
+    .nav__brand { gap: 9px; font-size: 21px; }
+    .nav__brand-mark { width: 24px; height: 24px; }
     .nav__icon { width: 38px; height: 38px; }
   }
 </style>

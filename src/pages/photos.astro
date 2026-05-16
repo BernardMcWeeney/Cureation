@@ -50,7 +50,7 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
   />
 
   {hero && (
-    <section class="container" style="padding: clamp(24px, 4vw, 48px) 0; margin-top: 2rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+    <section class="container" style="padding-block: clamp(24px, 4vw, 48px); margin-top: 2rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
       <div class="mono-sm muted" style="margin-bottom: 1rem;"><span class="pip pip--hot"></span>PHOTO OF THE DAY</div>
       <div class="pod-grid">
         <a href={hero.album_slug ? `/discography/${hero.album_slug}` : '#'} class="photo-plate" style="text-decoration:none;">

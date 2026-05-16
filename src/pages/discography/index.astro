@@ -269,7 +269,7 @@ const tabs = [
   .record-wrap { display: flex; flex-direction: column; min-width: 0; }
 
   .disc-controls {
-    padding: clamp(18px, 2.4vw, 32px) 0 clamp(10px, 1.6vw, 20px);
+    padding-block: clamp(18px, 2.4vw, 32px) clamp(10px, 1.6vw, 20px);
   }
   .disc-controls + .issue-section {
     border-top: 0;
@@ -327,7 +327,7 @@ const tabs = [
     color: var(--accent-ink);
   }
   :root[data-theme='papers'] .disc-type-tab.is-active {
-    color: #F9F1DC;
+    color: var(--accent-ink);
   }
   .disc-type-tab__count {
     font-family: var(--f-mono);

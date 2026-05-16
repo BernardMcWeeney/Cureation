@@ -30,7 +30,7 @@ export async function GET(context: APIContext) {
 
   return rss({
     title: 'Cureation — An editorial archive of The Cure',
-    description: 'Dispatches, setlists and archive additions from Cureation.',
+    description: 'Journal entries, setlists and archive additions from Cureation.',
     site: context.site ?? new URL('https://cureation.net'),
     items,
     customData: `<language>en</language>`,

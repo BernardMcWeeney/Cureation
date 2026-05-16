@@ -126,7 +126,7 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
   </div>
 
   {(setlist.hero_image || (venue && venue.photo_file)) && (
-    <section class="container" style="padding: clamp(16px, 3vw, 32px) 0;">
+    <section class="container" style="padding-block: clamp(16px, 3vw, 32px);">
       <figure style="position: relative; aspect-ratio: 21/9; overflow:hidden; border: 1px solid var(--rule); background: var(--bg-2);">
         <img src={asset((setlist.hero_image || venue!.photo_file)!, 'hero')} alt={setlist.venue || 'Concert'} style="width:100%; height:100%; object-fit:cover; filter: saturate(.85) contrast(1.08);" />
         <div class="cover-plate__corner cover-plate__corner--tl"><span>CONCERT · {year}</span></div>
@@ -173,7 +173,7 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0;">
+  <section class="container" style="padding-block: clamp(32px, 5vw, 64px);">
     <div class="show-grid">
       <div class="show-grid__main stack" style="--gap: 2rem;">
         {orderedSets.map(([k, items]) => (

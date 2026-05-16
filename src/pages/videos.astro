@@ -5,10 +5,11 @@ import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
 import SearchField from '../components/ui/SearchField.astro';
 import { fetchRaw } from '../lib/directus';
+import { asset } from '../lib/assets';
 
-const videos: any[] = await fetchRaw('videos', { limit: -1, sort: '-release_date,-date_created' }).catch(() => []);
+const videos: any[] = await fetchRaw('videos', { limit: -1, sort: '-date,-date_created' }).catch(() => []);
 const types = Array.from(new Set(videos.map((v) => v.type).filter(Boolean))).sort();
-const years = Array.from(new Set(videos.map((v) => (v.release_date || '').slice(0, 4)).filter(Boolean))).sort().reverse();
+const years = Array.from(new Set(videos.map((v) => (v.release_date || v.date || '').slice(0, 4)).filter(Boolean))).sort().reverse();
 
 const ytId = (url: string): string | null => {
   if (!url) return null;
@@ -31,7 +32,7 @@ const ytId = (url: string): string | null => {
   />
 
   {videos.length === 0 ? (
-    <section class="container" style="padding: clamp(40px, 6vw, 80px) 0;">
+    <section class="container" style="padding-block: clamp(40px, 6vw, 80px);">
       <div class="panel-head" style="border: 1px solid var(--rule);"><span>No entries yet</span><span>Coming soon</span></div>
       <p class="deck" style="margin-top:.8rem;">The video index is being compiled — promos first, then live films, then interviews.</p>
     </section>
@@ -58,22 +59,24 @@ const ytId = (url: string): string | null => {
         </div>
         <div class="video-grid" data-video-grid>
           {videos.map((v) => {
-            const yid = ytId(v.url || v.video_url || '');
-            const thumb = yid ? `https://i.ytimg.com/vi/${yid}/hqdefault.jpg` : v.thumbnail_url || '';
+            const url = v.url || v.video_url || '';
+            const videoDate = v.release_date || v.date || '';
+            const yid = ytId(url);
+            const thumb = yid ? `https://i.ytimg.com/vi/${yid}/hqdefault.jpg` : (v.thumbnail_url || (v.thumbnail ? asset(v.thumbnail, 'card') : ''));
             return (
               <a class="video-card"
-                 href={v.slug ? `/videos/${v.slug}` : (v.url || '#')}
-                 target={!v.slug && v.url ? '_blank' : undefined}
-                 rel={!v.slug && v.url ? 'noopener' : undefined}
+                 href={url || '#'}
+                 target={url ? '_blank' : undefined}
+                 rel={url ? 'noopener' : undefined}
                  data-type={v.type || ''}
-                 data-year={(v.release_date || '').slice(0, 4)}
+                 data-year={videoDate.slice(0, 4)}
                  data-search={`${v.title || ''} ${v.director || ''} ${v.album_title || ''}`.toLowerCase()}>
                 <div class="video-card__thumb">
                   {thumb ? <img src={thumb} alt={v.title || ''} loading="lazy" /> : <div class="video-card__ph" />}
                   <div class="video-card__play">▶</div>
                 </div>
                 <div class="video-card__meta">
-                  <div class="mono-sm muted">{(v.type || 'VIDEO').toUpperCase()} · {(v.release_date || '').slice(0, 4) || '—'}</div>
+                  <div class="mono-sm muted">{(v.type || 'VIDEO').toUpperCase()} · {videoDate.slice(0, 4) || '—'}</div>
                   <div class="serif" style="font-style: italic; font-size: 19px; line-height: 1.2; margin-top: .2rem;">{v.title}</div>
                   {v.director && <div class="mono-sm muted" style="margin-top:.2rem;">Dir. {v.director}</div>}
                 </div>

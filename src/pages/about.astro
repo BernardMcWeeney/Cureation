@@ -3,20 +3,20 @@ import Layout from '../layouts/Layout.astro';
 import Crumbs from '../components/ui/Crumbs.astro';
 import { getRunningFigures } from '../lib/directus';
 const fig = await getRunningFigures().catch(() => ({ albums: 0, songs: 0, setlists: 0, venues: 0, photos: 0, members: 0 }));
-const launched = 'August 2024';
+const launched = 'February 2022';
 
 const milestones: Array<[string, string, string]> = [
-  [launched, 'Archive opens', 'A first index of 13 studio albums, 300-odd songs, and the outline of a live archive.'],
-  ['2024 Q4', 'Setlists imported', 'Nightly sync from Cure-Concerts with venue, tour, and support act normalisation.'],
-  ['2025', 'Lyrics structured', 'Every song\'s lyrics broken into section/line JSON to support click-to-annotate.'],
-  ['2026', 'Editorial voice', 'A magazine-style rewrite — dark-romantic, purple, slow reading.'],
+  ['February 2022', 'A fan page begins', 'Cureation started as a fan page on Twitter, now X, sharing and collecting pieces of The Cure history.'],
+  ['Early versions', 'Setlists and discography', 'The site first grew around the core archive work: a setlist log and a discography log.'],
+  ['Now', 'A connected archive', 'The archive keeps expanding through linked data, editorial records, photos, venues, sources, and other details around the band.'],
+  ['Always', 'Open to correction', 'Dates, credits, lineups, venues, and sources can be corrected as better evidence comes to light.'],
 ];
 
 const pillars: Array<[string, string]> = [
-  ['Primary sources first', 'Wikipedia, liner notes, contemporary reviews, and cureconcerts.com cited on every factual claim.'],
-  ['Schema, not stringly-typed', 'Songs link to albums; setlists link to venues; venues link to coordinates. Relations, not strings.'],
-  ['Non-commercial', 'No ads, no affiliate links, no tracking. Hosted and curated by one fan.'],
-  ['Open corrections', 'If a date is wrong, a lineup is wrong, a writer credit is wrong — the form at /community is the fastest route to fix it.'],
+  ['Fan archive', 'Cureation is dedicated to The Cure and built for people who want to explore the band in detail.'],
+  ['Verified where possible', 'The aim is to use primary verified sources wherever possible, supported by reliable secondary sources when needed.'],
+  ['Non-commercial', 'Cureation is a one-person passion project, maintained without ads, affiliate links, or commercial backing.'],
+  ['Open corrections', 'If a date, lineup, venue, writer credit, or attribution is wrong, corrections are welcome and will be updated accordingly.'],
 ];
 ---
 <Layout title="About · Cureation">
@@ -24,21 +24,43 @@ const pillars: Array<[string, string]> = [
     <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
   </div>
 
-  <section class="container" style="padding: clamp(24px, 4vw, 56px) 0;">
-    <div class="mono-sm muted">COLOPHON · SINCE {launched.toUpperCase()}</div>
+  <section class="container" style="padding-block: clamp(24px, 4vw, 56px);">
+    <div class="mono-sm muted">FAN ARCHIVE · SINCE {launched.toUpperCase()}</div>
     <h1 class="serif" style="font-size: clamp(56px, 10vw, 128px); line-height:.9; font-style: italic; margin: .4rem 0 0; letter-spacing: -.01em;">
-      A <em style="color: var(--accent-3); font-family: var(--f-display);">slow</em> archive<br/>of a band<br/>that never hurried.
+      Welcome to<br/><em style="color: var(--accent-3); font-family: var(--f-display);">Cureation</em>.
     </h1>
     <p class="deck" style="max-width: 62ch; margin-top: clamp(16px, 3vw, 28px);">
-      <em>Cureation</em> is a one-person, non-commercial editorial archive of The Cure — the records, the live history, the people who made them, and the room around them. Assembled slowly. Cited where possible. Corrected often.
+      <em>Cureation</em> is a fan archive dedicated to The Cure. It is a one-person, non-commercial editorial archive built to capture, connect, and preserve as much of the band&apos;s history as possible.
     </p>
   </section>
 
-  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
     <div class="about-grid">
       <div>
-        <div class="mono-sm muted">THE THESIS</div>
-        <h2 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; font-style: italic; margin: .6rem 0 0;">Four quiet convictions.</h2>
+        <div class="mono-sm muted">THE PROJECT</div>
+        <h2 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; font-style: italic; margin: .6rem 0 0;">The idea behind the archive.</h2>
+      </div>
+      <div>
+        <div class="copy-block">
+          <p>
+            The aim of Cureation is to become one source for all things The Cure: releases, songs, setlists, tours, venues, people, photographs, sources, and the many details that sit around the music.
+          </p>
+          <p>
+            Cureation is run by Bernard Mcweeney, based in Ireland. What started as a fan page on Twitter, now X, in February 2022 has grown into a strong foundation for a wider archive, website, and social media presence.
+          </p>
+          <p>
+            The archive exists because The Cure have a long history and a lot of data. The goal is to record as much of it as possible, and to do that with care.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
+    <div class="about-grid">
+      <div>
+        <div class="mono-sm muted">MISSION</div>
+        <h2 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; font-style: italic; margin: .6rem 0 0;">Collected carefully. Corrected openly.</h2>
       </div>
       <div class="stack" style="--gap: 0;">
         {pillars.map(([k, v], i) => (
@@ -50,11 +72,14 @@ const pillars: Array<[string, string]> = [
             </div>
           </div>
         ))}
+        <p style="font-family: var(--f-serif); font-size: 16px; line-height: 1.65; color: var(--ink-2); margin-top: 1.2rem; max-width: 56ch;">
+          Every effort is made to be factually correct, to verify sources, and to attribute information to the right person or publication. Some things will still slip through the net. If you notice a wrong date, lineup, venue, writer credit, or attribution, please get in touch and it will be reviewed.
+        </p>
       </div>
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
     <div class="panel-head" style="border: 1px solid var(--rule);">
       <span>Running figures</span>
       <span>AS OF TODAY</span>
@@ -76,9 +101,9 @@ const pillars: Array<[string, string]> = [
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
-    <div class="mono-sm muted">A CHRONOLOGY OF THE SITE</div>
-    <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .4rem 0 1.6rem;">The archive, dated.</h2>
+  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
+    <div class="mono-sm muted">A CHRONOLOGY OF THE PROJECT</div>
+    <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .4rem 0 1.6rem;">From fan page to archive.</h2>
     <div class="rail">
       {milestones.map(([date, title, body], i) => (
         <div class={`rail__item${i === 0 ? ' rail__item--gold' : i === milestones.length - 1 ? ' rail__item--hot' : ''}`}>
@@ -90,31 +115,36 @@ const pillars: Array<[string, string]> = [
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
     <div class="about-grid">
       <div>
-        <div class="mono-sm muted">CREDITS</div>
-        <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .6rem 0 0;">On whose shoulders.</h2>
+        <div class="mono-sm muted">TECHNOLOGY</div>
+        <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .6rem 0 0;">How the site is built.</h2>
       </div>
       <div>
         <div class="facts">
-          <div class="facts__item"><div class="facts__k">Curator</div><div class="facts__v">Bernard McWeeney</div></div>
-          <div class="facts__item"><div class="facts__k">Built with</div><div class="facts__v">Astro · Directus · Cloudflare</div></div>
-          <div class="facts__item"><div class="facts__k">Type</div><div class="facts__v">Cormorant Garamond, EB Garamond, Inter, JetBrains Mono</div></div>
-          <div class="facts__item"><div class="facts__k">Sources</div><div class="facts__v">Wikipedia, cureconcerts.com, setlist.fm, fan scans</div></div>
+          <div class="facts__item"><div class="facts__k">Curator</div><div class="facts__v">Bernard Mcweeney</div></div>
+          <div class="facts__item"><div class="facts__k">Backend</div><div class="facts__v">Directus</div></div>
+          <div class="facts__item"><div class="facts__k">Frontend</div><div class="facts__v">Astro · Tailwind CSS</div></div>
+          <div class="facts__item"><div class="facts__k">Hosting</div><div class="facts__v">Directus on a server · Astro on Cloudflare</div></div>
         </div>
-        <p style="font-family: var(--f-serif); font-size: 16px; line-height: 1.65; color: var(--ink-2); margin-top: 1.2rem; max-width: 56ch;">
-          This archive exists because other archives existed first. Where a claim is traceable, it is traced. Where it is not, it is marked <span class="tag tag--blood">UNCERTAIN</span> and left for a better source to arrive.
-        </p>
+        <div class="copy-block" style="margin-top: 1.2rem;">
+          <p>
+            Cureation uses open source software as much as possible. The backend is powered by Directus, an open source backend that gives the archive flexibility for data modelling and makes it easier to add and update records.
+          </p>
+          <p>
+            The frontend is built with Astro and Tailwind CSS. Astro is the frontend framework behind the website, while Tailwind CSS helps shape the design system and styling.
+          </p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="container" style="padding: clamp(32px, 5vw, 64px) 0; border-top: 1px solid var(--rule);">
+  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
     <div class="voices" style="max-width: 780px;">
-      <div class="mono-sm muted" style="margin-bottom:.4rem;"><span class="pip pip--gold"></span>A NOTE ON TONE</div>
+      <div class="mono-sm muted" style="margin-bottom:.4rem;"><span class="pip pip--gold"></span>A NOTE OF THANKS</div>
       <div class="voices__quote">
-        "The Cure's records rarely rushed. This archive is built to read the same way — one issue at a time, with room to linger."
+        "This website is a passion project. Servers, domains, tools, and occasional AI coding support are all part of keeping it moving. Thank you to every visitor who finds something useful, interesting, or worth correcting here. The archive would be pointless without people who care about The Cure and know what a great band they are."
       </div>
     </div>
   </section>
@@ -123,5 +153,7 @@ const pillars: Array<[string, string]> = [
 
 <style>
   .about-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: clamp(24px, 4vw, 72px); align-items: start; }
+  .copy-block { display: grid; gap: 1rem; max-width: 62ch; }
+  .copy-block p { color: var(--ink-2); font-family: var(--f-serif); font-size: 17px; line-height: 1.68; margin: 0; }
   @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; } }
 </style>

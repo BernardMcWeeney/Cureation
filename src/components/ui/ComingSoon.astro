@@ -5,7 +5,7 @@ interface Props { title: string; phase: 2 | 3 | 4; deck?: string; }
 const { title, phase, deck } = Astro.props;
 ---
 <Layout title={`${title} · Cureation`}>
-  <section class="container" style="padding: clamp(60px, 10vw, 140px) 0; text-align: center;">
+  <section class="container" style="padding-block: clamp(60px, 10vw, 140px); text-align: center;">
     <div class="kicker">In Phase {phase}</div>
     <h1 class="headline headline--xxl" style="margin: 1rem 0;">{title}</h1>
     <p class="deck" style="margin: 0 auto; max-width: 56ch;">

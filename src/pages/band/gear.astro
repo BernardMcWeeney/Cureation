@@ -1,53 +1,1240 @@
 ---
+export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
-import IssueSection from '../../components/ui/IssueSection.astro';
-import PageHero from '../../components/ui/PageHero.astro';
-import { fetchRaw } from '../../lib/directus';
+import Crumbs from '../../components/ui/Crumbs.astro';
+import Tag from '../../components/ui/Tag.astro';
+import {
+  listGear,
+  listMembers,
+  memberGearFamilies,
+  memberRoleLabel,
+  memberTenureLabel,
+  type Gear,
+  type GearFamily,
+  type Member,
+} from '../../lib/directus';
+import { asset } from '../../lib/assets';
 
-const gear: any[] = await fetchRaw('gear', { limit: -1, fields: '*' }).catch(() => []);
+const [gear, members] = await Promise.all([
+  listGear().catch(() => []),
+  listMembers().catch(() => []),
+]);
 
-const byCategory = gear.reduce((acc: Record<string, any[]>, g: any) => {
-  const k = (g.category || g.kind || 'Other');
-  (acc[k] = acc[k] || []).push(g);
-  return acc;
-}, {});
-const categories = Object.keys(byCategory).sort();
+type LinkSource = 'direct' | 'named' | 'role';
+type GearLink = { member: Member; source: LinkSource; score: number };
+type GearRow = {
+  gear: Gear;
+  index: number;
+  family: GearFamily;
+  label: string;
+  range: string;
+  rangeStart: number | null;
+  rangeEnd: number | null;
+  links: GearLink[];
+};
+
+const familyOrder: GearFamily[] = ['guitar', 'bass', 'keyboard', 'drums', 'voice', 'other'];
+const familyLabels: Record<GearFamily, string> = {
+  guitar: 'Guitars',
+  bass: 'Bass',
+  keyboard: 'Keyboards',
+  drums: 'Drums',
+  voice: 'Voice',
+  other: 'Other',
+};
+const familyTone: Record<GearFamily, string> = {
+  guitar: 'hot',
+  bass: 'gold',
+  keyboard: 'cool',
+  drums: 'blood',
+  voice: 'accent',
+  other: 'default',
+};
+
+function norm(value: unknown): string {
+  return String(value ?? '').trim().toLowerCase();
+}
+
+function titleCase(value: string): string {
+  return value.replace(/[-_]/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function gearFamily(item: Gear): GearFamily {
+  const text = norm([item.kind, item.category, item.name, item.description, item.notes].filter(Boolean).join(' '));
+  if (/\b(six[- ]string bass|bass guitar|bass)\b/.test(text)) return 'bass';
+  if (/\b(guitar|baritone|jazzmaster|schecter)\b/.test(text)) return 'guitar';
+  if (/\b(keyboard|keyboards|synth|synthesizer|piano|organ|oberheim|roland)\b/.test(text)) return 'keyboard';
+  if (/\b(drum|drums|percussion|kit)\b/.test(text)) return 'drums';
+  if (/\b(vocal|vocals|voice|microphone)\b/.test(text)) return 'voice';
+  return 'other';
+}
+
+function yearFromChunk(value: string | null, fallback: number | null): number | null {
+  if (!value) return fallback;
+  const decade = value.match(/(\d{4})s/);
+  if (decade) return Number(decade[1]);
+  const year = value.match(/(\d{4})/);
+  return year ? Number(year[1]) : fallback;
+}
+
+function rangeStart(item: Gear): number | null {
+  return yearFromChunk(item.era_range, null);
+}
+
+function rangeEnd(item: Gear): number | null {
+  const text = norm(item.era_range);
+  if (!text || text.includes('present')) return null;
+  const years = text.match(/\d{4}s?|\d{4}/g) ?? [];
+  return yearFromChunk(years[years.length - 1] || null, null);
+}
+
+function rangeLabel(item: Gear): string {
+  return item.era_range || 'Era to be filed';
+}
+
+function overlapsStints(member: Member, start: number | null, end: number | null): boolean {
+  const stints = member.stints ?? [];
+  if (!stints.length || start === null) return true;
+  const rangeEndYear = end ?? new Date().getUTCFullYear();
+  return stints.some((stint) => {
+    if (stint.start_year === null) return false;
+    const stintEnd = stint.end_year ?? 9999;
+    return stint.start_year <= rangeEndYear && stintEnd >= start;
+  });
+}
+
+function usedByTokens(value: unknown): { ids: Set<number>; names: Set<string> } {
+  const ids = new Set<number>();
+  const names = new Set<string>();
+  const values = Array.isArray(value) ? value : [value];
+  for (const item of values) {
+    if (!item) continue;
+    if (typeof item === 'object') {
+      const id = Number((item as any).id ?? (item as any).member ?? (item as any).member_id);
+      if (Number.isFinite(id)) ids.add(id);
+      const name = norm((item as any).name);
+      if (name) names.add(name);
+      continue;
+    }
+    const id = Number(item);
+    if (Number.isFinite(id)) ids.add(id);
+    const name = norm(item);
+    if (name && !Number.isFinite(id)) names.add(name);
+  }
+  return { ids, names };
+}
+
+function linksForGear(item: Gear): GearLink[] {
+  const family = gearFamily(item);
+  const text = norm([item.name, item.description, item.notes, item.owner].filter(Boolean).join(' '));
+  const direct = usedByTokens(item.used_by);
+  const start = rangeStart(item);
+  const end = rangeEnd(item);
+  const links: GearLink[] = [];
+
+  for (const member of members) {
+    const memberName = norm(member.name);
+    const families = member.gear_families ?? memberGearFamilies(member);
+    const isDirect = direct.ids.has(member.id) || direct.names.has(memberName);
+    const isNamed = memberName.length > 0 && text.includes(memberName);
+    const isRoleMatch = families.includes(family) && overlapsStints(member, start, end);
+
+    if (isDirect) links.push({ member, source: 'direct', score: 0 });
+    else if (isNamed) links.push({ member, source: 'named', score: 1 });
+    else if (isRoleMatch) links.push({ member, source: 'role', score: 2 });
+  }
+
+  const byId = new Map<number, GearLink>();
+  for (const link of links) {
+    const prev = byId.get(link.member.id);
+    if (!prev || link.score < prev.score) byId.set(link.member.id, link);
+  }
+
+  return Array.from(byId.values()).sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    if (a.member.is_current_member !== b.member.is_current_member) return a.member.is_current_member ? -1 : 1;
+    return a.member.name.localeCompare(b.member.name);
+  });
+}
+
+const gearRows: GearRow[] = gear.map((item, index) => {
+  const family = gearFamily(item);
+  return {
+    gear: item,
+    index,
+    family,
+    label: familyLabels[family],
+    range: rangeLabel(item),
+    rangeStart: rangeStart(item),
+    rangeEnd: rangeEnd(item),
+    links: linksForGear(item),
+  };
+});
+
+const categories = familyOrder
+  .map((family) => ({
+    family,
+    label: familyLabels[family],
+    rows: gearRows.filter((row) => row.family === family),
+  }))
+  .filter((category) => category.rows.length > 0);
+
+const memberRows = members.map((member) => {
+  const families = member.gear_families ?? memberGearFamilies(member);
+  const matches = gearRows.filter((row) =>
+    row.links.some((link) => link.member.id === member.id) ||
+    families.includes(row.family)
+  );
+  return { member, families, matches };
+});
+
+const currentMemberRows = memberRows.filter((row) => row.member.is_current_member);
+const linkedMemberCount = new Set(gearRows.flatMap((row) => row.links.map((link) => link.member.id))).size;
+const namedLinkCount = gearRows.reduce((count, row) =>
+  count + row.links.filter((link) => link.source !== 'role').length, 0);
+const featured = gearRows.find((row) => row.gear.image) || gearRows[0] || null;
+const maxCategoryCount = Math.max(1, ...categories.map((category) => category.rows.length));
+const sourceLabel: Record<LinkSource, string> = {
+  direct: 'Direct',
+  named: 'Named',
+  role: 'Role',
+};
 ---
-<Layout title="Gear · The band · Cureation">
-  <PageHero
-    section="Gear"
-    title="Instruments & equipment"
-    deck="Guitars, pedals, synths and stage equipment — documented where known, cross-referenced to records and tours."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'The band', href: '/band' }, { label: 'Gear' }]}
-    facts={[
-      { k: 'On file', v: gear.length },
-      { k: 'Categories', v: categories.length },
-    ]}
-  />
+<Layout title="Instruments & equipment · The band · Cureation">
+  <div class="container gear-topbar">
+    <Crumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'The band', href: '/band' },
+      { label: 'Gear' },
+    ]} />
+  </div>
 
-  {gear.length === 0 ? (
-    <IssueSection kicker="In progress" title="Gear ledger">
-      <p class="deck">Collection is being populated. Check back as entries land.</p>
-    </IssueSection>
-  ) : categories.map((cat) => (
-    <IssueSection kicker={cat.toUpperCase()} title={cat} meta={`${byCategory[cat].length} entries`}>
-      <div class="table-wrap">
-      <table class="data">
-        <thead><tr><th style="width:50px;">№</th><th>Item</th><th>Notes</th><th>Used by</th></tr></thead>
+  <section class="container gear-head">
+    <div class="gear-head__art">
+      <figure class="gear-plate">
+        <div class="gear-plate__corner gear-plate__corner--tl">
+          <span class="mono-sm muted">GEAR FILE · {gearRows.length || 'TBC'} ITEMS</span>
+        </div>
+        <div class="gear-plate__corner gear-plate__corner--tr">
+          <span class="mono-sm muted">{categories.length || 'NO'} CATEGORIES</span>
+        </div>
+        {featured?.gear.image ? (
+          <img src={asset(featured.gear.image, 'hero')} alt={featured.gear.name} />
+        ) : (
+          <div class="gear-rack" aria-hidden="true">
+            <div class="gear-rack__strings">
+              {Array.from({ length: 6 }).map((_, i) => <span style={`left: ${14 + i * 13}%;`}></span>)}
+            </div>
+            {categories.length > 0 ? categories.map((category, i) => (
+              <div class={`gear-rack__module gear-rack__module--${category.family}`} style={`--delay: ${i};`}>
+                <span>{category.label}</span>
+                <strong>{String(category.rows.length).padStart(2, '0')}</strong>
+              </div>
+            )) : (
+              <div class="gear-rack__module gear-rack__module--other">
+                <span>Filed soon</span>
+                <strong>00</strong>
+              </div>
+            )}
+          </div>
+        )}
+        <div class="gear-plate__corner gear-plate__corner--bl">
+          <span class="mono-sm muted">{featured ? featured.range.toUpperCase() : 'ARCHIVE IN PROGRESS'}</span>
+        </div>
+      </figure>
+    </div>
+
+    <div class="gear-head__body">
+      <div class="cluster" style="gap: .4rem;">
+        {categories.slice(0, 4).map((category) => (
+          <Tag variant={familyTone[category.family] === 'accent' ? 'accent' : undefined}>
+            {category.label.toUpperCase()}
+          </Tag>
+        ))}
+      </div>
+
+      <h1 class="gear-head__title serif">Instruments & equipment</h1>
+      <div class="mono-sm gear-head__meta">
+        Band file · instruments · stage equipment · member register
+      </div>
+
+      <p class="gear-head__lede">
+        Guitars, basses, keyboards, drums and stage equipment, cross-referenced against the member instrument register where the collection does not yet carry a direct player link.
+      </p>
+
+      {namedLinkCount > 0 && (
+        <div class="archivist">
+          <span class="mono-sm muted">Archive note:</span>
+          {namedLinkCount} player link{namedLinkCount === 1 ? '' : 's'} are named directly in gear records. Role-derived links use member instruments and documented tenure windows.
+        </div>
+      )}
+
+      <div class="facts">
+        <div class="facts__item"><div class="facts__k">On file</div><div class="facts__v">{gearRows.length || 'To be filed'}</div></div>
+        <div class="facts__item"><div class="facts__k">Categories</div><div class="facts__v">{categories.length || '—'}</div></div>
+        <div class="facts__item"><div class="facts__k">Member links</div><div class="facts__v">{linkedMemberCount || '—'}</div></div>
+        <div class="facts__item"><div class="facts__k">Direct or named</div><div class="facts__v">{namedLinkCount || '—'}</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container gear-tabs-wrap">
+    <div class="gear-tabs" data-gear-tabs role="tablist">
+      <button class="gear-tab is-active" role="tab" data-target="overview">
+        Overview <span class="gear-tab__count">{gearRows.length}</span>
+      </button>
+      <button class="gear-tab" role="tab" data-target="categories">
+        Categories <span class="gear-tab__count">{categories.length}</span>
+      </button>
+      <button class="gear-tab" role="tab" data-target="members">
+        Member register <span class="gear-tab__count">{members.length}</span>
+      </button>
+      <button class="gear-tab" role="tab" data-target="ledger">
+        Ledger <span class="gear-tab__count">{gearRows.length}</span>
+      </button>
+    </div>
+  </div>
+
+  <section class="container gear-section" data-gear-panel="overview">
+    {gearRows.length === 0 ? (
+      <div class="empty-note">
+        <div class="mono-sm muted">In progress</div>
+        <h2 class="serif">Gear ledger</h2>
+        <p>Collection is being populated. Check back as entries land.</p>
+      </div>
+    ) : (
+      <div class="gear-layout">
+        <div class="gear-stack">
+          {gearRows.map((row) => (
+            <article class={`gear-card${row.gear.image ? ' gear-card--image' : ''}`} id={row.gear.slug || row.gear.id}>
+              <div class="gear-card__idx">{String(row.index + 1).padStart(2, '0')}</div>
+              {row.gear.image && (
+                <figure class="gear-card__image">
+                  <img src={asset(row.gear.image, 'card')} alt={row.gear.name} loading="lazy" />
+                </figure>
+              )}
+              <div class="gear-card__body">
+                <div class="gear-card__top">
+                  <div>
+                    <div class="mono-sm muted">{row.label} · {row.range}</div>
+                    <h2 class="serif">{row.gear.name}</h2>
+                  </div>
+                  <span class={`tag tag--${familyTone[row.family] === 'default' ? 'cool' : familyTone[row.family]}`}>
+                    {row.family.toUpperCase()}
+                  </span>
+                </div>
+                {(row.gear.description || row.gear.notes) && (
+                  <p>{row.gear.description || row.gear.notes}</p>
+                )}
+                <div class="gear-card__links">
+                  {row.links.length > 0 ? row.links.slice(0, 5).map((link) => (
+                    <a href={`/band/members/${link.member.slug}`} class={`player-chip player-chip--${link.source}`}>
+                      <span>{link.member.name}</span>
+                      <small>{sourceLabel[link.source]}</small>
+                    </a>
+                  )) : (
+                    <span class="player-chip player-chip--empty">Player link TBC</span>
+                  )}
+                </div>
+                <div class="gear-card__meta">
+                  <span>{row.gear.manufacturer || row.gear.model || titleCase(row.gear.kind || row.gear.category || row.family)}</span>
+                  <span>{row.range}</span>
+                  <span>{row.links.length ? `${row.links.length} member ${row.links.length === 1 ? 'link' : 'links'}` : 'Unlinked'}</span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <aside class="gear-aside stack" style="--gap: 1.4rem;">
+          <div class="panel--bare">
+            <div class="panel-head">
+              <span>Category mix</span>
+              <span>{categories.length} groups</span>
+            </div>
+            <div class="family-meter">
+              {categories.map((category) => (
+                <div class="family-meter__row">
+                  <div>
+                    <span>{category.label}</span>
+                    <small>{category.rows.map((row) => row.gear.name).join(' · ')}</small>
+                  </div>
+                  <strong>{category.rows.length}</strong>
+                  <i style={`width: ${Math.max(12, (category.rows.length / maxCategoryCount) * 100)}%;`}></i>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div class="panel--bare">
+            <div class="panel-head">
+              <span>Current players</span>
+              <span>{currentMemberRows.length}</span>
+            </div>
+            <div class="current-register">
+              {currentMemberRows.map((row) => (
+                <a href={`/band/members/${row.member.slug}`} class="current-register__row">
+                  <span>
+                    <strong>{row.member.name}</strong>
+                    <small>{memberRoleLabel(row.member) || row.families.map((family) => familyLabels[family]).join(' / ')}</small>
+                  </span>
+                  <em>{row.matches.length}</em>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div class="panel--bare">
+            <div class="panel-head">
+              <span>Model quality</span>
+              <span>{namedLinkCount ? 'mixed' : 'role-derived'}</span>
+            </div>
+            <div class="model-note">
+              <p>Direct player links are shown first. When they are empty, the member instrument model fills the gap from roles, instruments, and active-year windows.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    )}
+  </section>
+
+  <section class="container gear-section" data-gear-panel="categories" hidden>
+    <div class="gear-section__intro">
+      <div>
+        <div class="mono muted">Equipment families</div>
+        <h2 class="serif">Filed by sound source</h2>
+      </div>
+      <div class="mono-sm muted">{categories.length} categories</div>
+    </div>
+    <div class="category-grid">
+      {categories.map((category) => (
+        <section class="category-block">
+          <div class="category-block__head">
+            <span>{category.label}</span>
+            <strong>{category.rows.length}</strong>
+          </div>
+          <div class="category-block__items">
+            {category.rows.map((row) => (
+              <a href={`#${row.gear.slug || row.gear.id}`}>
+                <span>{row.gear.name}</span>
+                <small>{row.range}</small>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <section class="container gear-section" data-gear-panel="members" hidden>
+    <div class="gear-section__intro">
+      <div>
+        <div class="mono muted">Member data model</div>
+        <h2 class="serif">Instrument register</h2>
+      </div>
+      <div class="mono-sm muted">{members.length} members</div>
+    </div>
+    <div class="member-register">
+      {memberRows.map((row) => (
+        <a href={`/band/members/${row.member.slug}`} class="member-gear-row">
+          <span class="member-gear-row__status">{row.member.is_current_member ? 'Current' : 'Archive'}</span>
+          <span class="member-gear-row__main">
+            <strong>{row.member.name}</strong>
+            <small>{memberTenureLabel(row.member)}</small>
+          </span>
+          <span class="member-gear-row__families">
+            {row.families.map((family) => familyLabels[family]).join(' / ')}
+          </span>
+          <span class="member-gear-row__count">{row.matches.length}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="container gear-section" data-gear-panel="ledger" hidden>
+    <div class="gear-section__intro">
+      <div>
+        <div class="mono muted">Archive ledger</div>
+        <h2 class="serif">Every filed instrument</h2>
+      </div>
+      <div class="mono-sm muted">{gearRows.length} entries</div>
+    </div>
+    <div class="gear-ledger-wrap">
+      <table class="data data--airy gear-ledger">
+        <thead>
+          <tr>
+            <th class="gear-ledger__no">No.</th>
+            <th>Item</th>
+            <th class="gear-ledger__category">Category</th>
+            <th class="gear-ledger__era">Era</th>
+            <th class="gear-ledger__members">Member links</th>
+          </tr>
+        </thead>
         <tbody>
-          {byCategory[cat].map((g: any, i: number) => (
+          {gearRows.map((row) => (
             <tr>
-              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-              <td><span class="serif" style="font-size: 17px; font-style: italic;">{g.name || g.model || g.title}</span>
-                {g.manufacturer && <span class="mono-sm muted"> · {g.manufacturer}</span>}
+              <td class="idx" data-label="No.">{String(row.index + 1).padStart(2, '0')}</td>
+              <td data-label="Item">
+                <span class="serif" style="font-size: 18px;">{row.gear.name}</span>
+                {(row.gear.description || row.gear.notes) && <div class="mono-sm muted gear-ledger-note">{row.gear.description || row.gear.notes}</div>}
               </td>
-              <td class="mono-sm muted">{g.description || g.notes || ''}</td>
-              <td class="mono-sm" style="color: var(--accent-3);">{g.owner || g.used_by || '—'}</td>
+              <td class="mono-sm" data-label="Category">{row.label}</td>
+              <td class="mono-sm muted" data-label="Era">{row.range}</td>
+              <td class="mono-sm gear-ledger__links" data-label="Member links">
+                <div class="gear-link-list">
+                  {row.links.length ? row.links.slice(0, 6).map((link) => (
+                    <a href={`/band/members/${link.member.slug}`} class={`gear-link-pill gear-link-pill--${link.source}`}>
+                      {link.member.name}
+                    </a>
+                  )) : (
+                    <span class="gear-link-pill gear-link-pill--empty">TBC</span>
+                  )}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      </div>
-    </IssueSection>
-  ))}
+    </div>
+  </section>
 </Layout>
+
+<style>
+  .gear-topbar {
+    padding-top: clamp(20px, 3vw, 34px);
+  }
+
+  .gear-head {
+    display: grid;
+    grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+    padding: clamp(18px, 3vw, 34px) var(--gutter) clamp(32px, 4vw, 58px);
+    border-bottom: 1px solid var(--rule);
+    max-width: var(--max-w);
+    margin: 0 auto;
+  }
+
+  .gear-plate {
+    aspect-ratio: 4 / 5;
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    background: var(--bg-3);
+    border: 1px solid var(--rule);
+  }
+
+  .gear-plate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(.9) contrast(1.05);
+  }
+
+  .gear-plate__corner {
+    position: absolute;
+    z-index: 2;
+    padding: 13px 14px;
+    pointer-events: none;
+  }
+
+  .gear-plate__corner--tl { top: 0; left: 0; }
+  .gear-plate__corner--tr { top: 0; right: 0; text-align: right; }
+  .gear-plate__corner--bl { bottom: 0; left: 0; max-width: 100%; }
+
+  .gear-plate__corner > * {
+    display: inline-block;
+    max-width: min(320px, 72vw);
+    padding: 4px 8px;
+    background: color-mix(in oklab, var(--bg), transparent 12%);
+    backdrop-filter: blur(6px);
+  }
+
+  .gear-rack {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: repeat(5, 1fr);
+    gap: 1px;
+    padding: 72px 26px 56px;
+    background:
+      linear-gradient(90deg, transparent 0 48%, var(--rule-2) 48% 52%, transparent 52%),
+      repeating-linear-gradient(0deg, var(--bg-3), var(--bg-3) 18px, var(--bg-2) 18px, var(--bg-2) 19px);
+  }
+
+  .gear-rack__strings span {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: color-mix(in oklab, var(--ink-2), transparent 78%);
+  }
+
+  .gear-rack__module {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 0;
+    padding: 14px;
+    border: 1px solid var(--rule);
+    background: color-mix(in oklab, var(--bg), transparent 10%);
+  }
+
+  .gear-rack__module span {
+    color: var(--ink-2);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .gear-rack__module strong {
+    color: var(--ink);
+    font-family: var(--f-display);
+    font-size: clamp(30px, 5vw, 54px);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .gear-rack__module--guitar { border-left-color: var(--hot); }
+  .gear-rack__module--bass { border-left-color: var(--gold); }
+  .gear-rack__module--keyboard { border-left-color: var(--cool); }
+  .gear-rack__module--drums { border-left-color: var(--blood); }
+  .gear-rack__module--voice,
+  .gear-rack__module--other { border-left-color: var(--accent); }
+
+  .gear-head__body {
+    min-width: 0;
+  }
+
+  .gear-head__title {
+    margin: 16px 0 0;
+    color: var(--ink);
+    font-size: clamp(54px, 9vw, 116px);
+    line-height: .92;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .gear-head__meta {
+    margin-top: 12px;
+    color: var(--ink-2);
+  }
+
+  .gear-head__lede {
+    max-width: 680px;
+    margin: 24px 0 0;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 19px;
+    line-height: 1.65;
+  }
+
+  .archivist {
+    margin-top: 18px;
+    max-width: 680px;
+    color: var(--muted);
+    font-family: var(--f-serif);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .archivist .mono-sm {
+    margin-right: .5em;
+  }
+
+  .gear-head__body .facts {
+    margin-top: 28px;
+  }
+
+  .gear-tabs-wrap {
+    margin-top: clamp(20px, 2.4vw, 32px);
+    padding-bottom: 0;
+  }
+
+  .gear-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .gear-tab {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    padding: 12px 18px 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    transition: color .18s, border-color .18s;
+  }
+
+  .gear-tab:hover {
+    color: var(--ink-2);
+  }
+
+  .gear-tab.is-active {
+    color: var(--accent-ink);
+    border-bottom-color: var(--accent);
+  }
+
+  :root[data-theme='papers'] .gear-tab.is-active {
+    color: var(--accent);
+  }
+
+  .gear-tab__count {
+    font-size: 10px;
+    letter-spacing: .1em;
+    opacity: .56;
+  }
+
+  .gear-section {
+    padding: clamp(32px, 5vw, 58px) var(--gutter);
+    max-width: var(--max-w);
+    margin: 0 auto;
+  }
+
+  .gear-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr);
+    gap: clamp(24px, 3vw, 48px);
+    align-items: start;
+  }
+
+  .gear-stack {
+    display: grid;
+    gap: 12px;
+  }
+
+  .gear-card {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+    padding: 18px;
+    background: color-mix(in oklab, var(--bg-2), transparent 42%);
+    border: 1px solid var(--rule-2);
+    transition: border-color .18s, background .18s;
+  }
+
+  .gear-card--image {
+    grid-template-columns: 54px minmax(110px, 160px) minmax(0, 1fr);
+  }
+
+  .gear-card:hover {
+    border-color: var(--rule);
+    background: color-mix(in oklab, var(--bg-2), transparent 20%);
+  }
+
+  .gear-card__idx {
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    letter-spacing: .12em;
+  }
+
+  .gear-card__image {
+    aspect-ratio: 1 / 1;
+    margin: 0;
+    overflow: hidden;
+    background: var(--bg-3);
+    border: 1px solid var(--rule);
+  }
+
+  .gear-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(.9) contrast(1.04);
+  }
+
+  .gear-card__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .gear-card h2 {
+    margin: 7px 0 0;
+    color: var(--ink);
+    font-size: clamp(28px, 3vw, 42px);
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.04;
+  }
+
+  .gear-card p {
+    max-width: 72ch;
+    margin: 14px 0 0;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 16px;
+    line-height: 1.58;
+  }
+
+  .gear-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .player-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 7px 9px;
+    color: var(--ink-2);
+    border: 1px solid var(--rule);
+    background: transparent;
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .player-chip:hover {
+    color: var(--accent-3);
+    border-color: var(--accent);
+  }
+
+  .player-chip small {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: .14em;
+  }
+
+  .player-chip--direct { border-color: var(--accent); }
+  .player-chip--named { border-color: var(--rule-strong); }
+  .player-chip--role { color: var(--muted); }
+  .player-chip--empty { color: var(--muted); }
+
+  .gear-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 18px;
+    padding-top: 13px;
+    border-top: 1px solid var(--rule-2);
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .family-meter {
+    padding: 12px 16px 16px;
+  }
+
+  .family-meter__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 12px 0 15px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .family-meter__row:last-child {
+    border-bottom: 0;
+  }
+
+  .family-meter__row span,
+  .current-register__row strong {
+    display: block;
+    color: var(--ink);
+    font-family: var(--f-serif);
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .family-meter__row small,
+  .current-register__row small {
+    display: block;
+    margin-top: 3px;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: .12em;
+    line-height: 1.45;
+    text-transform: uppercase;
+  }
+
+  .family-meter__row strong {
+    color: var(--accent-3);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .family-meter__row i {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--accent-3);
+  }
+
+  .current-register {
+    padding: 8px 0;
+  }
+
+  .current-register__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    color: inherit;
+    border: none;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .current-register__row:last-child {
+    border-bottom: 0;
+  }
+
+  .current-register__row em {
+    color: var(--accent-3);
+    font-family: var(--f-display);
+    font-size: 28px;
+    font-style: italic;
+    line-height: 1;
+  }
+
+  .model-note {
+    padding: 14px 16px 16px;
+  }
+
+  .model-note p,
+  .empty-note p {
+    margin: 0;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .gear-section__intro {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .gear-section__intro h2 {
+    margin: 4px 0 0;
+    font-size: 34px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  .category-block {
+    background: color-mix(in oklab, var(--bg-2), transparent 42%);
+    border: 1px solid var(--rule-2);
+  }
+
+  .category-block__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .category-block__head span {
+    color: var(--ink);
+    font-family: var(--f-display);
+    font-size: 28px;
+    font-style: italic;
+  }
+
+  .category-block__head strong {
+    color: var(--accent-3);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: .14em;
+  }
+
+  .category-block__items a {
+    display: grid;
+    gap: 4px;
+    padding: 13px 18px;
+    color: inherit;
+    border: none;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .category-block__items a:last-child {
+    border-bottom: 0;
+  }
+
+  .category-block__items span {
+    color: var(--ink);
+    font-family: var(--f-serif);
+    font-size: 18px;
+    font-style: italic;
+  }
+
+  .category-block__items small {
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .member-register {
+    display: grid;
+    gap: 10px;
+  }
+
+  .member-gear-row {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr) minmax(180px, .7fr) 54px;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    color: inherit;
+    background: color-mix(in oklab, var(--bg-2), transparent 42%);
+    border: 1px solid var(--rule-2);
+  }
+
+  .member-gear-row:hover {
+    border-color: var(--rule);
+    background: var(--bg-2);
+  }
+
+  .member-gear-row__status,
+  .member-gear-row__families,
+  .member-gear-row__count {
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .member-gear-row__main strong,
+  .member-gear-row__main small {
+    display: block;
+  }
+
+  .member-gear-row__main strong {
+    color: var(--ink);
+    font-family: var(--f-serif);
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .member-gear-row__main small {
+    margin-top: 3px;
+    color: var(--ink-2);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .member-gear-row__count {
+    color: var(--accent-3);
+    text-align: right;
+  }
+
+  .gear-ledger-note {
+    margin-top: 5px;
+    white-space: normal;
+    line-height: 1.45;
+  }
+
+  .gear-ledger-wrap {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .gear-ledger {
+    min-width: 0 !important;
+    max-width: 100%;
+    overflow: visible;
+    table-layout: fixed;
+  }
+
+  .gear-ledger__no {
+    width: 54px;
+  }
+
+  .gear-ledger__category {
+    width: 16%;
+  }
+
+  .gear-ledger__era {
+    width: 18%;
+  }
+
+  .gear-ledger__members {
+    width: 30%;
+  }
+
+  .gear-ledger tbody td,
+  .gear-ledger tbody td.mono-sm,
+  .gear-ledger tbody td.idx,
+  .gear-ledger tbody td.num {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .gear-link-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .gear-link-pill {
+    display: inline-flex;
+    max-width: 100%;
+    padding: 5px 7px;
+    color: var(--ink-2);
+    border: 1px solid var(--rule);
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: .12em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .gear-link-pill:hover {
+    color: var(--accent-3);
+    border-color: var(--accent);
+  }
+
+  .gear-link-pill--direct { border-color: var(--accent); }
+  .gear-link-pill--named { border-color: var(--rule-strong); }
+  .gear-link-pill--role,
+  .gear-link-pill--empty { color: var(--muted); }
+
+  .empty-note {
+    padding: clamp(28px, 5vw, 56px);
+    background: var(--bg-2);
+    border: 1px solid var(--rule);
+  }
+
+  .empty-note h2 {
+    margin: 8px 0 12px;
+    font-size: 36px;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  @media (max-width: 940px) {
+    .gear-head,
+    .gear-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .gear-plate {
+      max-width: 560px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .gear-card,
+    .gear-card--image,
+    .member-gear-row {
+      grid-template-columns: 1fr;
+    }
+
+    .gear-card__top,
+    .gear-section__intro {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .member-gear-row__count {
+      text-align: left;
+    }
+
+    .gear-ledger,
+    .gear-ledger thead,
+    .gear-ledger tbody,
+    .gear-ledger tr,
+    .gear-ledger th,
+    .gear-ledger td {
+      display: block;
+      width: 100%;
+    }
+
+    .gear-ledger thead {
+      display: none;
+    }
+
+    .gear-ledger tr {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .gear-ledger tbody td {
+      padding: 5px 0;
+      border-bottom: 0;
+    }
+
+    .gear-ledger tbody td:not(:first-child)::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-family: var(--f-mono);
+      font-size: 9px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+  }
+</style>
+
+<script>
+  function wireGearTabs() {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('[data-gear-tabs] .gear-tab');
+    const panels = document.querySelectorAll<HTMLElement>('[data-gear-panel]');
+    if (!tabs.length) return;
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-target');
+        tabs.forEach((item) => item.classList.toggle('is-active', item === tab));
+        panels.forEach((panel) => {
+          panel.hidden = panel.getAttribute('data-gear-panel') !== target;
+        });
+      });
+    });
+  }
+
+  wireGearTabs();
+  document.addEventListener('astro:page-load', wireGearTabs);
+</script>

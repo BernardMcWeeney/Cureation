@@ -1,5 +1,7 @@
 ---
 const current = Astro.url.pathname;
+const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
+const calendarSubscribeUrl = calendarFeedUrl.replace(/^https?:/, 'webcal:');
 const sections: Array<{ title: string; links: Array<{ href: string; label: string }> }> = [
   { title: 'Records', links: [
     { href: '/discography', label: 'Discography' },
@@ -11,42 +13,46 @@ const sections: Array<{ title: string; links: Array<{ href: string; label: strin
   ]},
   { title: 'Live', links: [
     { href: '/setlists', label: 'Live archive' },
+    { href: '/tours/2026-european-summer-shows', label: '2026 Tour Tracker' },
     { href: '/setlists/compare', label: 'Compare shows' },
-    { href: '/tours', label: 'Tours' },
-    { href: '/venues', label: 'Venues' },
-    { href: '/venues/map', label: 'Venue map' },
     { href: '/on-this-day', label: 'On this day' },
   ]},
-  { title: 'Media', links: [
+  { title: 'Places', links: [
+    { href: '/tours', label: 'Tours' },
+    { href: calendarSubscribeUrl, label: 'Tour calendar feed' },
+    { href: '/venues', label: 'Venues' },
+    { href: '/tours/map', label: 'World map' },
+  ]},
+  { title: 'Wiki', links: [
+    { href: '/wiki', label: 'All wiki pages' },
     { href: '/photos', label: 'Photographs' },
     { href: '/videos', label: 'Videos' },
-  ]},
-  { title: 'The band', links: [
     { href: '/band', label: 'Members' },
     { href: '/band/history', label: 'History' },
     { href: '/band/gear', label: 'Gear' },
-    { href: '/band/quotes', label: 'Quotations' },
   ]},
-  { title: 'Dispatches', links: [
-    { href: '/news', label: 'Dispatches' },
+  { title: 'Journal', links: [
+    { href: '/news', label: 'All journal entries' },
+    { href: '/news?category=news', label: 'News' },
+    { href: '/news?category=blog', label: 'Blog' },
+    { href: '/news?category=reviews', label: 'Reviews' },
     { href: '/newsletter', label: 'Newsletter' },
     { href: '/rss.xml', label: 'RSS feed' },
-    { href: '/wiki', label: 'The wiki' },
   ]},
-  { title: 'Figures', links: [
+  { title: 'Stats', links: [
     { href: '/stats', label: 'Stats' },
     { href: '/curiosities', label: 'Curiosities' },
   ]},
-  { title: 'Archive', links: [
-    { href: '/about', label: 'About' },
-    { href: '/sources', label: 'Sources' },
-    { href: '/community', label: 'Community' },
+  { title: 'Community', links: [
+    { href: '/community', label: 'Forums' },
     { href: '/my-archive', label: 'My archive' },
-    { href: '/calendar.ics', label: 'Tour dates (iCal)' },
+    { href: '/sources', label: 'Sources' },
+    { href: '/about', label: 'About' },
   ]},
 ];
 function isActive(href: string) {
-  return current === href || current.startsWith(href + '/');
+  const path = href.split('?')[0];
+  return current === path || current.startsWith(path + '/');
 }
 ---
 <div class="menu" id="site-menu" data-menu hidden role="dialog" aria-modal="true" aria-label="Site menu">

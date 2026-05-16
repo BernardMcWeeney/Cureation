@@ -4,29 +4,67 @@ import Layout from '../../../layouts/Layout.astro';
 import Crumbs from '../../../components/ui/Crumbs.astro';
 import Tag from '../../../components/ui/Tag.astro';
 import Bookmark from '../../../components/ui/Bookmark.astro';
-import { getMemberBySlug, listAlbums } from '../../../lib/directus';
+import {
+  formatStintYears,
+  getMemberBySlug,
+  getMemberLiveStats,
+  listMemberPhotos,
+  memberActiveYears,
+  memberLifespanLabel,
+  memberPhoto,
+  memberRoleLabel,
+  memberTenureLabel,
+} from '../../../lib/directus';
 import { asset } from '../../../lib/assets';
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/band');
-const member: any = await getMemberBySlug(slug);
+
+const member = await getMemberBySlug(slug);
 if (!member) return new Response('Not found', { status: 404 });
 
-const albums = await listAlbums();
+const [photos, liveStats] = await Promise.all([
+  listMemberPhotos(member, { limit: 9 }),
+  getMemberLiveStats(member),
+]);
 
-const instruments: string[] = Array.isArray(member.instruments) ? member.instruments : [];
-const aliases: string[] = Array.isArray(member.aliases) ? member.aliases : [];
-const sideProjects: any[] = Array.isArray(member.side_projects) ? member.side_projects : [];
+const instruments = member.instruments ?? [];
+const aliases = member.aliases ?? [];
+const sideProjects = member.side_projects ?? [];
+const stints = member.stints ?? [];
+const portrait = memberPhoto(member);
+const portraitSrc = portrait ? (String(portrait).startsWith('http') ? portrait : asset(portrait, 'hero')) : null;
+const role = memberRoleLabel(member);
+const tenure = memberTenureLabel(member);
+const activeYears = memberActiveYears(member);
+const lifeDates = memberLifespanLabel(member);
+const statusLabel = member.is_current_member ? 'Current lineup' : member.death_date ? 'In memoriam' : 'Alumni';
+const source = member.source && typeof member.source === 'object' ? member.source : null;
+const sourceHref = member.source_url || source?.url || null;
+const sourceName = source?.name || null;
+const primaryTags = instruments.length > 0 ? instruments.slice(0, 4) : (role ? [role] : []);
+const hasLifeNote = Boolean(member.birth_date || member.death_date || member.death_place);
+const hasSourceNote = Boolean(sourceName || sourceHref);
+const hasNotes = hasLifeNote || hasSourceNote || aliases.length > 0 || instruments.length > 0 || sideProjects.length > 0;
+const maxYearCount = Math.max(1, ...liveStats.yearlyCounts.map((item) => item.count));
+const recentYearCounts = liveStats.yearlyCounts.slice(-36);
 
-const facts: Array<[string, string]> = [
-  ['Status', member.is_current_member ? 'Current member' : 'Former member'],
-  ['Tenure', member.tenure || `${member.tenure_start || ''}–${member.tenure_end || 'present'}`],
-  ['Instruments', instruments.slice(0, 4).join(', ') || '—'],
-  ['Born', member.birth_date || '—'],
+const showPlace = (show: any) => [show.venue, show.city, show.country].filter(Boolean).join(' · ');
+const showDate = (date: string | null) => date ? date.slice(0, 10) : 'Date to be filed';
+const showHref = (show: any) => show?.slug ? `/setlists/${show.slug}` : undefined;
+const showMeta = (show: any) => [show.tour_name, show.song_count ? `${show.song_count} songs` : null].filter(Boolean).join(' · ');
+const photoSrc = (photo: any, preset: 'card' | 'hero' = 'card') =>
+  photo.image_file ? asset(photo.image_file, preset) : photo.image_url;
+
+const heroFacts = [
+  { k: 'Tenure', v: tenure },
+  { k: 'Documented shows', v: liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : 'To be filed' },
+  { k: 'Countries', v: liveStats.countries ? liveStats.countries.toLocaleString() : '—' },
+  { k: 'Active years', v: activeYears ? `${activeYears}` : '—' },
 ];
 ---
-<Layout title={`${member.name} · The band · Cureation`} description={member.bio || `${member.name}, ${member.is_current_member ? 'current' : 'former'} member of The Cure.`} ogImage={member.photo_file && !String(member.photo_file).startsWith('http') ? asset(member.photo_file, 'og') : undefined}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+<Layout title={`${member.name} · The band · Cureation`} description={member.bio || `${member.name}, ${statusLabel.toLowerCase()} member of The Cure.`} ogImage={portrait && !String(portrait).startsWith('http') ? asset(portrait, 'og') : undefined}>
+  <div class="container member-topbar">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'The band', href: '/band' },
@@ -35,85 +73,892 @@ const facts: Array<[string, string]> = [
     <Bookmark kind="member" id={member.id} label={member.name} href={`/band/members/${member.slug}`} />
   </div>
 
-  <section class="container dossier">
-    <figure class="dossier__portrait">
-      {member.photo_file ? (
-        <img src={member.photo_file.startsWith('http') ? member.photo_file : asset(member.photo_file, 'hero')} alt={member.name} />
-      ) : (
-        <div class="placeholder" style="aspect-ratio: 3/4;">No portrait</div>
-      )}
-      <div class="cover-plate__corner cover-plate__corner--tl">
-        <span>{member.is_current_member ? '· CURRENT ·' : '· ALUMNI ·'}</span>
+  <section class="container member-head">
+    <div class="member-head__art">
+      <figure class="portrait-plate">
+        <div class="portrait-plate__corner portrait-plate__corner--tl">
+          <span class="mono-sm muted">{statusLabel.toUpperCase()}</span>
+        </div>
+        <div class="portrait-plate__corner portrait-plate__corner--tr">
+          <span class="mono-sm muted">{role || 'ROLE TBC'}</span>
+        </div>
+        {portraitSrc ? (
+          <img src={portraitSrc} alt={member.name} />
+        ) : (
+          <div class="portrait-plate__fallback">{member.name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2)}</div>
+        )}
+        <div class="portrait-plate__corner portrait-plate__corner--bl">
+          <span class="mono-sm muted">{tenure}</span>
+        </div>
+      </figure>
+    </div>
+
+    <div class="member-head__body">
+      <div class="cluster" style="gap: .4rem;">
+        <span class={`tag ${member.is_current_member ? 'tag--gold' : member.death_date ? 'tag--blood' : 'tag--cool'}`}>
+          {statusLabel.toUpperCase()}
+        </span>
+        {primaryTags.map((instrument) => <Tag>{instrument.toUpperCase()}</Tag>)}
+        {liveStats.tenureShowCount > 0 && <Tag variant="accent">{liveStats.tenureShowCount.toLocaleString()} SHOWS</Tag>}
       </div>
-      <div class="cover-plate__corner cover-plate__corner--tr">
-        <span>{instruments[0]?.toUpperCase() || 'MEMBER'}</span>
+
+      <h1 class="member-head__title serif">{member.name}</h1>
+      <div class="mono-sm member-head__meta">
+        {role || 'Role to be filed'} · {tenure}
+        {lifeDates !== 'Life dates to be filed' && <> · {lifeDates}</>}
       </div>
-      {member.birth_date && (
-        <div class="cover-plate__corner cover-plate__corner--br">
-          <span>b. {member.birth_date.slice(0, 4)}</span>
+
+      {member.bio && <p class="member-head__lede">{member.bio}</p>}
+
+      {liveStats.firstShow && liveStats.lastShow && (
+        <div class="archivist">
+          <span class="mono-sm muted">Live archive:</span>
+          documented setlists place {member.name} inside {liveStats.tenureShowCount.toLocaleString()} Cure show{liveStats.tenureShowCount === 1 ? '' : 's'} from {showDate(liveStats.firstShow.date)} to {showDate(liveStats.lastShow.date)}.
         </div>
       )}
-    </figure>
 
-    <div class="dossier__body stack" style="--gap: 1rem;">
-      <div class="mono-sm muted">MEMBER · {member.tenure || '—'}</div>
-      <div class="cluster" style="gap:.4rem;">
-        {member.is_current_member
-          ? <span class="tag tag--gold"><span class="pip pip--gold"></span>ACTIVE</span>
-          : <span class="tag tag--cool">ALUMNI</span>}
-        {instruments.slice(0, 3).map((i) => <Tag>{i.toUpperCase()}</Tag>)}
-      </div>
-      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; font-weight: 400; margin: 0;">{member.name}</h1>
-      {aliases.length > 0 && <div class="mono-sm" style="color: var(--accent-3);">AKA {aliases.join(' · ').toUpperCase()}</div>}
-      {member.bio && <p style="font-family: var(--f-serif); font-size: 18px; line-height: 1.6; color: var(--ink-2); max-width: 58ch;">{member.bio}</p>}
       <div class="facts">
-        {facts.map(([k, v]) => (
+        {heroFacts.map((fact) => (
           <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
+            <div class="facts__k">{fact.k}</div>
+            <div class="facts__v">{fact.v}</div>
           </div>
         ))}
       </div>
     </div>
   </section>
 
-  {instruments.length > 0 && (
-    <section class="container" style="padding: clamp(24px, 4vw, 48px) 0;">
-      <div class="panel-head" style="border: 1px solid var(--rule);">
-        <span>Instruments on file</span>
-        <span>{instruments.length} LISTED</span>
+  <div class="container member-tabs-wrap">
+    <div class="member-tabs" data-member-tabs role="tablist">
+      <button class="member-tab is-active" role="tab" data-target="live">
+        Live record <span class="member-tab__count">{liveStats.tenureShowCount.toLocaleString()}</span>
+      </button>
+      <button class="member-tab" role="tab" data-target="lineup">
+        Lineup history <span class="member-tab__count">{stints.length}</span>
+      </button>
+      {photos.length > 0 && (
+        <button class="member-tab" role="tab" data-target="photos">
+          Photo file <span class="member-tab__count">{photos.length}</span>
+        </button>
+      )}
+      {hasNotes && (
+        <button class="member-tab" role="tab" data-target="notes">
+          Notes <span class="member-tab__count">·</span>
+        </button>
+      )}
+    </div>
+  </div>
+
+  <section class="container member-section" data-member-panel="live">
+    <div class="live-layout">
+      <div class="live-stats">
+        <div class="live-stat live-stat--primary">
+          <span>Documented tenure-window shows</span>
+          <strong>{liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : '—'}</strong>
+          <p>Counted from dated setlists that fall inside the member stint windows.</p>
+        </div>
+        <div class="live-stat">
+          <span>Lineup-tagged appearances</span>
+          <strong>{liveStats.lineupTaggedCount ? liveStats.lineupTaggedCount.toLocaleString() : '—'}</strong>
+        </div>
+        <div class="live-stat">
+          <span>Average set length</span>
+          <strong>{liveStats.avgSongCount ? `${liveStats.avgSongCount} songs` : '—'}</strong>
+        </div>
+        <div class="live-stat">
+          <span>Tours / countries</span>
+          <strong>{liveStats.tours || '—'} / {liveStats.countries || '—'}</strong>
+        </div>
       </div>
-      <ul class="inst-list">
-        {instruments.map((i) => (
-          <li class="serif" style="font-size: 18px; font-style: italic;">{i}</li>
+
+      <aside class="live-focus panel--bare">
+        <div class="panel-head">
+          <span>Archive markers</span>
+          <span>Setlist archive</span>
+        </div>
+        <div class="marker-list">
+          {liveStats.firstShow && (
+            <a href={showHref(liveStats.firstShow)} class="marker-row">
+              <span>First on file</span>
+              <strong>{showDate(liveStats.firstShow.date)}</strong>
+              <small>{showPlace(liveStats.firstShow)}</small>
+            </a>
+          )}
+          {liveStats.lastShow && (
+            <a href={showHref(liveStats.lastShow)} class="marker-row">
+              <span>Latest on file</span>
+              <strong>{showDate(liveStats.lastShow.date)}</strong>
+              <small>{showPlace(liveStats.lastShow)}</small>
+            </a>
+          )}
+          {liveStats.longestShow && (
+            <a href={showHref(liveStats.longestShow)} class="marker-row">
+              <span>Longest set</span>
+              <strong>{liveStats.longestShow.song_count} songs</strong>
+              <small>{showDate(liveStats.longestShow.date)} · {liveStats.longestShow.venue}</small>
+            </a>
+          )}
+        </div>
+      </aside>
+    </div>
+
+    {recentYearCounts.length > 0 && (
+      <div class="year-board">
+        <div class="member-section__intro">
+          <div>
+            <div class="mono muted">Year density</div>
+            <h2 class="serif">Setlists across the tenure window</h2>
+          </div>
+          <div class="mono-sm muted">Latest {recentYearCounts.length} active years on file</div>
+        </div>
+        <div class="year-bars">
+          {recentYearCounts.map((item) => (
+            <div class="year-bar" title={`${item.year}: ${item.count} shows`}>
+              <div class="year-bar__fill" style={`height: ${Math.max(4, (item.count / maxYearCount) * 100)}%;`}></div>
+              <span>{String(item.year).slice(2)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {liveStats.recentShows.length > 0 && (
+      <div class="recent-shows">
+        <div class="member-section__intro">
+          <div>
+            <div class="mono muted">Recent setlists</div>
+            <h2 class="serif">Latest appearances in the archive</h2>
+          </div>
+          <a href="/setlists" class="mono-sm">Open setlists →</a>
+        </div>
+        <div class="show-list">
+          {liveStats.recentShows.map((show, i) => (
+            <a href={showHref(show)} class="show-row">
+              <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+              <span>
+                <strong>{show.venue || 'Venue to be filed'}</strong>
+                <small>{showPlace(show)}</small>
+              </span>
+              <span class="show-row__date">{showDate(show.date)}</span>
+              <span class="show-row__meta">{showMeta(show) || 'Setlist'}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </section>
+
+  <section class="container member-section" data-member-panel="lineup" hidden>
+    <div class="member-section__intro">
+      <div>
+        <div class="mono muted">Member stints</div>
+        <h2 class="serif">Lineup history</h2>
+      </div>
+      <div class="mono-sm muted">{stints.length ? `${stints.length} stint${stints.length === 1 ? '' : 's'}` : 'No stints filed'}</div>
+    </div>
+
+    {stints.length > 0 ? (
+      <ol class="stint-ledger">
+        {stints.map((stint, i) => (
+          <li class={stint.end_year === null ? 'is-active' : undefined}>
+            <div class="stint-ledger__n">{String(stint.stint_number || i + 1).padStart(2, '0')}</div>
+            <div>
+              <div class="stint-ledger__years">{formatStintYears(stint)}</div>
+              <h3 class="serif">{stint.role || 'Band member'}</h3>
+              {stint.notes && <p>{stint.notes}</p>}
+            </div>
+            <div class="stint-ledger__flag">{stint.end_year === null ? 'Active' : 'Archive'}</div>
+          </li>
         ))}
-      </ul>
+      </ol>
+    ) : (
+      <p class="empty-note">No linked member stints have been filed yet.</p>
+    )}
+  </section>
+
+  {photos.length > 0 && (
+    <section class="container member-section" data-member-panel="photos" hidden>
+      <div class="member-section__intro">
+        <div>
+          <div class="mono muted">Photo file</div>
+          <h2 class="serif">Contact sheet</h2>
+        </div>
+        <div class="mono-sm muted">Linked, searched, and tenure-window photos</div>
+      </div>
+      <div class="contact-sheet">
+        {photos.map((photo) => (
+          <figure>
+            <img src={photoSrc(photo, 'card')} alt={photo.title || member.name} loading="lazy" />
+            <figcaption>
+              <span>{photo.title || 'Archive photograph'}</span>
+              <small>{[photo.formatted_date, photo.photographer, photo.location].filter(Boolean).join(' · ') || 'Cureation photo archive'}</small>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
     </section>
   )}
 
-  {sideProjects.length > 0 && (
-    <section class="container" style="padding-bottom: clamp(24px, 4vw, 48px);">
-      <div class="panel-head" style="border: 1px solid var(--rule);">
-        <span>Side projects</span>
-        <span>{sideProjects.length} LISTED</span>
+  {hasNotes && (
+    <section class="container member-section" data-member-panel="notes" hidden>
+      <div class="member-section__intro">
+        <div>
+          <div class="mono muted">Archive notes</div>
+          <h2 class="serif">Roles, aliases, sources</h2>
+        </div>
       </div>
-      <table class="data">
-        <thead><tr><th style="width:50px;">№</th><th>Project</th><th>Role</th><th>Years</th></tr></thead>
-        <tbody>
-          {sideProjects.map((p: any, i: number) => (
-            <tr>
-              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-              <td><span class="serif" style="font-size: 18px; font-style: italic;">{p.name || p.project || p}</span></td>
-              <td class="mono-sm muted">{p.role || '—'}</td>
-              <td class="mono-sm" style="color: var(--accent-3);">{p.years || p.start || '—'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div class="notes-grid">
+        {instruments.length > 0 && (
+          <section>
+            <div class="member-section__label">Instrument register</div>
+            <ul class="tag-list">
+              {instruments.map((instrument) => <li>{instrument}</li>)}
+            </ul>
+          </section>
+        )}
+        {aliases.length > 0 && (
+          <section>
+            <div class="member-section__label">Aliases</div>
+            <ul class="tag-list">
+              {aliases.map((alias) => <li>{alias}</li>)}
+            </ul>
+          </section>
+        )}
+        {hasLifeNote && (
+          <section>
+            <div class="member-section__label">Life dates</div>
+            <p>{lifeDates}{member.death_place ? ` · ${member.death_place}` : ''}</p>
+          </section>
+        )}
+        {sideProjects.length > 0 && (
+          <section>
+            <div class="member-section__label">Other work</div>
+            <ul class="project-list">
+              {sideProjects.map((project: any) => (
+                <li>
+                  <strong>{project.name || project.project || project}</strong>
+                  {(project.role || project.years || project.start) && (
+                    <span>{[project.role, project.years || project.start].filter(Boolean).join(' · ')}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+        {hasSourceNote && (
+          <section>
+            <div class="member-section__label">Source note</div>
+            <p>{sourceHref ? <a href={sourceHref} target="_blank" rel="noreferrer">{sourceName || 'Primary source'}</a> : sourceName}</p>
+          </section>
+        )}
+      </div>
     </section>
   )}
 </Layout>
 
 <style>
-  .inst-list { list-style: none; margin: 0; padding: 16px; background: var(--bg-2); border: 1px solid var(--rule); border-top: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .member-topbar {
+    padding-top: clamp(20px, 3vw, 34px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .member-head {
+    display: grid;
+    grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+    padding: clamp(18px, 3vw, 34px) var(--gutter) clamp(32px, 4vw, 58px);
+    border-bottom: 1px solid var(--rule);
+    max-width: var(--max-w);
+    margin: 0 auto;
+  }
+
+  .portrait-plate {
+    aspect-ratio: 4 / 5;
+    background: var(--bg-3);
+    border: 1px solid var(--rule);
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .portrait-plate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(.92) contrast(1.05);
+  }
+
+  .portrait-plate__fallback {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--accent-3);
+    font-family: var(--f-serif);
+    font-size: 72px;
+    font-style: italic;
+    background:
+      linear-gradient(135deg, transparent 0 49%, var(--rule-2) 49% 51%, transparent 51%),
+      var(--bg-2);
+  }
+
+  .portrait-plate__corner {
+    position: absolute;
+    padding: 13px 14px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .portrait-plate__corner--tl { top: 0; left: 0; }
+  .portrait-plate__corner--tr { top: 0; right: 0; text-align: right; }
+  .portrait-plate__corner--bl { bottom: 0; left: 0; max-width: 100%; }
+
+  .portrait-plate__corner > * {
+    display: inline-block;
+    max-width: min(320px, 72vw);
+    padding: 4px 8px;
+    background: color-mix(in oklab, var(--bg), transparent 12%);
+    backdrop-filter: blur(6px);
+  }
+
+  .member-head__body {
+    min-width: 0;
+  }
+
+  .member-head__title {
+    margin: 16px 0 0;
+    color: var(--ink);
+    font-size: 96px;
+    line-height: .92;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .member-head__meta {
+    color: var(--ink-2);
+    margin-top: 12px;
+  }
+
+  .member-head__lede {
+    max-width: 680px;
+    margin: 24px 0 0;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 19px;
+    line-height: 1.65;
+  }
+
+  .archivist {
+    margin-top: 18px;
+    max-width: 680px;
+    color: var(--muted);
+    font-family: var(--f-serif);
+    font-size: 14px;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .member-head__body .facts {
+    margin-top: 28px;
+  }
+
+  .member-tabs-wrap {
+    margin-top: clamp(20px, 2.4vw, 32px);
+    padding-bottom: 0;
+  }
+
+  .member-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .member-tab {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    padding: 12px 18px 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    transition: color .18s, border-color .18s;
+  }
+
+  .member-tab:hover {
+    color: var(--ink-2);
+  }
+
+  .member-tab.is-active {
+    color: var(--accent-ink);
+    border-bottom-color: var(--accent);
+  }
+
+  :root[data-theme='papers'] .member-tab.is-active {
+    color: var(--accent);
+  }
+
+  .member-tab__count {
+    font-size: 10px;
+    letter-spacing: .1em;
+    opacity: .56;
+  }
+
+  .member-section {
+    padding: clamp(32px, 5vw, 58px) var(--gutter);
+    max-width: var(--max-w);
+    margin: 0 auto;
+  }
+
+  .member-section__intro {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .member-section__intro h2 {
+    margin: 4px 0 0;
+    font-size: 34px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .member-section__label {
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  .live-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(260px, .8fr);
+    gap: clamp(24px, 3vw, 48px);
+  }
+
+  .live-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .live-stat {
+    min-height: 150px;
+    padding: 18px;
+    background: color-mix(in oklab, var(--bg-2), transparent 32%);
+    border: 1px solid var(--rule-2);
+  }
+
+  .live-stat--primary {
+    grid-row: span 2;
+    min-height: 312px;
+  }
+
+  .live-stat span,
+  .marker-row span,
+  .stint-ledger__flag {
+    display: block;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .live-stat strong {
+    display: block;
+    margin-top: 12px;
+    color: var(--ink);
+    font-family: var(--f-serif);
+    font-size: 32px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .live-stat--primary strong {
+    font-size: 72px;
+  }
+
+  .live-stat p {
+    max-width: 32ch;
+    margin: 16px 0 0;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .marker-list {
+    padding: 8px 0;
+  }
+
+  .marker-row {
+    display: block;
+    padding: 13px 18px 15px;
+    color: inherit;
+    border: none;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .marker-row:last-child {
+    border-bottom: none;
+  }
+
+  .marker-row strong {
+    display: block;
+    margin-top: 6px;
+    color: var(--ink);
+    font-family: var(--f-serif);
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .marker-row small {
+    display: block;
+    margin-top: 5px;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .year-board,
+  .recent-shows {
+    margin-top: clamp(34px, 5vw, 58px);
+  }
+
+  .year-bars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18px, 1fr));
+    gap: 4px;
+    height: 220px;
+    align-items: end;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+  }
+
+  .year-bar {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .year-bar__fill {
+    min-height: 3px;
+    background: var(--ink-2);
+    transition: background .2s;
+  }
+
+  .year-bar:hover .year-bar__fill {
+    background: var(--accent-3);
+  }
+
+  .year-bar span {
+    margin-top: 6px;
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: .04em;
+  }
+
+  .show-list {
+    border-top: 1px solid var(--rule);
+  }
+
+  .show-row {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1.2fr) minmax(100px, .45fr) minmax(120px, .65fr);
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    color: inherit;
+    border: none;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .show-row strong,
+  .show-row small {
+    display: block;
+  }
+
+  .show-row strong {
+    font-family: var(--f-serif);
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .show-row small {
+    margin-top: 3px;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 14px;
+  }
+
+  .show-row__date,
+  .show-row__meta {
+    color: var(--accent-3);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .show-row__meta {
+    color: var(--muted);
+  }
+
+  .stint-ledger {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .stint-ledger li {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr) auto;
+    gap: 18px;
+    align-items: start;
+    padding: 18px;
+    background: color-mix(in oklab, var(--bg-2), transparent 42%);
+    border: 1px solid var(--rule-2);
+  }
+
+  .stint-ledger li.is-active {
+    border-color: color-mix(in oklab, var(--gold), var(--rule) 70%);
+  }
+
+  .stint-ledger__n,
+  .stint-ledger__years {
+    color: var(--accent-3);
+    font-family: var(--f-mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .stint-ledger h3 {
+    margin: 7px 0 0;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  .stint-ledger p,
+  .notes-grid p,
+  .project-list span {
+    margin: 8px 0 0;
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .contact-sheet {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 28px);
+  }
+
+  .contact-sheet figure {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .contact-sheet img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    filter: saturate(.9) contrast(1.04);
+  }
+
+  .contact-sheet figcaption {
+    margin-top: 9px;
+  }
+
+  .contact-sheet figcaption span,
+  .contact-sheet figcaption small {
+    display: block;
+  }
+
+  .contact-sheet figcaption span {
+    color: var(--ink);
+    font-family: var(--f-serif);
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.25;
+  }
+
+  .contact-sheet figcaption small {
+    margin-top: 4px;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 46px);
+  }
+
+  .tag-list,
+  .project-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag-list li {
+    border: 1px solid var(--rule);
+    padding: 7px 9px;
+    color: var(--ink-2);
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .project-list li {
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .project-list li + li {
+    padding-top: 14px;
+  }
+
+  .project-list strong {
+    display: block;
+    font-family: var(--f-serif);
+    font-size: 19px;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .empty-note {
+    color: var(--muted);
+    font-family: var(--f-serif);
+    font-size: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .member-head,
+    .live-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .portrait-plate {
+      max-width: 560px;
+    }
+
+    .member-head__title {
+      font-size: 72px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .member-section__intro {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .live-stats,
+    .notes-grid,
+    .contact-sheet {
+      grid-template-columns: 1fr;
+    }
+
+    .live-stat--primary {
+      min-height: 190px;
+    }
+
+    .live-stat--primary strong {
+      font-size: 54px;
+    }
+
+    .show-row {
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px 12px;
+    }
+
+    .show-row__date,
+    .show-row__meta {
+      grid-column: 2;
+    }
+
+    .stint-ledger li {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .member-head__title {
+      font-size: 50px;
+    }
+
+    .member-head__lede {
+      font-size: 18px;
+    }
+
+    .member-tab {
+      width: 100%;
+      justify-content: space-between;
+      padding-inline: 0;
+    }
+  }
 </style>
+
+<script>
+  function wireMemberTabs() {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('[data-member-tabs] .member-tab');
+    const panels = document.querySelectorAll<HTMLElement>('[data-member-panel]');
+    if (!tabs.length) return;
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-target');
+        tabs.forEach((item) => item.classList.toggle('is-active', item === tab));
+        panels.forEach((panel) => {
+          panel.hidden = panel.getAttribute('data-member-panel') !== target;
+        });
+      });
+    });
+  }
+
+  wireMemberTabs();
+  document.addEventListener('astro:page-load', wireMemberTabs);
+</script>

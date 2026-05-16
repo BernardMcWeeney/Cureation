@@ -197,8 +197,8 @@
 }
 [data-theme='papers'] body {
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(78, 38, 119, 0.06), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgba(78, 38, 119, 0.05), transparent 55%),
+    radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent), transparent 94%), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, color-mix(in oklab, var(--accent), transparent 95%), transparent 55%),
     var(--bg);
   color: var(--ink);
 }
@@ -224,7 +224,7 @@
 [data-theme='papers'] .daily-photo__overlay .serif { color: #F3EEDF !important; }
 [data-theme='papers'] ::selection { background: var(--accent-tint-2); color: var(--ink); }
 [data-theme='papers'] .fog { opacity: 0.16; mix-blend-mode: multiply; }
-[data-theme='papers'] .fog__cloud { background: radial-gradient(closest-side, rgba(78,38,119,0.22), transparent 70%); }
+[data-theme='papers'] .fog__cloud { background: radial-gradient(closest-side, color-mix(in oklab, var(--accent), transparent 78%), transparent 70%); }
 /* Masthead wordmark: dark ink in papers so the title reads.
    Footer wordmark stays ghosted as a decorative blind-stamp. */
 [data-theme='papers'] .masthead-wordmark { color: var(--ink); opacity: 1; }
@@ -239,13 +239,13 @@
 [data-theme='papers'] .chip { background: var(--surface); color: var(--ink); }
 [data-theme='papers'] .chip:hover { color: var(--accent); border-color: var(--accent); }
 [data-theme='papers'] .chip.is-active,
-[data-theme='papers'] .chip[aria-pressed="true"] { background: var(--accent); color: #F9F1DC; border-color: var(--accent); }
+[data-theme='papers'] .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 [data-theme='papers'] .nav { background: color-mix(in oklab, var(--bg), transparent 10%); }
 [data-theme='papers'] .nav__link { color: var(--ink-2); }
 [data-theme='papers'] .nav__link:hover { color: var(--ink); }
 [data-theme='papers'] .nav__link.is-active { color: var(--accent); }
 [data-theme='papers'] .foot { background:
-  radial-gradient(600px 300px at 50% 0%, rgba(78,38,119,0.08), transparent 70%),
+  radial-gradient(600px 300px at 50% 0%, color-mix(in oklab, var(--accent), transparent 92%), transparent 70%),
   var(--bg);
 }
 
@@ -487,6 +487,9 @@ video {
   color: var(--accent-ink);
   background: var(--accent-tint-2);
 }
+:root[data-theme='papers'] .tag--accent {
+  color: var(--accent);
+}
 
 /* Chip — filter pill. Hover stays quiet (no splashy tint);
    only the selected state pulls accent foreground. */
@@ -520,7 +523,7 @@ video {
 :root[data-theme='papers'] .chip.is-active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #F9F1DC;
+  color: var(--accent-ink);
 }
 
 /* Button */
@@ -1440,8 +1443,8 @@ table.data a:hover { color: var(--accent-3); }
 .container {
   width: 100%;
   max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 var(--gutter);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
 }
 .stack > * + * { margin-top: 1rem; }
 .cluster { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }

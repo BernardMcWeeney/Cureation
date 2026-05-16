@@ -44,7 +44,7 @@ const pct = aKeys.size && bKeys.size
     </div>
   </div>
 
-  <section class="container" style="padding: clamp(20px, 3vw, 32px) 0;">
+  <section class="container" style="padding-block: clamp(20px, 3vw, 32px);">
     <form class="compare-form" method="get">
       <label>
         <div class="mono-sm muted">Show A</div>
@@ -69,7 +69,7 @@ const pct = aKeys.size && bKeys.size
   </section>
 
   {a && b && (
-    <section class="container" style="padding: clamp(16px, 2vw, 28px) 0 clamp(48px, 6vw, 80px);">
+    <section class="container" style="padding-block: clamp(16px, 2vw, 28px) clamp(48px, 6vw, 80px);">
       <div class="panel-head" style="border: 1px solid var(--accent);">
         <span><span class="pip"></span>Overlap: {both.size} shared song{both.size === 1 ? '' : 's'} · {pct}% similar</span>
         <span>{a.songs.length} vs {b.songs.length}</span>

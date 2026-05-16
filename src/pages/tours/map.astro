@@ -1,0 +1,723 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/ui/PageHero.astro';
+import DotMap from '../../components/viz/DotMap.astro';
+import { listSetlists, listVenues } from '../../lib/directus';
+import { cityCentroid } from '../../lib/city-centroids';
+import { countryCentroid, isValidCoordinate } from '../../lib/geo';
+
+export const prerender = false;
+
+type MutableCity = {
+  key: string;
+  name: string;
+  state: string | null;
+  country: string;
+  countryCode: string | null;
+  shows: number;
+  venues: Set<string>;
+  tours: Set<string>;
+  first: string | null;
+  latest: string | null;
+  latestSlug: string | null;
+  latTotal: number;
+  lngTotal: number;
+  coordSamples: number;
+};
+
+type MutableCountry = {
+  name: string;
+  code: string | null;
+  shows: number;
+  cities: Set<string>;
+  first: string | null;
+  latest: string | null;
+};
+
+const [setlists, venues] = await Promise.all([
+  listSetlists({ limit: -1 }),
+  listVenues(),
+]);
+
+const venueById = new Map(venues.map((v) => [v.id, v]));
+const cities = new Map<string, MutableCity>();
+const countries = new Map<string, MutableCountry>();
+
+const rememberDate = <T extends { first: string | null; latest: string | null }>(row: T, date: string | null | undefined) => {
+  if (!date) return;
+  if (!row.first || date < row.first) row.first = date;
+  if (!row.latest || date > row.latest) row.latest = date;
+};
+
+for (const show of setlists) {
+  if (!show.country) continue;
+
+  const countryCode = show.country_code || (show.country === 'Hong Kong SAR China' ? 'HK' : null);
+  const countryKey = show.country.toLowerCase();
+  if (!countries.has(countryKey)) {
+    countries.set(countryKey, {
+      name: show.country,
+      code: countryCode,
+      shows: 0,
+      cities: new Set(),
+      first: null,
+      latest: null,
+    });
+  }
+  const country = countries.get(countryKey)!;
+  country.shows += 1;
+  if (show.city) country.cities.add(show.city);
+  rememberDate(country, show.date);
+
+  if (!show.city) continue;
+  const cityKey = [show.city, show.state_province || '', show.country].join('|').toLowerCase();
+  if (!cities.has(cityKey)) {
+    cities.set(cityKey, {
+      key: cityKey,
+      name: show.city,
+      state: show.state_province,
+      country: show.country,
+      countryCode,
+      shows: 0,
+      venues: new Set(),
+      tours: new Set(),
+      first: null,
+      latest: null,
+      latestSlug: null,
+      latTotal: 0,
+      lngTotal: 0,
+      coordSamples: 0,
+    });
+  }
+
+  const city = cities.get(cityKey)!;
+  city.shows += 1;
+  if (show.venue) city.venues.add(show.venue);
+  if (show.tour_name) city.tours.add(show.tour_name);
+  rememberDate(city, show.date);
+  if (show.date && (!city.latest || show.date >= city.latest)) {
+    city.latest = show.date;
+    city.latestSlug = show.slug || null;
+  }
+
+  const venue = show.venue_link ? venueById.get(show.venue_link) : null;
+  if (venue && isValidCoordinate(venue.latitude, venue.longitude)) {
+    city.latTotal += Number(venue.latitude);
+    city.lngTotal += Number(venue.longitude);
+    city.coordSamples += 1;
+  }
+}
+
+const cityRows = Array.from(cities.values())
+  .sort((a, b) => b.shows - a.shows || a.name.localeCompare(b.name));
+
+const cityPoints = cityRows
+  .map((city) => ({
+    city,
+    coords: city.coordSamples > 0
+      ? [city.latTotal / city.coordSamples, city.lngTotal / city.coordSamples]
+      : cityCentroid(city.countryCode, city.country, city.name, city.state),
+    coordinateKind: city.coordSamples > 0 ? 'venue' : 'city',
+  }))
+  .filter((row) => row.coords)
+  .map(({ city, coords, coordinateKind }) => ({
+      id: city.key,
+      kind: 'city',
+      name: city.name,
+      place: [city.name, city.state, city.country].filter(Boolean).join(', '),
+      country: city.country,
+      lat: Number(coords![0].toFixed(6)),
+      lng: Number(coords![1].toFixed(6)),
+      shows: city.shows,
+      venues: city.venues.size,
+      tours: city.tours.size,
+      first: city.first,
+      latest: city.latest,
+      latestSlug: city.latestSlug,
+      coordinateKind,
+    }));
+
+const countryRows = Array.from(countries.values())
+  .sort((a, b) => b.shows - a.shows || a.name.localeCompare(b.name));
+
+const countryPoints = countryRows
+  .map((country) => {
+    const coords = countryCentroid(country.code, country.name);
+    if (!coords) return null;
+    return {
+      id: country.code || country.name,
+      kind: 'country',
+      name: country.name,
+      place: country.name,
+      lat: coords[0],
+      lng: coords[1],
+      shows: country.shows,
+      cities: country.cities.size,
+      first: country.first,
+      latest: country.latest,
+    };
+  })
+  .filter(Boolean);
+
+const mappedShowCount = cityPoints.reduce((sum, city) => sum + city.shows, 0);
+const venueMappedCityCount = cityPoints.filter((city: any) => city.coordinateKind === 'venue').length;
+const topCities = cityRows.slice(0, 12);
+---
+<Layout title="Touring world map · Cureation">
+  <PageHero
+    section="Geography"
+    title="Touring world map."
+    deck="The Cure's show history by country, with city bubbles plotted from linked venues first and city centroids where venue coordinates are missing."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Tours', href: '/tours' }, { label: 'World map' }]}
+    facts={[
+      { k: 'Shows counted', v: setlists.length },
+      { k: 'Cities on file', v: cityRows.length },
+      { k: 'Countries', v: countryRows.length },
+      { k: 'City bubbles', v: cityPoints.length },
+    ]}
+  />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <section class="container live-map-section">
+    <div class="live-map-shell">
+      <div class="live-map-main">
+        <div class="live-map-toolbar" aria-label="Map layers">
+          <button type="button" class="live-map-tab is-active" data-map-mode="all">All</button>
+          <button type="button" class="live-map-tab" data-map-mode="cities">Cities</button>
+          <button type="button" class="live-map-tab" data-map-mode="countries">Countries</button>
+        </div>
+        <div
+          id="shows-map"
+          class="shows-map"
+          data-city-points={JSON.stringify(cityPoints)}
+          data-country-points={JSON.stringify(countryPoints)}
+        >
+          <div class="shows-map__loading mono-sm">LOADING OPENSTREETMAP</div>
+        </div>
+        <div class="live-map-fallback" data-map-fallback>
+          <div class="panel-head">
+            <span>Static coverage</span>
+            <span>{countryPoints.length} COUNTRIES</span>
+          </div>
+          <DotMap
+            points={countryPoints.map((point: any) => ({
+              lat: point.lat,
+              lon: point.lng,
+              label: `${point.name} · ${point.shows} shows`,
+              weight: point.shows,
+            }))}
+            height={320}
+          />
+        </div>
+      </div>
+
+      <aside class="live-map-summary">
+        <div class="panel-head">
+          <span>Coverage</span>
+          <span>{mappedShowCount} CITY-MAPPED SHOWS</span>
+        </div>
+        <div class="live-map-metrics">
+          <div>
+            <span class="mono-sm muted">SHOWS</span>
+            <strong>{setlists.length.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span class="mono-sm muted">CITY DATA</span>
+            <strong>{cityRows.length.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span class="mono-sm muted">COUNTRIES</span>
+            <strong>{countryRows.length.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span class="mono-sm muted">CITY BUBBLES</span>
+            <strong>{cityPoints.length.toLocaleString()}</strong>
+          </div>
+        </div>
+        <div class="live-map-note mono-sm">
+          CITY LAYER USES LINKED VENUE COORDINATES FIRST, THEN CITY CENTROIDS WHERE VENUE COORDS ARE MISSING. {venueMappedCityCount} CITIES HAVE PRECISE VENUE COORDS.
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="container live-map-cities">
+    <div class="panel-head">
+      <span>Most visited cities</span>
+      <span>TOP {topCities.length}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="data data--airy">
+        <thead>
+          <tr>
+            <th style="width:50px;">№</th>
+            <th>City</th>
+            <th>Country</th>
+            <th class="num" style="text-align:right;">Shows</th>
+            <th class="num" style="text-align:right;">Venues</th>
+            <th class="num" style="text-align:right;">Latest</th>
+          </tr>
+        </thead>
+        <tbody>
+          {topCities.map((city, index) => (
+            <tr data-clickable={!!city.latestSlug} onclick={city.latestSlug ? `location.href='/setlists/${city.latestSlug}'` : undefined}>
+              <td class="idx">{String(index + 1).padStart(2, '0')}</td>
+              <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{city.name}</span></td>
+              <td class="mono-sm muted">{city.country}</td>
+              <td class="num" style="color: var(--accent-3);">{city.shows}</td>
+              <td class="num">{city.venues.size || '—'}</td>
+              <td class="num">{city.latest || '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  type MapPoint = {
+    id: string;
+    kind: 'city' | 'country';
+    name: string;
+    place: string;
+    country?: string;
+    lat: number;
+    lng: number;
+    shows: number;
+    venues?: number;
+    tours?: number;
+    cities?: number;
+    coordinateKind?: 'venue' | 'city';
+    first?: string | null;
+    latest?: string | null;
+    latestSlug?: string | null;
+  };
+
+  function readPoints(el: HTMLElement, attr: string): MapPoint[] {
+    try {
+      const raw = el.getAttribute(attr) || '[]';
+      return JSON.parse(raw).filter((point: MapPoint) => Number.isFinite(point.lat) && Number.isFinite(point.lng));
+    } catch {
+      return [];
+    }
+  }
+
+  function esc(value: unknown) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char] || char));
+  }
+
+  function plural(count: number, label: string) {
+    return `${count.toLocaleString()} ${label}${count === 1 ? '' : 's'}`;
+  }
+
+  async function waitForLeaflet() {
+    for (let i = 0; i < 80; i += 1) {
+      const L = (window as any).L;
+      if (L) return L;
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
+    }
+    return null;
+  }
+
+  function popup(point: MapPoint) {
+    const rows = point.kind === 'city'
+      ? [
+        plural(point.shows, 'show'),
+        point.venues ? plural(point.venues, 'venue') : '',
+        point.tours ? plural(point.tours, 'tour') : '',
+      ].filter(Boolean).join(' · ')
+      : [
+        plural(point.shows, 'show'),
+        point.cities ? plural(point.cities, 'city') : '',
+      ].filter(Boolean).join(' · ');
+    const dateRow = [point.first, point.latest].filter(Boolean).join(' -> ');
+    const link = point.kind === 'city' && point.latestSlug
+      ? `<a class="live-map-popup__link" href="/setlists/${esc(point.latestSlug)}">Open latest show</a>`
+      : '';
+
+    return `
+      <div class="live-map-popup">
+        <div class="live-map-popup__eyebrow">${point.kind === 'city' ? 'CITY' : 'COUNTRY'}</div>
+        <div class="live-map-popup__title">${esc(point.name)}</div>
+        <div class="live-map-popup__place">${esc(point.place)}</div>
+        <div class="live-map-popup__meta">${esc(rows)}</div>
+        ${dateRow ? `<div class="live-map-popup__dates">${esc(dateRow)}</div>` : ''}
+        ${link}
+      </div>
+    `;
+  }
+
+  async function bootMap() {
+    const el = document.getElementById('shows-map');
+    if (!el || (el as any)._booted) return;
+    (el as any)._booted = true;
+
+    const fallback = document.querySelector<HTMLElement>('[data-map-fallback]');
+    const cityPoints = readPoints(el, 'data-city-points');
+    const countryPoints = readPoints(el, 'data-country-points');
+    const L = await waitForLeaflet();
+
+    if (!L || (!cityPoints.length && !countryPoints.length)) {
+      el.hidden = true;
+      if (fallback) fallback.hidden = false;
+      return;
+    }
+
+    const rootStyles = getComputedStyle(document.documentElement);
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#C89B4A';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#7746B0';
+    const ink = rootStyles.getPropertyValue('--ink').trim() || '#f5f1e8';
+
+    const map = L.map(el, {
+      worldCopyJump: true,
+      minZoom: 2,
+      scrollWheelZoom: false,
+      zoomControl: true,
+      attributionControl: true,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      maxZoom: 20,
+      subdomains: 'abcd',
+    }).addTo(map);
+
+    const cityLayer = L.layerGroup();
+    const countryLayer = L.layerGroup();
+    const maxCity = Math.max(1, ...cityPoints.map((point) => point.shows));
+    const maxCountry = Math.max(1, ...countryPoints.map((point) => point.shows));
+
+    countryPoints
+      .slice()
+      .sort((a, b) => b.shows - a.shows)
+      .forEach((point) => {
+        const radius = 5 + Math.sqrt(point.shows / maxCountry) * 18;
+        L.circleMarker([point.lat, point.lng], {
+          radius,
+          color: accent,
+          weight: 1,
+          fillColor: ink,
+          fillOpacity: 0.18,
+          opacity: 0.68,
+        }).bindPopup(popup(point)).addTo(countryLayer);
+        L.marker([point.lat, point.lng], {
+          interactive: false,
+          keyboard: false,
+          icon: L.divIcon({
+            className: 'english-country-label',
+            html: `<span>${esc(point.name)}</span>`,
+            iconSize: [0, 0],
+          }),
+        }).addTo(countryLayer);
+      });
+
+    cityPoints
+      .slice()
+      .sort((a, b) => b.shows - a.shows)
+      .forEach((point) => {
+        const radius = 4 + Math.sqrt(point.shows / maxCity) * 20;
+        const precise = point.coordinateKind === 'venue';
+        L.circleMarker([point.lat, point.lng], {
+          radius,
+          color: precise ? accent : accent2,
+          weight: precise ? 1.5 : 1.1,
+          fillColor: precise ? accent2 : accent,
+          fillOpacity: precise ? 0.76 : 0.56,
+          opacity: precise ? 0.95 : 0.82,
+        }).bindPopup(popup(point)).addTo(cityLayer);
+      });
+
+    countryLayer.addTo(map);
+    cityLayer.addTo(map);
+
+    const bounds = L.latLngBounds([...countryPoints, ...cityPoints].map((point) => [point.lat, point.lng]));
+    if (bounds.isValid()) {
+      map.fitBounds(bounds.pad(0.08), { maxZoom: 4 });
+    } else {
+      map.setView([24, 0], 2);
+    }
+
+    if (fallback) fallback.hidden = true;
+
+    const modes = document.querySelectorAll<HTMLButtonElement>('[data-map-mode]');
+    const setMode = (mode: string) => {
+      modes.forEach((button) => button.classList.toggle('is-active', button.dataset.mapMode === mode));
+      if (mode === 'cities') {
+        if (map.hasLayer(countryLayer)) map.removeLayer(countryLayer);
+        if (!map.hasLayer(cityLayer)) cityLayer.addTo(map);
+      } else if (mode === 'countries') {
+        if (map.hasLayer(cityLayer)) map.removeLayer(cityLayer);
+        if (!map.hasLayer(countryLayer)) countryLayer.addTo(map);
+      } else {
+        if (!map.hasLayer(countryLayer)) countryLayer.addTo(map);
+        if (!map.hasLayer(cityLayer)) cityLayer.addTo(map);
+      }
+    };
+
+    modes.forEach((button) => {
+      button.addEventListener('click', () => setMode(button.dataset.mapMode || 'all'));
+    });
+
+    window.setTimeout(() => map.invalidateSize(), 120);
+  }
+
+  bootMap();
+  document.addEventListener('astro:page-load', bootMap);
+</script>
+
+<style is:global>
+  .live-map-section {
+    padding-block: clamp(20px, 3vw, 32px) clamp(32px, 5vw, 56px);
+  }
+
+  .live-map-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    gap: clamp(20px, 3vw, 36px);
+    align-items: start;
+  }
+
+  .live-map-main {
+    min-width: 0;
+  }
+
+  .live-map-toolbar {
+    display: flex;
+    width: max-content;
+    max-width: 100%;
+    border: 1px solid var(--rule);
+    border-bottom: none;
+    overflow: hidden;
+    background: var(--bg-2);
+  }
+
+  .live-map-tab {
+    appearance: none;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    line-height: 1;
+    min-height: 38px;
+    padding: 0 14px;
+    text-transform: uppercase;
+  }
+
+  .live-map-tab:last-child {
+    border-right: 0;
+  }
+
+  .live-map-tab.is-active {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .shows-map {
+    width: 100%;
+    height: clamp(430px, 64vh, 680px);
+    min-height: 430px;
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    isolation: isolate;
+  }
+
+  .shows-map__loading {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    color: var(--muted);
+  }
+
+  html:not([data-theme='papers']) .shows-map .leaflet-tile-pane {
+    filter: invert(.92) hue-rotate(180deg) saturate(.62) brightness(.72) contrast(1.06);
+  }
+
+  .shows-map .leaflet-container,
+  .shows-map.leaflet-container {
+    font-family: var(--f-sans);
+  }
+
+  .shows-map .leaflet-control-attribution {
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+  }
+
+  .shows-map .leaflet-control-attribution a {
+    color: var(--accent-3);
+  }
+
+  .shows-map .english-country-label {
+    background: transparent;
+    border: 0;
+    pointer-events: none;
+  }
+
+  .shows-map .english-country-label span {
+    color: color-mix(in srgb, var(--ink) 72%, var(--accent) 28%);
+    display: inline-block;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    line-height: 1;
+    opacity: .78;
+    padding: 3px 5px;
+    text-shadow:
+      0 1px 0 var(--bg),
+      1px 0 0 var(--bg),
+      0 -1px 0 var(--bg),
+      -1px 0 0 var(--bg);
+    text-transform: uppercase;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+
+  .shows-map .leaflet-popup-content-wrapper {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    color: var(--ink);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .28);
+  }
+
+  .shows-map .leaflet-popup-tip {
+    background: var(--bg);
+  }
+
+  .live-map-popup {
+    min-width: 190px;
+  }
+
+  .live-map-popup__eyebrow,
+  .live-map-popup__place,
+  .live-map-popup__meta,
+  .live-map-popup__dates,
+  .live-map-popup__link {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .live-map-popup__eyebrow {
+    color: var(--accent-3);
+    margin-bottom: .28rem;
+  }
+
+  .live-map-popup__title {
+    font-family: var(--f-display);
+    font-size: 19px;
+    font-style: italic;
+    line-height: 1.1;
+  }
+
+  .live-map-popup__place {
+    color: var(--muted);
+    margin-top: .25rem;
+  }
+
+  .live-map-popup__meta,
+  .live-map-popup__dates {
+    margin-top: .45rem;
+  }
+
+  .live-map-popup__link {
+    border-bottom: 1px solid var(--accent);
+    color: var(--accent-3);
+    display: inline-block;
+    margin-top: .55rem;
+    text-decoration: none;
+  }
+
+  .live-map-fallback {
+    margin-top: 16px;
+  }
+
+  .live-map-fallback[hidden] {
+    display: none;
+  }
+
+  .live-map-summary {
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+  }
+
+  .live-map-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .live-map-metrics > div {
+    min-width: 0;
+    padding: 14px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .live-map-metrics > div:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .live-map-metrics > div:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .live-map-metrics strong {
+    display: block;
+    font-family: var(--f-display);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 400;
+    line-height: 1;
+    margin-top: .35rem;
+  }
+
+  .live-map-note {
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 14px;
+  }
+
+  .live-map-cities {
+    padding-block: 0 clamp(48px, 6vw, 80px);
+  }
+
+  @media (max-width: 920px) {
+    .live-map-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .live-map-summary {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 540px) {
+    .live-map-toolbar {
+      width: 100%;
+    }
+
+    .live-map-tab {
+      flex: 1 1 0;
+      padding: 0 8px;
+    }
+
+    .shows-map {
+      height: 470px;
+    }
+  }
+</style>

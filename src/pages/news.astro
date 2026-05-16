@@ -13,12 +13,12 @@ const news: any[] = await fetchRaw('news', {
 
 const categories = Array.from(new Set(news.map((n) => n.category).filter(Boolean))).sort();
 ---
-<Layout title="News · Cureation">
+<Layout title="Journal · Cureation">
   <PageHero
-    section="Dispatches"
-    title="Dispatches"
-    deck="News, editorials, and archive additions — filed chronologically."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'News' }]}
+    section="Journal"
+    title="Journal"
+    deck="News, blog posts, reviews, newsletters, and archive additions — filed chronologically."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Journal' }]}
     flush
   >
     <div class="cluster" style="gap:6px; flex-wrap:wrap; margin-top: clamp(20px, 3vw, 32px);" data-cat-filters>
@@ -54,11 +54,17 @@ const categories = Array.from(new Set(news.map((n) => n.category).filter(Boolean
     const chips = document.querySelectorAll<HTMLElement>('[data-cat-filters] .cat-chip');
     const rows = document.querySelectorAll<HTMLElement>('[data-news] tbody tr');
     if (!chips.length) return;
-    chips.forEach((chip) => chip.addEventListener('click', () => {
+    const apply = (chip: HTMLElement) => {
       const c = chip.getAttribute('data-cat') || 'all';
       chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
       rows.forEach((r) => { const rc = r.getAttribute('data-cat') || ''; r.style.display = c === 'all' || rc === c ? '' : 'none'; });
-    }));
+    };
+    chips.forEach((chip) => chip.addEventListener('click', () => apply(chip)));
+    const requested = new URLSearchParams(window.location.search).get('category');
+    if (requested) {
+      const match = Array.from(chips).find((chip) => (chip.getAttribute('data-cat') || '').toLowerCase() === requested.toLowerCase());
+      if (match) apply(match);
+    }
   }
   wire();
   document.addEventListener('astro:page-load', wire);

@@ -710,27 +710,570 @@ export async function listSongs(opts: { limit?: number; album?: number; q?: stri
 
 export interface Member {
   id: number; name: string; slug: string; bio: string | null;
-  instruments: any; tenure_start: string | null; tenure_end: string | null;
-  tenure: string | null; is_current_member: boolean | null;
-  side_projects: any; birth_date: string | null; photo_file: string | null;
-  aliases: any;
+  instruments: string[]; is_current_member: boolean;
+  is_featured_member: boolean;
+  gear_families?: GearFamily[];
+  side_projects: any[]; birth_date: string | null; photo: string | null;
+  death_date: string | null; death_place: string | null;
+  photo_file?: string | null;
+  source: number | { id?: number; name?: string | null; url?: string | null; type?: string | null; reliability?: number | null; is_official?: boolean | null } | null;
+  source_url: string | null;
+  aliases: string[];
+  stints?: MemberStint[];
+  photos?: MemberPhoto[];
+}
+
+export interface MemberStint {
+  id: number;
+  member: number | { id?: number; name?: string | null; slug?: string | null } | null;
+  start_year: number | null;
+  end_year: number | null;
+  role: string | null;
+  stint_number: number | null;
+  notes: string | null;
+}
+
+export interface MemberPhoto {
+  id: number;
+  title: string | null;
+  description: string | null;
+  image_file: string | null;
+  image_url: string | null;
+  date_taken: string | null;
+  formatted_date: string | null;
+  photographer: string | null;
+  location: string | null;
+  tour: string | null;
+}
+
+export interface MemberShow {
+  id: number;
+  slug: string | null;
+  date: string | null;
+  venue: string | null;
+  city: string | null;
+  country: string | null;
+  country_code: string | null;
+  tour_name: string | null;
+  song_count: number | null;
+}
+
+export interface MemberLiveStats {
+  tenureShowCount: number;
+  lineupTaggedCount: number;
+  countries: number;
+  tours: number;
+  avgSongCount: number | null;
+  firstShow: MemberShow | null;
+  lastShow: MemberShow | null;
+  longestShow: MemberShow | null;
+  recentShows: MemberShow[];
+  yearlyCounts: Array<{ year: number; count: number }>;
+  peakYears: Array<{ year: number; count: number }>;
+}
+
+export type GearFamily = 'guitar' | 'bass' | 'keyboard' | 'drums' | 'voice' | 'other';
+
+export interface Gear {
+  id: string;
+  slug: string | null;
+  name: string;
+  kind: string | null;
+  category: string | null;
+  manufacturer: string | null;
+  model: string | null;
+  description: string | null;
+  notes: string | null;
+  era_range: string | null;
+  image: string | null;
+  owner: string | null;
+  used_by: number | string | { id?: number; name?: string | null; slug?: string | null; instruments?: unknown } | null;
+}
+
+const MEMBER_BASE_FIELDS = 'id,name,slug,bio,instruments,is_current_member,photo,birth_date,death_date,death_place,aliases,side_projects,source,source.id,source.name,source.url,source.type,source.reliability,source.is_official,source_url';
+const MEMBER_STINT_FIELDS = 'id,member,start_year,end_year,role,stint_number,notes';
+const MEMBER_WITH_STINT_FIELDS = `${MEMBER_BASE_FIELDS},stints.id,stints.start_year,stints.end_year,stints.role,stints.stint_number,stints.notes`;
+const MEMBER_PHOTO_FIELDS = 'id,title,description,image_file,image_url,date_taken,formatted_date,photographer,location,tour';
+const MEMBER_DETAIL_FIELDS = `${MEMBER_WITH_STINT_FIELDS},photos.${MEMBER_PHOTO_FIELDS.split(',').join(',photos.')}`;
+
+function normalizeList(value: unknown): any[] {
+  if (Array.isArray(value)) return value;
+  if (value === null || value === undefined || value === '') return [];
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return parsed;
+      return parsed === null || parsed === undefined ? [] : [parsed];
+    } catch {
+      return trimmed.split(',').map((item) => item.trim()).filter(Boolean);
+    }
+  }
+
+  return [value];
+}
+
+function normalizeStringList(value: unknown): string[] {
+  return normalizeList(value)
+    .map((item) => typeof item === 'string' ? item.trim() : String(item).trim())
+    .filter(Boolean);
+}
+
+function normalizeBoolean(value: unknown): boolean {
+  return value === true || value === 1 || value === '1' || value === 'true';
+}
+
+function normalizeYear(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const year = Number(value);
+  return Number.isFinite(year) ? year : null;
+}
+
+function compareStints(a: MemberStint, b: MemberStint): number {
+  const aOrder = a.stint_number ?? Number.MAX_SAFE_INTEGER;
+  const bOrder = b.stint_number ?? Number.MAX_SAFE_INTEGER;
+  if (aOrder !== bOrder) return aOrder - bOrder;
+  return (a.start_year ?? 9999) - (b.start_year ?? 9999);
+}
+
+function normalizeStint(row: any, memberId?: number): MemberStint {
+  return {
+    id: Number(row.id),
+    member: row.member ?? memberId ?? null,
+    start_year: normalizeYear(row.start_year),
+    end_year: normalizeYear(row.end_year),
+    role: row.role || null,
+    stint_number: normalizeYear(row.stint_number),
+    notes: row.notes || null,
+  };
+}
+
+function normalizePhoto(row: any): MemberPhoto {
+  return {
+    id: Number(row.id),
+    title: row.title || null,
+    description: row.description || null,
+    image_file: row.image_file || null,
+    image_url: row.image_url || null,
+    date_taken: row.date_taken || null,
+    formatted_date: row.formatted_date || null,
+    photographer: row.photographer || null,
+    location: row.location || null,
+    tour: row.tour || null,
+  };
+}
+
+function gearFamiliesFromText(value: unknown): GearFamily[] {
+  const text = normalizeStringList(value).join(' ').toLowerCase();
+  const families = new Set<GearFamily>();
+  if (/\b(six[- ]string bass|bass guitar|bass)\b/.test(text)) families.add('bass');
+  if (/\b(guitar|baritone|jazzmaster|schecter)\b/.test(text)) families.add('guitar');
+  if (/\b(keyboard|keyboards|synth|synthesizer|piano|organ|oberheim|roland)\b/.test(text)) families.add('keyboard');
+  if (/\b(drum|drums|percussion|kit)\b/.test(text)) families.add('drums');
+  if (/\b(vocal|vocals|voice|singer)\b/.test(text)) families.add('voice');
+  return Array.from(families);
+}
+
+export function memberGearFamilies(member: Pick<Member, 'instruments' | 'stints'>): GearFamily[] {
+  const roleText = (member.stints ?? []).map((stint) => stint.role).filter(Boolean).join(', ');
+  const families = new Set<GearFamily>([
+    ...gearFamiliesFromText(member.instruments),
+    ...gearFamiliesFromText(roleText),
+  ]);
+  return families.size ? Array.from(families) : ['other'];
+}
+
+function normalizeGear(row: any): Gear {
+  const kind = row.kind ?? row.category ?? null;
+  return {
+    id: String(row.id),
+    slug: row.slug ?? null,
+    name: row.name || row.model || row.title || 'Untitled equipment',
+    kind,
+    category: row.category ?? row.kind ?? null,
+    manufacturer: row.manufacturer ?? null,
+    model: row.model ?? null,
+    description: row.description ?? null,
+    notes: row.notes ?? null,
+    era_range: row.era_range ?? row.years ?? null,
+    image: row.image ?? row.image_file ?? null,
+    owner: row.owner ?? null,
+    used_by: row.used_by ?? null,
+  };
+}
+
+function comparePhotos(a: MemberPhoto, b: MemberPhoto): number {
+  return String(b.date_taken || '').localeCompare(String(a.date_taken || ''));
+}
+
+function normalizeMember(row: any, stintsOverride?: MemberStint[]): Member {
+  const stints = (stintsOverride ?? normalizeList(row.stints).map((stint) => normalizeStint(stint, row.id))).sort(compareStints);
+  const photo = row.photo ?? row.photo_file ?? null;
+  const photos = normalizeList(row.photos).map(normalizePhoto).filter((item) => item.image_file || item.image_url).sort(comparePhotos);
+  const isCurrentMember = normalizeBoolean(row.is_current_member) || stints.some((stint) => stint.end_year === null);
+  const instruments = normalizeStringList(row.instruments);
+
+  return {
+    ...row,
+    instruments,
+    aliases: normalizeStringList(row.aliases),
+    side_projects: normalizeList(row.side_projects),
+    photo,
+    photo_file: photo,
+    source: row.source ?? null,
+    source_url: row.source_url ?? null,
+    death_date: row.death_date ?? null,
+    death_place: row.death_place ?? null,
+    stints,
+    photos,
+    gear_families: memberGearFamilies({ instruments, stints }),
+    is_featured_member: isCurrentMember,
+    is_current_member: isCurrentMember,
+  };
+}
+
+function compareMembers(a: Member, b: Member): number {
+  if (a.is_current_member !== b.is_current_member) return a.is_current_member ? -1 : 1;
+  const aStart = a.stints?.[0]?.start_year ?? 9999;
+  const bStart = b.stints?.[0]?.start_year ?? 9999;
+  if (aStart !== bStart) return aStart - bStart;
+  return a.name.localeCompare(b.name);
+}
+
+function isMissingStintsFieldError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes('field "stints"') || message.includes('field \\"stints\\"') || message.includes('access field');
+}
+
+async function listAllMemberStints(): Promise<MemberStint[]> {
+  const rows = await directusFetch<any[]>('/items/member_stints', {
+    limit: -1,
+    fields: MEMBER_STINT_FIELDS,
+    sort: 'member,stint_number,start_year',
+  });
+  return rows.map((row) => normalizeStint(row)).sort(compareStints);
+}
+
+function groupStintsByMember(stints: MemberStint[]): Map<number, MemberStint[]> {
+  const groups = new Map<number, MemberStint[]>();
+  for (const stint of stints) {
+    const memberId = typeof stint.member === 'number' ? stint.member : stint.member?.id;
+    if (!memberId) continue;
+    const existing = groups.get(memberId) ?? [];
+    existing.push(stint);
+    groups.set(memberId, existing);
+  }
+  for (const group of groups.values()) group.sort(compareStints);
+  return groups;
+}
+
+export function formatStintYears(stint: MemberStint): string {
+  return `${stint.start_year ?? '—'}–${stint.end_year ?? 'Present'}`;
+}
+
+export function memberTenureLabel(member: Member): string {
+  const stintYears = (member.stints ?? []).map(formatStintYears).filter(Boolean);
+  if (stintYears.length > 0) return stintYears.join(', ');
+  return 'Tenure to be filed';
+}
+
+export function memberCurrentStint(member: Member): MemberStint | null {
+  const active = (member.stints ?? []).filter((stint) => stint.end_year === null);
+  return active.length > 0 ? active[active.length - 1] : null;
+}
+
+export function memberRoleLabel(member: Member): string {
+  const stints = member.stints ?? [];
+  const lastStint = stints.length > 0 ? stints[stints.length - 1] : null;
+  return memberCurrentStint(member)?.role || lastStint?.role || member.instruments?.[0] || '';
+}
+
+export function memberPhoto(member: Pick<Member, 'photo'> & { photo_file?: string | null }): string | null {
+  return member.photo || member.photo_file || null;
+}
+
+export function memberLifespanLabel(member: Pick<Member, 'birth_date' | 'death_date'>): string {
+  const born = member.birth_date?.slice(0, 4) || null;
+  const died = member.death_date?.slice(0, 4) || null;
+  if (born && died) return `${born}–${died}`;
+  if (born) return `Born ${born}`;
+  if (died) return `Died ${died}`;
+  return 'Life dates to be filed';
+}
+
+export function memberFirstJoinYear(member: Pick<Member, 'stints'>): number | null {
+  const years = (member.stints ?? []).map((stint) => stint.start_year).filter((year): year is number => year !== null);
+  return years.length ? Math.min(...years) : null;
+}
+
+export function memberLastDepartureYear(member: Pick<Member, 'stints' | 'is_current_member'>): number | null {
+  if (member.is_current_member) return null;
+  const years = (member.stints ?? []).map((stint) => stint.end_year).filter((year): year is number => year !== null);
+  return years.length ? Math.max(...years) : null;
+}
+
+export function memberActiveYears(member: Pick<Member, 'stints'>): number | null {
+  const currentYear = new Date().getUTCFullYear();
+  let total = 0;
+  for (const stint of member.stints ?? []) {
+    if (stint.start_year === null) continue;
+    const end = stint.end_year ?? currentYear;
+    if (end < stint.start_year) continue;
+    total += end - stint.start_year + 1;
+  }
+  return total || null;
+}
+
+export function compareMembersByDeparture(a: Member, b: Member): number {
+  const aLast = memberLastDepartureYear(a) ?? -Infinity;
+  const bLast = memberLastDepartureYear(b) ?? -Infinity;
+  if (aLast !== bLast) return bLast - aLast;
+  const aFirst = memberFirstJoinYear(a) ?? Infinity;
+  const bFirst = memberFirstJoinYear(b) ?? Infinity;
+  if (aFirst !== bFirst) return aFirst - bFirst;
+  return a.name.localeCompare(b.name);
 }
 
 export async function listMembers(): Promise<Member[]> {
-  return await directusFetch<Member[]>('/items/members', {
-    limit: -1,
-    fields: 'id,name,slug,bio,instruments,tenure,tenure_start,tenure_end,is_current_member,photo_file,birth_date,aliases,side_projects',
-    sort: '-is_current_member,tenure_start',
-  });
+  try {
+    const rows = await directusFetch<any[]>('/items/members', {
+      limit: -1,
+      fields: MEMBER_WITH_STINT_FIELDS,
+      'deep[stints][_sort]': 'stint_number,start_year',
+      sort: 'name',
+    });
+    return rows.map((row) => normalizeMember(row)).sort(compareMembers);
+  } catch (error) {
+    if (!isMissingStintsFieldError(error)) throw error;
+    const [rows, stints] = await Promise.all([
+      directusFetch<any[]>('/items/members', {
+        limit: -1,
+        fields: MEMBER_BASE_FIELDS,
+        sort: 'name',
+      }),
+      listAllMemberStints(),
+    ]);
+    const stintsByMember = groupStintsByMember(stints);
+    return rows.map((row) => normalizeMember(row, stintsByMember.get(row.id) ?? [])).sort(compareMembers);
+  }
+}
+
+export async function listGear(): Promise<Gear[]> {
+  let rows: any[];
+  try {
+    rows = await directusFetch<any[]>('/items/gear', {
+      limit: -1,
+      fields: '*,used_by.id,used_by.name,used_by.slug,used_by.instruments',
+      sort: 'kind,name',
+    });
+  } catch {
+    rows = await directusFetch<any[]>('/items/gear', {
+      limit: -1,
+      fields: '*',
+      sort: 'kind,name',
+    });
+  }
+  return rows.map(normalizeGear);
 }
 
 export async function getMemberBySlug(slug: string): Promise<Member | null> {
-  const rows = await directusFetch<Member[]>('/items/members', {
-    limit: 1,
-    'filter[slug][_eq]': slug,
-    fields: '*',
+  try {
+    const rows = await directusFetch<any[]>('/items/members', {
+      limit: 1,
+      'filter[slug][_eq]': slug,
+      fields: MEMBER_DETAIL_FIELDS,
+      'deep[stints][_sort]': 'stint_number,start_year',
+      'deep[photos][_sort]': '-date_taken',
+      'deep[photos][_limit]': 12,
+    });
+    return rows?.[0] ? normalizeMember(rows[0]) : null;
+  } catch (error) {
+    if (!isMissingStintsFieldError(error)) throw error;
+    const rows = await directusFetch<any[]>('/items/members', {
+      limit: 1,
+      'filter[slug][_eq]': slug,
+      fields: MEMBER_BASE_FIELDS,
+    });
+    const member = rows?.[0] || null;
+    if (!member) return null;
+    const stints = await getMemberStints(member.id).catch(() => []);
+    return normalizeMember(member, stints);
+  }
+}
+
+export async function getMemberStints(memberId: number): Promise<MemberStint[]> {
+  const rows = await directusFetch<any[]>('/items/member_stints', {
+    limit: -1,
+    'filter[member][_eq]': memberId,
+    fields: MEMBER_STINT_FIELDS,
+    sort: 'stint_number,start_year',
   });
-  return rows?.[0] || null;
+  return rows.map((row) => normalizeStint(row, memberId)).sort(compareStints);
+}
+
+export async function listMemberPhotos(member: Pick<Member, 'id' | 'name' | 'photos'>, opts: { limit?: number } = {}): Promise<MemberPhoto[]> {
+  const limit = opts.limit ?? 8;
+  const seen = new Set<number>();
+  const merged: MemberPhoto[] = [];
+  const add = (rows: any[]) => {
+    for (const row of rows) {
+      const photo = normalizePhoto(row);
+      if (!photo.id || seen.has(photo.id) || !(photo.image_file || photo.image_url)) continue;
+      seen.add(photo.id);
+      merged.push(photo);
+    }
+  };
+
+  add(member.photos ?? []);
+
+  try {
+    const linked = await directusFetch<any[]>('/items/photos', {
+      limit,
+      fields: MEMBER_PHOTO_FIELDS,
+      'filter[member][_eq]': member.id,
+      sort: '-date_taken',
+    });
+    add(linked);
+  } catch {
+    // Older schemas may not have photos.member yet; fall back to search below.
+  }
+
+  if (member.name && merged.length < limit) {
+    const searched = await directusFetch<any[]>('/items/photos', {
+      limit,
+      fields: MEMBER_PHOTO_FIELDS,
+      search: member.name,
+      sort: '-date_taken',
+    }).catch(() => []);
+    add(searched);
+  }
+
+  const stints = 'stints' in member && Array.isArray((member as any).stints) ? (member as any).stints as MemberStint[] : [];
+  if (stints.length > 0 && merged.length < limit) {
+    const windows = stints
+      .filter((stint) => stint.start_year !== null)
+      .map((stint) => ({
+        start: `${stint.start_year}-01-01`,
+        end: `${stint.end_year ?? new Date().getUTCFullYear()}-12-31`,
+      }));
+    const eraRows = await Promise.all(
+      windows.map((window) => directusFetch<any[]>('/items/photos', {
+        limit,
+        fields: MEMBER_PHOTO_FIELDS,
+        'filter[date_taken][_between]': `${window.start},${window.end}`,
+        'filter[image_file][_nnull]': 'true',
+        sort: '-date_taken',
+      }).catch(() => []))
+    );
+    for (const rows of eraRows) add(rows);
+  }
+
+  return merged.sort(comparePhotos).slice(0, limit);
+}
+
+function toMemberShow(row: any): MemberShow {
+  return {
+    id: Number(row.id),
+    slug: row.slug || null,
+    date: row.date || null,
+    venue: row.venue || null,
+    city: row.city || null,
+    country: row.country || null,
+    country_code: row.country_code || null,
+    tour_name: row.tour_name || null,
+    song_count: row.song_count === null || row.song_count === undefined ? null : Number(row.song_count),
+  };
+}
+
+function showYear(show: Pick<MemberShow, 'date'>): number | null {
+  if (!show.date) return null;
+  const year = Number(String(show.date).slice(0, 4));
+  return Number.isFinite(year) ? year : null;
+}
+
+function showFallsWithinStints(show: Pick<MemberShow, 'date'>, stints: MemberStint[]): boolean {
+  const year = showYear(show);
+  if (year === null) return false;
+  return stints.some((stint) => {
+    if (stint.start_year === null) return false;
+    const end = stint.end_year ?? 9999;
+    return year >= stint.start_year && year <= end;
+  });
+}
+
+function performerListContainsMember(value: unknown, member: Pick<Member, 'id' | 'name'>): boolean {
+  const performers = normalizeList(value);
+  const memberName = member.name.trim().toLowerCase();
+  return performers.some((performer) => {
+    if (!performer || typeof performer !== 'object') return false;
+    const performerId = Number((performer as any).member_id ?? (performer as any).member);
+    if (Number.isFinite(performerId) && performerId === member.id) return true;
+    return String((performer as any).name || '').trim().toLowerCase() === memberName;
+  });
+}
+
+export async function getMemberLiveStats(member: Pick<Member, 'id' | 'name' | 'stints'>): Promise<MemberLiveStats> {
+  const empty: MemberLiveStats = {
+    tenureShowCount: 0,
+    lineupTaggedCount: 0,
+    countries: 0,
+    tours: 0,
+    avgSongCount: null,
+    firstShow: null,
+    lastShow: null,
+    longestShow: null,
+    recentShows: [],
+    yearlyCounts: [],
+    peakYears: [],
+  };
+  const stints = member.stints ?? [];
+  if (stints.length === 0) return empty;
+
+  const rows = await directusFetch<any[]>('/items/setlists', {
+    limit: -1,
+    fields: `${SETLIST_LIST_FIELDS},performing_musicians`,
+    'filter[date][_nnull]': 'true',
+    sort: 'date',
+  }, { ttl: 600 }).catch(() => []);
+
+  const shows = rows.map(toMemberShow).filter((show) => showFallsWithinStints(show, stints));
+  const lineupTaggedCount = rows.filter((row) => performerListContainsMember(row.performing_musicians, member)).length;
+  const countries = new Set(shows.map((show) => show.country_code || show.country).filter(Boolean)).size;
+  const tours = new Set(shows.map((show) => show.tour_name).filter(Boolean)).size;
+  const songCounts = shows.map((show) => show.song_count).filter((count): count is number => count !== null && Number.isFinite(count));
+  const avgSongCount = songCounts.length
+    ? Math.round(songCounts.reduce((sum, count) => sum + count, 0) / songCounts.length)
+    : null;
+  const longestShow = shows.reduce<MemberShow | null>((best, show) => {
+    if (!show.song_count) return best;
+    if (!best?.song_count || show.song_count > best.song_count) return show;
+    return best;
+  }, null);
+  const byYear = new Map<number, number>();
+  for (const show of shows) {
+    const year = showYear(show);
+    if (year === null) continue;
+    byYear.set(year, (byYear.get(year) ?? 0) + 1);
+  }
+  const yearlyCounts = Array.from(byYear.entries())
+    .map(([year, count]) => ({ year, count }))
+    .sort((a, b) => a.year - b.year);
+
+  return {
+    tenureShowCount: shows.length,
+    lineupTaggedCount,
+    countries,
+    tours,
+    avgSongCount,
+    firstShow: shows[0] ?? null,
+    lastShow: shows[shows.length - 1] ?? null,
+    longestShow,
+    recentShows: shows.slice(-5).reverse(),
+    yearlyCounts,
+    peakYears: yearlyCounts.slice().sort((a, b) => b.count - a.count).slice(0, 6),
+  };
 }
 
 export async function listTimeline(opts: { limit?: number } = {}): Promise<any[]> {
