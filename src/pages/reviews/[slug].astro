@@ -1,0 +1,159 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import EditorialArticle from '../../components/editorial/EditorialArticle.astro';
+import Tag from '../../components/ui/Tag.astro';
+import { getReviewBySlug, listReviews } from '../../lib/directus';
+import { asset } from '../../lib/assets';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/reviews');
+
+const review = await getReviewBySlug(slug);
+if (!review) return new Response('Not found', { status: 404 });
+
+const reviews = await listReviews();
+const currentIndex = reviews.findIndex((item) => item.id === review.id);
+const related = [reviews[currentIndex - 1], reviews[currentIndex + 1]].filter(Boolean);
+const albumYear = review.album.release_date?.slice(0, 4) || '–';
+const scoreLabel = review.score == null ? '–' : Number(review.score).toFixed(Number(review.score) % 1 ? 1 : 0);
+const reviewUrl = new URL(`/reviews/${review.slug}`, Astro.site ?? Astro.url).toString();
+const reviewSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Review',
+  name: review.title,
+  url: reviewUrl,
+  datePublished: review.published_date,
+  author: { '@type': 'Person', name: review.author_name },
+  reviewBody: (review.body || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+  reviewRating: review.score == null ? undefined : {
+    '@type': 'Rating',
+    ratingValue: review.score,
+    bestRating: 10,
+    worstRating: 0,
+  },
+  itemReviewed: {
+    '@type': 'MusicAlbum',
+    name: review.album.title,
+    datePublished: review.album.release_date,
+    image: asset(review.album.cover_art, 'og'),
+    byArtist: { '@type': 'MusicGroup', name: 'The Cure' },
+  },
+};
+---
+
+<Layout
+  title={review.seo_title || `${review.title} · Reviews · Cureation`}
+  description={review.seo_description || review.standfirst || undefined}
+  ogImage={asset(review.album.cover_art, 'og')}
+  ogType="article"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(reviewSchema)}></script>
+  <EditorialArticle
+    kind="review"
+    section="Reviews"
+    sectionHref="/reviews"
+    eyebrow={`Album review · ${albumYear}`}
+    title={review.title}
+    standfirst={review.standfirst}
+    publishedDate={review.published_date}
+    readingTime={review.reading_time}
+    author={review.author_name}
+    tags={['Studio album', `${scoreLabel} / 10`]}
+    image={asset(review.album.cover_art, 'hero')}
+    imageAlt={`${review.album.title} album cover`}
+    score={review.score}
+    bookmark={{ kind: 'review', id: review.id, href: `/reviews/${review.slug}` }}
+    crumbs={[
+      { label: 'Home', href: '/' },
+      { label: 'Reviews', href: '/reviews' },
+      { label: review.album.title },
+    ]}
+  >
+    {review.body && <div set:html={review.body} />}
+
+    {review.verdict && (
+      <aside class="review-verdict">
+        <span>Verdict</span>
+        <p>{review.verdict}</p>
+        <strong>{scoreLabel}<small>/10</small></strong>
+      </aside>
+    )}
+
+    <div slot="rail">
+      <section class="editorial-rail-card">
+        <span class="editorial-rail-label">The record</span>
+        <ul class="editorial-rail-list">
+          <li><span>Album</span><strong>{review.album.title}</strong></li>
+          <li><span>Released</span><strong>{review.album.release_date || '–'}</strong></li>
+          <li><span>Label</span><strong>{review.album.label || '–'}</strong></li>
+          <li><span>Producer</span><strong>{review.album.producer || '–'}</strong></li>
+          <li><span>Tracks</span><strong>{review.album.track_count || '–'}</strong></li>
+        </ul>
+        <a class="editorial-rail-link" href={`/discography/${review.album.slug}`}>Open album archive <span>→</span></a>
+      </section>
+
+      {review.standout_tracks && review.standout_tracks.length > 0 && (
+        <section class="editorial-rail-card">
+          <span class="editorial-rail-label">Standout tracks</span>
+          <div class="review-track-list">
+            {review.standout_tracks.map((track, index) => (
+              <div><span>{String(index + 1).padStart(2, '0')}</span><strong>{track}</strong></div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+
+    {related.length > 0 && (
+      <div slot="footer">
+        <div class="review-more__head">
+          <div><span class="review-more__kicker">Keep listening</span><h2>More album reviews</h2></div>
+          <Tag variant="accent">Complete archive</Tag>
+        </div>
+        <div class="review-more__grid">
+          {related.map((item) => (
+            <a class="review-more__card" href={`/reviews/${item.slug}`}>
+              <img src={asset(item.album.cover_art, 'thumb')} alt="" width="150" height="150" loading="lazy" decoding="async" />
+              <span><small>{item.album.release_date?.slice(0, 4)} · {item.score}/10</small><strong>{item.title}</strong><b>Read review →</b></span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </EditorialArticle>
+</Layout>
+
+<style is:global>
+  .review-verdict { position: relative; margin: 2.8em 0 0; padding: 28px clamp(24px, 4vw, 42px); border: 1px solid var(--rule-strong); background: color-mix(in srgb, var(--bg-2) 90%, var(--accent) 10%); overflow: hidden; }
+  .review-verdict > span { color: var(--accent-3); font-family: var(--f-mono); font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+  .review-verdict p { max-width: 28ch; margin: 12px 82px 0 0; font-family: var(--f-display); font-size: clamp(24px, 3vw, 36px); font-style: italic; line-height: 1.22; }
+  .review-verdict > strong { position: absolute; right: 24px; bottom: 22px; color: var(--accent-3); font-family: var(--f-display); font-size: 48px; font-style: italic; font-weight: 400; line-height: 1; }
+  .review-verdict > strong small { font-family: var(--f-mono); font-size: 9px; font-style: normal; letter-spacing: .08em; }
+  .review-track-list { display: grid; }
+  .review-track-list div { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--rule-2); }
+  .review-track-list div:first-child { border-top: 0; padding-top: 0; }
+  .review-track-list span { color: var(--accent-3); font-family: var(--f-mono); font-size: 9px; }
+  .review-track-list strong { font-family: var(--f-serif); font-size: 14px; font-weight: 400; line-height: 1.35; }
+  .review-more__head { display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+  .review-more__kicker { color: var(--accent-3); font-family: var(--f-mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; }
+  .review-more__head h2 { margin: 8px 0 0; font-family: var(--f-display); font-size: clamp(32px, 4vw, 54px); font-style: italic; font-weight: 400; line-height: 1; }
+  .review-more__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 28px; }
+  .review-more__card { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 20px; padding: 16px; border: 1px solid var(--rule); background: var(--bg-2); }
+  .review-more__card:hover { border-color: var(--accent); }
+  .review-more__card img { width: 112px; aspect-ratio: 1; object-fit: cover; }
+  .review-more__card > span { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; }
+  .review-more__card small, .review-more__card b { color: var(--muted); font-family: var(--f-mono); font-size: 8px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
+  .review-more__card strong { margin-top: 8px; font-family: var(--f-display); font-size: 23px; font-style: italic; font-weight: 400; line-height: 1.05; }
+  .review-more__card b { margin-top: auto; padding-top: 10px; color: var(--accent-3); }
+  @media (max-width: 720px) {
+    .review-more__grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 460px) {
+    .review-verdict p { margin-right: 0; }
+    .review-verdict > strong { position: static; display: block; margin-top: 18px; }
+    .review-more__card { grid-template-columns: 84px minmax(0, 1fr); gap: 15px; padding: 12px; }
+    .review-more__card img { width: 84px; }
+    .review-more__card strong { font-size: 20px; }
+  }
+</style>

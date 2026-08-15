@@ -33,14 +33,14 @@ const facts: Array<[string, string]> = [
   <PageHero
     section="Anniversaries"
     title={`On ${todayLabel}`}
-    deck="Every release, concert, and documented milestone that happened on this day — aggregated across every year of the band's history."
+    deck="Every release, concert and documented milestone that happened on this day, gathered across every year of the band's history."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'On this day' }]}
     facts={facts.map(([k, v]) => ({ k, v }))}
   />
 
   {entries.length === 0 ? (
     <IssueSection kicker="Quiet day" title="Nothing on file">
-      <p class="deck">No documented events for this date yet — check back tomorrow, or browse the full timeline.</p>
+      <p class="deck">No documented events for this date yet. Check back tomorrow, or browse the full timeline.</p>
     </IssueSection>
   ) : decades.map((dec) => (
     <IssueSection kicker={dec} title={`${dec} · ${byDecade[dec].length} entries`}>
@@ -50,7 +50,7 @@ const facts: Array<[string, string]> = [
         <tbody>
           {byDecade[dec].sort((a: any, b: any) => (b.year || 0) - (a.year || 0)).map((e: any) => (
             <tr data-clickable={e.link_slug ? '' : undefined} onclick={e.link_slug && e.link_collection ? `location.href='/${e.link_collection}/${e.link_slug}'` : undefined}>
-              <td class="num" style="text-align:left; color: var(--accent-3); font-size: 14px;">{e.year || '—'}</td>
+              <td class="num" style="text-align:left; color: var(--accent-3); font-size: 14px;">{e.year || '–'}</td>
               <td class="mono-sm muted">{(e.kind || '').toUpperCase()}</td>
               <td>
                 <span class="serif" style="font-size: 18px; font-style: italic;">{e.title}</span>

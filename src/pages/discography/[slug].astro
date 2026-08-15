@@ -11,6 +11,7 @@ import {
   listAlbumCharts,
   listEras,
   fetchRaw,
+  getReviewByAlbum,
 } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 
@@ -20,7 +21,7 @@ if (!slug) return Astro.redirect('/discography');
 const album = await getAlbumBySlug(slug);
 if (!album) return new Response('Not found', { status: 404 });
 
-const [trivia, charts, eras, variants] = await Promise.all([
+const [trivia, charts, eras, variants, review] = await Promise.all([
   listAlbumTrivia(album.id),
   listAlbumCharts(album.id),
   listEras(),
@@ -30,6 +31,7 @@ const [trivia, charts, eras, variants] = await Promise.all([
     sort: 'sort,release_year',
     limit: -1,
   }).catch(() => []) as Promise<any[]>,
+  getReviewByAlbum(album.id),
 ]);
 
 const songs = (album.songs || []).slice().sort((a, b) => (a.track_number || 0) - (b.track_number || 0));
@@ -45,9 +47,9 @@ const totalSec = songs.reduce((n, s) => {
 const h = Math.floor(totalSec / 3600);
 const m = Math.floor((totalSec % 3600) / 60);
 const s = totalSec % 60;
-const runtime = h ? `${h}h ${m}m` : totalSec ? `${m}:${String(s).padStart(2, '0')}` : '—';
+const runtime = h ? `${h}h ${m}m` : totalSec ? `${m}:${String(s).padStart(2, '0')}` : '–';
 
-const year = album.release_date?.slice(0, 4) || '—';
+const year = album.release_date?.slice(0, 4) || '–';
 
 const totalLivePlays = songs.reduce((n, s) => n + (s.times_played_live || 0), 0);
 const maxPlays = Math.max(1, ...songs.map((s) => s.times_played_live || 0));
@@ -86,14 +88,14 @@ const featuredChartLine = (() => {
 })();
 
 const facts: Array<[string, string]> = [
-  ['Released', album.release_date || '—'],
-  ['Label', album.label || '—'],
-  ['Producer', album.producer?.split(/[\/,]/)[0]?.trim() || '—'],
-  ['Catalog', album.catalog_number || '—'],
+  ['Released', album.release_date || '–'],
+  ['Label', album.label || '–'],
+  ['Producer', album.producer?.split(/[\/,]/)[0]?.trim() || '–'],
+  ['Catalog', album.catalog_number || '–'],
   ['Runtime', runtime],
-  ['Tracks', String(album.track_count || songs.length || '—')],
-  ['Era', era?.name || '—'],
-  ['Peak', featuredChartLine || '—'],
+  ['Tracks', String(album.track_count || songs.length || '–')],
+  ['Era', era?.name || '–'],
+  ['Peak', featuredChartLine || '–'],
 ];
 
 function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' : t; }
@@ -108,7 +110,6 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
     <Crumbs items={[
       { label: 'Home',        href: '/' },
       { label: 'Discography', href: '/discography' },
-      ...(era ? [{ label: era.name, href: `/band/history#${era.slug}` }] : []),
       { label: album.title },
     ]} />
     <Bookmark kind="album" id={album.id} label={album.title} href={`/discography/${album.slug}`} />
@@ -122,7 +123,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
           <span class="mono-sm muted">{album.type?.toUpperCase()} · {year}</span>
         </div>
         <div class="cover-plate__corner cover-plate__corner--tr">
-          <span class="mono-sm muted">FIX · {album.catalog_number || '—'}</span>
+          <span class="mono-sm muted">FIX · {album.catalog_number || '–'}</span>
         </div>
         {album.cover_art ? (
           <img src={asset(album.cover_art, 'card')} alt={`${album.title} cover`} />
@@ -130,7 +131,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
           <div class="cover-plate__fallback" aria-hidden="true"></div>
         )}
         <div class="cover-plate__corner cover-plate__corner--bl">
-          <span class="mono-sm muted">{album.label ? album.label.split(/[\/]/)[0].trim().toUpperCase() : '—'}</span>
+          <span class="mono-sm muted">{album.label ? album.label.split(/[\/]/)[0].trim().toUpperCase() : '–'}</span>
         </div>
       </figure>
     </div>
@@ -148,7 +149,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
       </h1>
 
       <div class="mono-sm" style="color: var(--ink-2); margin-top: 10px;">
-        {year} · {runtime} · {songs.length || album.track_count || '—'} TRACKS
+        {year} · {runtime} · {songs.length || album.track_count || '–'} TRACKS
         {featuredChartLine && <> · {featuredChartLine.toUpperCase()}</>}
       </div>
 
@@ -162,7 +163,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
             CRITICAL RECEPTION · ARCHIVE EXCERPT
           </div>
           <div class="voices__quote">"{firstReceptionSentence}"</div>
-          <div class="mono-sm muted" style="margin-top: 8px;">— Press, {year}</div>
+          <div class="mono-sm muted" style="margin-top: 8px;">Press, {year}</div>
         </div>
       )}
 
@@ -184,8 +185,13 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
       </div>
 
       <div class="cluster" style="gap: .5rem; margin-top: 22px;">
+        {review && (
+          <Button href={`/reviews/${review.slug}`} variant="default">
+            Read the {review.score}/10 review →
+          </Button>
+        )}
         {totalLivePlays > 0 && (
-          <Button href={`/setlists?album=${album.slug}`} variant="default">
+          <Button href={`/setlists?album=${album.slug}`} variant={review ? 'ghost' : 'default'}>
             View {totalLivePlays.toLocaleString()} performances →
           </Button>
         )}
@@ -265,8 +271,8 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
                   <td><span class="mono-sm muted">
                     {song.is_single ? 'SINGLE' : song.writer && song.writer.toLowerCase() !== 'robert smith' ? `CO-WRITTEN` : ''}
                   </span></td>
-                  <td class="num">{song.duration || '—'}</td>
-                  <td class="num" style="color: var(--accent-3);">{plays ? plays.toLocaleString() : '—'}</td>
+                  <td class="num">{song.duration || '–'}</td>
+                  <td class="num" style="color: var(--accent-3);">{plays ? plays.toLocaleString() : '–'}</td>
                 </tr>
               );
             })}
@@ -294,9 +300,9 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
           </div>
           <div>
             {[
-              ['Original', `${songs.length || album.track_count || '—'} tracks`, runtime],
+              ['Original', `${songs.length || album.track_count || '–'} tracks`, runtime],
               album.disc_count && album.disc_count > 1 ? ['Multi-disc', `${album.disc_count} discs`, runtime] : null,
-              album.type === 'deluxe' ? ['Deluxe edition', 'Expanded', '—'] : null,
+              album.type === 'deluxe' ? ['Deluxe edition', 'Expanded', '–'] : null,
             ].filter(Boolean).map((v, i, arr) => (
               <div style={`display: grid; grid-template-columns: 1fr auto auto; gap: 14px; padding: 10px 18px; border-bottom: ${i < arr.length - 1 ? '1px solid var(--rule-2)' : 'none'}; font-size: 13px;`}>
                 <div>{(v as string[])[0]}</div>
@@ -420,9 +426,9 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
                 {charts.map((c: any) => (
                   <tr>
                     <td>{c.territory}</td>
-                    <td class="num">{c.peak ? '#' + c.peak : '—'}</td>
-                    <td class="num">{c.weeks ?? '—'}</td>
-                    <td class="num">{c.year ?? '—'}</td>
+                    <td class="num">{c.peak ? '#' + c.peak : '–'}</td>
+                    <td class="num">{c.weeks ?? '–'}</td>
+                    <td class="num">{c.year ?? '–'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -445,8 +451,8 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
                   return (
                     <tr>
                       <td><span class="serif" style="font-size: 16px;">{s.title}</span></td>
-                      <td class="mono-sm">{s.release_date?.slice(0, 7).toUpperCase() || '—'}</td>
-                      <td class="num" style="color: var(--accent-3);">{peak !== null ? `#${peak}` : '—'}</td>
+                      <td class="mono-sm">{s.release_date?.slice(0, 7).toUpperCase() || '–'}</td>
+                      <td class="num" style="color: var(--accent-3);">{peak !== null ? `#${peak}` : '–'}</td>
                     </tr>
                   );
                 })}
@@ -474,7 +480,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
             <a class="live-bar" href={song.slug ? `/songs/${song.slug}` : '#'}>
               <div class="live-bar__fill" style={`height: ${pct}%; background: ${plays > maxPlays * 0.6 ? 'var(--accent)' : 'var(--ink-2)'};`}></div>
               <div class="mono-sm live-bar__label">{shortTitle(song.title)}</div>
-              <div class="mono-sm muted live-bar__count">{plays ? plays.toLocaleString() : '—'}</div>
+              <div class="mono-sm muted live-bar__count">{plays ? plays.toLocaleString() : '–'}</div>
             </a>
           );
         })}
@@ -499,7 +505,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
               {v.format && <span class="variant__format mono-sm">{String(v.format).toUpperCase()}</span>}
             </div>
             <figcaption>
-              <div class="serif variant__title">{v.territory || '—'}{v.release_year ? ` · ${v.release_year}` : ''}</div>
+              <div class="serif variant__title">{v.territory || '–'}{v.release_year ? ` · ${v.release_year}` : ''}</div>
               {v.catalog_number && <div class="mono-sm muted">{v.catalog_number}{v.label ? ` · ${v.label}` : ''}</div>}
               {v.notes && <div class="variant__notes">{v.notes}</div>}
             </figcaption>
@@ -582,8 +588,8 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
     transition: color .18s, border-color .18s;
     display: inline-flex; align-items: baseline; gap: 6px;
   }
-  .album-tab:hover { color: var(--ink-2); }
-  .album-tab.is-active { color: var(--accent-ink); border-bottom-color: var(--accent); }
+  .album-tab:hover { color: var(--accent); }
+  .album-tab.is-active { color: var(--accent-3); border-bottom-color: var(--accent); }
   :root[data-theme='papers'] .album-tab.is-active { color: var(--accent); }
   .album-tab__count { font-size: 10px; opacity: 0.5; letter-spacing: 0.1em; }
 
@@ -687,7 +693,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
     if (!focus || !rows.length) return;
     rows.forEach((r) => {
       r.addEventListener('mouseenter', () => {
-        const n = r.getAttribute('data-track-n') || '—';
+        const n = r.getAttribute('data-track-n') || '–';
         const title = r.getAttribute('data-track-title') || '';
         const dur = r.getAttribute('data-track-dur') || '';
         const plays = parseInt(r.getAttribute('data-track-plays') || '0', 10);
@@ -695,7 +701,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
         if (focusLabel) focusLabel.textContent = `#${String(n).padStart(2, '0')}`;
         if (focusBody) focusBody.innerHTML = `
           <div class="serif" style="font-size: 28px; line-height: 1.1;">${title}</div>
-          <div class="mono-sm muted" style="margin-top: 6px;">Track ${n} · ${dur || '—'}</div>
+          <div class="mono-sm muted" style="margin-top: 6px;">Track ${n} · ${dur || '–'}</div>
           ${meaning ? `<p style="margin-top: 14px; font-size: 14px; color: var(--ink-2); line-height: 1.55;">${meaning}${meaning.length >= 260 ? '…' : ''}</p>` : ''}
           ${plays ? `<p style="margin-top: 14px; font-size: 13px; color: var(--accent-3); font-family: var(--f-mono); letter-spacing: .14em;">${plays.toLocaleString()} DOCUMENTED PLAYS</p>` : ''}
           <div style="margin-top: 14px; height: 48px; display: flex; align-items: end; gap: 2px;">

@@ -1,29 +1,13 @@
-# Self-hosted fonts
+# Typography packages
 
-`src/styles/tokens.css` references these paths:
+Cureation's production fonts are installed through Fontsource and imported in
+`src/styles/global.css`:
 
-```
-public/fonts/cormorant-garamond/{regular,italic}.woff2
-public/fonts/eb-garamond/{regular,italic}.woff2
-public/fonts/inter/regular.woff2
-public/fonts/jetbrains-mono/regular.woff2
-public/fonts/caveat/regular.woff2
-```
+- Cormorant Garamond Variable — display and italic headlines
+- EB Garamond Variable — editorial reading text
+- Inter Variable — navigation and interface text
+- JetBrains Mono Variable — dates, labels and archive metadata
 
-## Quick install via fontsource (recommended)
-
-```bash
-npm i @fontsource-variable/cormorant-garamond \
-      @fontsource-variable/eb-garamond \
-      @fontsource-variable/inter \
-      @fontsource-variable/jetbrains-mono \
-      @fontsource/caveat
-```
-
-Then copy the relevant `.woff2` files from `node_modules/@fontsource*` into the paths above, or swap `tokens.css` `@font-face src` URLs to point at the fontsource package paths imported from `src/styles/global.css`.
-
-## Alternative: manual download
-
-Use Google Fonts Helper (https://gwfh.mranftl.com/fonts) to download subset (latin) WOFF2 for each family and rename according to the paths above.
-
-Until these files exist the browser falls back to the serif/mono/sans declared in `tokens.css` — usable in dev, but install before shipping Phase 1.
+The files are bundled with the site at build time, so typography no longer
+depends on the visitor's operating-system fonts. The fallback stacks remain in
+`src/styles/tokens.css` for resilience.

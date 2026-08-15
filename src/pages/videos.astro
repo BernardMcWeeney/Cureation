@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
 import SearchField from '../components/ui/SearchField.astro';
@@ -20,8 +19,8 @@ const ytId = (url: string): string | null => {
 <Layout title="Videos · Cureation">
   <PageHero
     section="Moving image"
-    title="Videos"
-    deck="Promos, performances, interviews, and concert films — catalogued with director, year, and source."
+    title="The video archive"
+    deck="Promos, performances, interviews and concert films, catalogued with director, year and source."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Videos' }]}
     facts={[
       { k: 'On file', v: videos.length },
@@ -32,14 +31,13 @@ const ytId = (url: string): string | null => {
   />
 
   {videos.length === 0 ? (
-    <section class="container" style="padding-block: clamp(40px, 6vw, 80px);">
-      <div class="panel-head" style="border: 1px solid var(--rule);"><span>No entries yet</span><span>Coming soon</span></div>
-      <p class="deck" style="margin-top:.8rem;">The video index is being compiled — promos first, then live films, then interviews.</p>
+    <section class="video-index"><div class="container"><div class="video-empty"><span>Archive in progress</span><h2>The pictures will<br />start moving soon.</h2><p>The video index is being compiled, starting with promos, then live films and interviews.</p></div></div>
     </section>
   ) : (
-    <>
-      <IssueSection kicker="Catalogue" title="Every film" meta={`${videos.length} entries`}>
-        <div class="table-controls" aria-label="Video catalogue filters">
+    <section class="video-index">
+      <div class="container">
+        <header class="video-heading"><div><span>Moving image catalogue</span><h2>Watch the archive<br /><em>come alive.</em></h2></div><small>{videos.length} films</small></header>
+        <div class="video-filters" aria-label="Video catalogue filters">
           <div class="table-controls__grid table-controls__grid--3">
             <Select
               name="type"
@@ -54,17 +52,17 @@ const ytId = (url: string): string | null => {
             <SearchField placeholder="Title, director..." />
           </div>
         </div>
-        <div class="table-results-bar">
+        <div class="table-results-bar video-results">
           <span data-match-count>{videos.length} videos</span>
         </div>
         <div class="video-grid" data-video-grid>
-          {videos.map((v) => {
+          {videos.map((v, i) => {
             const url = v.url || v.video_url || '';
             const videoDate = v.release_date || v.date || '';
             const yid = ytId(url);
             const thumb = yid ? `https://i.ytimg.com/vi/${yid}/hqdefault.jpg` : (v.thumbnail_url || (v.thumbnail ? asset(v.thumbnail, 'card') : ''));
             return (
-              <a class="video-card"
+              <a class={`video-card${i === 0 ? ' video-card--lead' : ''}`}
                  href={url || '#'}
                  target={url ? '_blank' : undefined}
                  rel={url ? 'noopener' : undefined}
@@ -76,16 +74,16 @@ const ytId = (url: string): string | null => {
                   <div class="video-card__play">▶</div>
                 </div>
                 <div class="video-card__meta">
-                  <div class="mono-sm muted">{(v.type || 'VIDEO').toUpperCase()} · {videoDate.slice(0, 4) || '—'}</div>
-                  <div class="serif" style="font-style: italic; font-size: 19px; line-height: 1.2; margin-top: .2rem;">{v.title}</div>
-                  {v.director && <div class="mono-sm muted" style="margin-top:.2rem;">Dir. {v.director}</div>}
+                  <small>{(v.type || 'VIDEO').toUpperCase()} · {videoDate.slice(0, 4) || '–'}</small>
+                  <h3>{v.title}</h3>
+                  {v.director && <span>Directed by {v.director}</span>}
                 </div>
               </a>
             );
           })}
         </div>
-      </IssueSection>
-    </>
+      </div>
+    </section>
   )}
 </Layout>
 
@@ -122,14 +120,32 @@ const ytId = (url: string): string | null => {
 </script>
 
 <style is:global>
-  .video-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
-  @media (max-width: 900px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px) { .video-grid { grid-template-columns: 1fr; } }
-  .video-card { color: inherit; border: none; display: block; transition: transform .22s ease; }
-  .video-card:hover { transform: translateY(-3px); }
-  .video-card__thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; background: var(--bg-2); border: 1px solid var(--rule); }
-  .video-card__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .video-index { padding-block: clamp(82px, 10vw, 148px); background: var(--bg-2); }
+  .video-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 32px; margin-bottom: clamp(42px, 6vw, 76px); }
+  .video-heading span, .video-card__meta small, .video-card__meta > span, .video-results, .video-empty > span { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  .video-heading h2, .video-empty h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
+  .video-heading h2 em { color: var(--accent); font-weight: inherit; }
+  .video-heading > small { padding: 11px 14px; background: var(--accent); color: var(--accent-ink); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .video-filters { padding: clamp(18px, 2.5vw, 30px); background: var(--bg); }
+  .video-results { padding: 20px 0; }
+  .video-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 58px); }
+  .video-card { min-width: 0; display: block; border: 0; color: inherit; }
+  .video-card--lead { grid-column: 1 / -1; }
+  .video-card__thumb { position: relative; aspect-ratio: 16/9; overflow: hidden; background: var(--bg); }
+  .video-card--lead .video-card__thumb { aspect-ratio: 2.25 / 1; }
+  .video-card__thumb::after { position: absolute; inset: 0; content: ''; background: linear-gradient(0deg, rgba(0,0,0,.4), transparent 52%); }
+  .video-card__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(1.08) contrast(1.04); transition: transform .55s ease; }
   .video-card__ph { position: absolute; inset: 0; background: repeating-linear-gradient(45deg, var(--bg-2), var(--bg-2) 10px, var(--bg-3) 10px, var(--bg-3) 20px); }
-  .video-card__play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; color: var(--accent-ink); text-shadow: 0 2px 16px rgba(0,0,0,.6); opacity: .85; }
-  .video-card__meta { padding-top: .8rem; }
+  .video-card__play { position: absolute; z-index: 2; right: 18px; bottom: 18px; width: 58px; height: 58px; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-size: 18px; box-shadow: var(--glow); }
+  .video-card__meta { position: relative; padding: 20px 0 22px; }
+  .video-card__meta::after { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; content: ''; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .22s ease; }
+  .video-card h3 { max-width: 20ch; margin: 8px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(29px, 3vw, 46px); font-style: italic; font-weight: 400; line-height: .96; }
+  .video-card--lead h3 { font-size: clamp(42px, 5vw, 72px); }
+  .video-card__meta > span { display: block; margin-top: 10px; color: var(--muted); }
+  .video-card:hover img { transform: scale(1.02); }
+  .video-card:hover h3 { color: var(--accent); }
+  .video-card:hover .video-card__meta::after { transform: scaleX(1); }
+  .video-empty { max-width: 1040px; padding: clamp(36px, 6vw, 80px); background: linear-gradient(135deg, var(--accent-tint-2), transparent 60%), var(--bg); }
+  .video-empty p { max-width: 46ch; color: var(--ink-2); font-size: 18px; line-height: 1.6; }
+  @media (max-width: 720px) { .video-heading { grid-template-columns: 1fr; align-items: start; } .video-heading > small { justify-self: start; } .video-grid { grid-template-columns: 1fr; } .video-card--lead { grid-column: auto; } .video-card--lead .video-card__thumb { aspect-ratio: 16/9; } }
 </style>

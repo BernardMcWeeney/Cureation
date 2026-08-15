@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
 import SearchField from '../components/ui/SearchField.astro';
+import Pagination from '../components/ui/Pagination.astro';
 import { listVenues } from '../lib/directus';
 
 const venues = await listVenues();
@@ -20,16 +20,21 @@ const facts: Array<[string, string]> = [
 <Layout title="Venues · Cureation">
   <PageHero
     section="Venues"
-    title="Venues"
-    deck="Every room the band has played — ranked by repeat visits, annotated with capacity and first/last Cure appearance."
+    title="The venue archive"
+    deck="Every room the band has played, ranked by repeat visits and annotated with capacity and first and latest Cure appearances."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Venues' }]}
     facts={facts.map(([k, v]) => ({ k, v }))}
     flush
   />
 
-  <IssueSection kicker="Ranked ledger" title="Rooms" meta="Most-visited first">
-    <div class="table-controls" aria-label="Venue table filters">
-      <div class="table-controls__grid table-controls__grid--3">
+  <section class="venue-index">
+    <div class="container">
+      <header class="venue-heading">
+        <div><span>Ranked by repeat visits</span><h2>Every room,<br /><em>from clubs to fields.</em></h2></div>
+        <a href="/venues/map">Open the venue map <i>↗</i></a>
+      </header>
+      <div class="venue-filters" aria-label="Venue archive filters">
+        <div class="table-controls__grid table-controls__grid--3">
         <Select
           name="country"
           label="Country"
@@ -47,66 +52,102 @@ const facts: Array<[string, string]> = [
           ]}
         />
         <SearchField placeholder="Venue, city..." />
+        </div>
       </div>
-    </div>
-    <div class="table-results-bar">
-      <span data-match-count>{venues.length} venues</span>
-    </div>
-    <div class="table-wrap">
-    <table class="data data--airy" data-venue-table>
-      <thead><tr><th style="width:50px;">№</th><th>Venue</th><th>City</th><th>Country</th><th class="num" style="text-align:right;">Capacity</th><th class="num" style="text-align:right;">Cure shows</th></tr></thead>
-      <tbody>
+      <div class="table-results-bar venue-results">
+        <span data-match-count>{venues.length} venues</span>
+        <span data-page-range aria-live="polite"></span>
+      </div>
+      <div class="venue-grid" data-venue-grid>
         {venues.map((v, i) => {
           const cap = v.capacity || 0;
           const bucket = cap === 0 ? 'all' : cap < 1000 ? 'small' : cap < 5000 ? 'mid' : cap < 20000 ? 'large' : 'huge';
           const search = `${v.name || ''} ${v.city || ''} ${v.country || ''}`.toLowerCase();
           return (
-            <tr data-clickable data-country={v.country || ''} data-cap={bucket} data-search={search} onclick={`location.href='/venues/${v.slug}'`}>
-              <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-              <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{v.name}</span></td>
-              <td class="mono-sm muted">{[v.city, v.state_province].filter(Boolean).join(', ')}</td>
-              <td class="mono-sm muted">{v.country || '—'}</td>
-              <td class="num">{v.capacity ? v.capacity.toLocaleString() : '—'}</td>
-              <td class="num" style="color: var(--accent-3);">{v.cure_show_count || '—'}</td>
-            </tr>
+            <a class="venue-card" href={`/venues/${v.slug}`} data-venue-card data-country={v.country || ''} data-cap={bucket} data-search={search}>
+              <span class="venue-card__index">{String(i + 1).padStart(2, '0')}</span>
+              <div class="venue-card__body">
+                <small>{[v.city, v.state_province, v.country].filter(Boolean).join(' · ') || 'Location pending'}</small>
+                <h3>{v.name}</h3>
+              </div>
+              <dl>
+                <div><dt>Capacity</dt><dd>{v.capacity ? v.capacity.toLocaleString() : '–'}</dd></div>
+                <div><dt>Cure shows</dt><dd>{v.cure_show_count || '–'}</dd></div>
+              </dl>
+              <b>Open venue <i>↗</i></b>
+            </a>
           );
         })}
-      </tbody>
-    </table>
+      </div>
+      <Pagination label="Venue archive pages" />
     </div>
-  </IssueSection>
+  </section>
 </Layout>
 
 <script>
+  import { createTablePager } from '../lib/client-pagination';
+
   function wire() {
     const state: Record<string, string> = { country: 'all', cap: 'all', search: '' };
-    const table = document.querySelector<HTMLElement>('[data-venue-table]');
-    if (!table || table.dataset.filtersWired === 'true') return;
-    table.dataset.filtersWired = 'true';
-    const rows = Array.from(table.querySelectorAll<HTMLElement>('tbody tr'));
-    const counter = document.querySelector<HTMLElement>('[data-match-count]');
-    const apply = () => {
-      let m = 0;
-      rows.forEach((r) => {
+    const grid = document.querySelector<HTMLElement>('[data-venue-grid]');
+    if (!grid || grid.dataset.filtersWired === 'true') return;
+    grid.dataset.filtersWired = 'true';
+    const root = grid.closest<HTMLElement>('.venue-index');
+    const rows = Array.from(grid.querySelectorAll<HTMLElement>('[data-venue-card]'));
+    if (!root) return;
+    const counter = root.querySelector<HTMLElement>('[data-match-count]');
+    const pager = createTablePager(root, rows, { pageSize: 50 });
+    const apply = (resetPage = false) => {
+      const matches = rows.filter((r) => {
         const c = r.getAttribute('data-country') || '';
         const cap = r.getAttribute('data-cap') || '';
         const s = r.getAttribute('data-search') || '';
         const ok = (state.country === 'all' || c === state.country) &&
                    (state.cap === 'all' || cap === state.cap) &&
                    (!state.search || s.includes(state.search));
-        r.style.display = ok ? '' : 'none';
-        if (ok) m++;
+        return ok;
       });
-      if (counter) counter.textContent = `${m} venues`;
+      pager.render(matches, { reset: resetPage });
+      if (counter) counter.textContent = `${matches.length} venue${matches.length === 1 ? '' : 's'}`;
     };
-    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+    root.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
       const key = sel.getAttribute('data-filter-select') || '';
-      sel.addEventListener('change', () => { state[key] = sel.value || 'all'; apply(); });
+      sel.addEventListener('change', () => { state[key] = sel.value || 'all'; apply(true); });
     });
-    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
-    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    const search = root.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(true); });
     apply();
   }
   wire();
   document.addEventListener('astro:page-load', wire);
 </script>
+
+<style>
+  .venue-index { padding-block: clamp(82px, 10vw, 148px); background: var(--bg-2); }
+  .venue-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; margin-bottom: clamp(42px, 6vw, 76px); }
+  .venue-heading span, .venue-card small, .venue-card__index, .venue-card dt, .venue-card > b, .venue-results { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  .venue-heading h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
+  .venue-heading h2 em { color: var(--accent); font-weight: inherit; }
+  .venue-heading > a { display: flex; gap: 18px; padding: 14px 16px; border: 0; background: var(--accent); color: var(--accent-ink); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .venue-heading > a:hover { color: var(--accent-ink); box-shadow: var(--glow); }
+  .venue-heading i, .venue-card i { font-style: normal; }
+  .venue-filters { padding: clamp(18px, 2.5vw, 30px); background: var(--bg); }
+  .venue-results { display: flex; justify-content: space-between; gap: 16px; padding: 20px 0; }
+  .venue-results > :last-child { color: var(--muted); }
+  .venue-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule); }
+  .venue-card { position: relative; min-width: 0; min-height: 340px; display: flex; flex-direction: column; padding: clamp(23px, 2.8vw, 38px); border: 0; background: var(--bg); color: inherit; overflow: hidden; }
+  .venue-card::after { position: absolute; right: 0; bottom: 0; left: 0; height: 5px; content: ''; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .22s ease; }
+  .venue-card__body { margin-top: clamp(44px, 6vw, 80px); }
+  .venue-card h3 { max-width: 15ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(31px, 3vw, 46px); font-style: italic; font-weight: 400; letter-spacing: -.035em; line-height: .92; }
+  .venue-card dl { display: flex; gap: clamp(22px, 3vw, 46px); margin: auto 0 0; padding-top: 28px; }
+  .venue-card dl div { min-width: 0; }
+  .venue-card dt { color: var(--muted); }
+  .venue-card dd { margin: 5px 0 0; color: var(--ink); font-family: var(--f-display); font-size: 24px; }
+  .venue-card > b { display: flex; justify-content: space-between; margin-top: 24px; }
+  .venue-card:hover { background: var(--accent-tint); }
+  .venue-card:hover::after { transform: scaleX(1); }
+  .venue-card:hover h3 { color: var(--accent); }
+  @media (max-width: 1000px) { .venue-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 720px) { .venue-heading { grid-template-columns: 1fr; align-items: start; } .venue-heading > a { justify-self: start; } }
+  @media (max-width: 580px) { .venue-grid { grid-template-columns: 1fr; } .venue-card { min-height: 290px; } }
+</style>

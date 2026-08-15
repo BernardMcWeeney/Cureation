@@ -1,6 +1,6 @@
 # Cureation
 
-**Cureation** is a fan-built website dedicated to **The Cure** — one of the most iconic bands of our time. This is a community-driven platform to explore, document, and celebrate their music, legacy, and culture. From discographies and lyrics to tour setlists and curated blog posts, Cureation aims to be the definitive online fan archive for all things The Cure.
+**Cureation** is a fan-built website dedicated to **The Cure** – one of the most iconic bands of our time. This is a community-driven platform to explore, document, and celebrate their music, legacy, and culture. From discographies and lyrics to tour setlists and curated blog posts, Cureation aims to be the definitive online fan archive for all things The Cure.
 
 ---
 

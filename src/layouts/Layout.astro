@@ -5,108 +5,60 @@ import Nav from '../components/nav/Nav.astro';
 import MobileMenu from '../components/nav/MobileMenu.astro';
 import SearchOverlay from '../components/nav/SearchOverlay.astro';
 import Footer from '../components/nav/Footer.astro';
-import TweaksPanel from '../components/nav/TweaksPanel.astro';
-import Fog from '../components/atmosphere/Fog.astro';
 
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  ogType?: 'website' | 'article';
   theme?: 'dark' | 'papers';
 }
 
 const {
-  title = 'Cureation — an archive of The Cure',
+  title = 'Cureation | An archive of The Cure',
   description = 'An editorial archive documenting The Cure: albums, live shows, lyrics, members, photos, news.',
-  ogImage = '/hero-image1.jpg',
+  ogImage = '/og-editorial-v2.png',
+  ogType = 'website',
   theme = 'dark',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
 ---
 <!doctype html>
-<html lang="en" data-theme={theme}>
+<html lang="en" data-theme={theme} data-colour-theme="bloodflowers">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="generator" content={Astro.generator} />
-  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="icon" type="image/png" href="/favicon-64.png" />
   <link rel="canonical" href={canonical} />
-  <link rel="alternate" type="application/rss+xml" title="Cureation — journal & shows" href="/rss.xml" />
-  <link rel="alternate" type="application/rss+xml" title="Cureation — journal only" href="/news/rss.xml" />
-  <link rel="alternate" type="text/calendar" title="The Cure — tour dates" href="/calendar.ics" />
+  <link rel="alternate" type="application/rss+xml" title="Cureation | News and shows" href="/rss.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Cureation | Publication" href="/publication/rss.xml" />
+  <link rel="alternate" type="text/calendar" title="The Cure | Tour dates" href="/calendar.ics" />
 
   <title>{title}</title>
   <meta name="description" content={description} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:image" content={ogImage} />
-  <meta property="og:type" content="website" />
+  <meta property="og:image" content={ogImageUrl} />
+  <meta property="og:type" content={ogType} />
   <meta name="twitter:card" content="summary_large_image" />
 
   <ClientRouter />
-
   <script is:inline>
-    // Restore stored tweaks before paint to avoid flash.
     (function () {
-      var html = document.documentElement;
-      var ACC = {
-        disintegration: {
-          dark: { accent: '#7746B0', accent2: '#5A3389', accent3: '#B089E0', ink: '#F1E9F9' },
-          light: { accent: '#4E2677', accent2: '#351753', accent3: '#6A3AA0', ink: '#F9F1DC' }
-        },
-        wish: {
-          dark: { accent: '#B8354A', accent2: '#842839', accent3: '#E37A8A', ink: '#FFF1F3' },
-          light: { accent: '#8F2638', accent2: '#5B1423', accent3: '#A9384C', ink: '#FFF4E8' }
-        },
-        pornography: {
-          dark: { accent: '#8C2638', accent2: '#641B2B', accent3: '#D36A7E', ink: '#FDECEF' },
-          light: { accent: '#711C2B', accent2: '#4B111C', accent3: '#942D41', ink: '#FFF4E8' }
-        },
-        faith: {
-          dark: { accent: '#4D638E', accent2: '#2F3D5A', accent3: '#92A6D0', ink: '#EEF2FA' },
-          light: { accent: '#2F405F', accent2: '#1F2A40', accent3: '#485D84', ink: '#F4F1E7' }
-        },
-        'head-on-the-door': {
-          dark: { accent: '#A88344', accent2: '#73572B', accent3: '#DAB86E', ink: '#FFF8E7' },
-          light: { accent: '#76551F', accent2: '#4C3511', accent3: '#8E682C', ink: '#FFF4E2' }
-        },
-        bloodflowers: {
-          dark: { accent: '#A6462A', accent2: '#78311E', accent3: '#D8795F', ink: '#FFF1EA' },
-          light: { accent: '#843518', accent2: '#57210D', accent3: '#A34A2B', ink: '#FFF3E5' }
-        }
-      };
-      var mode = 'dark';
-      var accent = 'disintegration';
       try {
-        var raw = localStorage.getItem('cureation:tweaks');
-        if (raw) {
-          var s = JSON.parse(raw);
-          if (s && (s.mode === 'dark' || s.mode === 'light')) mode = s.mode;
-          else if (s && s.theme === 'papers') mode = 'light';
-          if (s && s.accent && ACC[s.accent]) accent = s.accent;
-        }
-      } catch (e) {}
-      html.setAttribute('data-theme', mode === 'light' ? 'papers' : 'dark');
-      html.setAttribute('data-display', 'cormorant');
-      html.setAttribute('data-atmos', 'heavy');
-      html.setAttribute('data-grain', 'off');
-      html.setAttribute('data-density', 'balanced');
-      html.setAttribute('data-headline', 'italic');
-      var palette = ACC[accent] || ACC.disintegration;
-      var tone = palette[mode === 'light' ? 'light' : 'dark'];
-      html.style.setProperty('--accent', tone.accent);
-      html.style.setProperty('--accent-2', tone.accent2);
-      html.style.setProperty('--accent-3', tone.accent3);
-      html.style.setProperty('--accent-ink', tone.ink);
-      html.style.setProperty('--accent-tint', tone.accent + '1A');
-      html.style.setProperty('--accent-tint-2', tone.accent + '33');
-      html.style.setProperty('--glow', '0 0 ' + (mode === 'light' ? '32px' : '40px') + ' ' + tone.accent + '40');
+        var saved = localStorage.getItem('cureation:theme');
+        if (saved === 'dark' || saved === 'papers') document.documentElement.setAttribute('data-theme', saved);
+        var colourTheme = localStorage.getItem('cureation:colour-theme');
+        var colourThemes = ['wish', 'disintegration', 'pornography', 'faith', 'head-on-the-door', 'bloodflowers'];
+        if (colourThemes.indexOf(colourTheme) !== -1) document.documentElement.setAttribute('data-colour-theme', colourTheme);
+      } catch (error) {}
     })();
   </script>
 </head>
 <body>
-  <Fog />
   <a class="sr-only" href="#main">Skip to content</a>
 
   <Nav />
@@ -118,6 +70,106 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString(
   </main>
 
   <Footer />
-  <TweaksPanel />
+
+  <script>
+    type CureationTheme = 'dark' | 'papers';
+    type CureationColourTheme = 'wish' | 'disintegration' | 'pornography' | 'faith' | 'head-on-the-door' | 'bloodflowers';
+    const themeKey = 'cureation:theme';
+    const colourThemeKey = 'cureation:colour-theme';
+    const colourThemeLabels: Record<CureationColourTheme, string> = {
+      wish: 'Wish',
+      disintegration: 'Disintegration',
+      pornography: 'Pornography',
+      faith: 'Faith',
+      'head-on-the-door': 'The Head on the Door',
+      bloodflowers: 'Bloodflowers',
+    };
+
+    function savedTheme(): CureationTheme {
+      try {
+        return localStorage.getItem(themeKey) === 'papers' ? 'papers' : 'dark';
+      } catch (error) {
+        return 'dark';
+      }
+    }
+
+    function paintTheme(theme: CureationTheme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+        const nextLabel = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+        button.setAttribute('aria-label', nextLabel);
+        button.setAttribute('title', nextLabel);
+        button.setAttribute('aria-pressed', String(theme === 'papers'));
+      });
+      document.dispatchEvent(new CustomEvent('cureation:theme-change', { detail: { theme } }));
+    }
+
+    function savedColourTheme(): CureationColourTheme {
+      try {
+        const saved = localStorage.getItem(colourThemeKey) as CureationColourTheme | null;
+        return saved && saved in colourThemeLabels ? saved : 'bloodflowers';
+      } catch (error) {
+        return 'bloodflowers';
+      }
+    }
+
+    function paintColourTheme(colourTheme: CureationColourTheme) {
+      document.documentElement.setAttribute('data-colour-theme', colourTheme);
+      document.querySelectorAll<HTMLButtonElement>('[data-colour-theme]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.colourTheme === colourTheme));
+      });
+      document.querySelectorAll<HTMLElement>('[data-colour-theme-current]').forEach((label) => {
+        label.textContent = colourThemeLabels[colourTheme];
+      });
+      document.dispatchEvent(new CustomEvent('cureation:colour-theme-change', { detail: { colourTheme } }));
+    }
+
+    function wireThemeSwitcher() {
+      paintTheme(savedTheme());
+      paintColourTheme(savedColourTheme());
+      document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+        if (button.dataset.themeWired) return;
+        button.dataset.themeWired = 'true';
+        button.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme') === 'papers' ? 'papers' : 'dark';
+          const nextTheme: CureationTheme = currentTheme === 'dark' ? 'papers' : 'dark';
+          try { localStorage.setItem(themeKey, nextTheme); } catch (error) {}
+          paintTheme(nextTheme);
+        });
+      });
+      document.querySelectorAll<HTMLButtonElement>('[data-colour-theme]').forEach((button) => {
+        if (button.dataset.colourThemeWired) return;
+        button.dataset.colourThemeWired = 'true';
+        button.addEventListener('click', () => {
+          const colourTheme = button.dataset.colourTheme as CureationColourTheme | undefined;
+          if (!colourTheme || !(colourTheme in colourThemeLabels)) return;
+          try { localStorage.setItem(colourThemeKey, colourTheme); } catch (error) {}
+          paintColourTheme(colourTheme);
+          button.closest('details')?.removeAttribute('open');
+        });
+      });
+    }
+
+    function wireResponsiveTables() {
+      document.querySelectorAll<HTMLTableElement>('table.data:not(.gear-ledger)').forEach((table) => {
+        if (table.dataset.responsiveWired) return;
+        table.dataset.responsiveWired = 'true';
+        const labels = Array.from(table.querySelectorAll<HTMLTableCellElement>('thead th'))
+          .map((heading) => heading.textContent?.trim() || '');
+
+        table.querySelectorAll<HTMLTableRowElement>('tbody tr').forEach((row) => {
+          Array.from(row.cells).forEach((cell, index) => {
+            const label = labels[index];
+            if (label && !cell.hasAttribute('data-label')) cell.setAttribute('data-label', label);
+          });
+        });
+      });
+    }
+
+    wireThemeSwitcher();
+    wireResponsiveTables();
+    document.addEventListener('astro:page-load', wireThemeSwitcher);
+    document.addEventListener('astro:page-load', wireResponsiveTables);
+  </script>
 </body>
 </html>

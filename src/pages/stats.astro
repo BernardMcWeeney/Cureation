@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import BarChart from '../components/ui/BarChart.astro';
 import { listAlbums, listSongs, listSetlists, listTours, listEras, getRunningFigures } from '../lib/directus';
@@ -64,58 +63,111 @@ const facts: Array<[string, string]> = [
   <PageHero
     section="By the numbers"
     title="Statistics"
-    deck="The archive, quantified — live frequencies, tour cadence, catalogue distribution — stacked against decades and geography."
+    deck="The archive, quantified through live frequencies, tour cadence and catalogue distribution across decades and geography."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Statistics' }]}
     facts={facts.map(([k, v]) => ({ k, v }))}
   />
 
-  <IssueSection kicker="Live frequency" title="Most-played songs" meta="Top 10 by live count">
-    <BarChart unit="plays" bars={topSongs.map((s) => {
-      const alb = s.album ? albumsById[s.album] : null;
-      return { label: s.title || '—', sub: alb?.title || '', value: s.times_played_live || 0, href: s.slug ? `/songs/${s.slug}` : undefined };
-    })} />
-  </IssueSection>
-
-  <IssueSection kicker="Records rank" title="Albums by live prevalence" meta="Aggregate of song plays">
-    <BarChart bars={topAlbums.map(({ album, plays }) => ({
-      label: album!.title,
-      sub: String(album!.release_date || '').slice(0, 4),
-      value: plays,
-      href: `/discography/${album!.slug}`,
-    }))} />
-  </IssueSection>
-
-  <IssueSection kicker="Cadence" title="Shows per decade" meta="Live archive">
-    <div class="decade-bars" style="height: 220px;">
-      {decadeEntries.map(([d, c]) => (
-        <div class="decade-bar" style={`--h: ${Math.round((c / maxDecadeShows) * 100)}%;`}>
-          <div class="decade-bar__val">{c}</div>
-          <div class="decade-bar__fill"></div>
-          <div class="decade-bar__label">{d}</div>
-        </div>
-      ))}
+  <section class="stats-section stats-section--lead">
+    <div class="container">
+      <header class="stats-heading stats-heading--row">
+        <div><span>Live frequency</span><h2>The songs played<br /><em>again and again.</em></h2></div>
+        <small>Top 10 · live archive</small>
+      </header>
+      <div class="stats-lead-chart">
+        <BarChart unit="plays" bars={topSongs.map((s) => {
+          const alb = s.album ? albumsById[s.album] : null;
+          return { label: s.title || '–', sub: alb?.title || '', value: s.times_played_live || 0, href: s.slug ? `/songs/${s.slug}` : undefined };
+        })} />
+      </div>
     </div>
-  </IssueSection>
+  </section>
 
-  <IssueSection kicker="Geography" title="Top touring countries" meta="By show count">
-    <BarChart bars={topCountries.map(([c, n]) => ({ label: c, value: n }))} />
-  </IssueSection>
+  <section class="stats-section stats-section--soft">
+    <div class="container">
+      <header class="stats-heading"><span>Two ways through the live archive</span><h2>Records and<br /><em>places.</em></h2></header>
+      <div class="stats-grid">
+        <article class="stats-card">
+          <header><span>Records rank</span><h3>Albums by live prevalence</h3><small>Aggregate song plays</small></header>
+          <BarChart bars={topAlbums.map(({ album, plays }) => ({
+            label: album!.title,
+            sub: String(album!.release_date || '').slice(0, 4),
+            value: plays,
+            href: `/discography/${album!.slug}`,
+          }))} />
+        </article>
+        <article class="stats-card">
+          <header><span>Geography</span><h3>Top touring countries</h3><small>By show count</small></header>
+          <BarChart bars={topCountries.map(([c, n]) => ({ label: c, value: n }))} />
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="container">
+      <header class="stats-heading stats-heading--row">
+        <div><span>Cadence</span><h2>How the years<br /><em>fill up.</em></h2></div>
+        <small>{tours.length} tours catalogued</small>
+      </header>
+      <div class="cadence-grid">
+        <article>
+          <h3>Shows per decade</h3>
+          <div class="decade-bars" style="height: 260px;">
+            {decadeEntries.map(([d, c]) => (
+              <div class="decade-bar" style={`--h: ${Math.round((c / maxDecadeShows) * 100)}%;`}>
+                <div class="decade-bar__val">{c}</div><div class="decade-bar__fill"></div><div class="decade-bar__label">{d}</div>
+              </div>
+            ))}
+          </div>
+        </article>
+        <article>
+          <h3>Tours launched</h3>
+          <div class="decade-bars" style="height: 260px;">
+            {tourDecadeEntries.map(([d, c]) => (
+              <div class="decade-bar" style={`--h: ${Math.round((c / maxTourDecade) * 100)}%;`}>
+                <div class="decade-bar__val">{c}</div><div class="decade-bar__fill"></div><div class="decade-bar__label">{d}</div>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
 
   {eraEntries.length > 0 && (
-    <IssueSection kicker="Chronology" title="Records per era" meta="Catalogue distribution">
-      <BarChart bars={eraEntries.map(([k, v]) => ({ label: k, value: v }))} />
-    </IssueSection>
+    <section class="stats-section stats-section--accent">
+      <div class="container stats-era">
+        <header><span>Catalogue chronology</span><h2>Every era leaves<br />a different shape.</h2><p>Studio records grouped by the archive's historical eras.</p></header>
+        <div class="stats-era__chart"><BarChart showRank={false} bars={eraEntries.map(([k, v]) => ({ label: k, value: v }))} /></div>
+      </div>
+    </section>
   )}
-
-  <IssueSection kicker="Tours cadence" title="Tours launched, by decade" meta={`${tours.length} tours total`}>
-    <div class="decade-bars" style="height: 180px;">
-      {tourDecadeEntries.map(([d, c]) => (
-        <div class="decade-bar" style={`--h: ${Math.round((c / maxTourDecade) * 100)}%;`}>
-          <div class="decade-bar__val">{c}</div>
-          <div class="decade-bar__fill"></div>
-          <div class="decade-bar__label">{d}</div>
-        </div>
-      ))}
-    </div>
-  </IssueSection>
 </Layout>
+
+<style>
+  .stats-section { padding-block: clamp(80px, 10vw, 148px); }
+  .stats-section--soft { background: var(--bg-2); }
+  .stats-heading { margin-bottom: clamp(42px, 6vw, 76px); }
+  .stats-heading--row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 36px; }
+  .stats-heading span, .stats-card header > span, .stats-era header > span { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+  .stats-heading h2, .stats-era h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
+  .stats-heading h2 em { color: var(--accent); font-weight: inherit; }
+  .stats-heading > small { padding: 11px 14px; background: var(--accent); color: var(--accent-ink); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .stats-lead-chart { padding: clamp(24px, 4vw, 54px); background: linear-gradient(145deg, var(--accent-tint), transparent 54%), var(--bg-2); }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 3vw, 42px); }
+  .stats-card { min-width: 0; padding: clamp(24px, 3vw, 44px); background: var(--bg); }
+  .stats-card header { min-height: 145px; margin-bottom: 28px; }
+  .stats-card h3 { margin: 10px 0 8px; color: var(--ink); font-family: var(--f-display); font-size: clamp(36px, 4vw, 58px); font-style: italic; font-weight: 400; letter-spacing: -.04em; line-height: .9; }
+  .stats-card header small { color: var(--muted); font-family: var(--f-sans); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+  .cadence-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 78px); }
+  .cadence-grid > article { min-width: 0; padding: clamp(24px, 3vw, 42px); background: var(--bg-2); }
+  .cadence-grid h3 { margin: 0 0 32px; color: var(--ink); font-family: var(--f-display); font-size: clamp(31px, 3vw, 46px); font-style: italic; font-weight: 400; }
+  .stats-section--accent { background: var(--accent); color: var(--accent-ink); }
+  .stats-era { display: grid; grid-template-columns: minmax(0, .75fr) minmax(360px, 1.25fr); gap: clamp(42px, 8vw, 120px); align-items: center; }
+  .stats-era header > span, .stats-era h2, .stats-era header p { color: var(--accent-ink); }
+  .stats-era header p { max-width: 36ch; font-size: 17px; line-height: 1.6; }
+  .stats-era__chart { padding: clamp(20px, 3vw, 42px); background: var(--bg); color: var(--ink); }
+  @media (max-width: 900px) { .stats-grid, .cadence-grid, .stats-era { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .stats-heading--row { grid-template-columns: 1fr; align-items: start; } .stats-heading > small { justify-self: start; } }
+</style>

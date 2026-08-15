@@ -18,7 +18,7 @@ const decades = Object.keys(byDecade).sort();
   <PageHero
     section="History"
     title="A chronology"
-    deck="The Cure, year by year — divided into six identifying eras and annotated with the events that defined each."
+    deck="The Cure, year by year, divided into six identifying eras and annotated with the events that defined each."
     crumbs={[
       { label: 'Home', href: '/' },
       { label: 'The band', href: '/band' },
@@ -44,7 +44,7 @@ const decades = Object.keys(byDecade).sort();
               <span class="serif" style="font-size:22px; font-style:italic;">{e.name}</span>
               {e.description && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{e.description}</div>}
             </td>
-            <td class="mono-sm" style="color: var(--accent-3);">{e.short_name || '—'}</td>
+            <td class="mono-sm" style="color: var(--accent-3);">{e.short_name || '–'}</td>
           </tr>
         ))}
       </tbody>

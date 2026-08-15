@@ -25,16 +25,16 @@ const decades = Array.from(showsByDecade.keys()).sort().reverse();
 
 const firstY = venue.first_cure_show?.slice(0, 4);
 const lastY = venue.latest_cure_show?.slice(0, 4);
-const span = firstY && lastY ? (firstY === lastY ? firstY : `${firstY}–${lastY}`) : '—';
+const span = firstY && lastY ? (firstY === lastY ? firstY : `${firstY}–${lastY}`) : '–';
 
 const facts: Array<[string, string]> = [
-  ['Location', [venue.city, venue.state_province, venue.country].filter(Boolean).join(', ') || '—'],
-  ['Capacity', venue.capacity ? venue.capacity.toLocaleString() : '—'],
-  ['Opened', venue.opened_year ? String(venue.opened_year) : '—'],
-  ['Type', venue.venue_type || '—'],
-  ['Cure shows', String(venue.cure_show_count || shows.length || '—')],
-  ['First appearance', venue.first_cure_show || '—'],
-  ['Latest appearance', venue.latest_cure_show || '—'],
+  ['Location', [venue.city, venue.state_province, venue.country].filter(Boolean).join(', ') || '–'],
+  ['Capacity', venue.capacity ? venue.capacity.toLocaleString() : '–'],
+  ['Opened', venue.opened_year ? String(venue.opened_year) : '–'],
+  ['Type', venue.venue_type || '–'],
+  ['Cure shows', String(venue.cure_show_count || shows.length || '–')],
+  ['First appearance', venue.first_cure_show || '–'],
+  ['Latest appearance', venue.latest_cure_show || '–'],
   ['Span', span],
 ];
 

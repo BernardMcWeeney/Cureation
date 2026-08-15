@@ -14,6 +14,9 @@ const classes = ['tag', variant === 'accent' ? 'tag--accent' : '', klass].filter
 )}
 
 <style>
+  .tag--accent { color: var(--accent-3); }
+  :global(:root[data-theme='papers']) .tag--accent { color: var(--accent); }
   a.tag { border-bottom-width: 1px; }
-  a.tag:hover { color: var(--accent-ink); border-color: var(--accent); }
+  a.tag:hover { color: var(--accent-3); border-color: var(--accent); }
+  :global(:root[data-theme='papers']) a.tag:hover { color: var(--accent); }
 </style>

@@ -47,7 +47,7 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
   <PageHero
     section="Provenance"
     title="Sources"
-    deck="Every claim traces back to something. This is the ledger of where the archive's facts came from — cited, counted, and ranked by reliability."
+    deck="Every claim traces back to something. This ledger records where the archive's facts came from, with citations, counts and reliability rankings."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Sources' }]}
     facts={[
       { k: 'Sources on file', v: sources.length },
@@ -105,10 +105,10 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
               {s.is_official && <span class="tag" style="margin-left:.5rem; font-size:9px; background: var(--accent-tint);">OFFICIAL</span>}
               {s.description && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem; max-width: 60ch;">{s.description}</div>}
             </td>
-            <td class="mono-sm muted">{(s.type || '—').toUpperCase()}</td>
-            <td class="mono-sm muted">{s.author || '—'}</td>
+            <td class="mono-sm muted">{(s.type || '–').toUpperCase()}</td>
+            <td class="mono-sm muted">{s.author || '–'}</td>
             <td class="num" style="color: var(--accent-3);">{s.counts.total.toLocaleString()}</td>
-            <td class="num">{s.reliability ?? '—'}</td>
+            <td class="num">{s.reliability ?? '–'}</td>
           </tr>
         ))}
       </tbody>

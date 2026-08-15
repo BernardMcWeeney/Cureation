@@ -35,7 +35,7 @@ const tags: string[] = Array.isArray(article.tags) ? article.tags : [];
     <h1 class="serif" style="font-size: clamp(40px, 6vw, 80px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0;">{article.title}</h1>
     {article.excerpt && <p style="font-family: var(--f-serif); font-size: 20px; line-height: 1.55; color: var(--ink-2); margin-top: 1rem;">{article.excerpt}</p>}
     <div class="mono-sm muted" style="margin-top: 1rem;">
-      {article.published_date || '—'}
+      {article.published_date || '–'}
       {article.reading_time && <> · {article.reading_time} MIN READ</>}
       {article.author_name && <> · {article.author_name.toUpperCase()}</>}
     </div>

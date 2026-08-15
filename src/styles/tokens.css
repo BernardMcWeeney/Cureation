@@ -1,104 +1,56 @@
 /* ==========================================================================
-   Cureation — Design tokens
-   Dark-romantic editorial identity. Purple accent #7746B0.
+   Cureation – Design tokens
+   Dark-romantic editorial identity. Vivid red with ultraviolet highlights.
    Single source of truth for palette, typography, fog, component primitives.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   Self-hosted fonts
-   Drop files in public/fonts/<family>/<weight>.woff2
-   -------------------------------------------------------------------------- */
-@font-face {
-  font-family: 'Cormorant Garamond';
-  font-style: italic;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('/fonts/cormorant-garamond/italic.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Cormorant Garamond';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('/fonts/cormorant-garamond/regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'EB Garamond';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/eb-garamond/regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'EB Garamond';
-  font-style: italic;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/eb-garamond/italic.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('/fonts/inter/regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 300 600;
-  font-display: swap;
-  src: url('/fonts/jetbrains-mono/regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Caveat';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('/fonts/caveat/regular.woff2') format('woff2');
-}
-
-/* --------------------------------------------------------------------------
-   Palette + tokens — theme: dark (default)
+   Palette + tokens – theme: dark (default)
    -------------------------------------------------------------------------- */
 :root,
 [data-theme='dark'] {
   /* Surfaces */
-  --bg: #0B0B0E;
-  --bg-2: #111116;
-  --bg-3: #17171E;
-  --surface: #1B1B24;
-  --elev: #22222D;
+  --bg: #080808;
+  --bg-2: #0E0E0E;
+  --bg-3: #151515;
+  --surface: #181818;
+  --elev: #202020;
 
-  /* Type — darkened muted a touch so metadata never reads "ghosted" */
-  --ink: #EFE9DD;
-  --ink-2: #CDC6B8;
-  --muted: #9A9386;
-  --muted-2: #6F6A5E;
+  /* Type */
+  --ink: #F0EEE8;
+  --ink-2: #C5C1B7;
+  --muted: #8D8980;
+  --muted-2: #7D7971;
 
   /* Rules */
-  --rule: rgba(232, 226, 214, 0.14);
-  --rule-2: rgba(232, 226, 214, 0.06);
-  --rule-strong: rgba(232, 226, 214, 0.28);
+  --rule: rgba(240, 238, 232, 0.14);
+  --rule-2: rgba(240, 238, 232, 0.07);
+  --rule-strong: rgba(240, 238, 232, 0.28);
 
-  /* Accent — purple */
-  --accent: #7746B0;
-  --accent-2: #5A3389;
-  --accent-3: #B089E0;
-  --accent-ink: #F1E9F9;
-  --accent-tint: rgba(119, 70, 176, 0.10);
-  --accent-tint-2: rgba(119, 70, 176, 0.20);
-  --glow: 0 0 40px rgba(119, 70, 176, 0.25);
+  /* Accent – Cure pop against the black */
+  --accent: #F70D1A;
+  --accent-2: #B60710;
+  --accent-3: #F70D1A;
+  --accent-ink: #080808;
+  --accent-tint: rgba(247, 13, 26, 0.12);
+  --accent-tint-2: rgba(247, 13, 26, 0.24);
+  --glow: 0 0 52px rgba(247, 13, 26, 0.28);
+
+  /* Secondary pop – the electric blue-purple in the Cureation mark */
+  --violet: #9B5CFF;
+  --violet-2: #6730C8;
+  --violet-tint: rgba(155, 92, 255, 0.15);
+  --violet-tint-2: rgba(155, 92, 255, 0.28);
 
   /* Status */
   --success: #6E8E62;
   --warn: #B38A3E;
   --danger: #A14A4A;
 
-  /* Color pops — editorial flourish */
-  --hot: #E28A4B;        /* ember — debuts, new, heat */
+  /* Color pops – editorial flourish */
+  --hot: #E28A4B;        /* ember – debuts, new, heat */
   --hot-tint: rgba(226, 138, 75, 0.14);
-  --cool: #6FA6B3;       /* archive teal — historical, vintage */
+  --cool: #6FA6B3;       /* archive teal – historical, vintage */
   --cool-tint: rgba(111, 166, 179, 0.14);
   --gold: #D8AB56;       /* awards, peaks, chart #1 */
   --gold-tint: rgba(216, 171, 86, 0.14);
@@ -110,19 +62,25 @@
   --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.55);
 
   /* Typography */
-  --f-display: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
-  --f-serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
-  --f-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --f-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --f-script: 'Caveat', 'Cormorant Garamond', cursive;
+  --f-display: 'Cormorant Garamond Variable', Iowan Old Style, Baskerville, 'Times New Roman', serif;
+  --f-serif: 'EB Garamond Variable', Iowan Old Style, Baskerville, Georgia, 'Times New Roman', serif;
+  --f-sans: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --f-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --f-script: 'Cormorant Garamond Variable', Iowan Old Style, Baskerville, Georgia, serif;
 
   /* Layout */
   --radius: 0px; /* hard corners */
   --radius-chip: 2px;
-  --max-w: 1280px;
+  --max-w: 1480px;
+  --max-w-wide: 1640px;
+  --max-w-reading: 760px;
   --gutter: clamp(16px, 4vw, 40px);
 
-  /* Spacing scale — use for rhythm between sections */
+  /* Small editorial type remains readable on dense archive surfaces. */
+  --micro: 11px;
+  --micro-sm: 10px;
+
+  /* Spacing scale – use for rhythm between sections */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -140,7 +98,7 @@
   --bp-tablet: 960px;
 }
 
-/* Midnight — deeper, cooler */
+/* Midnight – deeper, cooler */
 [data-theme='midnight'] {
   --bg: #07070B;
   --bg-2: #0C0C13;
@@ -150,40 +108,41 @@
   --ink: #E4DED2;
   --ink-2: #B7AF9F;
   --muted: #867F72;
-  --muted-2: #5A544B;
+  --muted-2: #817A70;
   --rule: rgba(220, 215, 204, 0.14);
   --rule-2: rgba(220, 215, 204, 0.06);
   --rule-strong: rgba(220, 215, 204, 0.28);
-  --accent: #8A59C4;
-  --accent-2: #6A40A0;
-  --accent-3: #BE94E6;
-  --accent-ink: #F2ECF9;
-  --accent-tint: rgba(138, 89, 196, 0.12);
-  --accent-tint-2: rgba(138, 89, 196, 0.22);
-  --glow: 0 0 46px rgba(138, 89, 196, 0.30);
+  --accent: #F70D1A;
+  --accent-2: #B60710;
+  --accent-3: #F70D1A;
+  --accent-ink: #080808;
+  --accent-tint: rgba(247, 13, 26, 0.12);
+  --accent-tint-2: rgba(247, 13, 26, 0.22);
+  --glow: 0 0 46px rgba(247, 13, 26, 0.30);
 }
 
-/* Papers — clean warm off-white (magazine stock) */
+/* Light – warm editorial stock. The historical `papers` key remains so
+   saved preferences and page-level selectors continue to work. */
 [data-theme='papers'] {
-  --bg: #F3EEDF;
-  --bg-2: #EAE2CB;
-  --bg-3: #DDD2B7;
-  --surface: #F9F4E6;
-  --elev: #FFFBEE;
-  --ink: #141008;
-  --ink-2: #2A251B;
-  --muted: #3C372A;
-  --muted-2: #6B6454;
-  --rule: rgba(20, 16, 8, 0.24);
-  --rule-2: rgba(20, 16, 8, 0.10);
-  --rule-strong: rgba(20, 16, 8, 0.48);
-  --accent: #4E2677;
-  --accent-2: #351753;
-  --accent-3: #6A3AA0;
-  --accent-ink: #F3EEDF;
-  --accent-tint: rgba(78, 38, 119, 0.10);
-  --accent-tint-2: rgba(78, 38, 119, 0.22);
-  --glow: 0 0 32px rgba(78, 38, 119, 0.18);
+  --bg: #F4F0E7;
+  --bg-2: #EBE5DA;
+  --bg-3: #DED6C8;
+  --surface: #EEE8DC;
+  --elev: #FAF7F0;
+  --ink: #11100E;
+  --ink-2: #2E2B26;
+  --muted: #5C574E;
+  --muted-2: #706A60;
+  --rule: rgba(10, 10, 10, 0.20);
+  --rule-2: rgba(10, 10, 10, 0.09);
+  --rule-strong: rgba(10, 10, 10, 0.42);
+  --accent: #F70D1A;
+  --accent-2: #A8070F;
+  --accent-3: #F70D1A;
+  --accent-ink: #080808;
+  --accent-tint: rgba(247, 13, 26, 0.10);
+  --accent-tint-2: rgba(247, 13, 26, 0.20);
+  --glow: 0 0 32px rgba(247, 13, 26, 0.18);
   --shadow-1: 0 1px 2px rgba(20, 16, 8, 0.10), 0 2px 8px rgba(20, 16, 8, 0.07);
   --shadow-2: 0 12px 36px rgba(20, 16, 8, 0.18);
   --hot: #9A3F14;
@@ -196,32 +155,27 @@
   --blood-tint: rgba(89, 24, 32, 0.14);
 }
 [data-theme='papers'] body {
-  background:
-    radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--accent), transparent 94%), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, color-mix(in oklab, var(--accent), transparent 95%), transparent 55%),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
 }
-/* Key text targets use --accent in papers so they read against warm paper.
-   Anywhere that sits on a transparent/cream background needs to override
-   --accent-ink (cream) → --accent (dark purple) for contrast. */
+/* Key text targets use the deeper red in papers so they read against warm stock. */
 [data-theme='papers'] .stat-hero__value,
 [data-theme='papers'] .countdown__value,
 [data-theme='papers'] .foot-figure__v,
 [data-theme='papers'] .album-tab.is-active,
 [data-theme='papers'] .bar:hover .bar__val { color: var(--accent); }
 [data-theme='papers'] a:hover { color: var(--accent); border-color: var(--accent); }
-/* Dark overlays on imagery — always light text */
-[data-theme='papers'] .cover-plate__corner { background: rgba(243, 238, 223, 0.92); color: var(--ink); border-color: var(--rule); }
+/* Dark overlays on imagery – always light text */
+[data-theme='papers'] .cover-plate__corner { background: rgba(255, 255, 255, 0.94); color: var(--ink); border-color: var(--rule); }
 [data-theme='papers'] .photo-plate__overlay,
 [data-theme='papers'] .daily-photo__overlay,
 [data-theme='papers'] .cover-wall__cap,
 [data-theme='papers'] .filmstrip__caption {
   background: linear-gradient(to top, rgba(20,16,8,0.86), transparent);
-  color: #F3EEDF;
+  color: #FFFFFF;
 }
 [data-theme='papers'] .daily-photo__overlay .mono-sm,
-[data-theme='papers'] .daily-photo__overlay .serif { color: #F3EEDF !important; }
+[data-theme='papers'] .daily-photo__overlay .serif { color: #FFFFFF !important; }
 [data-theme='papers'] ::selection { background: var(--accent-tint-2); color: var(--ink); }
 [data-theme='papers'] .fog { opacity: 0.16; mix-blend-mode: multiply; }
 [data-theme='papers'] .fog__cloud { background: radial-gradient(closest-side, color-mix(in oklab, var(--accent), transparent 78%), transparent 70%); }
@@ -242,63 +196,135 @@
 [data-theme='papers'] .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 [data-theme='papers'] .nav { background: color-mix(in oklab, var(--bg), transparent 10%); }
 [data-theme='papers'] .nav__link { color: var(--ink-2); }
-[data-theme='papers'] .nav__link:hover { color: var(--ink); }
+[data-theme='papers'] .nav__link:hover { color: var(--accent); }
 [data-theme='papers'] .nav__link.is-active { color: var(--accent); }
 [data-theme='papers'] .foot { background:
-  radial-gradient(600px 300px at 50% 0%, color-mix(in oklab, var(--accent), transparent 92%), transparent 70%),
+  radial-gradient(600px 300px at 50% 0%, color-mix(in oklab, var(--violet), transparent 95%), transparent 70%),
   var(--bg);
 }
 
-/* --------------------------------------------------------------------------
-   Tweaks — runtime CSS hooks (TweaksPanel sets these attrs on <html>)
-   -------------------------------------------------------------------------- */
-
-/* Display-font swap */
-html[data-display='eb'] {
-  --f-display: 'EB Garamond', Georgia, 'Times New Roman', serif;
+/* Album-inspired colour themes own the complete accent system. Switching a
+   theme changes links, active states, buttons, rules, glows and atmosphere. */
+:root,
+[data-colour-theme='bloodflowers'] {
+  --accent: #F70D1A;
+  --accent-2: #B60710;
+  --accent-3: #F70D1A;
+  --accent-ink: #080808;
+  --accent-tint: rgba(247, 13, 26, 0.12);
+  --accent-tint-2: rgba(247, 13, 26, 0.24);
+  --glow: 0 0 52px rgba(247, 13, 26, 0.28);
+  --violet: #F70D1A;
+  --violet-2: #B60710;
+  --violet-tint: rgba(247, 13, 26, 0.15);
+  --violet-tint-2: rgba(247, 13, 26, 0.28);
+}
+[data-colour-theme='wish'] {
+  --accent: #4D8DFF;
+  --accent-2: #1D5FCB;
+  --accent-3: #4D8DFF;
+  --accent-ink: #080808;
+  --accent-tint: rgba(77, 141, 255, 0.12);
+  --accent-tint-2: rgba(77, 141, 255, 0.24);
+  --glow: 0 0 52px rgba(77, 141, 255, 0.28);
+  --violet: #4D8DFF;
+  --violet-2: #1D5FCB;
+  --violet-tint: rgba(77, 141, 255, 0.15);
+  --violet-tint-2: rgba(77, 141, 255, 0.28);
+}
+[data-colour-theme='disintegration'] {
+  --accent: #9B5CFF;
+  --accent-2: #6730C8;
+  --accent-3: #9B5CFF;
+  --accent-ink: #080808;
+  --accent-tint: rgba(155, 92, 255, 0.12);
+  --accent-tint-2: rgba(155, 92, 255, 0.24);
+  --glow: 0 0 52px rgba(155, 92, 255, 0.28);
+  --violet: #9B5CFF;
+  --violet-2: #6730C8;
+  --violet-tint: rgba(155, 92, 255, 0.15);
+  --violet-tint-2: rgba(155, 92, 255, 0.28);
+}
+[data-colour-theme='pornography'] {
+  --accent: #D33A55;
+  --accent-2: #8D1930;
+  --accent-3: #D33A55;
+  --accent-ink: #080808;
+  --accent-tint: rgba(211, 58, 85, 0.12);
+  --accent-tint-2: rgba(211, 58, 85, 0.24);
+  --glow: 0 0 52px rgba(211, 58, 85, 0.28);
+  --violet: #D33A55;
+  --violet-2: #8D1930;
+  --violet-tint: rgba(211, 58, 85, 0.15);
+  --violet-tint-2: rgba(211, 58, 85, 0.28);
+}
+[data-colour-theme='faith'] {
+  --accent: #7894C2;
+  --accent-2: #40587D;
+  --accent-3: #7894C2;
+  --accent-ink: #080808;
+  --accent-tint: rgba(120, 148, 194, 0.12);
+  --accent-tint-2: rgba(120, 148, 194, 0.24);
+  --glow: 0 0 52px rgba(120, 148, 194, 0.28);
+  --violet: #7894C2;
+  --violet-2: #40587D;
+  --violet-tint: rgba(120, 148, 194, 0.15);
+  --violet-tint-2: rgba(120, 148, 194, 0.28);
+}
+[data-colour-theme='head-on-the-door'] {
+  --accent: #D6A64A;
+  --accent-2: #8A641C;
+  --accent-3: #D6A64A;
+  --accent-ink: #080808;
+  --accent-tint: rgba(214, 166, 74, 0.12);
+  --accent-tint-2: rgba(214, 166, 74, 0.24);
+  --glow: 0 0 52px rgba(214, 166, 74, 0.28);
+  --violet: #D6A64A;
+  --violet-2: #8A641C;
+  --violet-tint: rgba(214, 166, 74, 0.15);
+  --violet-tint-2: rgba(214, 166, 74, 0.28);
 }
 
-/* Density */
-html[data-density='airy'] body { font-size: 18px; line-height: 1.75; }
-html[data-density='dense'] body { font-size: 15.5px; line-height: 1.55; }
-html[data-density='airy'] :root,
-html[data-density='airy'] {
-  --section-y: clamp(56px, 7.5vw, 112px);
-  --section-y-sm: clamp(32px, 5vw, 64px);
+/* Light mode uses a deeper shade of each hue for readable text and controls. */
+[data-theme='papers'][data-colour-theme='wish'] {
+  --accent: #1557C0;
+  --accent-2: #0B3E91;
+  --accent-3: #1557C0;
+  --accent-ink: #FFFFFF;
+  --accent-tint: rgba(21, 87, 192, 0.10);
+  --accent-tint-2: rgba(21, 87, 192, 0.20);
 }
-html[data-density='dense'] :root,
-html[data-density='dense'] {
-  --section-y: clamp(28px, 4vw, 56px);
-  --section-y-sm: clamp(18px, 2.6vw, 36px);
+[data-theme='papers'][data-colour-theme='disintegration'] {
+  --accent: #6E35B5;
+  --accent-2: #4A1E82;
+  --accent-3: #6E35B5;
+  --accent-ink: #FFFFFF;
+  --accent-tint: rgba(110, 53, 181, 0.10);
+  --accent-tint-2: rgba(110, 53, 181, 0.20);
 }
-
-/* Atmosphere intensity */
-html[data-atmos='off'] .fog { display: none; }
-html[data-atmos='soft'] .fog__cloud { opacity: 0.32; }
-html[data-atmos='heavy'] .fog__cloud { opacity: 0.7; filter: blur(60px); }
-
-/* Film grain */
-html[data-grain='on'] body::after {
-  content: '';
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0.5;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.85 0 0 0 0 0.8 0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+[data-theme='papers'][data-colour-theme='pornography'] {
+  --accent: #991D34;
+  --accent-2: #681022;
+  --accent-3: #991D34;
+  --accent-ink: #FFFFFF;
+  --accent-tint: rgba(153, 29, 52, 0.10);
+  --accent-tint-2: rgba(153, 29, 52, 0.20);
 }
-html[data-theme='papers'][data-grain='on'] body::after { mix-blend-mode: multiply; opacity: 0.35; }
-
-/* Headline style — upright kills italic on display headings */
-html[data-headline='upright'] .headline,
-html[data-headline='upright'] .masthead-wordmark,
-html[data-headline='upright'] .issue__title,
-html[data-headline='upright'] .issue-section__title,
-html[data-headline='upright'] .essay__head,
-html[data-headline='upright'] .dispatch__title,
-html[data-headline='upright'] .pull,
-html[data-headline='upright'] .foot-word em {
-  font-style: normal;
+[data-theme='papers'][data-colour-theme='faith'] {
+  --accent: #405779;
+  --accent-2: #293A55;
+  --accent-3: #405779;
+  --accent-ink: #FFFFFF;
+  --accent-tint: rgba(64, 87, 121, 0.10);
+  --accent-tint-2: rgba(64, 87, 121, 0.20);
+}
+[data-theme='papers'][data-colour-theme='head-on-the-door'] {
+  --accent: #815D16;
+  --accent-2: #583D09;
+  --accent-3: #815D16;
+  --accent-ink: #FFFFFF;
+  --accent-tint: rgba(129, 93, 22, 0.10);
+  --accent-tint-2: rgba(129, 93, 22, 0.20);
 }
 
 /* --------------------------------------------------------------------------
@@ -321,8 +347,7 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(1200px 600px at 10% -10%, var(--accent-tint), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, var(--accent-tint), transparent 55%),
+    radial-gradient(900px 520px at 82% -10%, color-mix(in srgb, var(--violet) 11%, transparent), transparent 68%),
     var(--bg);
   color: var(--ink);
   font-family: var(--f-serif);
@@ -343,8 +368,8 @@ a {
   transition: color 0.18s ease, border-color 0.18s ease;
 }
 a:hover {
-  color: var(--accent-3);
-  border-color: var(--accent-3);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 ::selection {
@@ -385,9 +410,9 @@ video {
 .kicker,
 .label {
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: var(--micro);
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.17em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -434,7 +459,7 @@ video {
   padding: 0;
 }
 .crumbs a { border-bottom: none; color: var(--muted); }
-.crumbs a:hover { color: var(--accent-3); }
+.crumbs a:hover { color: var(--accent); }
 .crumbs [aria-current='page'] { color: var(--ink-2); }
 .crumbs__item + .crumbs__item::before {
   content: '·';
@@ -446,7 +471,7 @@ video {
    Component primitives
    -------------------------------------------------------------------------- */
 
-/* Panel — editorial card surface */
+/* Panel – editorial card surface */
 .panel {
   background: var(--surface);
   border: 1px solid var(--rule);
@@ -466,7 +491,7 @@ video {
   padding: clamp(24px, 3vw, 48px) 0;
 }
 
-/* Tag — small editorial label */
+/* Tag – small editorial label */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -491,7 +516,7 @@ video {
   color: var(--accent);
 }
 
-/* Chip — filter pill. Hover stays quiet (no splashy tint);
+/* Chip – filter pill. Hover stays quiet (no splashy tint);
    only the selected state pulls accent foreground. */
 .chip {
   display: inline-flex;
@@ -510,8 +535,8 @@ video {
   border-radius: var(--radius-chip);
 }
 .chip:hover {
-  border-color: var(--rule-strong);
-  color: var(--ink);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .chip[aria-pressed='true'],
 .chip.is-active {
@@ -545,7 +570,7 @@ video {
 }
 .btn:hover {
   border-color: var(--accent);
-  color: var(--accent-3);
+  color: var(--accent);
   background: transparent;
 }
 :root[data-theme='papers'] .btn:hover { color: var(--accent); }
@@ -555,8 +580,9 @@ video {
   color: var(--accent-ink);
 }
 .btn--accent:hover {
-  background: var(--accent-2);
-  border-color: var(--accent-2);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
   box-shadow: var(--glow);
 }
 .btn--ghost {
@@ -564,7 +590,7 @@ video {
   color: var(--ink-2);
 }
 
-/* Placeholder — missing art */
+/* Placeholder – missing art */
 .placeholder {
   display: flex;
   align-items: center;
@@ -617,7 +643,7 @@ video {
   .masthead-rule::after { min-width: 12px; }
 }
 
-/* Cover hero — editorial issue cover */
+/* Cover hero – editorial issue cover */
 .cover-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
@@ -648,7 +674,7 @@ video {
   .cover-hero { grid-template-columns: 1fr; }
 }
 
-/* Stat hero — running figures */
+/* Stat hero – running figures */
 .stat-hero {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -668,7 +694,7 @@ video {
   font-style: italic;
   font-size: clamp(36px, 4.8vw, 64px);
   line-height: 1;
-  color: var(--accent-ink);
+  color: var(--accent);
 }
 .stat-hero__label {
   font-family: var(--f-mono);
@@ -678,37 +704,70 @@ video {
   color: var(--muted);
 }
 
-/* Issue section — horizontal rule with kicker. */
+/* Issue section – homepage-scale editorial rhythm without repetitive rules. */
 .issue-section {
-  padding: var(--section-y) 0;
-  border-top: 1px solid var(--rule);
+  padding: clamp(52px, 7vw, 96px) 0;
+  border-top: 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 760px;
 }
 .issue-section__head {
-  display: flex;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: clamp(20px, 2.4vw, 32px);
-  flex-wrap: wrap;
+  gap: clamp(24px, 5vw, 72px);
+  margin-bottom: clamp(28px, 4vw, 50px);
+}
+.issue-section__intro {
+  display: grid;
+  grid-template-columns: minmax(116px, .28fr) minmax(0, 1fr);
+  gap: clamp(18px, 3vw, 44px);
+  align-items: start;
+}
+.issue-section__intro--solo .issue-section__title { grid-column: 1 / -1; }
+.issue-section__intro .kicker {
+  margin-top: 9px;
+  padding-top: 10px;
+  border-top: 2px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--f-mono);
+  font-size: var(--micro-sm);
+  font-weight: 650;
+  letter-spacing: .16em;
+  text-transform: uppercase;
 }
 .issue-section__title {
   font-family: var(--f-display);
   font-style: italic;
-  font-size: clamp(26px, 3vw, 40px);
-  line-height: 1.05;
+  font-weight: 500;
+  font-size: clamp(39px, 5.4vw, 68px);
+  line-height: .94;
   margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -.035em;
   text-wrap: balance;
 }
 .issue-section__meta {
+  max-width: 24ch;
+  padding: 10px 13px;
+  border: 1px solid var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent);
   font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: var(--micro-sm);
+  font-weight: 650;
+  letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--muted);
+  text-align: right;
+}
+@media (max-width: 720px) {
+  .issue-section__head { grid-template-columns: 1fr; align-items: start; }
+  .issue-section__intro { grid-template-columns: 1fr; gap: 12px; }
+  .issue-section__intro .kicker { width: min(170px, 52vw); }
+  .issue-section__meta { justify-self: start; text-align: left; }
 }
 
-/* Track line — single row in tracklist */
+/* Track line – single row in tracklist */
 .track-line {
   display: grid;
   grid-template-columns: 32px 1fr auto auto;
@@ -745,16 +804,16 @@ video {
 }
 
 /* --------------------------------------------------------------------------
-   Editorial utilities — direct-use classes matching the reference voice
+   Editorial utilities – direct-use classes matching the reference voice
    -------------------------------------------------------------------------- */
 .serif { font-family: var(--f-display); font-style: italic; letter-spacing: -0.01em; }
-.mono  { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); }
-.mono-sm { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2); }
+.mono  { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-2); }
+.mono-sm { font-family: var(--f-mono); font-size: var(--micro); line-height: 1.45; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-2); }
 .muted { color: var(--muted); }
 .num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: 12px; }
 .idx { font-family: var(--f-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
 
-/* Data table — ledger feel */
+/* Data table – ledger feel */
 .table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -774,8 +833,8 @@ table.data.data--airy {
 }
 table.data thead th {
   font-family: var(--f-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.2em;
+  font-size: var(--micro);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
   text-align: left;
@@ -809,34 +868,151 @@ table.data tbody td.num {
   table.data thead th { font-size: 9.5px; letter-spacing: 0.16em; }
   table.data tbody td { font-size: 14px; }
 }
-/* Safety net: on narrow screens let any unwrapped data table scroll sideways
-   instead of clipping against body's overflow-x: hidden. */
-@media (max-width: 720px) {
-  :where(table.data) {
-    display: block;
-    overflow-x: auto;
-    max-width: 100%;
-    -webkit-overflow-scrolling: touch;
+/* On narrow screens, ledgers become labelled cards so the page never depends
+   on a horizontal scrollbar. Gear has its own purpose-built card treatment. */
+@media (max-width: 800px) {
+  .table-wrap {
+    overflow-x: visible;
   }
-  :where(.table-wrap > table.data) {
-    display: table;
+  .table-wrap > table.data:not(.gear-ledger),
+  table.data:not(.gear-ledger) {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     overflow: visible;
-    max-width: none;
+  }
+  table.data:not(.gear-ledger) thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  table.data:not(.gear-ledger) tbody {
+    display: grid;
+    gap: 10px;
+  }
+  table.data:not(.gear-ledger) tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row dense;
+    padding: 8px;
+    border: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--bg-2) 68%, transparent);
+  }
+  table.data:not(.gear-ledger) tbody td,
+  table.data:not(.gear-ledger) tbody td:first-child,
+  table.data:not(.gear-ledger) tbody td.mono-sm,
+  table.data:not(.gear-ledger) tbody td.idx,
+  table.data:not(.gear-ledger) tbody td.num {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 9px 10px;
+    border-bottom: 0;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  table.data:not(.gear-ledger) tbody td:has(.serif),
+  table.data:not(.gear-ledger) tbody td[colspan] {
+    grid-column: 1 / -1;
+  }
+  table.data:not(.gear-ledger) tbody td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+}
+@media (max-width: 420px) {
+  table.data:not(.gear-ledger) tbody tr {
+    grid-template-columns: 1fr;
+  }
+  table.data:not(.gear-ledger) tbody td:has(.serif),
+  table.data:not(.gear-ledger) tbody td[colspan] {
+    grid-column: auto;
   }
 }
 table.data tbody tr { transition: color .18s ease, border-color .18s ease; }
 /* Hover is editorial, not a button: row rule strengthens, title tilts to accent.
-   No splashy tinted background — this is a magazine, not a dashboard. */
+   No splashy tinted background – this is a magazine, not a dashboard. */
 table.data tbody tr:hover td { border-bottom-color: var(--rule-strong); color: var(--ink); }
 table.data tbody tr:hover td .t-title,
-table.data tbody tr:hover td .serif { color: var(--accent-3); }
+table.data tbody tr:hover td .serif { color: var(--accent); }
 table.data tbody tr[data-clickable] { cursor: pointer; }
 table.data td.num { text-align: right; font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); }
 table.data td.idx { color: var(--muted); font-family: var(--f-mono); font-size: 11px; }
 table.data a { border-bottom: none; color: inherit; }
-table.data a:hover { color: var(--accent-3); }
+table.data a:hover { color: var(--accent); }
 
-/* Panel head — for card panels with labelled title strip */
+/* Filter-aware archive pagination */
+.archive-pagination {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-top: clamp(22px, 3vw, 36px);
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+.archive-pagination[hidden] { display: none; }
+.archive-pagination__pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.archive-pagination button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--f-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.archive-pagination button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.archive-pagination button[aria-current='page'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.archive-pagination button:disabled { opacity: .36; cursor: default; }
+.archive-pagination__ellipsis {
+  min-width: 24px;
+  color: var(--muted);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .archive-pagination { grid-template-columns: 1fr 1fr; }
+  .archive-pagination__pages { grid-column: 1 / -1; grid-row: 1; }
+  .archive-pagination > button:last-child { justify-self: end; }
+}
+
+/* Panel head – for card panels with labelled title strip */
 .panel-head {
   display: flex; align-items: baseline; justify-content: space-between;
   gap: 1rem; padding: 12px 16px;
@@ -888,7 +1064,7 @@ table.data a:hover { color: var(--accent-3); }
 .voices__quote { font-family: var(--f-display); font-style: italic; font-size: 20px; line-height: 1.4; color: var(--ink); }
 
 /* --------------------------------------------------------------------------
-   Color-pop variants — tag/chip/pip in accent-alts
+   Color-pop variants – tag/chip/pip in accent-alts
    -------------------------------------------------------------------------- */
 .tag--hot   { border-color: var(--hot);   background: var(--hot-tint);   color: var(--hot); }
 .tag--cool  { border-color: var(--cool);  background: var(--cool-tint);  color: var(--cool); }
@@ -910,10 +1086,10 @@ table.data a:hover { color: var(--accent-3); }
 .rule-gold   { border-top: 2px solid var(--gold);   padding-top: 1rem; }
 
 /* --------------------------------------------------------------------------
-   Layout variants — dossier, filmstrip, timeline-rail, cover-wall
+   Layout variants – dossier, filmstrip, timeline-rail, cover-wall
    -------------------------------------------------------------------------- */
 
-/* Dossier — split-column portrait + ledger for member/venue detail */
+/* Dossier – split-column portrait + ledger for member/venue detail */
 .dossier {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
@@ -934,7 +1110,7 @@ table.data a:hover { color: var(--accent-3); }
 .dossier__body { display: flex; flex-direction: column; gap: 1.2rem; }
 @media (max-width: 780px) { .dossier { grid-template-columns: 1fr; } }
 
-/* Filmstrip — horizontal scrolling image row (photos, tour gallery) */
+/* Filmstrip – horizontal scrolling image row (photos, tour gallery) */
 .filmstrip {
   display: grid;
   grid-auto-flow: column;
@@ -943,8 +1119,9 @@ table.data a:hover { color: var(--accent-3); }
   overflow-x: auto;
   padding: 4px 0 16px;
   scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
+.filmstrip::-webkit-scrollbar { display: none; }
 .filmstrip__cell {
   position: relative;
   aspect-ratio: 3 / 4;
@@ -963,7 +1140,7 @@ table.data a:hover { color: var(--accent-3); }
   color: var(--ink);
 }
 
-/* Timeline-rail — vertical spine for tour itinerary / history */
+/* Timeline-rail – vertical spine for tour itinerary / history */
 .rail { position: relative; padding-left: 32px; }
 .rail::before {
   content: ''; position: absolute; left: 7px; top: 8px; bottom: 8px;
@@ -983,7 +1160,7 @@ table.data a:hover { color: var(--accent-3); }
 .rail__title { font-family: var(--f-display); font-style: italic; font-size: clamp(22px, 2.4vw, 30px); line-height: 1.1; margin: 4px 0 6px; color: var(--ink); }
 .rail__body { font-family: var(--f-serif); font-size: 15px; color: var(--ink-2); max-width: 60ch; }
 
-/* Cover-wall — dense album/artwork grid */
+/* Cover-wall – dense album/artwork grid */
 .cover-wall {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -1008,7 +1185,7 @@ table.data a:hover { color: var(--accent-3); }
 }
 .cover-wall__cell:hover .cover-wall__cap { opacity: 1; }
 
-/* Countdown — next-concert panel */
+/* Countdown – next-concert panel */
 .countdown {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1032,7 +1209,7 @@ table.data a:hover { color: var(--accent-3); }
   text-transform: uppercase; color: var(--muted); margin-top: 6px;
 }
 
-/* Cover-plate — framed hero with corner annotations */
+/* Cover-plate – framed hero with corner annotations */
 .cover-plate {
   position: relative;
   border: 1px solid var(--rule);
@@ -1093,7 +1270,7 @@ table.data a:hover { color: var(--accent-3); }
 }
 
 /* --------------------------------------------------------------------------
-   Atmosphere — drifting fog clouds
+   Atmosphere – drifting fog clouds
    -------------------------------------------------------------------------- */
 .fog {
   position: fixed;
@@ -1175,7 +1352,7 @@ table.data a:hover { color: var(--accent-3); }
 @media (max-width: 720px) { .eras-strip { grid-template-columns: 1fr; } .eras-strip__rail { border-left: 0; border-top: 1px solid var(--rule); } }
 
 /* --------------------------------------------------------------------------
-   Filter strip — global pattern for index pages (search + selects)
+   Filter strip – global pattern for index pages (search + selects)
    -------------------------------------------------------------------------- */
 .filter-strip {
   padding: clamp(24px, 2.8vw, 36px) 0;
@@ -1281,7 +1458,7 @@ table.data a:hover { color: var(--accent-3); }
 :root[data-theme='papers'] .filter-search { background: var(--bg-2); }
 
 /* --------------------------------------------------------------------------
-   Editorial select / search field — used by Select.astro and SearchField.astro.
+   Editorial select / search field – used by Select.astro and SearchField.astro.
    Promoted to global so inline label markup elsewhere keeps the same look.
    -------------------------------------------------------------------------- */
 .select {
@@ -1326,12 +1503,12 @@ table.data a:hover { color: var(--accent-3); }
   pointer-events: none;
   color: var(--muted);
 }
-.select:hover .select__caret { color: var(--ink); }
+.select:hover .select__caret { color: var(--accent); }
 .select option { background: var(--bg); color: var(--ink); font-family: var(--f-serif); }
 :root[data-theme='papers'] .select select { background: var(--bg-2); }
 
 /* --------------------------------------------------------------------------
-   Decade bars — used on setlists, tours, venues, stats.
+   Decade bars – used on setlists, tours, venues, stats.
    -------------------------------------------------------------------------- */
 .decade-bars {
   display: grid;
@@ -1393,7 +1570,7 @@ table.data a:hover { color: var(--accent-3); }
 }
 
 /* --------------------------------------------------------------------------
-   Section tabs — segmented bar used on discography sub-pages, etc.
+   Section tabs – segmented bar used on discography sub-pages, etc.
    -------------------------------------------------------------------------- */
 .disc-tabs {
   padding-top: clamp(24px, 3vw, 40px);
@@ -1420,7 +1597,7 @@ table.data a:hover { color: var(--accent-3); }
   text-decoration: none;
 }
 .disc-tabs__tab:first-child { padding-left: 0; }
-.disc-tabs__tab:hover { color: var(--ink); }
+.disc-tabs__tab:hover { color: var(--accent); }
 .disc-tabs__tab.is-active {
   color: var(--accent-3);
   border-bottom-color: var(--accent);
@@ -1428,7 +1605,7 @@ table.data a:hover { color: var(--accent-3); }
 :root[data-theme='papers'] .disc-tabs__tab.is-active { color: var(--accent); }
 
 /* --------------------------------------------------------------------------
-   Section spacers — generous magazine breathing room between blocks
+   Section spacers – generous magazine breathing room between blocks
    -------------------------------------------------------------------------- */
 .section-rule {
   border-top: 1px solid var(--rule-strong);

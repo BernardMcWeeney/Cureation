@@ -1,4 +1,4 @@
-ai.txt — Cureation
+ai.txt – Cureation
 Project Overview
 
 Cureation is an independent, fan-built website dedicated to The Cure.
@@ -74,15 +74,15 @@ Content Structure
 
 The site is organised around clearly defined content domains:
 
-Discography — Albums and releases with structured metadata.
+Discography – Albums and releases with structured metadata.
 
-Lyrics — Song-level pages with readable, themed layouts.
+Lyrics – Song-level pages with readable, themed layouts.
 
-Setlists — Historical concert data with expandable details.
+Setlists – Historical concert data with expandable details.
 
-Blog / Editorial — Curated news, reviews, essays, and fan-written content.
+Blog / Editorial – Curated news, reviews, essays, and fan-written content.
 
-About / Meta — Project mission, context, and technical documentation.
+About / Meta – Project mission, context, and technical documentation.
 
 Content is treated as structured data wherever possible to support reuse, filtering, and future features.
 

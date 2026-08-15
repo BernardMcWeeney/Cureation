@@ -9,7 +9,7 @@ interface Props {
   typeLabel?: string;
 }
 const { album, size = 'md', href: hrefProp, typeLabel } = Astro.props;
-const year = album.release_date?.slice(0, 4) || '—';
+const year = album.release_date?.slice(0, 4) || '–';
 const href = hrefProp || (album.slug ? `/discography/${album.slug}` : '#');
 const img = asset(album.cover_art, 'card');
 const releaseType = typeLabel ?? (album.type && album.type !== 'studio' ? album.type : '');
@@ -40,12 +40,11 @@ const releaseType = typeLabel ?? (album.type && album.type !== 'studio' ? album.
   }
   .album-card__art img {
     width: 100%; height: 100%; object-fit: cover;
-    filter: saturate(.92) contrast(1.04);
-    transition: transform .6s ease, filter .4s ease;
+    filter: saturate(1.06) contrast(1.03);
   }
   .album-card:hover .album-card__art img {
-    transform: scale(1.04);
-    filter: saturate(1) contrast(1.08);
+    transform: none;
+    filter: saturate(1.06) contrast(1.03);
   }
   .album-card__title {
     font-family: var(--f-display); font-style: italic;

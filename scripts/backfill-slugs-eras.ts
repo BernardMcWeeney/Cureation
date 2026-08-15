@@ -1,6 +1,6 @@
 /**
  * Backfill: slugs on discography + songs + singles, era_id on discography.
- * Idempotent — only writes where value is null.
+ * Idempotent – only writes where value is null.
  *
  * Run:  DIRECTUS_URL=... DIRECTUS_TOKEN=... npx tsx scripts/backfill-slugs-eras.ts
  */
@@ -103,7 +103,7 @@ async function backfillCollection(
 async function main() {
   await backfillCollection('discography', ['era_id', 'release_date']);
   await backfillCollection('songs');
-  // singles don't have slug field — skip
+  // singles don't have slug field – skip
   console.log('\n✔ backfill complete');
 }
 

@@ -11,8 +11,8 @@ const { title, kicker, meta, href, id } = Astro.props;
 <section class="issue-section" id={id}>
   <div class="container">
     <header class="issue-section__head">
-      <div>
-        {kicker && <div class="kicker" style="margin-bottom:.4rem">{kicker}</div>}
+      <div class:list={['issue-section__intro', { 'issue-section__intro--solo': !kicker }]}>
+        {kicker && <div class="kicker">{kicker}</div>}
         <h2 class="issue-section__title">
           {href ? <a href={href} style="border:none;">{title}</a> : title}
         </h2>

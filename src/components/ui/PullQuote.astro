@@ -4,7 +4,7 @@ const { cite } = Astro.props;
 ---
 <figure class="pullquote">
   <blockquote class="pull"><slot /></blockquote>
-  {cite && <figcaption class="kicker" style="margin-top:1rem;">— {cite}</figcaption>}
+  {cite && <figcaption class="kicker" style="margin-top:1rem;">{cite}</figcaption>}
 </figure>
 <style>
   figure.pullquote { margin: clamp(24px, 4vw, 48px) 0; }

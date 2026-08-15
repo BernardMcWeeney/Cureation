@@ -1,0 +1,245 @@
+---
+import PageHero from '../ui/PageHero.astro';
+import { asset } from '../../lib/assets';
+import { listNews } from '../../lib/directus';
+
+const entries: any[] = await listNews(-1).catch(() => []);
+const editorialCategories = new Set(['editorial', 'editorials', 'feature', 'features', 'interview', 'interviews', 'review', 'reviews']);
+const newsCategories = new Set(['news', 'rumor', 'rumors']);
+const categoryOf = (entry: any) => String(entry.category || '').toLowerCase();
+const latestNews = entries.filter((entry) => newsCategories.has(categoryOf(entry)));
+const editorials = entries.filter((entry) => editorialCategories.has(categoryOf(entry)) || (entry.is_editorial && categoryOf(entry) !== 'wiki'));
+const leadNews = latestNews[0] || null;
+const newsCards = latestNews.slice(1, 4);
+const newsArchive = latestNews.slice(4, 7);
+
+const formatDate = (value?: string | null) => value
+  ? new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+  : 'Date to be confirmed';
+const stripHtml = (value = '') => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const entryHref = (entry: any) => entry.slug ? `/publication/${entry.slug}` : '/publication';
+const fallbackImages = ['/The-Cure-Live-2.avif', '/thecure-troxyimage.jpg', '/images/albums/disintegration.jpg', '/images/albums/pornography.jpg'];
+const entryImage = (entry: any, index = 0) => {
+  if (entry.featured_image_file) return asset(entry.featured_image_file, 'hero');
+  if (typeof entry.featured_image === 'string' && entry.featured_image.startsWith('http')) return entry.featured_image;
+  return fallbackImages[index % fallbackImages.length];
+};
+const labelFor = (entry: any) => {
+  const value = categoryOf(entry).replace(/s$/, '');
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : 'Story';
+};
+---
+<PageHero
+  section="Publication"
+  title="Publication"
+  deck="The current record and the considered view: verified news, essays, interviews and editorials with room to breathe."
+  crumbs={[{ label: 'Home', href: '/' }, { label: 'Publication' }]}
+  facts={[
+    { k: 'Latest news', v: latestNews.length },
+    { k: 'Editorials', v: editorials.length },
+    { k: 'Order', v: 'Newest first' },
+  ]}
+  flush
+>
+  <nav class="publication-jump" aria-label="Publication sections">
+    <a href="/news"><span>01</span><strong>News</strong><small>The present tense</small></a>
+    <a href="#editorials"><span>02</span><strong>Editorials</strong><small>The longer view</small></a>
+    <a href="/reviews"><span>03</span><strong>Reviews</strong><small>Close listening</small></a>
+    <a href="/wiki"><span>04</span><strong>Wiki</strong><small>The reference desk</small></a>
+  </nav>
+</PageHero>
+
+<section class="publication-section publication-section--news" id="latest-news">
+  <div class="container">
+    <header class="publication-head">
+      <div class="publication-head__index"><span>01</span><small>News desk</small></div>
+      <div><p>Latest news</p><h2>The Cure,<br /><em>right now.</em></h2></div>
+      <p>Announcements, performances, releases and developments, ordered by the date they entered the record.</p>
+    </header>
+
+    {leadNews ? (
+      <>
+        <a class="news-lead" href={entryHref(leadNews)}>
+          <span class="news-lead__image">
+            <img src={entryImage(leadNews)} alt="" width="1600" height="1000" loading="eager" decoding="async" />
+            <small>Latest dispatch</small>
+          </span>
+          <span class="news-lead__copy">
+            <span>{labelFor(leadNews)} · {formatDate(leadNews.published_date)}</span>
+            <strong>{leadNews.title}</strong>
+            {leadNews.excerpt && <p>{stripHtml(leadNews.excerpt)}</p>}
+            <b>Read the report <i>→</i></b>
+          </span>
+        </a>
+
+        {newsCards.length > 0 && (
+          <div class="news-card-grid">
+            {newsCards.map((entry, index) => (
+              <a class="news-card" href={entryHref(entry)}>
+                <span class="news-card__image"><img src={entryImage(entry, index + 1)} alt="" width="900" height="600" loading="lazy" decoding="async" /></span>
+                <span class="news-card__meta">{formatDate(entry.published_date)}</span>
+                <strong>{entry.title}</strong>
+                {entry.excerpt && <p>{stripHtml(entry.excerpt)}</p>}
+                <b>Read →</b>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {newsArchive.length > 0 && (
+          <div class="news-index">
+            <div class="news-index__head"><span>More dispatches</span><a href="/news">Open the news desk →</a></div>
+            {newsArchive.map((entry, index) => (
+              <a href={entryHref(entry)}>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <time datetime={entry.published_date}>{formatDate(entry.published_date)}</time>
+                <strong>{entry.title}</strong>
+                <b>↗</b>
+              </a>
+            ))}
+          </div>
+        )}
+      </>
+    ) : (
+      <div class="publication-empty"><span>News desk</span><strong>The desk is quiet.</strong><p>New verified updates will appear here as they are filed.</p></div>
+    )}
+  </div>
+</section>
+
+<section class="publication-section publication-section--editorials" id="editorials">
+  <div class="container">
+    <header class="publication-head">
+      <div class="publication-head__index"><span>02</span><small>Long reads</small></div>
+      <div><p>Editorials</p><h2>The longer,<br /><em>stranger view.</em></h2></div>
+      <p>Essays, interviews and close readings that connect the facts without rushing past the details.</p>
+    </header>
+
+    {editorials.length > 0 ? (
+      <div class="editorial-grid">
+        {editorials.map((entry, index) => (
+          <a class:list={['editorial-card', { 'editorial-card--lead': index === 0 }]} href={entryHref(entry)}>
+            <span class="editorial-card__image">
+              <img src={entryImage(entry, index + 2)} alt="" width="1200" height="900" loading="lazy" decoding="async" />
+              <small>{labelFor(entry)}</small>
+            </span>
+            <span class="editorial-card__copy">
+              <span>{formatDate(entry.published_date)}{entry.reading_time ? ` · ${entry.reading_time} min read` : ''}</span>
+              <strong>{entry.title}</strong>
+              {entry.excerpt && <p>{stripHtml(entry.excerpt)}</p>}
+              <b>Continue reading <i>→</i></b>
+            </span>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="publication-empty"><span>Editorial desk</span><strong>The next long read is being prepared.</strong></div>
+    )}
+  </div>
+</section>
+
+<style>
+  .publication-jump { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
+  .publication-jump a { min-width: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; padding: 18px 0; border: 0; color: inherit; }
+  .publication-jump a + a { padding-left: clamp(18px, 3vw, 42px); border-left: 1px solid var(--rule); }
+  .publication-jump a > span { grid-row: 1 / span 2; color: var(--accent); font: 650 var(--micro)/1 var(--f-mono); letter-spacing: .12em; }
+  .publication-jump strong { font-family: var(--f-display); font-size: 23px; font-style: italic; font-weight: 500; line-height: 1; }
+  .publication-jump small { color: var(--muted); font: 600 var(--micro-sm)/1.3 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
+  .publication-jump a:hover strong { color: var(--accent); }
+
+  .publication-section { padding-block: clamp(60px, 8vw, 112px); scroll-margin-top: 80px; }
+  .publication-section--editorials { background: var(--bg-2); }
+  .publication-head { display: grid; grid-template-columns: minmax(108px, .2fr) minmax(0, 1fr) minmax(260px, .42fr); gap: clamp(24px, 4.5vw, 74px); align-items: end; margin-bottom: clamp(38px, 5vw, 68px); }
+  .publication-head__index { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; padding-top: 10px; border-top: 2px solid var(--accent); }
+  .publication-head__index span { color: var(--accent); font: 500 clamp(32px, 4vw, 54px)/.9 var(--f-display); }
+  .publication-head__index small, .publication-head > div:nth-child(2) > p { color: var(--accent); font: 650 var(--micro-sm)/1.4 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; }
+  .publication-head > div:nth-child(2) > p { margin: 0 0 9px; }
+  .publication-head h2 { margin: 0; font-family: var(--f-display); font-size: clamp(48px, 6.6vw, 88px); font-weight: 500; letter-spacing: -.045em; line-height: .8; }
+  .publication-head h2 em { color: var(--accent); font-weight: inherit; }
+  .publication-head > p { max-width: 37ch; margin: 0; color: var(--ink-2); font-size: 17px; line-height: 1.6; }
+
+  .news-lead { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr); min-height: 520px; border: 1px solid var(--rule-strong); background: var(--bg-2); color: inherit; }
+  .news-lead__image { position: relative; min-height: 520px; overflow: hidden; }
+  .news-lead__image img, .news-card__image img, .editorial-card__image img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.08); transition: transform .45s ease; }
+  .news-lead__image::after, .editorial-card__image::after { position: absolute; inset: 0; content: ''; background: linear-gradient(0deg, rgba(0,0,0,.76), transparent 54%); }
+  .news-lead__image small, .editorial-card__image small { position: absolute; z-index: 1; bottom: 18px; left: 18px; color: #fff; font: 700 var(--micro-sm)/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; }
+  .news-lead__copy { display: flex; flex-direction: column; align-items: flex-start; padding: clamp(28px, 4.5vw, 58px); }
+  .news-lead__copy > span, .news-card__meta, .editorial-card__copy > span { color: var(--accent); font: 650 var(--micro-sm)/1.45 var(--f-mono); letter-spacing: .13em; text-transform: uppercase; }
+  .news-lead__copy > strong { margin-top: 18px; font-family: var(--f-display); font-size: clamp(38px, 4.6vw, 62px); font-style: italic; font-weight: 500; letter-spacing: -.035em; line-height: .98; text-wrap: balance; }
+  .news-lead__copy p { max-width: 46ch; margin: 24px 0 0; color: var(--ink-2); font-size: 16px; line-height: 1.65; }
+  .news-lead__copy b, .editorial-card__copy b { margin-top: auto; padding-top: 28px; color: var(--ink); font: 700 var(--micro)/1 var(--f-mono); letter-spacing: .13em; text-transform: uppercase; }
+  .news-lead__copy b i, .editorial-card__copy b i { margin-left: 12px; color: var(--accent); font-style: normal; }
+  .news-lead:hover img, .news-card:hover img, .editorial-card:hover img { transform: scale(1.025); }
+  .news-lead:hover strong, .news-card:hover strong, .editorial-card:hover strong { color: var(--accent); }
+
+  .news-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 2.4vw, 32px); margin-top: clamp(32px, 4vw, 56px); }
+  .news-card { display: flex; min-width: 0; flex-direction: column; border: 0; color: inherit; }
+  .news-card__image { height: clamp(210px, 22vw, 320px); overflow: hidden; background: var(--surface); }
+  .news-card__meta { margin-top: 16px; }
+  .news-card > strong { margin-top: 10px; font-family: var(--f-display); font-size: clamp(27px, 3vw, 39px); font-style: italic; font-weight: 500; line-height: 1; text-wrap: balance; }
+  .news-card > p { display: -webkit-box; margin: 14px 0 0; overflow: hidden; color: var(--muted); font-size: 15px; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .news-card > b { margin-top: 18px; color: var(--accent); font: 650 var(--micro-sm)/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
+
+  .news-index { margin-top: clamp(52px, 7vw, 94px); border-top: 1px solid var(--rule-strong); }
+  .news-index__head { display: flex; justify-content: space-between; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--rule); color: var(--muted); font: 650 var(--micro)/1.3 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; }
+  .news-index__head span { color: var(--accent); }
+  .news-index__head a { border: 0; color: var(--accent); }
+  .news-index > a { display: grid; grid-template-columns: 46px minmax(150px, .32fr) minmax(0, 1fr) auto; gap: clamp(14px, 2vw, 30px); align-items: baseline; padding: 18px 0; border: 0; border-bottom: 1px solid var(--rule); color: inherit; }
+  .news-index > a > span, .news-index time { color: var(--muted); font: 550 var(--micro)/1.3 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .news-index strong { font-family: var(--f-display); font-size: clamp(20px, 2vw, 28px); font-style: italic; font-weight: 500; line-height: 1.1; }
+  .news-index b { color: var(--accent); font-weight: 500; }
+  .news-index a:hover strong { color: var(--accent); }
+
+  .editorial-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(20px, 3vw, 42px); }
+  .editorial-card { min-width: 0; display: grid; grid-template-columns: minmax(180px, .72fr) minmax(0, 1.28fr); min-height: 330px; border: 1px solid var(--rule); background: var(--bg); color: inherit; }
+  .editorial-card--lead { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr); min-height: 480px; }
+  .editorial-card__image { position: relative; min-height: 100%; overflow: hidden; background: var(--surface); }
+  .editorial-card__copy { display: flex; flex-direction: column; align-items: flex-start; padding: clamp(24px, 3vw, 42px); }
+  .editorial-card__copy > strong { margin-top: 13px; font-family: var(--f-display); font-size: clamp(29px, 3.3vw, 45px); font-style: italic; font-weight: 500; line-height: 1; text-wrap: balance; }
+  .editorial-card--lead .editorial-card__copy > strong { font-size: clamp(39px, 4.8vw, 64px); }
+  .editorial-card__copy > p { display: -webkit-box; margin: 18px 0 0; overflow: hidden; color: var(--muted); font-size: 15px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
+  .publication-empty { min-height: 280px; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(28px, 4vw, 52px); border: 1px solid var(--rule); background: var(--bg-2); }
+  .publication-empty > span { color: var(--accent); font: 650 var(--micro)/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; }
+  .publication-empty > strong { max-width: 18ch; margin-top: 18px; font-family: var(--f-display); font-size: clamp(35px, 4vw, 54px); font-style: italic; font-weight: 500; line-height: 1; }
+  .publication-empty p { color: var(--muted); }
+
+  @media (max-width: 980px) {
+    .publication-head { grid-template-columns: 90px minmax(0, 1fr); }
+    .publication-head > p { grid-column: 2; }
+    .news-lead, .editorial-card--lead { grid-template-columns: 1fr; }
+    .news-lead__image, .editorial-card--lead .editorial-card__image { min-height: min(64vw, 520px); }
+    .news-lead__copy, .editorial-card--lead .editorial-card__copy { min-height: 390px; }
+    .editorial-grid { grid-template-columns: 1fr; }
+    .editorial-card--lead { grid-column: auto; }
+  }
+  @media (max-width: 760px) {
+    .publication-jump { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .publication-jump a:nth-child(3) { padding-left: 0; border-top: 1px solid var(--rule); border-left: 0; }
+    .publication-jump a:nth-child(4) { border-top: 1px solid var(--rule); }
+    .news-card-grid { grid-template-columns: 1fr; }
+    .news-card { display: grid; grid-template-columns: minmax(120px, .42fr) minmax(0, .58fr); gap: 6px 18px; }
+    .news-card__image { grid-row: 1 / span 5; height: 100%; min-height: 180px; }
+    .news-card__meta { margin-top: 4px; }
+    .news-index > a { grid-template-columns: 32px minmax(0, 1fr) auto; }
+    .news-index time { grid-column: 2; grid-row: 2; }
+    .news-index strong { grid-column: 2; grid-row: 1; }
+    .news-index b { grid-column: 3; grid-row: 1 / span 2; }
+  }
+  @media (max-width: 560px) {
+    .publication-jump { grid-template-columns: 1fr; }
+    .publication-jump a + a, .publication-jump a:nth-child(4) { padding-left: 0; border-top: 1px solid var(--rule); border-left: 0; }
+    .publication-head { grid-template-columns: 1fr; gap: 18px; }
+    .publication-head__index { min-height: 0; flex-direction: row; align-items: baseline; }
+    .publication-head > p { grid-column: 1; }
+    .publication-head h2 { font-size: clamp(48px, 16vw, 72px); }
+    .news-lead__image { min-height: 76vw; }
+    .news-lead__copy { min-height: 400px; padding: 26px 22px; }
+    .news-card { grid-template-columns: 1fr; }
+    .news-card__image { grid-row: auto; min-height: 64vw; }
+    .editorial-card { grid-template-columns: 1fr; }
+    .editorial-card__image { min-height: 72vw; }
+    .editorial-card__copy { min-height: 330px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .news-lead__image img, .news-card__image img, .editorial-card__image img { transition: none; }
+  }
+</style>

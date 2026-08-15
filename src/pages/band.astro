@@ -22,9 +22,10 @@ const [members, timeline, figures] = await Promise.all([
   getRunningFigures(),
 ]);
 const current = members.filter((m) => m.is_current_member);
-const former = members.filter((m) => !m.is_current_member).sort(compareMembersByDeparture);
+const guests = members.filter((m) => !m.is_current_member && m.membership_type === 'guest').sort(compareMembersByDeparture);
+const former = members.filter((m) => !m.is_current_member && m.membership_type !== 'guest').sort(compareMembersByDeparture);
 const alumniThumbEntries = await Promise.all(
-  former.map(async (m) => {
+  [...former, ...guests].map(async (m) => {
     const fallback = await listMemberPhotos(m, { limit: 1 }).catch(() => []);
     const photo = memberPhoto(m) || fallback[0]?.image_file || fallback[0]?.image_url || null;
     return [m.id, photo] as const;
@@ -35,9 +36,10 @@ const timelineRecent = timeline.slice().sort((a, b) => String(b.date || '').loca
 const timelineLead = timelineRecent[0] || null;
 
 const facts: Array<[string, string]> = [
-  ['Total members', String(members.length)],
-  ['Current lineup', String(current.length)],
+  ['People on file', String(members.length)],
+  ['Current live lineup', String(current.length)],
   ['Former members', String(former.length)],
+  ['Guest players', String(guests.length)],
   ['Setlists', figures.setlists.toLocaleString()],
 ];
 
@@ -49,12 +51,12 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
   <PageHero
     section="The band"
     title="The band"
-    deck="Members past and present — their instruments, their tenures, the live archive, and the chronology that shaped the lineup."
+    deck="Members past and present, including their instruments, tenures, live history and the chronology that shaped the lineup."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'The band' }]}
     facts={facts.map(([k, v]) => ({ k, v }))}
   />
 
-  <IssueSection kicker="Current lineup" title="On stage now" meta={`${current.length} members`}>
+  <IssueSection kicker="Current live lineup" title="On stage in 2026" meta={`${current.length} players`}>
     <div class="member-grid">
       {current.map((m) => (
         <a href={`/band/members/${m.slug}`} class="member-card">
@@ -65,7 +67,7 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
               <div class="placeholder">No photo</div>
             )}
           </figure>
-          <div class="mono-sm muted" style="margin-top:.5rem;">{memberTenureLabel(m)}</div>
+          <div class="mono-sm muted" style="margin-top:.5rem;">{m.membership_type === 'touring' ? 'TOURING ADDITION · ' : ''}{memberTenureLabel(m)}</div>
           <h3 class="serif" style="font-size: 22px; font-style: italic; margin: .2rem 0 0;">{m.name}</h3>
           <div class="mono-sm" style="color: var(--accent-3);">{(memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ')).toUpperCase()}</div>
         </a>
@@ -102,12 +104,38 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
     </IssueSection>
   )}
 
+  {guests.length > 0 && (
+    <IssueSection kicker="Guest register" title="Touring guests & substitutes" meta={`${guests.length} on file`}>
+      <div class="alumni-grid">
+        {guests.map((m, i) => {
+          const photo = thumbSrc(alumniThumbs.get(m.id));
+          return (
+            <a href={`/band/members/${m.slug}`} class="alumni-card">
+              <figure class="alumni-card__thumb">
+                {photo ? <img src={photo} alt={m.name} loading="lazy" /> : <span>{initials(m.name)}</span>}
+              </figure>
+              <div class="alumni-card__body">
+                <div class="mono-sm muted">Guest № {String(i + 1).padStart(2, '0')}</div>
+                <h3 class="serif">{m.name}</h3>
+                <p>{memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ') || 'Role to be filed'}</p>
+              </div>
+              <div class="alumni-card__meta">
+                <span>Guest appearance</span>
+                <strong>{memberTenureLabel(m)}</strong>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </IssueSection>
+  )}
+
   {timeline.length > 0 && (
     <IssueSection kicker="Band history" title="Timeline" href="/band/history" meta={`${timeline.length} archive entries`}>
       <div class="history-board">
         {timelineLead && (
           <a href="/band/history" class="history-lead">
-            <span class="mono-sm muted">{(timelineLead.type || 'event').toUpperCase()} · {timelineLead.formatted_date || timelineLead.year || '—'}</span>
+            <span class="mono-sm muted">{(timelineLead.type || 'event').toUpperCase()} · {timelineLead.formatted_date || timelineLead.year || '–'}</span>
             <h3 class="serif">{timelineLead.title}</h3>
             {timelineLead.description && <p>{timelineLead.description}</p>}
           </a>
@@ -115,7 +143,7 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
         <div class="history-list">
           {timelineRecent.slice(1).map((t) => (
             <a href="/band/history" class="history-row">
-              <span>{t.formatted_date || t.date || t.year || '—'}</span>
+              <span>{t.formatted_date || t.date || t.year || '–'}</span>
               <strong>{t.title}</strong>
               <small>{(t.type || 'event').toUpperCase()}</small>
             </a>

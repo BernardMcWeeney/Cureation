@@ -6,6 +6,7 @@ import Chip from '../components/ui/Chip.astro';
 import Select from '../components/ui/Select.astro';
 import SearchField from '../components/ui/SearchField.astro';
 import Tag from '../components/ui/Tag.astro';
+import Pagination from '../components/ui/Pagination.astro';
 import { fetchRaw, getAllSongPlayCounts, getLyricOfDay, listAlbums } from '../lib/directus';
 import { asset } from '../lib/assets';
 import { normalizeStructuredLyrics } from '../lib/lyrics-helpers';
@@ -141,11 +142,11 @@ const facts: Array<[string, string]> = [
               <span>{lyricReleaseKind}</span>
             </div>
             <div class="cover-plate__corner cover-plate__corner--br">
-              <span>{lyricReleaseDate?.slice(0, 4) || '—'}</span>
+              <span>{lyricReleaseDate?.slice(0, 4) || '–'}</span>
             </div>
           </a>
           <div class="lyrics-feature__body">
-            <div class="mono-sm lyrics-feature__kind"><span class="pip pip--hot"></span>LYRIC OF THE DAY · {today.toUpperCase()}</div>
+            <div class="mono-sm lyrics-feature__kind"><span class="pip"></span>LYRIC OF THE DAY · {today.toUpperCase()}</div>
             <blockquote class="lyrics-feature__quote">
               <span class="lyrics-feature__mark">&ldquo;</span>{lyricOfDay.line}<span class="lyrics-feature__mark">&rdquo;</span>
             </blockquote>
@@ -194,6 +195,7 @@ const facts: Array<[string, string]> = [
     </div>
     <div class="table-results-bar">
       <span data-match-count>{lyricRows.length} songs</span>
+      <span data-page-range aria-live="polite"></span>
     </div>
     <div class="table-wrap">
     <table class="data data--airy" data-lyric-table>
@@ -221,7 +223,7 @@ const facts: Array<[string, string]> = [
                 {s.duration && <div class="mono-sm muted lyric-sub">{s.duration}</div>}
               </td>
               <td>
-                <span class="mono-sm lyric-record">{album?.title || '—'}</span>
+                <span class="mono-sm lyric-record">{album?.title || '–'}</span>
                 {albumYear && <div class="mono-sm muted lyric-sub">{albumYear}{s.track_number ? ` · track ${s.track_number}` : ''}</div>}
               </td>
               <td class="num">{s.lineCount.toLocaleString()} lines</td>
@@ -233,24 +235,30 @@ const facts: Array<[string, string]> = [
     </table>
     </div>
     <div class="lyrics-empty mono-sm muted" data-empty hidden>No matching lyric pages.</div>
+    <Pagination label="Lyric index pages" />
   </IssueSection>
 </Layout>
 
 <script>
+  import { createTablePager } from '../lib/client-pagination';
+
   function wire() {
     const table = document.querySelector<HTMLElement>('[data-lyric-table]');
     if (!table || table.dataset.filtersWired === 'true') return;
     table.dataset.filtersWired = 'true';
 
     const state: Record<string, string> = { record: 'all', sort: 'title', search: '', letter: 'all' };
+    const root = table.closest<HTMLElement>('.issue-section');
     const tbody = table.querySelector<HTMLElement>('tbody');
     const rows = Array.from(table.querySelectorAll<HTMLElement>('tbody tr'));
-    const counter = document.querySelector<HTMLElement>('[data-match-count]');
-    const empty = document.querySelector<HTMLElement>('[data-empty]');
-    if (!tbody) return;
+    if (!root || !tbody) return;
+    const counter = root.querySelector<HTMLElement>('[data-match-count]');
+    const empty = root.querySelector<HTMLElement>('[data-empty]');
+    const pager = createTablePager(root, rows, { pageSize: 50 });
+    let orderedRows = [...rows];
 
     const sortRows = () => {
-      const sorted = [...rows].sort((a, b) => {
+      orderedRows = [...rows].sort((a, b) => {
         if (state.sort === 'plays') return Number(b.dataset.plays || 0) - Number(a.dataset.plays || 0);
         if (state.sort === 'lines') return Number(b.dataset.lines || 0) - Number(a.dataset.lines || 0);
         if (state.sort === 'record') {
@@ -260,16 +268,15 @@ const facts: Array<[string, string]> = [
         }
         return (a.dataset.title || '').localeCompare(b.dataset.title || '');
       });
-      sorted.forEach((row, index) => {
+      orderedRows.forEach((row, index) => {
         tbody.appendChild(row);
         const idx = row.querySelector('.idx');
         if (idx) idx.textContent = String(index + 1).padStart(3, '0');
       });
     };
 
-    const apply = () => {
-      let matches = 0;
-      rows.forEach((row) => {
+    const apply = (resetPage = false) => {
+      const matches = orderedRows.filter((row) => {
         const record = row.dataset.record || '';
         const letter = row.dataset.l || '';
         const search = row.dataset.search || '';
@@ -277,29 +284,29 @@ const facts: Array<[string, string]> = [
           (state.record === 'all' || record === state.record)
           && (state.letter === 'all' || letter === state.letter)
           && (!state.search || search.includes(state.search));
-        row.style.display = ok ? '' : 'none';
-        if (ok) matches++;
+        return ok;
       });
-      if (counter) counter.textContent = `${matches} song${matches === 1 ? '' : 's'}`;
-      if (empty) empty.hidden = matches > 0;
+      pager.render(matches, { reset: resetPage });
+      if (counter) counter.textContent = `${matches.length} song${matches.length === 1 ? '' : 's'}`;
+      if (empty) empty.hidden = matches.length > 0;
     };
 
-    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((select) => {
+    root.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((select) => {
       const key = select.getAttribute('data-filter-select') || '';
       select.addEventListener('change', () => {
         state[key] = select.value || 'all';
         if (key === 'sort') sortRows();
-        apply();
+        apply(true);
       });
     });
 
-    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
+    const search = root.querySelector<HTMLInputElement>('[data-filter-search]');
     if (search) search.addEventListener('input', () => {
       state.search = search.value.trim().toLowerCase();
-      apply();
+      apply(true);
     });
 
-    const chips = document.querySelectorAll<HTMLElement>('[data-letter-filters] .l-chip');
+    const chips = root.querySelectorAll<HTMLElement>('[data-letter-filters] .l-chip');
     chips.forEach((chip) => chip.addEventListener('click', () => {
       state.letter = chip.getAttribute('data-l') || 'all';
       chips.forEach((item) => {
@@ -307,7 +314,7 @@ const facts: Array<[string, string]> = [
         item.classList.toggle('is-active', active);
         item.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
-      apply();
+      apply(true);
     }));
 
     sortRows();
@@ -349,7 +356,7 @@ const facts: Array<[string, string]> = [
   }
   .lyrics-feature__art:hover img { transform: scale(1.03); }
   .lyrics-feature__kind {
-    color: var(--accent-3);
+    color: var(--accent);
     letter-spacing: .22em;
   }
   :root[data-theme='papers'] .lyrics-feature__kind { color: var(--accent); }
@@ -372,7 +379,7 @@ const facts: Array<[string, string]> = [
     text-wrap: balance;
   }
   .lyrics-feature__mark {
-    color: var(--accent-3);
+    color: var(--accent);
     font-family: var(--f-display);
   }
   :root[data-theme='papers'] .lyrics-feature__mark { color: var(--accent); }
@@ -384,7 +391,7 @@ const facts: Array<[string, string]> = [
     font-size: clamp(24px, 3vw, 36px);
     line-height: 1.05;
   }
-  .lyrics-feature__song:hover { color: var(--accent-3); }
+  .lyrics-feature__song:hover { color: var(--accent); }
   :root[data-theme='papers'] .lyrics-feature__song:hover { color: var(--accent); }
   .lyrics-letters {
     gap: 6px;

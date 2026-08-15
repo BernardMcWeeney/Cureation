@@ -4,6 +4,7 @@ import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
 import SearchField from '../components/ui/SearchField.astro';
+import Pagination from '../components/ui/Pagination.astro';
 import { listTours, listAlbums, listSetlists } from '../lib/directus';
 
 const [tours, albums, setlists] = await Promise.all([
@@ -43,7 +44,7 @@ const facts: Array<[string, string]> = [
   <PageHero
     section="Touring"
     title="The tours"
-    deck="Every run, in order — from the earliest club dates to the arena cycles — with associated records and lineups on file."
+    deck="Every run in order, from the earliest club dates to the arena cycles, with associated records and lineups on file."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Tours' }]}
     facts={facts.map(([k, v]) => ({ k, v }))}
     flush
@@ -71,7 +72,7 @@ const facts: Array<[string, string]> = [
     </div>
     <div class="table-results-bar">
       <span data-match-count>{tours.length} tours</span>
-      <span data-active-decade>All decades</span>
+      <span><span data-active-decade>All decades</span> · <span data-page-range aria-live="polite"></span></span>
     </div>
     <div class="table-wrap">
     <table class="data data--airy" data-tours-table>
@@ -86,64 +87,65 @@ const facts: Array<[string, string]> = [
           return (
             <tr data-clickable data-decade={tourDecades.join('|')} data-search={search} data-start={t.start_date || ''} onclick={`location.href='/tours/${t.slug}'`}>
               <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-              <td class="mono-sm" style="color: var(--ink);">{t.start_date || '—'}</td>
+              <td class="mono-sm" style="color: var(--ink);">{t.start_date || '–'}</td>
               <td><span class="serif" style="font-size:20px; font-style:italic;">{t.name}</span></td>
-              <td class="mono-sm" style="color: var(--ink-2);">{album ? album.title : '—'}</td>
-              <td class="num">{t.total_shows || '—'}</td>
+              <td class="mono-sm" style="color: var(--ink-2);">{album ? album.title : '–'}</td>
+              <td class="num">{t.total_shows || '–'}</td>
             </tr>
           );
         })}
       </tbody>
     </table>
     </div>
+    <Pagination label="Tour archive pages" />
   </IssueSection>
 </Layout>
 
 <script>
+  import { createTablePager } from '../lib/client-pagination';
+
   function wire() {
     const state: Record<string, string> = { decade: 'all', search: '', sort: 'desc' };
     const table = document.querySelector<HTMLElement>('[data-tours-table]');
     if (!table || table.dataset.filtersWired === 'true') return;
     table.dataset.filtersWired = 'true';
+    const root = table.closest<HTMLElement>('.issue-section');
     const tbody = table.querySelector<HTMLElement>('tbody');
     const rows = Array.from(table.querySelectorAll<HTMLElement>('tbody tr'));
-    const counter = document.querySelector<HTMLElement>('[data-match-count]');
-    const activeDecade = document.querySelector<HTMLElement>('[data-active-decade]');
-    const apply = () => {
-      let m = 0;
-      rows.forEach((r) => {
-        const decades = (r.getAttribute('data-decade') || '').split('|').filter(Boolean);
-        const s = r.getAttribute('data-search') || '';
-        const ok = (state.decade === 'all' || decades.includes(state.decade)) && (!state.search || s.includes(state.search));
-        r.style.display = ok ? '' : 'none';
-        if (ok) m++;
-      });
+    if (!root || !tbody) return;
+    const counter = root.querySelector<HTMLElement>('[data-match-count]');
+    const activeDecade = root.querySelector<HTMLElement>('[data-active-decade]');
+    const pager = createTablePager(root, rows, { pageSize: 50 });
+    const apply = (resetPage = false) => {
       const sorted = rows.slice().sort((a, b) => {
         const da = a.getAttribute('data-start') || '';
         const db = b.getAttribute('data-start') || '';
         return state.sort === 'asc' ? da.localeCompare(db) : db.localeCompare(da);
       });
-      let n = 0;
-      sorted.forEach((r) => {
-        if (tbody) tbody.appendChild(r);
-        if (r.style.display !== 'none') {
-          n++;
-          const idx = r.querySelector<HTMLElement>('.idx');
-          if (idx) idx.textContent = String(n).padStart(2, '0');
-        }
+      sorted.forEach((row) => tbody.appendChild(row));
+
+      const matches = sorted.filter((r) => {
+        const decades = (r.getAttribute('data-decade') || '').split('|').filter(Boolean);
+        const s = r.getAttribute('data-search') || '';
+        return (state.decade === 'all' || decades.includes(state.decade)) && (!state.search || s.includes(state.search));
       });
-      if (counter) counter.textContent = `${m} tours`;
+      matches.forEach((row, index) => {
+        const idx = row.querySelector<HTMLElement>('.idx');
+        if (idx) idx.textContent = String(index + 1).padStart(2, '0');
+      });
+      pager.render(matches, { reset: resetPage });
+      if (counter) counter.textContent = `${matches.length} tour${matches.length === 1 ? '' : 's'}`;
       if (activeDecade) activeDecade.textContent = state.decade === 'all' ? 'All decades' : state.decade;
     };
-    document.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
+    root.querySelectorAll<HTMLSelectElement>('[data-filter-select]').forEach((sel) => {
       const key = sel.getAttribute('data-filter-select') || '';
       sel.addEventListener('change', () => {
         state[key] = sel.value || 'all';
-        apply();
+        apply(true);
       });
     });
-    const search = document.querySelector<HTMLInputElement>('[data-filter-search]');
-    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(); });
+    const search = root.querySelector<HTMLInputElement>('[data-filter-search]');
+    if (search) search.addEventListener('input', () => { state.search = search.value.trim().toLowerCase(); apply(true); });
     apply();
   }
   wire();

@@ -1,0 +1,10 @@
+{
+  "name": "cureation-automation-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "deploy": "wrangler deploy --keep-vars --config wrangler.jsonc",
+    "deploy:check": "wrangler deploy --dry-run --keep-vars --config wrangler.jsonc"
+  }
+}

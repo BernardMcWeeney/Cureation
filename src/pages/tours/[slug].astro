@@ -61,7 +61,7 @@ const album = tour.associated_album ? albums.find((a) => a.id === tour.associate
 
 const startY = tour.start_date?.slice(0, 4);
 const endY = tour.end_date?.slice(0, 4);
-const years = startY && endY ? (startY === endY ? startY : `${startY}–${endY}`) : (startY || '—');
+const years = startY && endY ? (startY === endY ? startY : `${startY}–${endY}`) : (startY || '–');
 const countries = Array.from(new Set(setlists.map((s) => s.country).filter(Boolean))).sort();
 const tourCountryLabelByKey = new Map<string, { id: string; name: string; lat: number; lng: number }>();
 for (const s of sortedByDate) {
@@ -161,13 +161,13 @@ const supportActs: string[] = Array.isArray(tour.support_acts)
 
 const facts: Array<[string, string]> = [
   ['Years', years],
-  ['Start', tour.start_date || '—'],
-  ['End', tour.end_date || '—'],
+  ['Start', tour.start_date || '–'],
+  ['End', tour.end_date || '–'],
   ['Shows on file', String(setlists.length)],
-  ['Total shows', String(tour.total_shows || setlists.length || '—')],
+  ['Total shows', String(tour.total_shows || setlists.length || '–')],
   ['Countries', String(countries.length)],
-  ['Associated record', album?.title || '—'],
-  ['Lineup size', String(lineup.length || '—')],
+  ['Associated record', album?.title || '–'],
+  ['Lineup size', String(lineup.length || '–')],
 ];
 
 const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image || null);
@@ -484,8 +484,8 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     }
 
     const rootStyles = getComputedStyle(document.documentElement);
-    const accent = rootStyles.getPropertyValue('--accent').trim() || '#7746B0';
-    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#C89B4A';
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#F70D1A';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#B60710';
     const muted = rootStyles.getPropertyValue('--muted').trim() || '#888';
 
     const map = L.map(el, {
@@ -504,20 +504,20 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     addEnglishCountryLabels(L, map, readTourCountryLabels(el));
 
     const linePoints = routePoints.map((point: any) => [point.lat, point.lng]);
-    if (linePoints.length > 1) {
-      L.polyline(linePoints, {
+    const routeLine = linePoints.length > 1
+      ? L.polyline(linePoints, {
         color: accent,
         weight: 2,
         opacity: 0.72,
         dashArray: '7 9',
         lineCap: 'round',
-      }).addTo(map);
-    }
+      }).addTo(map)
+      : null;
 
-    routePoints.forEach((point: any, index: number) => {
+    const markers = routePoints.map((point: any, index: number) => {
       const precise = point.coordinateKind === 'venue';
       const firstOrLast = index === 0 || index === routePoints.length - 1;
-      L.circleMarker([point.lat, point.lng], {
+      const marker = L.circleMarker([point.lat, point.lng], {
         radius: firstOrLast ? 8 : precise ? 5 : 4,
         color: precise ? accent2 : muted,
         weight: firstOrLast ? 2 : 1.2,
@@ -525,7 +525,9 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
         fillOpacity: precise ? 0.78 : 0.42,
         opacity: precise ? 0.95 : 0.62,
       }).bindPopup(routePopup(point)).addTo(map);
+      return { marker, precise };
     });
+    (el as any)._tourRouteMapThemeState = { markers, routeLine };
 
     const bounds = L.latLngBounds(linePoints);
     if (bounds.isValid()) {
@@ -534,6 +536,20 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
       map.setView([24, 0], 2);
     }
     window.setTimeout(() => map.invalidateSize(), 120);
+  }
+
+  function repaintTourRouteTheme() {
+    const el = document.querySelector<HTMLElement>('[data-tour-route-map]');
+    const state = el ? (el as any)._tourRouteMapThemeState : null;
+    if (!state) return;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#F70D1A';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#B60710';
+    const muted = rootStyles.getPropertyValue('--muted').trim() || '#888';
+    state.routeLine?.setStyle({ color: accent });
+    state.markers.forEach(({ marker, precise }: any) => {
+      marker.setStyle({ color: precise ? accent2 : muted, fillColor: precise ? accent : muted });
+    });
   }
 
   function wireTourItinerary() {
@@ -574,6 +590,8 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
   bootTourRouteMap();
   document.addEventListener('astro:page-load', wireTourItinerary);
   document.addEventListener('astro:page-load', bootTourRouteMap);
+  document.addEventListener('cureation:theme-change', repaintTourRouteTheme);
+  document.addEventListener('cureation:colour-theme-change', repaintTourRouteTheme);
 </script>
 
 <style>

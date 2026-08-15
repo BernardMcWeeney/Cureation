@@ -1,0 +1,12 @@
+---
+interface Props {
+  label?: string;
+}
+
+const { label = 'Archive pages' } = Astro.props;
+---
+<nav class="archive-pagination" data-pagination aria-label={label} hidden>
+  <button type="button" data-page-action="previous" aria-label="Previous page">← Previous</button>
+  <div class="archive-pagination__pages" data-page-list></div>
+  <button type="button" data-page-action="next" aria-label="Next page">Next →</button>
+</nav>

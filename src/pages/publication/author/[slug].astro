@@ -1,0 +1,61 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import IssueSection from '../../../components/ui/IssueSection.astro';
+import Crumbs from '../../../components/ui/Crumbs.astro';
+import { fetchRaw } from '../../../lib/directus';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const decoded = decodeURIComponent(slug || '');
+
+const all: any[] = await fetchRaw('news', {
+  limit: -1,
+  fields: 'id,title,slug,excerpt,category,published_date,date_created,reading_time,author_name,author_slug',
+  sort: '-published_date,-date_created',
+}).catch(() => []);
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+const byThisAuthor = all.filter((n) => (n.author_slug || slugify(n.author_name || '')) === decoded);
+if (byThisAuthor.length === 0) return Astro.redirect('/publication');
+
+const first = byThisAuthor[0];
+const authorName = first.author_name || decoded;
+const categories = Array.from(new Set(byThisAuthor.map((n) => n.category).filter(Boolean))).sort();
+---
+<Layout title={`${authorName} · Publication · Cureation`}>
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
+    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Publication', href: '/publication' }, { label: authorName }]} />
+
+    <section style="padding: clamp(20px, 3vw, 40px) 0;">
+      <div class="mono-sm muted">AUTHOR · BY-LINE</div>
+      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: .4rem 0;">{authorName}</h1>
+      <p class="deck" style="max-width: 62ch;">{byThisAuthor.length} {byThisAuthor.length === 1 ? 'entry' : 'entries'} filed under this byline, most recent first.</p>
+      <div class="facts" style="margin-top: 1rem;">
+        <div class="facts__item"><div class="facts__k">Pieces</div><div class="facts__v">{byThisAuthor.length}</div></div>
+        <div class="facts__item"><div class="facts__k">Categories</div><div class="facts__v">{categories.length}</div></div>
+        <div class="facts__item"><div class="facts__k">First entry</div><div class="facts__v">{(byThisAuthor[byThisAuthor.length - 1]?.published_date || '').slice(0, 10) || '–'}</div></div>
+        <div class="facts__item"><div class="facts__k">Most recent</div><div class="facts__v">{(byThisAuthor[0]?.published_date || '').slice(0, 10) || '–'}</div></div>
+      </div>
+    </section>
+  </div>
+
+  <IssueSection kicker="By-line" title="Publication archive" meta={`${byThisAuthor.length} on file`}>
+    <table class="data data--airy">
+      <thead><tr><th style="width:110px;">Date</th><th style="width:140px;">Category</th><th>Title</th><th class="num" style="text-align:right; width:80px;">Read</th></tr></thead>
+      <tbody>
+        {byThisAuthor.map((n) => (
+          <tr data-clickable onclick={`location.href='/publication/${n.slug}'`}>
+            <td class="mono-sm" style="color: var(--ink);">{(n.published_date || n.date_created || '').slice(0, 10)}</td>
+            <td class="mono-sm" style="color: var(--accent-3);">{(n.category || '–').toUpperCase()}</td>
+            <td>
+              <span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{n.title}</span>
+              {n.excerpt && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem;">{n.excerpt}</div>}
+            </td>
+            <td class="num">{n.reading_time ? `${n.reading_time}m` : '–'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </IssueSection>
+</Layout>

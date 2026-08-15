@@ -22,8 +22,8 @@ export async function GET(context: APIContext) {
     : await listSetlists({ limit: 500 }).catch(() => []);
   const tourDates = shows.filter((s) => s.date).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
   const calendarName = latestTour?.name
-    ? `The Cure — ${latestTour.name} (Cureation)`
-    : 'The Cure — tour dates (Cureation)';
+    ? `The Cure: ${latestTour.name} (Cureation)`
+    : 'The Cure: tour dates (Cureation)';
 
   const site = (context.site?.toString() || 'https://cureation.net').replace(/\/$/, '');
   const lines = [
@@ -40,7 +40,7 @@ export async function GET(context: APIContext) {
   for (const s of tourDates) {
     const d = fmtDate(s.date!);
     const end = fmtDate(new Date(new Date(s.date!).getTime() + 86400000).toISOString());
-    const summary = `The Cure — ${s.venue || s.city || 'Show'}`;
+    const summary = `The Cure: ${s.venue || s.city || 'Show'}`;
     const loc = [s.venue, s.city, s.state_province, s.country].filter(Boolean).join(', ');
     lines.push(
       'BEGIN:VEVENT',

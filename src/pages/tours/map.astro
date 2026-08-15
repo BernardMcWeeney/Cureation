@@ -267,8 +267,8 @@ const topCities = cityRows.slice(0, 12);
               <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{city.name}</span></td>
               <td class="mono-sm muted">{city.country}</td>
               <td class="num" style="color: var(--accent-3);">{city.shows}</td>
-              <td class="num">{city.venues.size || '—'}</td>
-              <td class="num">{city.latest || '—'}</td>
+              <td class="num">{city.venues.size || '–'}</td>
+              <td class="num">{city.latest || '–'}</td>
             </tr>
           ))}
         </tbody>
@@ -373,8 +373,8 @@ const topCities = cityRows.slice(0, 12);
     }
 
     const rootStyles = getComputedStyle(document.documentElement);
-    const accent = rootStyles.getPropertyValue('--accent').trim() || '#C89B4A';
-    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#7746B0';
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#F70D1A';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#B60710';
     const ink = rootStyles.getPropertyValue('--ink').trim() || '#f5f1e8';
 
     const map = L.map(el, {
@@ -393,6 +393,8 @@ const topCities = cityRows.slice(0, 12);
 
     const cityLayer = L.layerGroup();
     const countryLayer = L.layerGroup();
+    const cityMarkers: Array<{ marker: any; precise: boolean }> = [];
+    const countryMarkers: any[] = [];
     const maxCity = Math.max(1, ...cityPoints.map((point) => point.shows));
     const maxCountry = Math.max(1, ...countryPoints.map((point) => point.shows));
 
@@ -401,7 +403,7 @@ const topCities = cityRows.slice(0, 12);
       .sort((a, b) => b.shows - a.shows)
       .forEach((point) => {
         const radius = 5 + Math.sqrt(point.shows / maxCountry) * 18;
-        L.circleMarker([point.lat, point.lng], {
+        const marker = L.circleMarker([point.lat, point.lng], {
           radius,
           color: accent,
           weight: 1,
@@ -409,6 +411,7 @@ const topCities = cityRows.slice(0, 12);
           fillOpacity: 0.18,
           opacity: 0.68,
         }).bindPopup(popup(point)).addTo(countryLayer);
+        countryMarkers.push(marker);
         L.marker([point.lat, point.lng], {
           interactive: false,
           keyboard: false,
@@ -426,7 +429,7 @@ const topCities = cityRows.slice(0, 12);
       .forEach((point) => {
         const radius = 4 + Math.sqrt(point.shows / maxCity) * 20;
         const precise = point.coordinateKind === 'venue';
-        L.circleMarker([point.lat, point.lng], {
+        const marker = L.circleMarker([point.lat, point.lng], {
           radius,
           color: precise ? accent : accent2,
           weight: precise ? 1.5 : 1.1,
@@ -434,10 +437,12 @@ const topCities = cityRows.slice(0, 12);
           fillOpacity: precise ? 0.76 : 0.56,
           opacity: precise ? 0.95 : 0.82,
         }).bindPopup(popup(point)).addTo(cityLayer);
+        cityMarkers.push({ marker, precise });
       });
 
     countryLayer.addTo(map);
     cityLayer.addTo(map);
+    (el as any)._liveMapThemeState = { cityMarkers, countryMarkers };
 
     const bounds = L.latLngBounds([...countryPoints, ...cityPoints].map((point) => [point.lat, point.lng]));
     if (bounds.isValid()) {
@@ -470,8 +475,24 @@ const topCities = cityRows.slice(0, 12);
     window.setTimeout(() => map.invalidateSize(), 120);
   }
 
+  function repaintMapTheme() {
+    const el = document.getElementById('shows-map');
+    const state = el ? (el as any)._liveMapThemeState : null;
+    if (!state) return;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#F70D1A';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#B60710';
+    const ink = rootStyles.getPropertyValue('--ink').trim() || '#F0EEE8';
+    state.countryMarkers.forEach((marker: any) => marker.setStyle({ color: accent, fillColor: ink }));
+    state.cityMarkers.forEach(({ marker, precise }: any) => {
+      marker.setStyle({ color: precise ? accent : accent2, fillColor: precise ? accent2 : accent });
+    });
+  }
+
   bootMap();
   document.addEventListener('astro:page-load', bootMap);
+  document.addEventListener('cureation:theme-change', repaintMapTheme);
+  document.addEventListener('cureation:colour-theme-change', repaintMapTheme);
 </script>
 
 <style is:global>

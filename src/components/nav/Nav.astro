@@ -1,239 +1,162 @@
 ---
-import { getAlbumOfMonth, getNextConcert, getLatestConcert } from '../../lib/directus';
-import { asset } from '../../lib/assets';
-
 const current = Astro.url.pathname;
-const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
-const calendarSubscribeUrl = calendarFeedUrl.replace(/^https?:/, 'webcal:');
 
-const [featuredAlbum, nextShow, lastShow] = await Promise.all([
-  getAlbumOfMonth().catch(() => null),
-  getNextConcert().catch(() => null),
-  getLatestConcert().catch(() => null),
-]);
-const featuredShow = nextShow || lastShow;
-
-type MegaLink = { href: string; label: string; meta?: string };
-type MegaCol = { title: string; links: MegaLink[] };
-type MegaFeature = {
-  kind: string;
-  title: string;
-  meta: string;
-  href: string;
-  image?: string | null;
-};
 type MegaSection = {
   id: string;
   label: string;
   href: string;
-  cols: MegaCol[];
-  feature: MegaFeature;
-  match: (p: string) => boolean;
+  match: string[];
+  columns: Array<{ title: string; links: Array<{ href: string; label: string; meta?: string }> }>;
+  feature: { eyebrow: string; title: string; href: string; image: string; meta: string };
 };
 
-const MEGA: MegaSection[] = [
+const sections: MegaSection[] = [
   {
-    id: 'records', label: 'Records', href: '/discography',
-    cols: [
-      { title: 'Discography', links: [
-        { href: '/discography?type=studio', label: 'Studio albums', meta: '13' },
-        { href: '/discography?type=ep', label: 'EPs', meta: '7' },
-        { href: '/discography?type=single', label: 'Singles', meta: '48' },
-        { href: '/discography?type=compilation', label: 'Compilations', meta: '11' },
-        { href: '/songs', label: 'All songs', meta: '267' },
-        { href: '/lyrics', label: 'Lyrics' },
+    id: 'music', label: 'Music', href: '/discography', match: ['/discography', '/songs', '/lyrics'],
+    columns: [
+      { title: 'Records', links: [
+        { href: '/discography', label: 'Discography', meta: 'all releases' },
+        { href: '/discography?type=studio', label: 'Albums', meta: '14 records' },
+        { href: '/discography?type=single', label: 'Singles' },
+        { href: '/discography?type=compilation', label: 'Compilations' },
       ]},
-      { title: 'By era', links: [
-        { href: '/band/history', label: 'Early years', meta: '1978–80' },
-        { href: '/band/history', label: 'Dark trilogy', meta: '1980–82' },
-        { href: '/band/history', label: 'Imperial phase', meta: '1985–92' },
-        { href: '/band/history', label: 'Wilderness', meta: '1996–08' },
-        { href: '/band/history', label: 'Return', meta: '2024–' },
+      { title: 'Song library', links: [
+        { href: '/songs', label: 'Songs', meta: 'A–Z' },
+        { href: '/lyrics', label: 'Lyrics' },
+        { href: '/stats', label: 'Most performed' },
+        { href: '/band/history', label: 'Browse by era' },
       ]},
     ],
-    feature: featuredAlbum ? {
-      kind: 'FEATURED RECORD',
-      title: featuredAlbum.title,
-      meta: [featuredAlbum.release_date?.slice(0, 4), featuredAlbum.label, (featuredAlbum.type || '').toUpperCase()].filter(Boolean).join(' · '),
-      href: featuredAlbum.slug ? `/discography/${featuredAlbum.slug}` : '/discography',
-      image: featuredAlbum.cover_art ? asset(featuredAlbum.cover_art, 'card') : null,
-    } : { kind: 'FEATURED RECORD', title: 'The discography', meta: 'Studio · EPs · Compilations · Singles', href: '/discography' },
-    match: (p) => p.startsWith('/discography') || p.startsWith('/songs') || p === '/lyrics',
+    feature: { eyebrow: 'Start here', title: 'The records, in full', href: '/discography', image: '/images/albums/disintegration.jpg', meta: 'Albums · singles · songs · credits' },
   },
   {
-    id: 'live', label: 'Live', href: '/setlists',
-    cols: [
-      { title: 'The archive', links: [
-        { href: '/setlists', label: 'Live archive', meta: 'all shows' },
-        { href: '/setlists', label: 'Setlists', meta: 'by show' },
-        { href: '/tours/2026-european-summer-shows', label: '2026 Tour Tracker', meta: '31 dates' },
-        { href: '/setlists/compare', label: 'Compare shows', meta: 'side-by-side' },
+    id: 'live', label: 'Live', href: '/tours/2026-european-summer-shows', match: ['/tours', '/setlists', '/venues', '/on-this-day'],
+    columns: [
+      { title: 'On tour now', links: [
+        { href: '/tours/2026-european-summer-shows', label: '2026 Summer Shows Tour Tracker', meta: 'live' },
+        { href: '/calendar.ics', label: 'Add dates to calendar' },
+        { href: '/tours/map', label: 'Tour map' },
+        { href: '/tours', label: 'All tours' },
+      ]},
+      { title: 'The live archive', links: [
+        { href: '/setlists', label: 'Setlists' },
+        { href: '/venues', label: 'Venues' },
+        { href: '/setlists/compare', label: 'Compare shows' },
         { href: '/on-this-day', label: 'On this day' },
       ]},
-      { title: 'Places', links: [
-        { href: '/tours', label: 'Tours' },
-        { href: calendarSubscribeUrl, label: 'Tour calendar feed', meta: 'latest tour' },
-        { href: '/venues', label: 'Venues' },
-        { href: '/tours/map', label: 'World map', meta: 'show geography' },
-      ]},
     ],
-    feature: featuredShow ? {
-      kind: nextShow ? 'NEXT SHOW' : 'LATEST SHOW',
-      title: featuredShow.venue || featuredShow.city || 'Live',
-      meta: [featuredShow.date, featuredShow.city, featuredShow.country].filter(Boolean).join(' · '),
-      href: featuredShow.slug ? `/setlists/${featuredShow.slug}` : '/setlists',
-    } : { kind: 'FEATURED', title: 'The live archive', meta: 'Setlists, tours, venues', href: '/setlists' },
-    match: (p) => p.startsWith('/setlists') || p.startsWith('/tours') || p.startsWith('/venues') || p === '/on-this-day',
+    feature: { eyebrow: 'Tour now', title: 'The 2026 Summer Shows Tour Tracker', href: '/tours/2026-european-summer-shows', image: '/hero-image1.jpg', meta: 'Dates · maps · setlists · updates' },
   },
   {
-    id: 'wiki', label: 'Wiki', href: '/wiki',
-    cols: [
-      { title: 'The wiki', links: [
-        { href: '/wiki', label: 'All wiki pages' },
-        { href: '/photos', label: 'Photographs' },
-        { href: '/videos', label: 'Videos' },
+    id: 'stories', label: 'Publication', href: '/publication', match: ['/publication', '/news', '/reviews', '/newsletter'],
+    columns: [
+      { title: 'The desks', links: [
+        { href: '/publication', label: 'Publication', meta: 'essays & interviews' },
+        { href: '/news', label: 'News', meta: 'the present tense' },
+        { href: '/reviews', label: 'Reviews', meta: 'close listening' },
+        { href: '/wiki', label: 'Wiki', meta: 'the reference desk' },
+      ]},
+      { title: 'Keep up', links: [
+        { href: '/publication#editorials', label: 'Editorials' },
+        { href: '/newsletter', label: 'Newsletter' },
+        { href: '/publication/rss.xml', label: 'Publication RSS' },
+        { href: '/news/rss.xml', label: 'News RSS' },
+      ]},
+    ],
+    feature: { eyebrow: 'Fourteen close listens', title: 'Every studio album, reviewed', href: '/reviews', image: '/images/albums/disintegration.jpg', meta: 'Reviews · scores · standout tracks' },
+  },
+  {
+    id: 'archive', label: 'Archive', href: '/wiki', match: ['/wiki', '/band', '/photos', '/videos', '/stats', '/curiosities', '/community', '/my-archive'],
+    columns: [
+      { title: 'The detail', links: [
+        { href: '/wiki', label: 'Cure wiki' },
+        { href: '/band', label: 'The band' },
+        { href: '/band/gear', label: 'Gear' },
         { href: '/curiosities', label: 'Curiosities' },
       ]},
-      { title: 'The band', links: [
-        { href: '/band', label: 'Members' },
-        { href: '/band/history', label: 'History' },
-        { href: '/band/gear', label: 'Gear' },
-      ]},
-    ],
-    feature: { kind: 'WIKI', title: 'The archive wiki', meta: 'Pages · media · band files', href: '/wiki' },
-    match: (p) => p.startsWith('/wiki') || p.startsWith('/band') || p === '/curiosities' || p.startsWith('/photos') || p.startsWith('/videos'),
-  },
-  {
-    id: 'stats', label: 'Stats', href: '/stats',
-    cols: [
-      { title: 'Stats', links: [
-        { href: '/stats', label: 'Most performed', meta: 'top 10' },
-        { href: '/stats', label: 'By decade', meta: '1978 → 2026' },
-        { href: '/stats', label: 'Rarities tracker' },
-        { href: '/stats', label: 'Touring heatmap' },
-      ]},
-      { title: 'Curiosities', links: [
-        { href: '/curiosities', label: 'Longest performances' },
-        { href: '/curiosities', label: 'Held chords' },
-        { href: '/curiosities', label: 'First-and-only songs' },
-        { href: '/curiosities', label: 'Tape vault' },
-      ]},
-    ],
-    feature: { kind: 'INDEX', title: 'The archive', meta: 'shows · songs · venues', href: '/stats' },
-    match: (p) => p.startsWith('/stats') || p === '/curiosities',
-  },
-  {
-    id: 'journal', label: 'Journal', href: '/news',
-    cols: [
-      { title: 'Stories', links: [
-        { href: '/news', label: 'All journal entries' },
-        { href: '/news?category=news', label: 'News' },
-        { href: '/news?category=blog', label: 'Blog' },
-        { href: '/news?category=reviews', label: 'Reviews' },
-        { href: '/newsletter', label: 'Newsletter', meta: 'monthly' },
-      ]},
-      { title: 'Feeds', links: [
-        { href: '/rss.xml', label: 'RSS feed' },
-        { href: '/news/rss.xml', label: 'Journal RSS' },
-      ]},
-    ],
-    feature: { kind: 'JOURNAL', title: 'Latest stories', meta: 'News · blog · reviews · newsletters', href: '/news' },
-    match: (p) => p.startsWith('/news') || p === '/newsletter',
-  },
-  {
-    id: 'community', label: 'Community', href: '/community',
-    cols: [
-      { title: 'Community', links: [
-        { href: '/community', label: 'Forums' },
+      { title: 'Look & count', links: [
+        { href: '/photos', label: 'Photographs' },
+        { href: '/videos', label: 'Video archive' },
+        { href: '/stats', label: 'Statistics' },
         { href: '/my-archive', label: 'My archive' },
       ]},
-      { title: 'About', links: [
-        { href: '/sources', label: 'Sources' },
-        { href: '/about', label: 'About' },
-      ]},
     ],
-    feature: { kind: 'COMMUNITY', title: 'Help keep the archive alive', meta: 'Forums · sources · corrections', href: '/community' },
-    match: (p) => p === '/about' || p === '/community' || p === '/my-archive' || p === '/sources',
+    feature: { eyebrow: 'Go deeper', title: 'Every beautiful detail', href: '/wiki', image: '/logo-mark.webp', meta: 'People · places · pictures · numbers' },
   },
 ];
 
-const activeSection = MEGA.find((s) => s.match(current))?.id ?? null;
-const isHome = current === '/';
+const isActive = (paths: string[]) => paths.some((path) => current.startsWith(path));
 ---
-<header class="nav" data-nav>
-  <div class="container nav__row">
-    <a href="/" class="nav__brand" aria-label="Cureation — home">
-      <span class="nav__brand-mark" aria-hidden="true">
-        <img src="/logo.png" alt="" width="28" height="28" loading="eager" decoding="sync" />
-      </span>
-      <span class="nav__brand-name">Cureation</span>
+<header class="mega-nav" data-nav>
+  <div class="container mega-nav__row">
+    <a href="/" class="mega-nav__brand" aria-label="Cureation home">
+      <span class="mega-nav__logo"><img src="/logo-mark.webp" alt="" width="42" height="42" decoding="async" /></span>
+      <span class="mega-nav__word">Cureation</span>
     </a>
 
-    <nav class="nav__links" aria-label="Primary">
-      <a href="/" class={`nav__link ${isHome ? 'is-active' : ''}`} data-mega-leave>Home</a>
-      {MEGA.map((s) => (
-        <a
-          href={s.href}
-          class={`nav__link nav__link--mega ${activeSection === s.id ? 'is-active' : ''}`}
-          data-mega-toggle={s.id}
-          aria-haspopup="true"
-          aria-expanded="false"
-        >
-          {s.label}
-          <svg class="nav__caret" viewBox="0 0 10 6" width="10" height="6" aria-hidden="true">
-            <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.2" />
-          </svg>
+    <nav class="mega-nav__links" aria-label="Primary navigation">
+      {sections.map((section) => (
+        <a href={section.href} class:list={{ 'is-active': isActive(section.match) }} data-mega-toggle={section.id} aria-haspopup="true" aria-expanded="false">
+          {section.label}
+          <svg viewBox="0 0 10 6" width="9" height="6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>
         </a>
       ))}
     </nav>
 
-    <div class="nav__utility">
-      <button class="nav__search" data-search-open aria-label="Open search (⌘K)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
-        </svg>
-        <span class="nav__search-label">Search the archive</span>
-        <kbd class="nav__kbd">⌘K</kbd>
+    <div class="mega-nav__actions">
+      <button class="mega-nav__search" data-search-open aria-label="Search the archive">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <span>Search</span><kbd>⌘K</kbd>
       </button>
-      <button class="nav__icon nav__icon--tweaks" data-tweaks-toggle aria-label="Open tweaks" aria-haspopup="dialog" aria-expanded="false">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      <details class="mega-nav__palette">
+        <summary aria-label="Choose colour theme" title="Choose colour theme">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="7" cy="8" r="3"></circle><circle cx="16.5" cy="7" r="2.5"></circle><circle cx="15" cy="16" r="3.5"></circle><path d="M9.5 10.5 12.7 13M13.8 8.8l-2.3 2.7"></path>
+          </svg>
+        </summary>
+        <div class="mega-nav__palette-panel">
+          <div><span>Colour theme</span><strong data-colour-theme-current>Bloodflowers</strong></div>
+          <button type="button" data-colour-theme="wish" aria-pressed="false"><i style="--swatch:#4D8DFF"></i><span>Wish</span></button>
+          <button type="button" data-colour-theme="disintegration" aria-pressed="false"><i style="--swatch:#9B5CFF"></i><span>Disintegration</span></button>
+          <button type="button" data-colour-theme="pornography" aria-pressed="false"><i style="--swatch:#D33A55"></i><span>Pornography</span></button>
+          <button type="button" data-colour-theme="faith" aria-pressed="false"><i style="--swatch:#7894C2"></i><span>Faith</span></button>
+          <button type="button" data-colour-theme="head-on-the-door" aria-pressed="false"><i style="--swatch:#D6A64A"></i><span>The Head on the Door</span></button>
+          <button type="button" data-colour-theme="bloodflowers" aria-pressed="true"><i style="--swatch:#F70D1A"></i><span>Bloodflowers</span></button>
+        </div>
+      </details>
+      <button class="mega-nav__theme" type="button" data-theme-toggle aria-label="Switch to light mode" title="Switch to light mode">
+        <svg class="mega-nav__theme-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+        </svg>
+        <svg class="mega-nav__theme-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M20.5 15.4A8.5 8.5 0 0 1 8.6 3.5a8.5 8.5 0 1 0 11.9 11.9Z"></path>
         </svg>
       </button>
-      <button class="nav__icon nav__menu" data-menu-open aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16"/>
-        </svg>
+      <button class="mega-nav__menu" data-menu-open aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
       </button>
     </div>
   </div>
 
-  {MEGA.map((s) => (
-    <div class="mega" data-mega-panel={s.id} hidden>
-      <div class="container mega__inner">
-        {s.cols.map((c) => (
-          <div class="mega__col">
-            <div class="mega__h">{c.title}</div>
-            {c.links.map((l) => (
-              <a class="mega__link" href={l.href}>
-                <span class="mega__link-t">{l.label}</span>
-                {l.meta && <span class="mega__link-c">{l.meta}</span>}
-              </a>
+  {sections.map((section) => (
+    <div class="mega-panel" data-mega-panel={section.id} hidden>
+      <div class="container mega-panel__grid">
+        {section.columns.map((column) => (
+          <div class="mega-panel__column">
+            <span class="mega-panel__eyebrow">{column.title}</span>
+            {column.links.map((link) => (
+              <a class="mega-panel__link" href={link.href}><span>{link.label}</span>{link.meta && <small>{link.meta}</small>}</a>
             ))}
           </div>
         ))}
-        <a class="mega__feature" href={s.feature.href}>
-          <div class={`mega__feature-img${s.feature.image ? ' has-image' : ''}`}>
-            {s.feature.image && <img src={s.feature.image} alt={s.feature.title} loading="lazy" />}
-            <span class="mega__feature-kind">{s.feature.kind}</span>
-            {!s.feature.image && <span class="mega__feature-orb" aria-hidden="true"></span>}
-          </div>
-          <div class="mega__feature-body">
-            <div class="serif mega__feature-title">{s.feature.title}</div>
-            <div class="mono-sm muted mega__feature-meta">{s.feature.meta}</div>
-            <div class="mono-sm mega__feature-cue">Open →</div>
-          </div>
+        <a class="mega-panel__feature" href={section.feature.href}>
+          <span class="mega-panel__image">
+            <img src={section.feature.image} alt="" width="480" height="270" loading="lazy" decoding="async" />
+            <small>{section.feature.eyebrow}</small>
+          </span>
+          <span class="mega-panel__feature-copy">
+            <strong>{section.feature.title}</strong><small>{section.feature.meta}</small><b>Open →</b>
+          </span>
         </a>
       </div>
     </div>
@@ -241,282 +164,113 @@ const isHome = current === '/';
 </header>
 
 <style>
-  .nav {
-    position: sticky; top: 0; z-index: 50;
-    background: color-mix(in oklab, var(--bg), transparent 22%);
-    backdrop-filter: saturate(140%) blur(14px);
-    -webkit-backdrop-filter: saturate(140%) blur(14px);
-    border-bottom: 1px solid var(--rule);
-  }
-  .nav__row {
-    display: grid; grid-template-columns: auto 1fr auto;
-    align-items: center; gap: clamp(12px, 2vw, 28px);
-    padding-block: 14px; min-height: 64px;
-  }
-
-  /* Brand: circle mark + wordmark */
-  .nav__brand {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-family: var(--f-display); font-style: italic; font-weight: 500;
-    font-size: clamp(22px, 2.4vw, 26px);
-    color: var(--ink); border: none; flex-shrink: 0; letter-spacing: -0.01em;
-    min-height: 28px;
-  }
-  .nav__brand-mark {
-    width: 28px; height: 28px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border: 1px solid var(--accent);
-    border-radius: 50%;
-    background: var(--accent-tint);
-    overflow: hidden;
-    box-shadow: 0 0 18px color-mix(in oklab, var(--accent), transparent 82%);
-    flex: 0 0 auto;
-  }
-  .nav__brand-mark img { width: 100%; height: 100%; object-fit: cover; }
-  .nav__brand-name { line-height: 1; }
-
-  /* Links + caret */
-  .nav__links {
-    display: flex; gap: 2px; align-items: center;
-    flex: 1; justify-content: center;
-  }
-  .nav__link {
-    font-family: var(--f-mono); font-size: 11px;
-    letter-spacing: 0.22em; text-transform: uppercase;
-    color: var(--ink-2); border: none; background: transparent;
-    padding: 10px 14px; cursor: pointer;
-    position: relative; white-space: nowrap;
-    transition: color .2s;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .nav__link:hover, .nav__link[aria-expanded='true'] { color: var(--ink); }
-  .nav__link.is-active { color: var(--accent-3); }
-  :root[data-theme='papers'] .nav__link.is-active { color: var(--accent); }
-  .nav__link.is-active::after {
-    content: ''; position: absolute; left: 14px; right: 14px; bottom: 4px;
-    height: 1px; background: var(--accent);
-  }
-  .nav__caret { opacity: .5; transition: transform .18s, opacity .18s; }
-  .nav__link[aria-expanded='true'] .nav__caret { opacity: 1; transform: rotate(180deg); }
-
-  .nav__utility { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
-  /* Inline search trigger */
-  .nav__search {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: transparent; border: 1px solid var(--rule);
-    padding: 8px 12px;
-    color: var(--muted); cursor: pointer;
-    font-family: var(--f-mono); font-size: 10.5px;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    min-width: 220px; transition: border-color .18s, color .18s;
-  }
-  .nav__search:hover { border-color: var(--accent); color: var(--ink); }
-  .nav__search-label { color: var(--muted); }
-  .nav__search:hover .nav__search-label { color: var(--ink-2); }
-  .nav__kbd {
-    margin-left: auto;
-    font-family: var(--f-mono); font-size: 9.5px;
-    padding: 2px 6px; border: 1px solid var(--rule);
-    color: var(--muted); letter-spacing: 0.1em;
-  }
-
-  .nav__icon {
-    width: 40px; height: 40px; display: inline-flex; align-items: center;
-    justify-content: center; background: transparent; color: var(--ink-2);
-    border: 1px solid var(--rule); cursor: pointer; transition: all .18s;
-  }
-  .nav__icon:hover { color: var(--accent-3); border-color: var(--accent); }
-  :root[data-theme='papers'] .nav__icon:hover { color: var(--accent); }
-  .nav__icon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .nav__menu { display: none; }
-
-  /* Mega menu panel */
-  .mega {
-    position: absolute; left: 0; right: 0; top: 100%;
-    background: color-mix(in oklab, var(--bg), transparent 4%);
-    backdrop-filter: blur(20px) saturate(1.3);
-    -webkit-backdrop-filter: blur(20px) saturate(1.3);
-    border-bottom: 1px solid var(--rule-strong);
-    border-top: 1px solid var(--rule);
-    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55);
-    animation: megaIn .18s ease-out;
-    z-index: 51;
-  }
-  .mega[hidden] { display: none; }
-  @keyframes megaIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-  .mega__inner {
-    display: grid; grid-template-columns: 1.1fr 1.1fr 1fr; gap: clamp(20px, 3vw, 48px);
-    padding-block: clamp(28px, 3.4vw, 40px) clamp(32px, 3.8vw, 44px);
-  }
-  .mega__col { min-width: 0; }
-  .mega__h {
-    font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--accent-3);
-    margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--rule);
-  }
-  :root[data-theme='papers'] .mega__h { color: var(--accent); }
-  .mega__link {
-    display: flex; justify-content: space-between; align-items: baseline;
-    gap: 12px; padding: 9px 0;
-    border-bottom: 1px solid var(--rule-2);
-    color: var(--ink); border-left: 0; border-right: 0; border-top: 0;
-    transition: color .12s, padding-left .12s, border-color .12s;
-  }
-  .mega__link:hover { color: var(--accent-3); padding-left: 6px; border-bottom-color: var(--rule); }
-  :root[data-theme='papers'] .mega__link:hover { color: var(--accent); }
-  .mega__link-t { font-family: var(--f-serif); font-style: italic; font-size: 17px; }
-  .mega__link-c {
-    font-family: var(--f-mono); font-size: 9px; color: var(--muted);
-    letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap;
-  }
-
-  .mega__feature {
-    background: var(--bg-2); border: 1px solid var(--rule);
-    color: inherit; transition: border-color .18s;
-    display: flex; flex-direction: column;
-  }
-  .mega__feature:hover { border-color: var(--accent); }
-  .mega__feature-img {
-    aspect-ratio: 16/9;
-    background: radial-gradient(ellipse at 40% 30%, var(--surface), var(--bg-2) 70%);
-    display: grid; place-items: center;
-    position: relative; border-bottom: 1px solid var(--rule);
-    overflow: hidden;
-  }
-  .mega__feature-img.has-image { background: var(--bg-2); }
-  .mega__feature-img img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%; object-fit: cover;
-    filter: saturate(0.9) contrast(1.05);
-    transition: transform .5s ease;
-  }
-  .mega__feature:hover .mega__feature-img img { transform: scale(1.04); }
-  .mega__feature-img.has-image::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .mega__feature-kind {
-    position: absolute; top: 12px; left: 12px;
-    z-index: 2;
-    font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--accent-3);
-    background: color-mix(in oklab, var(--bg), transparent 30%);
-    padding: 4px 8px; border: 1px solid var(--rule);
-  }
-  :root[data-theme='papers'] .mega__feature-kind { color: var(--accent); }
-  .mega__feature-orb {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: var(--accent); box-shadow: var(--glow);
-  }
-  .mega__feature-body { padding: 14px 16px; }
-  .mega__feature-title {
-    font-family: var(--f-display); font-style: italic;
-    font-size: 24px; line-height: 1.15; color: var(--ink);
-  }
-  .mega__feature-meta { margin-top: 6px; }
-  .mega__feature-cue { color: var(--accent-3); margin-top: 10px; letter-spacing: 0.18em; }
-  :root[data-theme='papers'] .mega__feature-cue { color: var(--accent); }
-
-  /* Tablet + mobile collapse */
-  @media (max-width: 1100px) {
-    .mega { display: none !important; }
-    .nav__caret { display: none; }
-  }
-  @media (max-width: 960px) {
-    .nav__links { display: none; }
-    .nav__search { display: none; }
-    .nav__menu { display: inline-flex; }
-    .nav__row {
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
-      padding: 10px var(--gutter);
-      min-height: 56px;
-    }
-    .nav__brand {
-      min-width: 0;
-      gap: 10px;
-      font-size: 22px;
-    }
-    .nav__brand-mark { width: 26px; height: 26px; }
-    .nav__brand-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      line-height: 1;
-    }
-    .nav__utility { gap: 6px; }
-    .nav__icon { width: 40px; height: 40px; }
+  .mega-nav { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--rule); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
+  .mega-nav__row { min-height: 72px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: clamp(18px, 3vw, 42px); }
+  .mega-nav__brand { display: inline-flex; align-items: center; gap: 11px; border: 0; color: var(--ink); }
+  .mega-nav__logo { width: 42px; height: 42px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 75%, white 10%); border-radius: 50%; background: var(--bg-2); box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 28%, transparent); }
+  .mega-nav__logo img { width: 100%; height: 100%; object-fit: cover; }
+  .mega-nav__word { font-family: var(--f-display); font-size: 25px; font-style: italic; line-height: 1; }
+  .mega-nav__links { display: flex; justify-content: center; align-items: center; gap: clamp(6px, 1.5vw, 22px); }
+  .mega-nav__links a { min-height: 72px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; border: 0; color: var(--muted); font-family: var(--f-sans); font-size: var(--micro); font-weight: 750; letter-spacing: .15em; text-transform: uppercase; }
+  .mega-nav__links a:hover, .mega-nav__links a[aria-expanded='true'] { color: var(--accent); }
+  .mega-nav__links a.is-active { color: var(--ink); }
+  .mega-nav__links a.is-active { box-shadow: inset 0 -2px var(--accent); }
+  .mega-nav__links svg { opacity: .55; transition: transform .18s ease; }
+  .mega-nav__links a[aria-expanded='true'] svg { transform: rotate(180deg); }
+  .mega-nav__actions { display: flex; align-items: center; justify-content: end; gap: 8px; }
+  .mega-nav__search, .mega-nav__theme, .mega-nav__menu, .mega-nav__palette > summary { min-height: 42px; border: 1px solid var(--rule); background: transparent; color: var(--ink-2); cursor: pointer; }
+  .mega-nav__search { display: inline-flex; align-items: center; gap: 9px; padding: 0 11px; font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+  .mega-nav__search kbd { margin-left: 8px; color: var(--muted); font: inherit; }
+  .mega-nav__theme { width: 42px; display: inline-grid; place-items: center; padding: 0; }
+  .mega-nav__theme-moon { display: none; }
+  :global(html[data-theme='papers']) .mega-nav__theme-sun { display: none; }
+  :global(html[data-theme='papers']) .mega-nav__theme-moon { display: block; }
+  .mega-nav__palette { position: relative; }
+  .mega-nav__palette > summary { width: 42px; display: grid; place-items: center; list-style: none; }
+  .mega-nav__palette > summary::-webkit-details-marker { display: none; }
+  .mega-nav__palette-panel { position: absolute; top: calc(100% + 10px); right: 0; z-index: 70; width: 270px; display: grid; padding: 12px; border: 1px solid var(--rule-strong); background: var(--bg); box-shadow: var(--shadow-2); }
+  .mega-nav__palette-panel > div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 6px 12px; border-bottom: 1px solid var(--rule); font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+  .mega-nav__palette-panel > div span { color: var(--muted); }
+  .mega-nav__palette-panel > div strong { color: var(--accent); font-weight: 750; }
+  .mega-nav__palette-panel button { display: grid; grid-template-columns: 18px 1fr; align-items: center; gap: 10px; min-height: 38px; padding: 6px; border: 0; border-bottom: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); font-family: var(--f-display); font-size: 16px; font-style: italic; text-align: left; cursor: pointer; }
+  .mega-nav__palette-panel button:last-child { border-bottom: 0; }
+  .mega-nav__palette-panel button i { width: 14px; height: 14px; border: 1px solid color-mix(in srgb, var(--swatch) 70%, var(--ink)); border-radius: 50%; background: var(--swatch); box-shadow: 0 0 12px color-mix(in srgb, var(--swatch) 42%, transparent); }
+  .mega-nav__palette-panel button:hover, .mega-nav__palette-panel button[aria-pressed='true'] { color: var(--accent); }
+  .mega-nav__palette-panel button[aria-pressed='true'] { background: var(--accent-tint); }
+  .mega-nav__search:hover, .mega-nav__theme:hover, .mega-nav__menu:hover, .mega-nav__palette > summary:hover { border-color: var(--accent); color: var(--accent); }
+  .mega-nav__search:focus-visible, .mega-nav__theme:focus-visible, .mega-nav__menu:focus-visible, .mega-nav__palette > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mega-nav__menu { width: 42px; display: none; place-items: center; }
+  .mega-panel { position: absolute; top: 100%; right: 0; left: 0; z-index: 51; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule-strong); background: color-mix(in srgb, var(--bg) 96%, transparent); box-shadow: 0 28px 70px rgba(0,0,0,.6); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); animation: panel-in .16s ease-out; }
+  .mega-panel[hidden] { display: none; }
+  @keyframes panel-in { from { opacity: 0; transform: translateY(-5px); } }
+  .mega-panel__grid { display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: clamp(24px, 4vw, 58px); padding-block: 34px 40px; }
+  .mega-panel__eyebrow { display: block; padding-bottom: 11px; border-bottom: 1px solid var(--rule); color: var(--violet); font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+  .mega-panel__link { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--rule-2); color: var(--ink); }
+  .mega-panel__link span { font-family: var(--f-display); font-size: 19px; font-style: italic; }
+  .mega-panel__link small { align-self: center; color: var(--muted); font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .mega-panel__link:hover { padding-left: 6px; color: var(--accent); }
+  .mega-panel__feature { display: grid; grid-template-columns: 150px 1fr; min-height: 186px; border: 1px solid var(--rule); background: var(--bg-2); color: inherit; }
+  .mega-panel__image { position: relative; min-height: 100%; overflow: hidden; }
+  .mega-panel__image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.12) contrast(1.08); transition: transform .5s ease; }
+  .mega-panel__image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.78), transparent 62%); }
+  .mega-panel__image small { position: absolute; z-index: 1; bottom: 11px; left: 11px; color: #fff; font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .mega-panel__feature-copy { display: flex; flex-direction: column; align-items: flex-start; padding: 20px; }
+  .mega-panel__feature-copy strong { color: var(--ink); font-family: var(--f-display); font-size: 28px; font-weight: 400; line-height: .95; }
+  .mega-panel__feature-copy small { margin-top: 10px; color: var(--muted); font-family: var(--f-sans); font-size: var(--micro-sm); letter-spacing: .08em; text-transform: uppercase; }
+  .mega-panel__feature-copy b { margin-top: auto; color: var(--accent-3); font-family: var(--f-sans); font-size: var(--micro-sm); letter-spacing: .13em; text-transform: uppercase; }
+  .mega-panel__feature:hover { border-color: var(--accent); }
+  .mega-panel__feature:hover img { transform: scale(1.035); }
+  @media (max-width: 1080px) {
+    .mega-nav__links, .mega-nav__search, .mega-panel { display: none !important; }
+    .mega-nav__menu { display: grid; }
+    .mega-nav__row { min-height: 62px; grid-template-columns: 1fr auto; }
   }
   @media (max-width: 520px) {
-    .nav__row {
-      gap: 10px;
-      padding-block: 8px;
-      min-height: 52px;
-    }
-    .nav__brand { gap: 9px; font-size: 21px; }
-    .nav__brand-mark { width: 24px; height: 24px; }
-    .nav__icon { width: 38px; height: 38px; }
+    .mega-nav__row { min-height: 58px; }
+    .mega-nav__logo { width: 36px; height: 36px; }
+    .mega-nav__word { font-size: 22px; }
+    .mega-nav__theme { width: 40px; min-height: 40px; padding: 0; }
+    .mega-nav__palette > summary { width: 40px; min-height: 40px; }
+    .mega-nav__palette-panel { position: fixed; top: 66px; right: var(--gutter); left: var(--gutter); width: auto; }
+    .mega-nav__menu { width: 40px; min-height: 40px; }
   }
+  @media (prefers-reduced-motion: reduce) { .mega-panel { animation: none; } .mega-panel__image img, .mega-nav__links svg { transition: none; } }
 </style>
 
 <script>
-  function wireNav() {
+  function wireMegaMenu() {
     const nav = document.querySelector<HTMLElement>('[data-nav]');
-    if (!nav) return;
-    if ((nav as any).__wired) return;
-    (nav as any).__wired = true;
-
-    const toggles = nav.querySelectorAll<HTMLAnchorElement>('[data-mega-toggle]');
-    const panels = nav.querySelectorAll<HTMLElement>('[data-mega-panel]');
-    const cover = nav.querySelector<HTMLElement>('[data-mega-leave]');
+    if (!nav || nav.dataset.megaWired) return;
+    nav.dataset.megaWired = 'true';
+    const toggles = [...nav.querySelectorAll<HTMLAnchorElement>('[data-mega-toggle]')];
+    const panels = [...nav.querySelectorAll<HTMLElement>('[data-mega-panel]')];
+    const palette = nav.querySelector<HTMLDetailsElement>('.mega-nav__palette');
     let openId: string | null = null;
-    let closeTimer: number | null = null;
-
-    function show(id: string | null) {
+    let closeTimer = 0;
+    const show = (id: string | null) => {
       openId = id;
-      toggles.forEach((b) => {
-        const match = b.getAttribute('data-mega-toggle') === id;
-        b.setAttribute('aria-expanded', match ? 'true' : 'false');
-      });
-      panels.forEach((p) => {
-        const match = p.getAttribute('data-mega-panel') === id;
-        p.hidden = !match;
-      });
-    }
-    function scheduleClose() {
-      if (closeTimer) window.clearTimeout(closeTimer);
-      closeTimer = window.setTimeout(() => show(null), 160);
-    }
-    function cancelClose() {
-      if (closeTimer) { window.clearTimeout(closeTimer); closeTimer = null; }
-    }
-
-    toggles.forEach((btn) => {
-      const id = btn.getAttribute('data-mega-toggle')!;
-      btn.addEventListener('mouseenter', () => { cancelClose(); show(id); });
-      btn.addEventListener('focus', () => { cancelClose(); show(id); });
-      btn.addEventListener('click', (e) => {
-        cancelClose();
-        // First click on a closed item opens the panel; second click navigates.
-        if (openId !== id) { e.preventDefault(); show(id); }
-      });
+      toggles.forEach((toggle) => toggle.setAttribute('aria-expanded', String(toggle.dataset.megaToggle === id)));
+      panels.forEach((panel) => { panel.hidden = panel.dataset.megaPanel !== id; });
+    };
+    const cancelClose = () => window.clearTimeout(closeTimer);
+    const scheduleClose = () => { closeTimer = window.setTimeout(() => show(null), 140); };
+    toggles.forEach((toggle) => {
+      const id = toggle.dataset.megaToggle || '';
+      toggle.addEventListener('mouseenter', () => { cancelClose(); show(id); });
+      toggle.addEventListener('focus', () => { cancelClose(); show(id); });
+      toggle.addEventListener('click', (event) => { if (openId !== id) { event.preventDefault(); show(id); } });
     });
-    panels.forEach((p) => {
-      p.addEventListener('mouseenter', cancelClose);
-      p.addEventListener('mouseleave', scheduleClose);
-    });
+    panels.forEach((panel) => { panel.addEventListener('mouseenter', cancelClose); panel.addEventListener('mouseleave', scheduleClose); });
     nav.addEventListener('mouseleave', scheduleClose);
-    cover?.addEventListener('mouseenter', () => show(null));
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && openId) show(null);
+    document.addEventListener('click', (event) => {
+      if (openId && !nav.contains(event.target as Node)) show(null);
+      if (palette?.open && !palette.contains(event.target as Node)) palette.open = false;
     });
-    document.addEventListener('click', (e) => {
-      if (!nav.contains(e.target as Node) && openId) show(null);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && openId) show(null);
+      if (event.key === 'Escape' && palette?.open) palette.open = false;
     });
   }
-  wireNav();
-  document.addEventListener('astro:page-load', wireNav);
+  wireMegaMenu();
+  document.addEventListener('astro:page-load', wireMegaMenu);
 </script>

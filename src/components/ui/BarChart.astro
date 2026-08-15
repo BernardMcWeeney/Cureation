@@ -44,21 +44,21 @@ const max = Math.max(1, ...list.map(b => b.value));
 </ol>
 
 <style>
-  .hbar { list-style: none; margin: 0; padding: 0; }
-  .hbar__row { border-bottom: 1px solid var(--rule-2); }
-  .hbar__row:first-child { border-top: 1px solid var(--ink); }
+  .hbar { display: grid; gap: 9px; list-style: none; margin: 0; padding: 0; }
+  .hbar__row { min-width: 0; }
   .hbar__link {
     display: grid;
     grid-template-columns: 36px minmax(0, 1fr) auto;
     align-items: center;
     gap: clamp(14px, 2vw, 24px);
-    padding: clamp(14px, 1.8vw, 20px) 0;
+    padding: clamp(13px, 1.6vw, 18px) clamp(13px, 1.6vw, 18px);
+    background: color-mix(in srgb, var(--bg-2) 90%, var(--accent-tint));
     color: inherit;
     border: none;
     text-decoration: none;
     transition: color .18s;
   }
-  .hbar__link:hover { color: var(--accent-3); }
+  .hbar__link:hover { color: var(--accent); background: var(--accent-tint); }
   :root[data-theme='papers'] .hbar__link:hover { color: var(--accent); }
 
   .hbar__rank {
@@ -98,7 +98,7 @@ const max = Math.max(1, ...list.map(b => b.value));
     transition: opacity .25s, box-shadow .25s;
   }
   .hbar__row--top .hbar__fill {
-    background: linear-gradient(to right, var(--accent), var(--gold));
+    background: linear-gradient(to right, var(--accent-2), var(--accent));
     opacity: 1;
   }
   .hbar__link:hover .hbar__fill { opacity: 1; box-shadow: 0 0 24px var(--accent); }

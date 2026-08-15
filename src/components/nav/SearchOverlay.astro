@@ -255,7 +255,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
       results.innerHTML = '<p class="search__hint">Type to search across the archive.</p>';
     };
 
-    // Delegated handlers — resilient to DOM swaps.
+    // Delegated handlers – resilient to DOM swaps.
     document.addEventListener('click', (e) => {
       const t = e.target as HTMLElement | null;
       if (!t) return;
@@ -290,7 +290,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
           results.innerHTML = render(data, q);
         } catch (err) {
           if ((err as any).name !== 'AbortError') {
-            results.innerHTML = '<p class="search__hint">Search failed — try again.</p>';
+            results.innerHTML = '<p class="search__hint">Search failed. Try again.</p>';
           }
         }
       }, 180);

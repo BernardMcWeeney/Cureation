@@ -1,0 +1,162 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import EditorialArticle from '../../components/editorial/EditorialArticle.astro';
+import Tag from '../../components/ui/Tag.astro';
+import { fetchRaw } from '../../lib/directus';
+import { asset } from '../../lib/assets';
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/publication');
+
+const rows: any[] = await fetchRaw('news', {
+  limit: 1,
+  'filter[slug][_eq]': slug,
+  fields: '*',
+}).catch(() => []);
+const article = rows[0];
+if (!article) return new Response('Not found', { status: 404 });
+
+const related: any[] = await fetchRaw('news', {
+  limit: 3,
+  'filter[id][_neq]': article.id,
+  fields: 'id,title,slug,excerpt,category,published_date,date_created,reading_time',
+  sort: '-published_date,-date_created',
+}).catch(() => []);
+
+const rawTags: string[] = (() => {
+  if (Array.isArray(article.tags)) return article.tags;
+  if (typeof article.tags !== 'string') return [];
+  try {
+    const parsed = JSON.parse(article.tags);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+})();
+const tags = [article.is_editorial ? 'Editorial' : article.category || 'News', ...rawTags]
+  .filter(Boolean)
+  .filter((tag, index, all) => all.findIndex((value) => value.toLowerCase() === tag.toLowerCase()) === index);
+const cover = article.featured_image_file || article.featured_image;
+const categoryKey = String(article.category || '').toLowerCase();
+const desk = ['news', 'rumor', 'rumors'].includes(categoryKey)
+  ? { label: 'News', href: '/news' }
+  : ['review', 'reviews'].includes(categoryKey)
+    ? { label: 'Reviews', href: '/reviews' }
+    : categoryKey === 'wiki'
+      ? { label: 'Wiki', href: '/wiki' }
+      : { label: 'Publication', href: '/publication' };
+const coverUrl = typeof cover === 'string' && cover.startsWith('http') ? cover : cover ? asset(cover, 'hero') : null;
+const publishedDate = article.published_date || article.date_created;
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': article.category === 'news' ? 'NewsArticle' : 'Article',
+  headline: article.title,
+  description: article.excerpt || undefined,
+  datePublished: publishedDate,
+  dateModified: article.date_updated || publishedDate,
+  author: article.author_name ? { '@type': 'Person', name: article.author_name } : undefined,
+  image: coverUrl || undefined,
+  mainEntityOfPage: new URL(`/publication/${article.slug}`, Astro.site ?? Astro.url).toString(),
+};
+---
+
+<Layout
+  title={`${article.title} · Publication · Cureation`}
+  description={article.excerpt || undefined}
+  ogImage={article.featured_image_file
+    ? asset(article.featured_image_file, 'og')
+    : (typeof article.featured_image === 'string' && article.featured_image.startsWith('http') ? article.featured_image : undefined)}
+  ogType="article"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)}></script>
+  <EditorialArticle
+    kind="news"
+    section={desk.label}
+    sectionHref={desk.href}
+    eyebrow={`Dispatch · ${(article.category || 'News').toUpperCase()}`}
+    title={article.title}
+    standfirst={article.excerpt}
+    publishedDate={publishedDate}
+    readingTime={article.reading_time}
+    author={article.author_name}
+    tags={tags}
+    image={coverUrl}
+    imageAlt={article.title}
+    imageCredit={article.image_credit}
+    bookmark={{ kind: 'news', id: article.id, href: `/publication/${article.slug}` }}
+    crumbs={[
+      { label: 'Home', href: '/' },
+      { label: desk.label, href: desk.href },
+      { label: article.title },
+    ]}
+  >
+    {article.content ? <div class="news-copy" set:html={article.content} /> : <p>Full article copy is being prepared.</p>}
+
+    <div slot="rail">
+      <section class="editorial-rail-card">
+        <span class="editorial-rail-label">Filed under</span>
+        <ul class="editorial-rail-list">
+          <li><span>Section</span><strong>{article.category || 'News'}</strong></li>
+          {article.author_name && <li><span>Words</span><strong>{article.author_name}</strong></li>}
+          {publishedDate && <li><span>Published</span><strong>{String(publishedDate).slice(0, 10)}</strong></li>}
+          {article.reading_time && <li><span>Reading time</span><strong>{article.reading_time} minutes</strong></li>}
+        </ul>
+        <a class="editorial-rail-link" href={desk.href}>More in this section <span>→</span></a>
+      </section>
+
+      {rawTags.length > 0 && (
+        <section class="editorial-rail-card">
+          <span class="editorial-rail-label">Index terms</span>
+          <div class="news-tag-list">
+            {rawTags.map((tag) => <Tag>{tag.toUpperCase()}</Tag>)}
+          </div>
+        </section>
+      )}
+    </div>
+
+    {related.length > 0 && (
+      <div slot="footer">
+        <div class="news-more__head">
+          <div><span class="news-more__kicker">From the publication</span><h2>Continue reading</h2></div>
+          <Tag variant="accent">Latest stories</Tag>
+        </div>
+        <div class="news-more__grid">
+          {related.map((item) => (
+            <a class="news-more__card" href={`/publication/${item.slug}`}>
+              <span>{(item.category || 'News').toUpperCase()} · {(item.published_date || item.date_created || '').slice(0, 4)}</span>
+              <strong>{item.title}</strong>
+              {item.excerpt && <p>{item.excerpt}</p>}
+              <b>{item.reading_time ? `${item.reading_time} min` : 'Read'} →</b>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+  </EditorialArticle>
+</Layout>
+
+<style is:global>
+  .news-copy > p:first-child::first-letter {
+    float: left;
+    margin: .08em .12em 0 0;
+    color: var(--accent-3);
+    font-family: var(--f-display);
+    font-size: 4.4em;
+    font-style: italic;
+    line-height: .74;
+  }
+  .news-tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .news-more__head { display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+  .news-more__kicker { color: var(--accent-3); font-family: var(--f-mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; }
+  .news-more__head h2 { margin: 8px 0 0; font-family: var(--f-display); font-size: clamp(32px, 4vw, 54px); font-style: italic; font-weight: 400; line-height: 1; }
+  .news-more__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
+  .news-more__card { display: flex; min-height: 260px; flex-direction: column; align-items: flex-start; padding: clamp(20px, 3vw, 30px); border: 1px solid var(--rule); background: var(--bg-2); }
+  .news-more__card:hover { border-color: var(--accent); }
+  .news-more__card > span, .news-more__card > b { color: var(--muted); font-family: var(--f-mono); font-size: 8px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+  .news-more__card > strong { margin-top: 16px; font-family: var(--f-display); font-size: clamp(23px, 2.4vw, 32px); font-style: italic; font-weight: 400; line-height: 1.05; text-wrap: balance; }
+  .news-more__card > p { display: -webkit-box; margin: 14px 0 0; overflow: hidden; color: var(--muted); font-family: var(--f-serif); font-size: 14px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .news-more__card > b { margin-top: auto; padding-top: 18px; color: var(--accent-3); }
+  @media (max-width: 800px) { .news-more__grid { grid-template-columns: 1fr; } .news-more__card { min-height: 0; } }
+  @media (max-width: 680px) { .news-copy > p:first-child::first-letter { font-size: 3.8em; } }
+</style>

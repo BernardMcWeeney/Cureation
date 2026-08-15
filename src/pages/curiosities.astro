@@ -12,7 +12,7 @@ const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolea
   <PageHero
     section="Did you know"
     title="Curiosities"
-    deck="Footnotes, trivia, and the minor observations — the marginalia that keep an archive honest about what it knows."
+    deck="Footnotes, trivia and minor observations: the marginalia that keep an archive honest about what it knows."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Curiosities' }]}
     facts={[
       { k: 'On file', v: items.length },
@@ -34,8 +34,8 @@ const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolea
         <article class="curio" data-cat={it.category || ''}>
           <div class="curio__idx mono-sm">№ {String(i + 1).padStart(3, '0')}</div>
           <div>
-            <div class="mono-sm muted" style="letter-spacing:.18em;">{(it.category || '—').toUpperCase()}</div>
-            <div class="curio__title serif">{it.title || '—'}</div>
+            <div class="mono-sm muted" style="letter-spacing:.18em;">{(it.category || '–').toUpperCase()}</div>
+            <div class="curio__title serif">{it.title || '–'}</div>
             <p class="curio__body">{it.content || it.body || ''}</p>
           </div>
         </article>

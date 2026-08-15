@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Crumbs from '../components/ui/Crumbs.astro';
+import PageHero from '../components/ui/PageHero.astro';
 import { getRunningFigures } from '../lib/directus';
 const fig = await getRunningFigures().catch(() => ({ albums: 0, songs: 0, setlists: 0, venues: 0, photos: 0, members: 0 }));
 const launched = 'February 2022';
@@ -20,28 +20,26 @@ const pillars: Array<[string, string]> = [
 ];
 ---
 <Layout title="About · Cureation">
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
-    <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
-  </div>
+  <PageHero
+    section="Independent fan archive"
+    title="Welcome to Cureation."
+    deck="A one-person, non-commercial archive built to capture, connect and preserve as much of The Cure's history as possible."
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'About' }]}
+    facts={[
+      { k: 'Founded', v: launched },
+      { k: 'Curated by', v: 'Bernard Mcweeney' },
+      { k: 'Based in', v: 'Ireland' },
+      { k: 'Status', v: 'Independent' },
+    ]}
+  />
 
-  <section class="container" style="padding-block: clamp(24px, 4vw, 56px);">
-    <div class="mono-sm muted">FAN ARCHIVE · SINCE {launched.toUpperCase()}</div>
-    <h1 class="serif" style="font-size: clamp(56px, 10vw, 128px); line-height:.9; font-style: italic; margin: .4rem 0 0; letter-spacing: -.01em;">
-      Welcome to<br/><em style="color: var(--accent-3); font-family: var(--f-display);">Cureation</em>.
-    </h1>
-    <p class="deck" style="max-width: 62ch; margin-top: clamp(16px, 3vw, 28px);">
-      <em>Cureation</em> is a fan archive dedicated to The Cure. It is a one-person, non-commercial editorial archive built to capture, connect, and preserve as much of the band&apos;s history as possible.
-    </p>
-  </section>
-
-  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
-    <div class="about-grid">
-      <div>
-        <div class="mono-sm muted">THE PROJECT</div>
-        <h2 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; font-style: italic; margin: .6rem 0 0;">The idea behind the archive.</h2>
-      </div>
-      <div>
-        <div class="copy-block">
+  <section class="about-section">
+    <div class="container about-split">
+      <header class="about-heading">
+        <span>The project</span>
+        <h2>One place for<br /><em>all of it.</em></h2>
+      </header>
+      <div class="copy-block">
           <p>
             The aim of Cureation is to become one source for all things The Cure: releases, songs, setlists, tours, venues, people, photographs, sources, and the many details that sit around the music.
           </p>
@@ -51,84 +49,71 @@ const pillars: Array<[string, string]> = [
           <p>
             The archive exists because The Cure have a long history and a lot of data. The goal is to record as much of it as possible, and to do that with care.
           </p>
-        </div>
       </div>
     </div>
   </section>
 
-  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
-    <div class="about-grid">
-      <div>
-        <div class="mono-sm muted">MISSION</div>
-        <h2 class="serif" style="font-size: clamp(32px, 4.6vw, 56px); line-height: 1; font-style: italic; margin: .6rem 0 0;">Collected carefully. Corrected openly.</h2>
-      </div>
-      <div class="stack" style="--gap: 0;">
+  <section class="about-section about-section--soft">
+    <div class="container">
+      <header class="about-heading about-heading--row">
+        <div><span>Mission</span><h2>Collected carefully.<br /><em>Corrected openly.</em></h2></div>
+        <p>Every claim should lead back to evidence. Every mistake should be easy to correct.</p>
+      </header>
+      <div class="value-grid">
         {pillars.map(([k, v], i) => (
-          <div style={`padding: 1.4rem 0; border-top: 1px solid ${i === 0 ? 'var(--ink)' : 'var(--rule)'}; display: grid; grid-template-columns: 28px 1fr; gap: 1rem; align-items: baseline;`}>
-            <div class="idx" style="color: var(--accent-3);">{String(i + 1).padStart(2, '0')}</div>
-            <div>
-              <div class="serif" style="font-size: clamp(22px, 2.4vw, 28px); font-style: italic; line-height: 1.1;">{k}</div>
-              <p style="font-family: var(--f-serif); font-size: 16px; line-height: 1.6; color: var(--ink-2); margin: .4rem 0 0; max-width: 52ch;">{v}</p>
-            </div>
-          </div>
+          <article class="value-card">
+            <span>{String(i + 1).padStart(2, '0')}</span>
+            <div><h3>{k}</h3><p>{v}</p></div>
+          </article>
         ))}
-        <p style="font-family: var(--f-serif); font-size: 16px; line-height: 1.65; color: var(--ink-2); margin-top: 1.2rem; max-width: 56ch;">
-          Every effort is made to be factually correct, to verify sources, and to attribute information to the right person or publication. Some things will still slip through the net. If you notice a wrong date, lineup, venue, writer credit, or attribution, please get in touch and it will be reviewed.
-        </p>
       </div>
     </div>
   </section>
 
-  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
-    <div class="panel-head" style="border: 1px solid var(--rule);">
-      <span>Running figures</span>
-      <span>AS OF TODAY</span>
-    </div>
-    <div class="stat-hero">
-      {[
-        ['Studio records', fig.albums],
-        ['Songs catalogued', fig.songs],
-        ['Setlists on file', fig.setlists],
-        ['Venues mapped', fig.venues],
-        ['Archive photographs', fig.photos],
-        ['Band members', fig.members],
-      ].map(([k, v]) => (
-        <div class="stat-hero__cell">
-          <div class="stat-hero__value">{(v as number).toLocaleString()}</div>
-          <div class="stat-hero__label">{k}</div>
-        </div>
-      ))}
+  <section class="about-figures">
+    <div class="container">
+      <div class="about-figures__head"><span>Running figures</span><small>As of today</small></div>
+      <div class="about-figures__grid">
+        {[
+          ['Studio records', fig.albums],
+          ['Songs catalogued', fig.songs],
+          ['Setlists on file', fig.setlists],
+          ['Venues mapped', fig.venues],
+          ['Archive photographs', fig.photos],
+          ['Band members', fig.members],
+        ].map(([k, v]) => (
+          <div><strong>{(v as number).toLocaleString()}</strong><span>{k}</span></div>
+        ))}
+      </div>
     </div>
   </section>
 
-  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
-    <div class="mono-sm muted">A CHRONOLOGY OF THE PROJECT</div>
-    <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .4rem 0 1.6rem;">From fan page to archive.</h2>
-    <div class="rail">
+  <section class="about-section">
+    <div class="container">
+      <header class="about-heading"><span>A chronology of the project</span><h2>From fan page<br /><em>to living archive.</em></h2></header>
+      <div class="milestone-grid">
       {milestones.map(([date, title, body], i) => (
-        <div class={`rail__item${i === 0 ? ' rail__item--gold' : i === milestones.length - 1 ? ' rail__item--hot' : ''}`}>
-          <div class="rail__date">{date.toUpperCase()}</div>
-          <div class="rail__title">{title}</div>
-          <div class="rail__body">{body}</div>
-        </div>
+        <article class="milestone-card">
+          <span>{String(i + 1).padStart(2, '0')} · {date}</span>
+          <h3>{title}</h3>
+          <p>{body}</p>
+        </article>
       ))}
+      </div>
     </div>
   </section>
 
-  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
-    <div class="about-grid">
+  <section class="about-section about-section--soft">
+    <div class="container about-split">
+      <header class="about-heading"><span>Technology</span><h2>Built for<br /><em>the long haul.</em></h2></header>
       <div>
-        <div class="mono-sm muted">TECHNOLOGY</div>
-        <h2 class="serif" style="font-size: clamp(28px, 3.4vw, 44px); font-style: italic; line-height: 1.05; margin: .6rem 0 0;">How the site is built.</h2>
-      </div>
-      <div>
-        <div class="facts">
-          <div class="facts__item"><div class="facts__k">Curator</div><div class="facts__v">Bernard Mcweeney</div></div>
-          <div class="facts__item"><div class="facts__k">Backend</div><div class="facts__v">Directus</div></div>
-          <div class="facts__item"><div class="facts__k">Frontend</div><div class="facts__v">Astro · Tailwind CSS</div></div>
-          <div class="facts__item"><div class="facts__k">Hosting</div><div class="facts__v">Directus on a server · Astro on Cloudflare</div></div>
+        <div class="technology-grid">
+          <div><span>Curator</span><strong>Bernard Mcweeney</strong></div>
+          <div><span>Backend</span><strong>Directus</strong></div>
+          <div><span>Frontend</span><strong>Astro · Tailwind CSS</strong></div>
+          <div><span>Hosting</span><strong>Cloudflare</strong></div>
         </div>
-        <div class="copy-block" style="margin-top: 1.2rem;">
+        <div class="copy-block technology-copy">
           <p>
             Cureation uses open source software as much as possible. The backend is powered by Directus, an open source backend that gives the archive flexibility for data modelling and makes it easier to add and update records.
           </p>
@@ -140,20 +125,51 @@ const pillars: Array<[string, string]> = [
     </div>
   </section>
 
-  <section class="container" style="padding-block: clamp(32px, 5vw, 64px); border-top: 1px solid var(--rule);">
-    <div class="voices" style="max-width: 780px;">
-      <div class="mono-sm muted" style="margin-bottom:.4rem;"><span class="pip pip--gold"></span>A NOTE OF THANKS</div>
-      <div class="voices__quote">
-        "This website is a passion project. Servers, domains, tools, and occasional AI coding support are all part of keeping it moving. Thank you to every visitor who finds something useful, interesting, or worth correcting here. The archive would be pointless without people who care about The Cure and know what a great band they are."
-      </div>
+  <section class="about-thanks">
+    <div class="container">
+      <span>A note of thanks</span>
+      <blockquote>“This archive would be pointless without people who care about The Cure, find something useful here and know when a detail needs correcting.”</blockquote>
+      <p>Thank you for reading, exploring and helping keep the record straight.</p>
     </div>
   </section>
 
 </Layout>
 
 <style>
-  .about-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: clamp(24px, 4vw, 72px); align-items: start; }
+  .about-section { padding-block: clamp(82px, 10vw, 148px); }
+  .about-section--soft { background: var(--bg-2); }
+  .about-split { display: grid; grid-template-columns: minmax(0, .82fr) minmax(360px, 1.18fr); gap: clamp(48px, 9vw, 140px); align-items: start; }
+  .about-heading > span, .about-figures__head, .about-thanks > .container > span { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+  .about-heading h2 { margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
+  .about-heading h2 em { color: var(--accent); font-weight: inherit; }
+  .about-heading--row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .42fr); gap: 48px; align-items: end; margin-bottom: clamp(42px, 6vw, 78px); }
+  .about-heading--row > p { max-width: 36ch; margin: 0; color: var(--ink-2); font-size: 17px; line-height: 1.6; }
   .copy-block { display: grid; gap: 1rem; max-width: 62ch; }
-  .copy-block p { color: var(--ink-2); font-family: var(--f-serif); font-size: 17px; line-height: 1.68; margin: 0; }
-  @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; } }
+  .copy-block p { color: var(--ink-2); font-family: var(--f-serif); font-size: clamp(18px, 1.55vw, 22px); line-height: 1.68; margin: 0; }
+  .value-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); }
+  .value-card { position: relative; min-height: 330px; display: flex; flex-direction: column; padding: clamp(24px, 3vw, 42px); background: var(--bg); }
+  .value-card::after { position: absolute; right: 0; bottom: 0; left: 0; height: 4px; content: ''; background: var(--accent); }
+  .value-card > span, .milestone-card > span, .technology-grid span { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .value-card > div { margin-top: auto; }
+  .value-card h3, .milestone-card h3 { margin: 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(31px, 3vw, 45px); font-style: italic; font-weight: 400; line-height: .95; }
+  .value-card p, .milestone-card p { margin: 15px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.58; }
+  .about-figures { padding-block: clamp(54px, 7vw, 92px); background: var(--accent); color: var(--accent-ink); }
+  .about-figures__head { display: flex; justify-content: space-between; color: var(--accent-ink); }
+  .about-figures__head small { font: inherit; }
+  .about-figures__grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 18px; margin-top: clamp(30px, 4vw, 52px); }
+  .about-figures__grid strong { display: block; font-family: var(--f-display); font-size: clamp(42px, 5vw, 76px); font-weight: 400; letter-spacing: -.05em; line-height: .8; }
+  .about-figures__grid span { display: block; margin-top: 12px; font-family: var(--f-sans); font-size: 8px; font-weight: 800; letter-spacing: .12em; line-height: 1.35; text-transform: uppercase; }
+  .milestone-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(16px, 2vw, 28px); margin-top: clamp(44px, 6vw, 76px); }
+  .milestone-card { min-height: 300px; padding: clamp(24px, 2.8vw, 38px); background: linear-gradient(145deg, var(--accent-tint), transparent 56%), var(--bg-2); }
+  .milestone-card h3 { margin-top: clamp(54px, 6vw, 88px); }
+  .technology-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .technology-grid > div { min-height: 126px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; background: var(--bg); }
+  .technology-grid strong { color: var(--ink); font-family: var(--f-display); font-size: clamp(21px, 2vw, 29px); font-weight: 400; line-height: 1.1; }
+  .technology-copy { margin-top: 32px; }
+  .about-thanks { padding-block: clamp(90px, 12vw, 170px); background: radial-gradient(circle at 88% 20%, var(--accent-tint-2), transparent 30%), var(--bg); }
+  .about-thanks blockquote { max-width: 19ch; margin: 24px 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(42px, 6.5vw, 88px); font-style: italic; line-height: .94; }
+  .about-thanks p { color: var(--ink-2); font-size: 18px; }
+  @media (max-width: 1120px) { .value-grid, .milestone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .about-figures__grid { grid-template-columns: repeat(3, 1fr); gap: 34px 18px; } }
+  @media (max-width: 860px) { .about-split, .about-heading--row { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .value-grid, .milestone-grid, .technology-grid { grid-template-columns: 1fr; } .value-card, .milestone-card { min-height: 260px; } .about-figures__grid { grid-template-columns: repeat(2, 1fr); } }
 </style>

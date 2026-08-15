@@ -16,12 +16,12 @@ const lastDate = issues[0]?.sent_date?.slice(0, 7);
   <PageHero
     section="Email digest"
     title="The dispatch"
-    deck="A slow newsletter — anniversary pieces, reader corrections, new archive additions, and anything worth lingering over. Roughly monthly. Unsubscribe at any time."
+    deck="A slow newsletter covering anniversary pieces, reader corrections, new archive additions and anything worth lingering over. Roughly monthly. Unsubscribe at any time."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Newsletter' }]}
     facts={issues.length > 0 ? [
       { k: 'Issues sent', v: issues.length },
-      { k: 'First', v: firstDate || '—' },
-      { k: 'Most recent', v: lastDate || '—' },
+      { k: 'First', v: firstDate || '–' },
+      { k: 'Most recent', v: lastDate || '–' },
     ] : undefined}
   >
     <form class="newsletter-form" style="margin-top: clamp(20px, 3vw, 32px);" action="https://buttondown.email/api/emails/embed-subscribe/cureation" method="post" target="popupwindow">
@@ -34,7 +34,7 @@ const lastDate = issues[0]?.sent_date?.slice(0, 7);
   {issues.length === 0 ? (
     <section class="container" style="padding-block: clamp(40px, 6vw, 80px);">
       <div class="panel-head" style="border: 1px solid var(--rule);"><span>No issues sent yet</span><span>Inaugural issue pending</span></div>
-      <p class="deck" style="margin-top: .8rem; max-width: 62ch;">The newsletter hasn't yet launched in this issue cycle. Once it does, every past edition lives here — full-text, linkable, and searchable.</p>
+      <p class="deck" style="margin-top: .8rem; max-width: 62ch;">The newsletter hasn't yet launched in this issue cycle. Once it does, every past edition lives here in a full-text, linkable and searchable format.</p>
     </section>
   ) : (
     <IssueSection kicker="Back issues" title="The archive" meta={`${issues.length} editions`}>
@@ -45,7 +45,7 @@ const lastDate = issues[0]?.sent_date?.slice(0, 7);
             <tr data-clickable onclick={`location.href='/newsletter/${it.slug}'`}>
               <td class="mono-sm" style="color: var(--ink);">{(it.sent_date || it.date_created || '').slice(0, 10)}</td>
               <td>
-                <span class="serif" style="font-size:19px; font-style:italic;">{it.title || it.subject || '—'}</span>
+                <span class="serif" style="font-size:19px; font-style:italic;">{it.title || it.subject || '–'}</span>
                 {it.deck && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem;">{it.deck}</div>}
               </td>
               <td class="num" style="color: var(--accent-3);">№ {String(issues.length - i).padStart(3, '0')}</td>

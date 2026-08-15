@@ -9,9 +9,4 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()]
   },
-  experimental: {
-    queuedRendering: {
-      enabled: true,
-    },
-  },
 });

@@ -13,6 +13,7 @@ import {
   memberLifespanLabel,
   memberPhoto,
   memberRoleLabel,
+  memberStatusLabel,
   memberTenureLabel,
 } from '../../../lib/directus';
 import { asset } from '../../../lib/assets';
@@ -38,7 +39,7 @@ const role = memberRoleLabel(member);
 const tenure = memberTenureLabel(member);
 const activeYears = memberActiveYears(member);
 const lifeDates = memberLifespanLabel(member);
-const statusLabel = member.is_current_member ? 'Current lineup' : member.death_date ? 'In memoriam' : 'Alumni';
+const statusLabel = memberStatusLabel(member);
 const source = member.source && typeof member.source === 'object' ? member.source : null;
 const sourceHref = member.source_url || source?.url || null;
 const sourceName = source?.name || null;
@@ -59,8 +60,8 @@ const photoSrc = (photo: any, preset: 'card' | 'hero' = 'card') =>
 const heroFacts = [
   { k: 'Tenure', v: tenure },
   { k: 'Documented shows', v: liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : 'To be filed' },
-  { k: 'Countries', v: liveStats.countries ? liveStats.countries.toLocaleString() : '—' },
-  { k: 'Active years', v: activeYears ? `${activeYears}` : '—' },
+  { k: 'Countries', v: liveStats.countries ? liveStats.countries.toLocaleString() : '–' },
+  { k: 'Active years', v: activeYears ? `${activeYears}` : '–' },
 ];
 ---
 <Layout title={`${member.name} · The band · Cureation`} description={member.bio || `${member.name}, ${statusLabel.toLowerCase()} member of The Cure.`} ogImage={portrait && !String(portrait).startsWith('http') ? asset(portrait, 'og') : undefined}>
@@ -154,20 +155,20 @@ const heroFacts = [
       <div class="live-stats">
         <div class="live-stat live-stat--primary">
           <span>Documented tenure-window shows</span>
-          <strong>{liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : '—'}</strong>
+          <strong>{liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : '–'}</strong>
           <p>Counted from dated setlists that fall inside the member stint windows.</p>
         </div>
         <div class="live-stat">
           <span>Lineup-tagged appearances</span>
-          <strong>{liveStats.lineupTaggedCount ? liveStats.lineupTaggedCount.toLocaleString() : '—'}</strong>
+          <strong>{liveStats.lineupTaggedCount ? liveStats.lineupTaggedCount.toLocaleString() : '–'}</strong>
         </div>
         <div class="live-stat">
           <span>Average set length</span>
-          <strong>{liveStats.avgSongCount ? `${liveStats.avgSongCount} songs` : '—'}</strong>
+          <strong>{liveStats.avgSongCount ? `${liveStats.avgSongCount} songs` : '–'}</strong>
         </div>
         <div class="live-stat">
           <span>Tours / countries</span>
-          <strong>{liveStats.tours || '—'} / {liveStats.countries || '—'}</strong>
+          <strong>{liveStats.tours || '–'} / {liveStats.countries || '–'}</strong>
         </div>
       </div>
 
@@ -497,7 +498,7 @@ const heroFacts = [
   }
 
   .member-tab:hover {
-    color: var(--ink-2);
+    color: var(--accent);
   }
 
   .member-tab.is-active {

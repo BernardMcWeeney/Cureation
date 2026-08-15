@@ -1,6 +1,6 @@
 ---
 /**
- * Decorative waveform. We don't have audio stems — this generates a deterministic
+ * Decorative waveform. We don't have audio stems – this generates a deterministic
  * shape from a seed (song title / id) so every song's "signature" is stable.
  * Not a scientific reading. Visual metaphor for tempo, dynamics, runtime.
  */
@@ -30,7 +30,7 @@ function mulberry32(a: number) {
 }
 
 const rand = mulberry32(hash(seed));
-// Build an amplitude envelope — loud intro, quiet verse, swell, chorus peaks, tail.
+// Build an amplitude envelope – loud intro, quiet verse, swell, chorus peaks, tail.
 const heights: number[] = [];
 for (let i = 0; i < bars; i++) {
   const t = i / (bars - 1);

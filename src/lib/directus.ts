@@ -1,5 +1,5 @@
 /**
- * Cureation — typed Directus client.
+ * Cureation – typed Directus client.
  * Small, focused helpers per entity; field projection at call site.
  * Runtime cache via Cloudflare's `caches.default` when available.
  */
@@ -11,7 +11,7 @@ export const DIRECTUS_URL =
 const TOKEN =
   (import.meta.env.DIRECTUS_TOKEN as string | undefined) ||
   (import.meta.env.PUBLIC_DIRECTUS_TOKEN as string | undefined) ||
-  '6hBeZWg0nCly0dxueAwX1ysQf-JYsEhe';
+  '';
 
 type Params = Record<string, string | number | boolean | undefined>;
 
@@ -30,11 +30,10 @@ async function directusFetch<T = any>(
   { ttl = 60 }: { ttl?: number } = {}
 ): Promise<T> {
   const url = `${DIRECTUS_URL}${path}${qs(params)}`;
+  const headers = new Headers({ Accept: 'application/json' });
+  if (TOKEN) headers.set('Authorization', `Bearer ${TOKEN}`);
   const req = new Request(url, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-      Accept: 'application/json',
-    },
+    headers,
   });
 
   // Cloudflare edge cache
@@ -161,6 +160,39 @@ export interface Single {
   release_date: string | null;
   chart_position: any;
   album: number | null;
+}
+
+export interface ReviewAlbum {
+  id: number;
+  title: string;
+  slug: string | null;
+  release_date: string | null;
+  cover_art: string | null;
+  label: string | null;
+  producer: string | null;
+  track_count: number | null;
+  type: AlbumType;
+}
+
+export interface Review {
+  id: number;
+  status: 'draft' | 'in_review' | 'published' | 'archived';
+  album: ReviewAlbum;
+  title: string;
+  slug: string;
+  standfirst: string | null;
+  body?: string | null;
+  score: number | null;
+  verdict: string | null;
+  standout_tracks: string[] | null;
+  author_name: string;
+  published_date: string | null;
+  reading_time: number | null;
+  featured: boolean;
+  seo_title: string | null;
+  seo_description: string | null;
+  date_created?: string | null;
+  date_updated?: string | null;
 }
 
 /* =======================================================================
@@ -317,10 +349,62 @@ export async function listNews(limit = 3): Promise<any[]> {
       limit,
       sort: '-published_date',
       fields:
-        'id,title,slug,excerpt,published_date,category,reading_time,is_editorial,featured_image_file,featured_image',
+        'id,title,slug,excerpt,published_date,category,reading_time,author_name,is_editorial,featured,featured_image_file,featured_image',
     });
   } catch {
     return [];
+  }
+}
+
+const REVIEW_LIST_FIELDS = [
+  'id', 'status', 'title', 'slug', 'standfirst', 'score', 'verdict',
+  'standout_tracks', 'author_name', 'published_date', 'reading_time', 'featured',
+  'seo_title', 'seo_description', 'date_created', 'date_updated',
+  'album.id', 'album.title', 'album.slug', 'album.release_date', 'album.cover_art',
+  'album.label', 'album.producer', 'album.track_count', 'album.type',
+].join(',');
+
+/** Published long-form album reviews, newest album first. */
+export async function listReviews(limit = -1): Promise<Review[]> {
+  try {
+    return await directusFetch<Review[]>('/items/reviews', {
+      limit,
+      'filter[status][_eq]': 'published',
+      fields: REVIEW_LIST_FIELDS,
+      sort: '-album.release_date',
+    }, { ttl: 300 });
+  } catch {
+    return [];
+  }
+}
+
+/** A single published review by its public slug. */
+export async function getReviewBySlug(slug: string): Promise<Review | null> {
+  try {
+    const rows = await directusFetch<Review[]>('/items/reviews', {
+      limit: 1,
+      'filter[status][_eq]': 'published',
+      'filter[slug][_eq]': slug,
+      fields: `${REVIEW_LIST_FIELDS},body`,
+    }, { ttl: 300 });
+    return rows?.[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+/** The published Cureation review attached to an album. */
+export async function getReviewByAlbum(albumId: number): Promise<Review | null> {
+  try {
+    const rows = await directusFetch<Review[]>('/items/reviews', {
+      limit: 1,
+      'filter[status][_eq]': 'published',
+      'filter[album][_eq]': albumId,
+      fields: REVIEW_LIST_FIELDS,
+    }, { ttl: 300 });
+    return rows?.[0] || null;
+  } catch {
+    return null;
   }
 }
 
@@ -539,7 +623,7 @@ export async function fetchRaw<T = any>(
 }
 
 // ---------------------------------------------------------------------------
-// Phase 2 — live archive helpers
+// Phase 2 – live archive helpers
 // ---------------------------------------------------------------------------
 
 export interface Setlist {
@@ -555,6 +639,9 @@ export interface Setlist {
   tour_name: string | null;
   tour: number | null;
   song_count: number | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  concert_duration_minutes?: number | null;
   notes?: string | null;
   facts?: string | null;
   credits?: string | null;
@@ -680,7 +767,7 @@ export async function getVenueById(id: number): Promise<Venue | null> {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 3 — lyrics / songs / band helpers
+// Phase 3 – lyrics / songs / band helpers
 // ---------------------------------------------------------------------------
 
 export async function getSongBySlug(slug: string): Promise<Song | null> {
@@ -711,6 +798,7 @@ export async function listSongs(opts: { limit?: number; album?: number; q?: stri
 export interface Member {
   id: number; name: string; slug: string; bio: string | null;
   instruments: string[]; is_current_member: boolean;
+  membership_type: 'member' | 'touring' | 'guest';
   is_featured_member: boolean;
   gear_families?: GearFamily[];
   side_projects: any[]; birth_date: string | null; photo: string | null;
@@ -790,7 +878,7 @@ export interface Gear {
   used_by: number | string | { id?: number; name?: string | null; slug?: string | null; instruments?: unknown } | null;
 }
 
-const MEMBER_BASE_FIELDS = 'id,name,slug,bio,instruments,is_current_member,photo,birth_date,death_date,death_place,aliases,side_projects,source,source.id,source.name,source.url,source.type,source.reliability,source.is_official,source_url';
+const MEMBER_BASE_FIELDS = 'id,name,slug,bio,instruments,is_current_member,membership_type,photo,birth_date,death_date,death_place,aliases,side_projects,source,source.id,source.name,source.url,source.type,source.reliability,source.is_official,source_url';
 const MEMBER_STINT_FIELDS = 'id,member,start_year,end_year,role,stint_number,notes';
 const MEMBER_WITH_STINT_FIELDS = `${MEMBER_BASE_FIELDS},stints.id,stints.start_year,stints.end_year,stints.role,stints.stint_number,stints.notes`;
 const MEMBER_PHOTO_FIELDS = 'id,title,description,image_file,image_url,date_taken,formatted_date,photographer,location,tour';
@@ -913,6 +1001,9 @@ function normalizeMember(row: any, stintsOverride?: MemberStint[]): Member {
   const photo = row.photo ?? row.photo_file ?? null;
   const photos = normalizeList(row.photos).map(normalizePhoto).filter((item) => item.image_file || item.image_url).sort(comparePhotos);
   const isCurrentMember = normalizeBoolean(row.is_current_member) || stints.some((stint) => stint.end_year === null);
+  const membershipType = row.membership_type === 'touring' || row.membership_type === 'guest'
+    ? row.membership_type
+    : 'member';
   const instruments = normalizeStringList(row.instruments);
 
   return {
@@ -929,6 +1020,7 @@ function normalizeMember(row: any, stintsOverride?: MemberStint[]): Member {
     stints,
     photos,
     gear_families: memberGearFamilies({ instruments, stints }),
+    membership_type: membershipType,
     is_featured_member: isCurrentMember,
     is_current_member: isCurrentMember,
   };
@@ -970,7 +1062,16 @@ function groupStintsByMember(stints: MemberStint[]): Map<number, MemberStint[]> 
 }
 
 export function formatStintYears(stint: MemberStint): string {
-  return `${stint.start_year ?? '—'}–${stint.end_year ?? 'Present'}`;
+  if (stint.start_year !== null && stint.start_year === stint.end_year) return String(stint.start_year);
+  return `${stint.start_year ?? '–'}–${stint.end_year ?? 'Present'}`;
+}
+
+export function memberStatusLabel(member: Pick<Member, 'is_current_member' | 'membership_type' | 'death_date'>): string {
+  if (member.is_current_member && member.membership_type === 'touring') return 'Touring lineup';
+  if (member.is_current_member) return 'Current member';
+  if (member.membership_type === 'guest') return 'Guest musician';
+  if (member.death_date) return 'In memoriam';
+  return 'Alumni';
 }
 
 export function memberTenureLabel(member: Member): string {
@@ -1209,12 +1310,16 @@ function performerListContainsMember(value: unknown, member: Pick<Member, 'id' |
   return performers.some((performer) => {
     if (!performer || typeof performer !== 'object') return false;
     const performerId = Number((performer as any).member_id ?? (performer as any).member);
-    if (Number.isFinite(performerId) && performerId === member.id) return true;
-    return String((performer as any).name || '').trim().toLowerCase() === memberName;
+    const performerName = String((performer as any).name || '').trim().toLowerCase();
+    // Some legacy JSON rows contain recycled numeric IDs. When a name is also
+    // present, require it to agree so an old guest is not assigned to a newer
+    // member who later received the same database ID.
+    if (Number.isFinite(performerId) && performerId === member.id && (!performerName || performerName === memberName)) return true;
+    return performerName === memberName;
   });
 }
 
-export async function getMemberLiveStats(member: Pick<Member, 'id' | 'name' | 'stints'>): Promise<MemberLiveStats> {
+export async function getMemberLiveStats(member: Pick<Member, 'id' | 'name' | 'stints' | 'membership_type'>): Promise<MemberLiveStats> {
   const empty: MemberLiveStats = {
     tenureShowCount: 0,
     lineupTaggedCount: 0,
@@ -1238,8 +1343,12 @@ export async function getMemberLiveStats(member: Pick<Member, 'id' | 'name' | 's
     sort: 'date',
   }, { ttl: 600 }).catch(() => []);
 
-  const shows = rows.map(toMemberShow).filter((show) => showFallsWithinStints(show, stints));
-  const lineupTaggedCount = rows.filter((row) => performerListContainsMember(row.performing_musicians, member)).length;
+  const taggedRows = rows.filter((row) => performerListContainsMember(row.performing_musicians, member));
+  const relevantRows = member.membership_type === 'guest' && taggedRows.length > 0
+    ? taggedRows
+    : rows.filter((row) => showFallsWithinStints(toMemberShow(row), stints));
+  const shows = relevantRows.map(toMemberShow);
+  const lineupTaggedCount = taggedRows.length;
   const countries = new Set(shows.map((show) => show.country_code || show.country).filter(Boolean)).size;
   const tours = new Set(shows.map((show) => show.tour_name).filter(Boolean)).size;
   const songCounts = shows.map((show) => show.song_count).filter((count): count is number => count !== null && Number.isFinite(count));
@@ -1285,7 +1394,7 @@ export async function listTimeline(opts: { limit?: number } = {}): Promise<any[]
 }
 
 // ---------------------------------------------------------------------------
-// Homepage widget helpers — album of month, song/lyric of day, photo of day,
+// Homepage widget helpers – album of month, song/lyric of day, photo of day,
 // next concert countdown. Deterministic by current date where applicable.
 // ---------------------------------------------------------------------------
 
@@ -1299,7 +1408,7 @@ function monthIndex(now = new Date()): number {
   return now.getUTCFullYear() * 12 + now.getUTCMonth();
 }
 
-/** Album of the month — prefers is_featured_issue, else deterministic from studio albums. */
+/** Album of the month – prefers is_featured_issue, else deterministic from studio albums. */
 export async function getAlbumOfMonth(): Promise<Album | null> {
   const featured = await getFeaturedIssue();
   if (featured) return featured;
@@ -1308,20 +1417,26 @@ export async function getAlbumOfMonth(): Promise<Album | null> {
   return studios[monthIndex() % studios.length];
 }
 
-/** Song of the day — deterministic pick from songs with lyrics. */
+/** Song of the day – deterministic pick from songs with lyrics. */
 export async function getSongOfDay(): Promise<Song | null> {
+  const filter = { 'filter[lyrics][_nnull]': 'true' };
+  const aggregate = await directusFetch<Array<{ count: { id: number | string } }>>('/items/songs', {
+    'aggregate[count]': 'id',
+    ...filter,
+  }, { ttl: 3600 });
+  const count = Number(aggregate?.[0]?.count?.id || 0);
+  if (!count) return null;
   const rows = await directusFetch<Song[]>('/items/songs', {
-    limit: -1,
+    limit: 1,
+    offset: dayIndex() % count,
     fields: 'id,title,slug,album,lyrics,lyrics_structured',
-    'filter[lyrics][_nnull]': 'true',
-  });
-  if (!rows.length) return null;
-  const song = rows[dayIndex() % rows.length];
-  await enrichSongsWithLivePlays([song]);
-  return song;
+    sort: 'id',
+    ...filter,
+  }, { ttl: 3600 });
+  return rows[0] || null;
 }
 
-/** Lyric of the day — picks a single memorable line from song of the day. */
+/** Lyric of the day – picks a single memorable line from song of the day. */
 export async function getLyricOfDay(): Promise<{ line: string; song: Song } | null> {
   const song = await getSongOfDay();
   if (!song) return null;
@@ -1342,15 +1457,26 @@ export async function getLyricOfDay(): Promise<{ line: string; song: Song } | nu
   return { line, song };
 }
 
-/** Photo of the day — deterministic from photos with images. */
+/** Photo of the day – deterministic from photos with images. */
 export async function getPhotoOfDay(): Promise<any | null> {
+  const filter = {
+    'filter[_or][0][image_file][_nnull]': 'true',
+    'filter[_or][1][image_url][_nnull]': 'true',
+  };
+  const aggregate = await directusFetch<Array<{ count: { id: number | string } }>>('/items/photos', {
+    'aggregate[count]': 'id',
+    ...filter,
+  }, { ttl: 3600 });
+  const count = Number(aggregate?.[0]?.count?.id || 0);
+  if (!count) return null;
   const rows = await directusFetch<any[]>('/items/photos', {
-    limit: -1,
+    limit: 1,
+    offset: dayIndex() % count,
+    sort: 'id',
     fields: 'id,title,description,image_file,image_url,date_taken,formatted_date,photographer,location,tour,album,album_slug',
-  });
-  const withImage = rows.filter(r => r.image_file || r.image_url);
-  if (!withImage.length) return null;
-  return withImage[dayIndex() % withImage.length];
+    ...filter,
+  }, { ttl: 3600 });
+  return rows[0] || null;
 }
 
 /** Next upcoming concert from setlists (date in future). */

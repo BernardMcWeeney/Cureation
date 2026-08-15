@@ -21,13 +21,27 @@ type TourShow = {
   country_code: string | null;
   tour_name: string | null;
   song_count: number | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  concert_duration_minutes?: number | null;
   notes?: string | null;
+  facts?: string | null;
+  credits?: string | null;
+  performing_musicians?: unknown;
+  support_acts?: unknown;
+  soundcheck?: unknown;
+  stage_banter?: unknown;
   photo_assets?: unknown;
   video_links?: unknown;
+  audio_links?: unknown;
+  recordings?: unknown;
+  additional_links?: unknown;
   ticket_assets?: unknown;
   ticket_status?: string | null;
   sales_status?: string | null;
   show_type?: string | null;
+  setlistfm_url?: string | null;
+  cure_concerts_url?: string | null;
   [key: string]: unknown;
 };
 
@@ -120,6 +134,106 @@ const normalizeList = (value: unknown): unknown[] => {
   }
   return [value];
 };
+const formatClock = (value?: string | null) => {
+  if (!value) return null;
+  const match = String(value).match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return String(value);
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+};
+const timeToMinutes = (value?: string | null) => {
+  const match = String(value || '').match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  const h = Number(match[1]);
+  const m = Number(match[2]);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+  return h * 60 + m;
+};
+const formatRuntime = (minutes?: number | null) => {
+  if (!minutes || !Number.isFinite(minutes) || minutes <= 0) return null;
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+};
+const showRuntimeMinutes = (show?: TourShow | null) => {
+  if (!show) return null;
+  const explicit = Number(show.concert_duration_minutes);
+  if (Number.isFinite(explicit) && explicit > 0) return explicit;
+  const start = timeToMinutes(show.start_time);
+  const end = timeToMinutes(show.end_time);
+  if (start === null || end === null) return null;
+  return end >= start ? end - start : end + 1440 - start;
+};
+const durationToSeconds = (value?: string | null) => {
+  if (!value) return 0;
+  const parts = String(value).split(':').map((part) => Number(part));
+  if (parts.some((part) => !Number.isFinite(part))) return 0;
+  if (parts.length === 2) return (parts[0] * 60) + parts[1];
+  if (parts.length === 3) return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+  return 0;
+};
+const formatSongRuntime = (rows: any[]) => {
+  const seconds = rows.reduce((sum, row) => sum + durationToSeconds(row?.song?.duration), 0);
+  return formatRuntime(Math.round(seconds / 60));
+};
+const describeDetail = (item: unknown): string => {
+  if (item === null || item === undefined) return '';
+  if (typeof item === 'string') return item.trim();
+  if (typeof item === 'number' || typeof item === 'boolean') return String(item);
+  if (Array.isArray(item)) return item.map(describeDetail).filter(Boolean).join(', ');
+  if (typeof item === 'object') {
+    const entries = Object.entries(item as Record<string, unknown>)
+      .filter(([, value]) => value !== null && value !== undefined && value !== '')
+      .map(([key, value]) => {
+        const label = key.replace(/_/g, ' ');
+        const text = Array.isArray(value)
+          ? value.map(describeDetail).filter(Boolean).join(', ')
+          : typeof value === 'object'
+            ? describeDetail(value)
+            : String(value);
+        return text ? `${label}: ${text}` : '';
+      })
+      .filter(Boolean);
+    return entries.join(' · ');
+  }
+  return '';
+};
+const detailTitle = (item: unknown, fallback: string) => {
+  if (item && typeof item === 'object' && !Array.isArray(item)) {
+    const record = item as Record<string, unknown>;
+    return String(record.title || record.name || record.artist || record.song || record.source || fallback);
+  }
+  return fallback;
+};
+const archiveNotesForShow = (show?: TourShow | null) => {
+  if (!show) return [] as Array<{ label: string; title: string; body: string }>;
+  const blocks: Array<{ label: string; title: string; body: string }> = [];
+  const addText = (label: string, value: unknown, title = label) => {
+    const body = describeDetail(value);
+    if (body) blocks.push({ label, title, body });
+  };
+  const addList = (label: string, value: unknown) => {
+    normalizeList(value).forEach((item, index) => {
+      const body = describeDetail(item);
+      if (body) blocks.push({ label, title: detailTitle(item, `${label} ${index + 1}`), body });
+    });
+  };
+  addText('Show notes', show.notes);
+  addText('Facts', show.facts);
+  addText('Credits', show.credits);
+  addList('Lineup', show.performing_musicians);
+  addList('Support', show.support_acts);
+  addList('Soundcheck', show.soundcheck);
+  addList('Banter', show.stage_banter);
+  addList('Recording', show.recordings);
+  return blocks;
+};
+const mediaCountForShow = (show?: TourShow | null) => show
+  ? normalizeList(show.photo_assets).length
+    + normalizeList(show.video_links).length
+    + normalizeList(show.audio_links).length
+    + normalizeList(show.recordings).length
+    + normalizeList(show.additional_links).length
+  : 0;
 
 const FESTIVAL_RE = /festival|primavera|north music|nova rock|firenze rocks|pinkpop|isle of wight|belsonic|roskilde|open'?er|werchter|pohoda|ejekt|electric castle|phillgood|paleo|pal[eé]o|nimes|nîmes|oyafestivalen|way out west|summer sessions|pagaille|rock en seine/i;
 const showKind = (show: TourShow) => {
@@ -172,9 +286,21 @@ const lostWorldInLastShow = lostWorld
   ? lastSongs.filter((row: any) => Number(row?.song?.album) === Number(lostWorld.id)).length
   : 0;
 const debutCount = lastSongs.filter((row: any) => row?.is_debut).length;
-const fanMediaCount = lastCompleted
-  ? normalizeList(lastCompleted.photo_assets).length + normalizeList(lastCompleted.video_links).length
-  : 0;
+const fanMediaCount = mediaCountForShow(lastCompleted);
+const lastShowRuntime = showRuntimeMinutes(lastCompleted);
+const lastShowStart = formatClock(lastCompleted?.start_time);
+const lastShowEnd = formatClock(lastCompleted?.end_time);
+const lastSongRuntime = formatSongRuntime(lastSongs);
+const lastShowArchiveNotes = archiveNotesForShow(lastCompleted);
+const lastSongNotes = lastSongs
+  .filter((row: any) => row?.notes)
+  .map((row: any) => ({
+    position: row.position,
+    title: songTitle(row),
+    setType: row.set_type || 'main',
+    note: String(row.notes),
+  }));
+const annotatedSongCount = lastSongNotes.length;
 
 const countries = Array.from(
   new Map(
@@ -270,6 +396,8 @@ const facts = [
   { k: 'Countries', v: countries.length, sub: 'summer route' },
   { k: 'Next', v: firstUpcoming ? formatDate(firstUpcoming.date) : 'Complete', sub: firstUpcoming?.city || '' },
   { k: 'Format', v: `${festivalCount}/${headlineCount}`, sub: 'festival/headline' },
+  { k: 'Last runtime', v: formatRuntime(lastShowRuntime) || 'Pending', sub: lastCompleted?.city || 'clock file' },
+  { k: 'Notes', v: lastShowArchiveNotes.length + annotatedSongCount, sub: 'latest show file' },
 ];
 
 const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
@@ -344,6 +472,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
             <span>Tour average: {averageSongCount || 'pending'}</span>
             <span>{lostWorldSongs.length || 'Latest album'} songs watched</span>
             <span>{longestGap ? `${longestGap.days} day longest gap` : 'Gaps pending'}</span>
+            <span>{formatRuntime(lastShowRuntime) || 'Runtime pending'}</span>
+            <span>{annotatedSongCount || 'No'} song note{annotatedSongCount === 1 ? '' : 's'}</span>
           </div>
         </div>
       </article>
@@ -359,12 +489,18 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
               <h2 class="last-show-title">{lastCompleted.venue || 'Venue TBC'}</h2>
               <div class="mono-sm muted">{[lastCompleted.city, lastCompleted.country].filter(Boolean).join(', ')}</div>
               <div class="last-show-grid">
+                <div><span>Start</span><strong>{lastShowStart || 'Pending'}</strong></div>
+                <div><span>End</span><strong>{lastShowEnd || 'Pending'}</strong></div>
+                <div><span>Total time</span><strong>{formatRuntime(lastShowRuntime) || 'Pending'}</strong></div>
+                <div><span>Song runtime</span><strong>{lastSongRuntime || 'Pending'}</strong></div>
                 <div><span>Songs</span><strong>{lastSongs.length || lastCompleted.song_count || 'Pending'}</strong></div>
                 <div><span>Opener</span><strong>{opener || 'Pending'}</strong></div>
                 <div><span>Closer</span><strong>{closer || 'Pending'}</strong></div>
                 <div><span>Encore</span><strong>{encoreCount || 'Pending'}</strong></div>
                 <div><span>Lost World</span><strong>{lostWorldInLastShow || 'Pending'}</strong></div>
                 <div><span>Fan media</span><strong>{fanMediaCount || 'Open'}</strong></div>
+                <div><span>Show notes</span><strong>{lastShowArchiveNotes.length || 'Open'}</strong></div>
+                <div><span>Song notes</span><strong>{annotatedSongCount || 'None'}</strong></div>
               </div>
               <div class="change-strip">
                 <div><span class="mono-sm muted">Added</span>{addedSongs.slice(0, 4).join(', ') || 'Pending previous-show comparison'}</div>
@@ -388,6 +524,104 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
         </div>
       </article>
     </section>
+
+    {lastCompleted && (
+      <section class="container tracker-file">
+        <div class="tracker-section-head">
+          <div>
+            <div class="kicker">Latest show file</div>
+            <h2 class="section-title">{lastCompleted.venue || lastCompleted.city || 'Last show'}</h2>
+          </div>
+          <div class="tracker-route-meta mono-sm">
+            <span>{formatLongDate(lastCompleted.date)}</span>
+            <span>{[lastCompleted.city, lastCompleted.country].filter(Boolean).join(', ')}</span>
+          </div>
+        </div>
+
+        <div class="file-grid">
+          <article class="file-card">
+            <div class="panel-head"><span>Clock</span><span>{formatRuntime(lastShowRuntime) || 'pending'}</span></div>
+            <div class="file-card__body">
+              <div class="clock-grid">
+                <div><span>Start time</span><strong>{lastShowStart || 'Pending'}</strong></div>
+                <div><span>End time</span><strong>{lastShowEnd || 'Pending'}</strong></div>
+                <div><span>Concert total</span><strong>{formatRuntime(lastShowRuntime) || 'Pending'}</strong></div>
+                <div><span>Song-file runtime</span><strong>{lastSongRuntime || 'Pending'}</strong></div>
+              </div>
+              <div class="source-links">
+                {lastCompleted.cure_concerts_url && <a href={lastCompleted.cure_concerts_url} target="_blank" rel="noopener">Cure Concerts</a>}
+                {lastCompleted.setlistfm_url && <a href={lastCompleted.setlistfm_url} target="_blank" rel="noopener">setlist.fm</a>}
+                <a href={`/setlists/${lastCompleted.slug}`}>Open show page</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="file-card">
+            <div class="panel-head"><span>Show notes</span><span>{lastShowArchiveNotes.length}</span></div>
+            <div class="file-card__body note-stack">
+              {lastShowArchiveNotes.length > 0 ? lastShowArchiveNotes.map((note) => (
+                <div class="note-block">
+                  <div class="mono-sm muted">{note.label}</div>
+                  <h3>{note.title}</h3>
+                  <p>{note.body}</p>
+                </div>
+              )) : (
+                <p class="muted">No show-level notes filed yet.</p>
+              )}
+            </div>
+          </article>
+
+          <article class="file-card">
+            <div class="panel-head"><span>Song notes</span><span>{annotatedSongCount}</span></div>
+            <div class="file-card__body note-stack">
+              {lastSongNotes.length > 0 ? lastSongNotes.map((note) => (
+                <div class="song-note">
+                  <div class="song-note__pos mono-sm">{String(note.position || '–').padStart(2, '0')}</div>
+                  <div>
+                    <div class="serif song-note__title">{note.title}</div>
+                    <div class="mono-sm muted">{note.setType}</div>
+                    <p>{note.note}</p>
+                  </div>
+                </div>
+              )) : (
+                <p class="muted">No song-level notes filed for this set yet.</p>
+              )}
+            </div>
+          </article>
+        </div>
+
+        {lastSongs.length > 0 && (
+          <article class="file-card setlist-ledger">
+            <div class="panel-head"><span>Full latest setlist</span><span>{lastSongs.length} songs</span></div>
+            <ol class="setlist-ledger__list">
+              {lastSongs.map((row: any) => {
+                const title = songTitle(row);
+                const SongTitle = row.song?.slug ? (
+                  <a href={`/songs/${row.song.slug}`}>{title}</a>
+                ) : (
+                  <span>{title}</span>
+                );
+                return (
+                  <li class={row.notes ? 'has-note' : ''}>
+                    <div class="setlist-ledger__pos mono-sm">{String(row.position || '').padStart(2, '0')}</div>
+                    <div class="setlist-ledger__main">
+                      <div class="setlist-ledger__line">
+                        <span class="serif setlist-ledger__title">{SongTitle}</span>
+                        <span class="tag">{row.set_type || 'main'}</span>
+                        {row.is_debut && <span class="tag tag--gold">debut</span>}
+                        {row.is_cover && <span class="tag tag--cool">cover{row.cover_artist ? ` · ${row.cover_artist}` : ''}</span>}
+                      </div>
+                      {row.notes && <p>{row.notes}</p>}
+                    </div>
+                    <div class="mono-sm muted setlist-ledger__dur">{row.song?.duration || '–'}</div>
+                  </li>
+                );
+              })}
+            </ol>
+          </article>
+        )}
+      </section>
+    )}
 
     {tourRoutePoints.length > 0 && (
       <>
@@ -451,6 +685,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
                   const kind = showKind(show);
                   const label = ticketLabel(show);
                   const tone = ticketTone(label);
+                  const runtime = formatRuntime(showRuntimeMinutes(show));
+                  const showNotes = archiveNotesForShow(show);
                   return (
                     <article
                       class="show-row"
@@ -474,7 +710,23 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
                           <span class={`tag ${kind === 'festival' ? 'tag--hot' : 'tag--cool'}`}>{kind}</span>
                           <span class={`tag ${tone === 'blood' ? 'tag--blood' : tone === 'gold' ? 'tag--gold' : tone === 'cool' ? 'tag--cool' : ''}`}>{label}</span>
                           {(show.song_count || 0) > 0 && <span class="tag tag--gold">{show.song_count} songs</span>}
+                          {formatClock(show.start_time) && <span class="tag">starts {formatClock(show.start_time)}</span>}
+                          {formatClock(show.end_time) && <span class="tag">ends {formatClock(show.end_time)}</span>}
+                          {runtime && <span class="tag tag--cool">{runtime}</span>}
                         </div>
+                        {showNotes.length > 0 && (
+                          <details class="show-row__notes">
+                            <summary class="mono-sm">Notes ({showNotes.length})</summary>
+                            <div class="show-row__notes-body">
+                              {showNotes.map((note) => (
+                                <div>
+                                  <span class="mono-sm muted">{note.label}</span>
+                                  <p>{note.body}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
                       </div>
                       <div class="show-row__actions">
                         <Bookmark
@@ -650,8 +902,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     }
 
     const rootStyles = getComputedStyle(document.documentElement);
-    const accent = rootStyles.getPropertyValue('--accent').trim() || '#7746B0';
-    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#C89B4A';
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#F70D1A';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#B60710';
     const hot = rootStyles.getPropertyValue('--hot').trim() || '#C85C46';
     const muted = rootStyles.getPropertyValue('--muted').trim() || '#888';
 
@@ -671,15 +923,15 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     addTrackerCountryLabels(L, map, readTrackerCountryLabels(el));
 
     const linePoints = routePoints.map((point: any) => [point.lat, point.lng]);
-    if (linePoints.length > 1) {
-      L.polyline(linePoints, {
+    const routeLine = linePoints.length > 1
+      ? L.polyline(linePoints, {
         color: accent,
         weight: 2,
         opacity: 0.72,
         dashArray: '7 9',
         lineCap: 'round',
-      }).addTo(map);
-    }
+      }).addTo(map)
+      : null;
 
     const markerLayer = L.layerGroup().addTo(map);
     const markers = routePoints.map((point: any, index: number) => {
@@ -695,10 +947,10 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
         opacity: festival || cityPoint ? 0.95 : 0.62,
       }).bindPopup(trackerRoutePopup(point));
       marker.addTo(markerLayer);
-      return { country: point.country || '', marker };
+      return { country: point.country || '', marker, cityPoint, festival };
     });
 
-    (el as any)._trackerRouteMapState = { map, markerLayer, markers };
+    (el as any)._trackerRouteMapState = { map, markerLayer, markers, routeLine };
 
     const bounds = L.latLngBounds(linePoints);
     if (bounds.isValid()) {
@@ -707,6 +959,24 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
       map.setView([52, 8], 4);
     }
     window.setTimeout(() => map.invalidateSize(), 120);
+  }
+
+  function repaintTrackerRouteTheme() {
+    const el = document.querySelector<HTMLElement>('[data-tracker-route-map]');
+    const state = el ? (el as any)._trackerRouteMapState : null;
+    if (!state) return;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const accent = rootStyles.getPropertyValue('--accent').trim() || '#F70D1A';
+    const accent2 = rootStyles.getPropertyValue('--accent-2').trim() || '#B60710';
+    const hot = rootStyles.getPropertyValue('--hot').trim() || '#C85C46';
+    const muted = rootStyles.getPropertyValue('--muted').trim() || '#888';
+    state.routeLine?.setStyle({ color: accent });
+    state.markers.forEach(({ marker, cityPoint, festival }: any) => {
+      marker.setStyle({
+        color: festival ? hot : cityPoint ? accent2 : muted,
+        fillColor: festival ? hot : cityPoint ? accent : muted,
+      });
+    });
   }
 
   function wireTourTracker() {
@@ -800,6 +1070,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   bootTrackerRouteMap();
   document.addEventListener('astro:page-load', wireTourTracker);
   document.addEventListener('astro:page-load', bootTrackerRouteMap);
+  document.addEventListener('cureation:theme-change', repaintTrackerRouteTheme);
+  document.addEventListener('cureation:colour-theme-change', repaintTrackerRouteTheme);
 </script>
 
 <style>
@@ -923,7 +1195,145 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   .change-strip { display: grid; gap: 10px; margin-top: 16px; color: var(--ink-2); }
   .pending-callout { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
 
+  .file-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, .85fr) minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(14px, 2vw, 24px);
+    align-items: stretch;
+  }
+  .file-card {
+    border: 1px solid var(--rule);
+    background: var(--bg-2);
+    min-width: 0;
+  }
+  .file-card__body { padding: clamp(16px, 2vw, 24px); }
+  .clock-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .clock-grid div {
+    background: var(--bg);
+    padding: 12px;
+    min-width: 0;
+  }
+  .clock-grid span {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .clock-grid strong {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: clamp(22px, 2.6vw, 34px);
+    line-height: 1;
+    color: var(--ink);
+  }
+  .source-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .source-links a {
+    border: 1px solid var(--rule);
+    color: var(--ink-2);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    padding: 7px 9px;
+    text-transform: uppercase;
+  }
+  .source-links a:hover { border-color: var(--accent); color: var(--accent-3); }
+  .note-stack {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    max-height: 420px;
+    overflow: auto;
+  }
+  .note-block,
+  .song-note {
+    border-bottom: 1px solid var(--rule-2);
+    padding-bottom: 12px;
+  }
+  .note-block:last-child,
+  .song-note:last-child { border-bottom: 0; padding-bottom: 0; }
+  .note-block h3 {
+    font-family: var(--f-display);
+    font-style: italic;
+    font-size: 21px;
+    line-height: 1.1;
+    margin: 3px 0 6px;
+  }
+  .note-block p,
+  .song-note p,
+  .show-row__notes p,
+  .setlist-ledger p {
+    color: var(--ink-2);
+    font-family: var(--f-serif);
+    font-size: 14.5px;
+    line-height: 1.5;
+    margin: .2rem 0 0;
+    overflow-wrap: anywhere;
+  }
+  .song-note {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .song-note__pos { color: var(--accent-3); }
+  .song-note__title {
+    color: var(--ink);
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.1;
+  }
+  .setlist-ledger { margin-top: clamp(14px, 2vw, 24px); }
+  .setlist-ledger__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .setlist-ledger__list li {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr) 52px;
+    gap: 12px;
+    align-items: start;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule-2);
+  }
+  .setlist-ledger__list li:last-child { border-bottom: 0; }
+  .setlist-ledger__list li.has-note { background: color-mix(in oklab, var(--accent-tint), transparent 50%); }
+  .setlist-ledger__pos,
+  .setlist-ledger__dur { color: var(--muted); }
+  .setlist-ledger__line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    align-items: center;
+  }
+  .setlist-ledger__title {
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-right: 4px;
+  }
+  .setlist-ledger__title a {
+    border-bottom: 0;
+    color: inherit;
+  }
+  .setlist-ledger__title a:hover { color: var(--accent-3); }
+
   .tracker-map-section,
+  .tracker-file,
   .tracker-board,
   .tracker-setlist-detail {
     padding-top: clamp(32px, 5vw, 72px);
@@ -1086,6 +1496,22 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   }
   .show-row__place { margin-top: 6px; color: var(--muted); }
   .show-row__badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .show-row__notes {
+    margin-top: 12px;
+    border-top: 1px solid var(--rule-2);
+    padding-top: 10px;
+  }
+  .show-row__notes summary {
+    color: var(--accent-3);
+    cursor: pointer;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  .show-row__notes-body {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+  }
   .show-row__actions {
     display: flex;
     align-items: center;
@@ -1182,6 +1608,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     .tracker-hero__grid,
     .tracker-watch,
     .schedule-grid,
+    .file-grid,
     .setlist-cards {
       grid-template-columns: 1fr;
     }
@@ -1195,6 +1622,9 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     .tracker-fact:nth-child(2n) { padding-left: 0; border-left: 0; }
     .show-row { grid-template-columns: 1fr; }
     .show-row__actions { grid-column: auto; }
+    .clock-grid { grid-template-columns: 1fr; }
+    .setlist-ledger__list li { grid-template-columns: 40px minmax(0, 1fr); }
+    .setlist-ledger__dur { grid-column: 2; }
     .song-bar { grid-template-columns: 1fr; gap: 5px; }
     .song-bar b { text-align: left; }
   }

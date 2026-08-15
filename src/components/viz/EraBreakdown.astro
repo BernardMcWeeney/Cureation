@@ -28,7 +28,7 @@ const colored = segments
 <div class={`era-bd ${klass}`}>
   <div class={`era-bd__bar${compact ? ' era-bd__bar--compact' : ''}`}>
     {colored.map((s) => (
-      <span class="era-bd__seg" style={`flex: ${s.count}; background: ${s.color};`} title={`${s.label} — ${s.count}`} />
+      <span class="era-bd__seg" style={`flex: ${s.count}; background: ${s.color};`} title={`${s.label} – ${s.count}`} />
     ))}
   </div>
   {!compact && (

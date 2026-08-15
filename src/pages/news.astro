@@ -1,71 +1,11 @@
 ---
+export const prerender = false;
 import Layout from '../layouts/Layout.astro';
-import IssueSection from '../components/ui/IssueSection.astro';
-import PageHero from '../components/ui/PageHero.astro';
-import Chip from '../components/ui/Chip.astro';
-import { fetchRaw } from '../lib/directus';
-
-const news: any[] = await fetchRaw('news', {
-  limit: -1,
-  fields: 'id,title,slug,excerpt,category,published_date,date_created,reading_time,author_name,featured,tags',
-  sort: '-published_date,-date_created',
-}).catch(() => []);
-
-const categories = Array.from(new Set(news.map((n) => n.category).filter(Boolean))).sort();
+import NewsIndex from '../components/editorial/NewsIndex.astro';
 ---
-<Layout title="Journal · Cureation">
-  <PageHero
-    section="Journal"
-    title="Journal"
-    deck="News, blog posts, reviews, newsletters, and archive additions — filed chronologically."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Journal' }]}
-    flush
-  >
-    <div class="cluster" style="gap:6px; flex-wrap:wrap; margin-top: clamp(20px, 3vw, 32px);" data-cat-filters>
-      <Chip active={true} class="cat-chip" data-cat="all">All</Chip>
-      {categories.map((c) => <Chip class="cat-chip" data-cat={c}>{c}</Chip>)}
-    </div>
-  </PageHero>
-
-  <IssueSection kicker={`${news.length} entries`} title="Archive">
-    <div class="table-wrap">
-    <table class="data" data-news>
-      <thead><tr><th style="width:110px;">Date</th><th style="width:120px;">Category</th><th>Entry</th><th class="num" style="text-align:right; width:70px;">Read</th></tr></thead>
-      <tbody>
-        {news.map((n) => (
-          <tr data-clickable data-cat={n.category || ''} onclick={n.slug ? `location.href='/news/${n.slug}'` : undefined}>
-            <td class="mono-sm" style="color: var(--ink);">{(n.published_date || n.date_created || '').slice(0, 10)}</td>
-            <td class="mono-sm" style="color: var(--accent-3);">{(n.category || '—').toUpperCase()}</td>
-            <td>
-              <span class="serif" style="font-size: 18px; font-style: italic;">{n.title}</span>
-              {n.excerpt && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{n.excerpt}</div>}
-            </td>
-            <td class="num">{n.reading_time ? `${n.reading_time}m` : '—'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    </div>
-  </IssueSection>
+<Layout
+  title="News · Cureation"
+  description="The latest verified Cure news, announcements, performances and releases from Cureation."
+>
+  <NewsIndex />
 </Layout>
-
-<script>
-  function wire() {
-    const chips = document.querySelectorAll<HTMLElement>('[data-cat-filters] .cat-chip');
-    const rows = document.querySelectorAll<HTMLElement>('[data-news] tbody tr');
-    if (!chips.length) return;
-    const apply = (chip: HTMLElement) => {
-      const c = chip.getAttribute('data-cat') || 'all';
-      chips.forEach((x) => { x.classList.toggle('is-active', x === chip); x.setAttribute('aria-pressed', x === chip ? 'true' : 'false'); });
-      rows.forEach((r) => { const rc = r.getAttribute('data-cat') || ''; r.style.display = c === 'all' || rc === c ? '' : 'none'; });
-    };
-    chips.forEach((chip) => chip.addEventListener('click', () => apply(chip)));
-    const requested = new URLSearchParams(window.location.search).get('category');
-    if (requested) {
-      const match = Array.from(chips).find((chip) => (chip.getAttribute('data-cat') || '').toLowerCase() === requested.toLowerCase());
-      if (match) apply(match);
-    }
-  }
-  wire();
-  document.addEventListener('astro:page-load', wire);
-</script>

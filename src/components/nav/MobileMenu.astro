@@ -3,55 +3,49 @@ const current = Astro.url.pathname;
 const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
 const calendarSubscribeUrl = calendarFeedUrl.replace(/^https?:/, 'webcal:');
 const sections: Array<{ title: string; links: Array<{ href: string; label: string }> }> = [
-  { title: 'Records', links: [
+  { title: 'Music', links: [
     { href: '/discography', label: 'Discography' },
-    { href: '/discography?type=ep', label: 'EPs' },
-    { href: '/discography?type=single', label: 'Singles' },
-    { href: '/discography?type=compilation', label: 'Compilations' },
-    { href: '/songs', label: 'All songs' },
+    { href: '/discography?type=studio', label: 'Albums' },
+    { href: '/songs', label: 'Songs' },
     { href: '/lyrics', label: 'Lyrics' },
+    { href: '/stats', label: 'Most performed' },
   ]},
   { title: 'Live', links: [
-    { href: '/setlists', label: 'Live archive' },
-    { href: '/tours/2026-european-summer-shows', label: '2026 Tour Tracker' },
+    { href: '/tours/2026-european-summer-shows', label: '2026 Summer Shows' },
+    { href: '/setlists', label: 'Setlists' },
+    { href: '/tours', label: 'Tours' },
+    { href: '/venues', label: 'Venues' },
     { href: '/setlists/compare', label: 'Compare shows' },
     { href: '/on-this-day', label: 'On this day' },
-  ]},
-  { title: 'Places', links: [
-    { href: '/tours', label: 'Tours' },
     { href: calendarSubscribeUrl, label: 'Tour calendar feed' },
-    { href: '/venues', label: 'Venues' },
     { href: '/tours/map', label: 'World map' },
   ]},
-  { title: 'Wiki', links: [
+  { title: 'Publication', links: [
+    { href: '/publication', label: 'Publication' },
+    { href: '/news', label: 'News' },
+    { href: '/reviews', label: 'Reviews' },
+    { href: '/wiki', label: 'Wiki' },
+    { href: '/publication#editorials', label: 'Editorials' },
+    { href: '/newsletter', label: 'Newsletter' },
+    { href: '/publication/rss.xml', label: 'Publication RSS' },
+    { href: '/news/rss.xml', label: 'News RSS' },
+  ]},
+  { title: 'Archive', links: [
     { href: '/wiki', label: 'All wiki pages' },
     { href: '/photos', label: 'Photographs' },
     { href: '/videos', label: 'Videos' },
     { href: '/band', label: 'Members' },
     { href: '/band/history', label: 'History' },
     { href: '/band/gear', label: 'Gear' },
-  ]},
-  { title: 'Journal', links: [
-    { href: '/news', label: 'All journal entries' },
-    { href: '/news?category=news', label: 'News' },
-    { href: '/news?category=blog', label: 'Blog' },
-    { href: '/news?category=reviews', label: 'Reviews' },
-    { href: '/newsletter', label: 'Newsletter' },
-    { href: '/rss.xml', label: 'RSS feed' },
-  ]},
-  { title: 'Stats', links: [
     { href: '/stats', label: 'Stats' },
     { href: '/curiosities', label: 'Curiosities' },
-  ]},
-  { title: 'Community', links: [
-    { href: '/community', label: 'Forums' },
     { href: '/my-archive', label: 'My archive' },
     { href: '/sources', label: 'Sources' },
     { href: '/about', label: 'About' },
   ]},
 ];
 function isActive(href: string) {
-  const path = href.split('?')[0];
+  const path = href.split(/[?#]/)[0];
   return current === path || current.startsWith(path + '/');
 }
 ---
@@ -59,16 +53,19 @@ function isActive(href: string) {
   <div class="menu__scrim" data-menu-close aria-hidden="true"></div>
   <aside class="menu__panel">
     <header class="menu__head">
-      <a href="/" class="menu__brand" aria-label="Cureation — home">
+      <a href="/" class="menu__brand" aria-label="Cureation home">
         <span class="menu__brand-mark" aria-hidden="true">
-          <img src="/logo.png" alt="" loading="eager" decoding="async" />
+          <img src="/logo-mark.webp" alt="" width="28" height="28" loading="eager" decoding="async" />
         </span>
         <span class="menu__brand-name">Cureation</span>
       </a>
       <div class="menu__actions">
-        <button class="menu__icon" data-theme-toggle aria-label="Toggle theme">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+        <button class="menu__icon menu__theme" type="button" data-theme-toggle aria-label="Switch to light mode" title="Switch to light mode">
+          <svg class="menu__theme-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/>
+          </svg>
+          <svg class="menu__theme-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20.5 15.4A8.5 8.5 0 0 1 8.6 3.5a8.5 8.5 0 1 0 11.9 11.9Z"/>
           </svg>
         </button>
         <button class="menu__icon" data-menu-close aria-label="Close menu">
@@ -88,8 +85,11 @@ function isActive(href: string) {
     </div>
     <div class="menu__body">
       {sections.map((sec) => (
-        <div class="menu__section">
-          <div class="menu__kicker">{sec.title}</div>
+        <details class="menu__section" open={sec.links.some((link) => isActive(link.href))}>
+          <summary class="menu__section-toggle">
+            <span class="menu__kicker">{sec.title}</span>
+            <svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true"><path d="m1 1 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+          </summary>
           <ul class="menu__list">
             {sec.links.map((l) => (
               <li>
@@ -100,8 +100,19 @@ function isActive(href: string) {
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       ))}
+    </div>
+    <div class="menu__appearance" aria-label="Colour theme">
+      <div><span>Appearance</span><strong data-colour-theme-current>Bloodflowers</strong></div>
+      <div class="menu__swatches">
+        <button type="button" data-colour-theme="wish" aria-label="Wish colour theme" aria-pressed="false" style="--swatch:#4D8DFF"></button>
+        <button type="button" data-colour-theme="disintegration" aria-label="Disintegration colour theme" aria-pressed="false" style="--swatch:#9B5CFF"></button>
+        <button type="button" data-colour-theme="pornography" aria-label="Pornography colour theme" aria-pressed="false" style="--swatch:#D33A55"></button>
+        <button type="button" data-colour-theme="faith" aria-label="Faith colour theme" aria-pressed="false" style="--swatch:#7894C2"></button>
+        <button type="button" data-colour-theme="head-on-the-door" aria-label="The Head on the Door colour theme" aria-pressed="false" style="--swatch:#D6A64A"></button>
+        <button type="button" data-colour-theme="bloodflowers" aria-label="Bloodflowers colour theme" aria-pressed="true" style="--swatch:#F70D1A"></button>
+      </div>
     </div>
   </aside>
 </div>
@@ -166,12 +177,21 @@ function isActive(href: string) {
     background: transparent; color: var(--ink-2); border: 1px solid var(--rule);
     cursor: pointer; transition: all .18s;
   }
-  .menu__icon:hover { color: var(--accent-3); border-color: var(--accent); background: transparent; }
+  .menu__icon:hover { color: var(--accent); border-color: var(--accent); background: transparent; }
+  .menu__theme-moon { display: none; }
+  :global(html[data-theme='papers']) .menu__theme-sun { display: none; }
+  :global(html[data-theme='papers']) .menu__theme-moon { display: block; }
   :root[data-theme='papers'] .menu__icon:hover { color: var(--accent); }
 
   .menu__search-wrap {
     padding: clamp(14px, 3.5vw, 22px) clamp(18px, 4vw, 28px) 0;
   }
+  .menu__appearance { margin: auto clamp(18px, 4vw, 28px) max(24px, env(safe-area-inset-bottom)); padding: 14px; border: 1px solid var(--rule); background: var(--bg-2); }
+  .menu__appearance > div:first-child { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-family: var(--f-mono); font-size: var(--micro-sm); letter-spacing: .13em; text-transform: uppercase; }
+  .menu__appearance > div:first-child strong { color: var(--accent); font-weight: 600; }
+  .menu__swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; }
+  .menu__swatches button { min-width: 0; aspect-ratio: 1; border: 1px solid var(--rule); border-radius: 50%; background: var(--swatch); cursor: pointer; box-shadow: 0 0 12px color-mix(in srgb, var(--swatch) 34%, transparent); }
+  .menu__swatches button:hover, .menu__swatches button[aria-pressed='true'] { border-color: var(--accent); outline: 2px solid var(--bg); outline-offset: -4px; }
   .menu__search {
     width: 100%;
     min-height: 48px;
@@ -182,8 +202,8 @@ function isActive(href: string) {
     color: var(--muted);
     cursor: pointer;
     font-family: var(--f-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.18em;
+    font-size: var(--micro);
+    letter-spacing: 0.15em;
     text-align: left;
     text-transform: uppercase;
     transition: border-color .18s, color .18s, background .18s;
@@ -196,7 +216,7 @@ function isActive(href: string) {
   }
   .menu__search:hover,
   .menu__search:focus-visible {
-    color: var(--ink);
+    color: var(--accent);
     border-color: var(--accent);
     background: color-mix(in oklab, var(--bg-2), var(--accent-tint) 45%);
   }
@@ -206,33 +226,49 @@ function isActive(href: string) {
   }
 
   .menu__body {
-    padding: clamp(18px, 4vw, 28px) clamp(18px, 4vw, 28px) clamp(32px, 6vw, 48px);
-    display: flex; flex-direction: column; gap: clamp(18px, 3.2vw, 28px);
+    padding: clamp(18px, 4vw, 28px) clamp(18px, 4vw, 28px) clamp(28px, 5vw, 40px);
+    display: flex; flex-direction: column;
   }
   .menu__section {
-    display: flex; flex-direction: column; gap: .4rem;
-    padding-top: 12px; border-top: 1px solid var(--rule);
+    border-top: 1px solid var(--rule);
   }
-  .menu__section:first-child { border-top: 0; padding-top: 0; }
+  .menu__section:last-child { border-bottom: 1px solid var(--rule); }
+  .menu__section-toggle {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0;
+    color: var(--ink);
+    cursor: pointer;
+    list-style: none;
+  }
+  .menu__section-toggle::-webkit-details-marker { display: none; }
+  .menu__section-toggle svg { color: var(--accent); transition: transform .18s ease; }
+  .menu__section[open] .menu__section-toggle svg { transform: rotate(180deg); }
 
   .menu__kicker {
-    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: .2rem;
+    font-family: var(--f-display); font-size: 28px; font-style: italic; font-weight: 500;
+    letter-spacing: -.02em; color: var(--ink);
   }
-  .menu__list { list-style: none; margin: 0; padding: 0; }
-  .menu__list li + li { margin-top: .2rem; }
+  .menu__section[open] .menu__kicker { color: var(--accent); }
+  .menu__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; list-style: none; margin: 0; padding: 2px 0 18px; }
   .menu__link {
     display: block;
-    font-family: var(--f-display); font-style: italic;
-    font-size: clamp(22px, 5vw, 30px);
-    line-height: 1.15;
-    padding: .3rem 0;
-    color: var(--ink);
+    min-height: 42px;
+    padding: 11px 0 9px;
     border: none;
-    letter-spacing: 0;
+    border-bottom: 1px solid var(--rule-2);
+    color: var(--ink-2);
+    font-family: var(--f-sans);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .08em;
+    line-height: 1.2;
+    text-transform: uppercase;
   }
-  .menu__link:hover { color: var(--accent-3); }
+  .menu__link:hover { color: var(--accent); }
   .menu__link.is-active { color: var(--accent); }
 
   @media (max-width: 520px) {
@@ -254,18 +290,14 @@ function isActive(href: string) {
     .menu__search-wrap { padding: 12px var(--gutter) 0; }
     .menu__search { min-height: 46px; }
     .menu__body {
-      padding: 16px var(--gutter) max(28px, env(safe-area-inset-bottom));
-      gap: 16px;
+      padding: 16px var(--gutter) 26px;
     }
-    .menu__section { padding-top: 10px; }
-    .menu__link {
-      font-size: 24px;
-      padding: .24rem 0;
-    }
+    .menu__appearance { margin-inline: var(--gutter); }
+    .menu__kicker { font-size: 27px; }
+    .menu__list { grid-template-columns: 1fr; }
+    .menu__link { font-size: 11px; }
   }
-  @media (max-width: 360px) {
-    .menu__link { font-size: 22px; }
-  }
+  @media (prefers-reduced-motion: reduce) { .menu__section-toggle svg { transition: none; } }
 </style>
 
 <script>

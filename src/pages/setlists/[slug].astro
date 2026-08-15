@@ -40,7 +40,7 @@ const eraSegments = Array.from(eraCounts.values()).map((e) => ({
   label: e.name, count: e.count, hue: e.hue,
 }));
 
-// Tour position — keep null when this show can't be located in the tour
+// Tour position – keep null when this show can't be located in the tour
 // sequence, so we don't render "Show 0 of N".
 let tourIndex: number | null = null;
 let tourTotal = 0;
@@ -62,10 +62,10 @@ const commentary: string | null = setlist.facts
   ? String(setlist.facts).split(/(?<=[\.\!\?])\s/).slice(0, 2).join(' ').trim()
   : null;
 
-const year = setlist.date?.slice(0, 4) || '—';
+const year = setlist.date?.slice(0, 4) || '–';
 const readableDate = setlist.date
   ? new Date(setlist.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
-  : '—';
+  : '–';
 
 const sets = songs.reduce((acc: Record<string, any[]>, s: any) => {
   const k = s.set_type || 'main';
@@ -88,10 +88,10 @@ const uniqueAlbums = new Set(songs.map((s) => s.song?.album).filter(Boolean)).si
 // render "0 / 0 / 0 / 0" in the facts grid.
 const hasSongs = songs.length > 0;
 const facts: Array<[string, string]> = [
-  ['Date', setlist.date || '—'],
-  ['Venue', setlist.venue || '—'],
-  ['City', [setlist.city, setlist.state_province, setlist.country].filter(Boolean).join(', ') || '—'],
-  ['Tour', setlist.tour_name || '—'],
+  ['Date', setlist.date || '–'],
+  ['Venue', setlist.venue || '–'],
+  ['City', [setlist.city, setlist.state_province, setlist.country].filter(Boolean).join(', ') || '–'],
+  ['Tour', setlist.tour_name || '–'],
   ...(hasSongs
     ? ([
         ['Songs', String(songs.length)],
@@ -144,7 +144,7 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
       {debuts > 0 && <span class="tag tag--hot"><span class="pip pip--hot"></span>{debuts} DEBUT{debuts > 1 ? 'S' : ''}</span>}
       {covers > 0 && <span class="tag tag--cool">{covers} COVER{covers > 1 ? 'S' : ''}</span>}
     </div>
-    <h1 class="show-head__title serif">{setlist.venue || '—'}</h1>
+    <h1 class="show-head__title serif">{setlist.venue || '–'}</h1>
     <div class="mono-sm muted" style="margin-top:.6rem;">
       {readableDate} · {[setlist.city, setlist.state_province, setlist.country].filter(Boolean).join(', ')}
     </div>
@@ -194,7 +194,7 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
                       {Boolean(row.is_debut) && <span class="mono-sm" style="margin-left:.6rem; color: var(--accent-3);">DEBUT</span>}
                     </td>
                     <td class="mono-sm muted">{row.notes || ''}</td>
-                    <td class="num">{row.song?.duration || '—'}</td>
+                    <td class="num">{row.song?.duration || '–'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -229,7 +229,7 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
 
         {tourTotal > 1 && tourIndex !== null && (
           <div class="panel--bare">
-            <div class="panel-head"><span>Tour · {setlist.tour_name || '—'}</span><span>{tourTotal} SHOWS</span></div>
+            <div class="panel-head"><span>Tour · {setlist.tour_name || '–'}</span><span>{tourTotal} SHOWS</span></div>
             <div style="padding: 14px 16px 18px;">
               <TourStrip total={tourTotal} current={tourIndex} height={36} />
               <div class="mono-sm muted" style="margin-top:.8rem;">
@@ -245,8 +245,8 @@ const additional: any[] = Array.isArray(setlist.additional_links) ? setlist.addi
             <div>
               {nearbyShows.map((s) => (
                 <a href={`/setlists/${s.slug}`} style="display:grid; grid-template-columns: 96px 1fr auto; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--rule-2); font-size: 13px; border-bottom-color: var(--rule-2); border-top: none; border-left: none; border-right: none; color: var(--ink);">
-                  <div class="mono-sm" style="color: var(--ink-2);">{s.date || '—'}</div>
-                  <div class="serif" style="font-style: italic; line-height:1.3; min-width:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{s.venue || '—'}</div>
+                  <div class="mono-sm" style="color: var(--ink-2);">{s.date || '–'}</div>
+                  <div class="serif" style="font-style: italic; line-height:1.3; min-width:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{s.venue || '–'}</div>
                   <div class="mono-sm muted">{s.country_code || ''}</div>
                 </a>
               ))}

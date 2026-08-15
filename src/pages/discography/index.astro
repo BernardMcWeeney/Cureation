@@ -6,7 +6,6 @@ import PageHero from '../../components/ui/PageHero.astro';
 import Select from '../../components/ui/Select.astro';
 import SearchField from '../../components/ui/SearchField.astro';
 import { fetchRaw, listAlbums, type Album } from '../../lib/directus';
-import { asset } from '../../lib/assets';
 
 const [albums, singles] = await Promise.all([
   listAlbums(),
@@ -22,7 +21,6 @@ const compilationTypes = new Set(['compilation', 'live', 'boxset', 'deluxe', 're
 
 type FilterType = 'studio' | 'ep' | 'compilation' | 'single';
 type Release = {
-  key: string;
   id: number;
   title: string;
   date: string | null;
@@ -32,9 +30,6 @@ type Release = {
   typeLabel: string;
   coverArt: string | null;
   href: string;
-  record: string;
-  label: string;
-  peak: string;
   search: string;
 };
 
@@ -58,15 +53,6 @@ function fileId(v: any): string | null {
   return null;
 }
 
-function peakChart(cp: any): string {
-  if (!Array.isArray(cp) || cp.length === 0) return '—';
-  const peaks = cp
-    .map((c) => Number(c.peak ?? c.chart_position ?? c.position))
-    .filter((n) => !Number.isNaN(n));
-  if (!peaks.length) return '—';
-  return `#${Math.min(...peaks)}`;
-}
-
 const albumReleases: Release[] = albums
   .filter((a) => a.type !== 'single')
   .map((a) => {
@@ -75,19 +61,15 @@ const albumReleases: Release[] = albums
     const typeLabel = filterType === 'compilation' ? titleCase(a.type) : filterType;
     const href = a.slug ? `/discography/${a.slug}` : '#';
     return {
-      key: `album-${a.id}`,
       id: a.id,
       title: a.title,
       date,
       sortDate: date || '9999-99-99',
-      year: date?.slice(0, 4) || '—',
+      year: date?.slice(0, 4) || '–',
       filterType,
       typeLabel,
       coverArt: a.cover_art,
       href,
-      record: a.label || '—',
-      label: a.label || '',
-      peak: '—',
       search: `${a.title || ''} ${a.label || ''} ${a.type || ''} ${date || ''}`.toLowerCase(),
     };
   });
@@ -99,27 +81,23 @@ const singleReleases: Release[] = singles.map((s: any) => {
   const directCover = fileId(s.cover_art) || fileId(s.cover) || fileId(s.artwork) || fileId(s.image) || fileId(s.image_file);
   const href = album?.slug ? `/discography/${album.slug}` : '#';
   return {
-    key: `single-${s.id}`,
     id: Number(s.id) || 0,
     title: s.title || 'Untitled single',
     date,
     sortDate: date || '9999-99-99',
-    year: date?.slice(0, 4) || '—',
+    year: date?.slice(0, 4) || '–',
     filterType: 'single',
     typeLabel: 'single',
     coverArt: directCover || album?.cover_art || null,
     href,
-    record: album?.title || '—',
-    label: s.label || album?.label || '',
-    peak: peakChart(s.chart_position),
     search: `${s.title || ''} ${album?.title || ''} ${s.label || ''} single ${date || ''}`.toLowerCase(),
   };
 });
 
 const releases = [...albumReleases, ...singleReleases].sort((a, b) => a.sortDate.localeCompare(b.sortDate));
 const dated = releases.filter((r) => r.date);
-const firstYear = dated[0]?.year || '—';
-const latestYear = dated[dated.length - 1]?.year || '—';
+const firstYear = dated[0]?.year || '–';
+const latestYear = dated[dated.length - 1]?.year || '–';
 
 const counts = {
   all: releases.length,
@@ -142,7 +120,7 @@ const tabs = [
   <PageHero
     section="Discography"
     title="The discography"
-    deck="Every studio record, EP, compilation and single — filtered in one archive, with sleeves up front and a chronological ledger underneath."
+    deck="Every studio record, EP, compilation and single in one filterable archive, with the sleeves up front."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Discography' }]}
     facts={[
       { k: 'Releases', v: counts.all },
@@ -190,7 +168,6 @@ const tabs = [
         {releases.map((r) => (
           <div class="record-wrap"
                data-release-card
-               data-key={r.key}
                data-type={r.filterType}
                data-date={r.sortDate}
                data-title={r.title.toLowerCase()}
@@ -210,50 +187,6 @@ const tabs = [
             />
           </div>
         ))}
-      </div>
-    </IssueSection>
-
-    <IssueSection kicker="Chronology" title="Release table" meta="Oldest first">
-      <div class="table-wrap">
-        <table class="data data--airy" data-release-table>
-          <thead>
-            <tr>
-              <th style="width:72px;">Sleeve</th>
-              <th style="width:120px;">Date</th>
-              <th style="width:150px;">Type</th>
-              <th>Title</th>
-              <th>Record / label</th>
-              <th class="num" style="text-align:right; width:80px;">Peak</th>
-            </tr>
-          </thead>
-          <tbody>
-            {releases.map((r) => (
-              <tr data-release-row
-                  data-key={r.key}
-                  data-type={r.filterType}
-                  data-date={r.sortDate}
-                  data-title={r.title.toLowerCase()}
-                  data-search={r.search}
-                  data-clickable={r.href !== '#' ? '' : undefined}
-                  onclick={r.href !== '#' ? `location.href='${r.href}'` : undefined}>
-                <td>
-                  <a class="release-thumb" href={r.href} aria-label={r.title}>
-                    {r.coverArt ? (
-                      <img src={asset(r.coverArt, 'thumb')} alt={`${r.title} cover`} loading="lazy" decoding="async" />
-                    ) : (
-                      <span class="release-thumb__fallback" aria-hidden="true"></span>
-                    )}
-                  </a>
-                </td>
-                <td class="mono-sm" style="color: var(--ink);">{r.date || '—'}</td>
-                <td class="mono-sm muted">{r.typeLabel}</td>
-                <td><span class="serif" style="font-size:20px; font-style:italic;">{r.title}</span></td>
-                <td class="mono-sm" style="color: var(--ink-2);">{r.record}</td>
-                <td class="num" style="color: var(--accent-3);">{r.peak}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </IssueSection>
   </div>
@@ -318,8 +251,8 @@ const tabs = [
     transition: background .18s ease, color .18s ease, border-color .18s ease;
   }
   .disc-type-tab:hover {
-    border-color: var(--rule);
-    color: var(--ink);
+    border-color: var(--accent);
+    color: var(--accent);
   }
   .disc-type-tab.is-active {
     background: var(--accent);
@@ -354,27 +287,6 @@ const tabs = [
   :root[data-theme='papers'] .disc-controls .filter-search {
     background: var(--bg);
   }
-  .release-thumb {
-    display: block;
-    width: 46px;
-    height: 46px;
-    border: 1px solid var(--rule);
-    background: var(--bg-2);
-    overflow: hidden;
-  }
-  .release-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .release-thumb__fallback {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background:
-      linear-gradient(135deg, transparent 48%, var(--rule) 49%, var(--rule) 51%, transparent 52%),
-      var(--bg-2);
-  }
   @media (max-width: 720px) {
     .records-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
     .disc-controls__bar { grid-template-columns: 1fr; }
@@ -390,9 +302,7 @@ const tabs = [
     archive.dataset.filtersWired = 'true';
 
     const cards = Array.from(archive.querySelectorAll<HTMLElement>('[data-release-card]'));
-    const rows = Array.from(archive.querySelectorAll<HTMLElement>('[data-release-row]'));
     const recordsParent = archive.querySelector<HTMLElement>('[data-records]');
-    const tableBody = archive.querySelector<HTMLElement>('[data-release-table] tbody');
     const counter = archive.querySelector<HTMLElement>('[data-match-count]');
     const tabs = Array.from(archive.querySelectorAll<HTMLAnchorElement>('[data-type-filter]'));
     const sortSelect = archive.querySelector<HTMLSelectElement>('[data-filter-select="sort"]');
@@ -436,9 +346,7 @@ const tabs = [
 
     const apply = (updateUrl = false) => {
       const sortedCards = [...cards].sort(compare);
-      const sortedRows = [...rows].sort(compare);
       if (recordsParent) sortedCards.forEach((r) => recordsParent.appendChild(r));
-      if (tableBody) sortedRows.forEach((r) => tableBody.appendChild(r));
 
       let matched = 0;
       sortedCards.forEach((r) => {
@@ -446,7 +354,6 @@ const tabs = [
         r.style.display = ok ? '' : 'none';
         if (ok) matched++;
       });
-      sortedRows.forEach((r) => { r.style.display = matches(r) ? '' : 'none'; });
       if (counter) counter.textContent = `${matched} release${matched === 1 ? '' : 's'}`;
       tabs.forEach((tab) => {
         const active = tab.dataset.typeFilter === state.type;

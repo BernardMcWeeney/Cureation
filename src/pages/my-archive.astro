@@ -7,7 +7,7 @@ import Chip from '../components/ui/Chip.astro';
   <PageHero
     section="Private · Local to this device"
     title="My archive"
-    deck="A private reading list — everything you've saved, kept in your browser (nothing is sent to a server). Click the ☆ on any record, song, or setlist to add it here."
+    deck="A private reading list of everything you've saved, kept in your browser. Nothing is sent to a server. Click the ☆ on any record, song or setlist to add it here."
     crumbs={[{ label: 'Home', href: '/' }, { label: 'My archive' }]}
     flush
   />
@@ -21,7 +21,7 @@ import Chip from '../components/ui/Chip.astro';
       <Chip class="k-chip" data-kind="venue">Venues</Chip>
       <Chip class="k-chip" data-kind="tour">Tours</Chip>
       <Chip class="k-chip" data-kind="member">Members</Chip>
-      <Chip class="k-chip" data-kind="news">Journal</Chip>
+      <Chip class="k-chip" data-kind="news">Publication</Chip>
     </div>
     <div class="my-ar__meta">
       <span class="mono-sm muted" data-count>0 items</span>
@@ -33,7 +33,7 @@ import Chip from '../components/ui/Chip.astro';
     <div class="bookmarks" data-bookmarks-root>
       <div class="bookmarks__empty" data-empty>
         <div class="mono-sm muted">Nothing saved yet</div>
-        <p class="bookmarks__empty-body">Every record, song, setlist, venue, and dispatch page carries a ☆ bookmark in its header. Tap one to begin a reading list here — stored in this browser only.</p>
+        <p class="bookmarks__empty-body">Every record, song, setlist, venue and dispatch page carries a ☆ bookmark in its header. Tap one to begin a reading list stored in this browser only.</p>
       </div>
     </div>
   </section>
