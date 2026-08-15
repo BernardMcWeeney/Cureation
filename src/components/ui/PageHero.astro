@@ -19,7 +19,7 @@ interface Props {
 }
 const { section, title, deck, crumbs = [], facts = [], flush = false } = Astro.props;
 ---
-<section class={`page-hero${flush ? ' page-hero--flush' : ''}`} data-section={section?.toUpperCase()}>
+<section class={`page-hero${flush ? ' page-hero--flush' : ''}`} data-reflection={title.toUpperCase()}>
   <div class="container">
     <div class="page-hero__mast">
       <div class="page-hero__headline">
@@ -57,11 +57,12 @@ const { section, title, deck, crumbs = [], facts = [], flush = false } = Astro.p
       var(--bg);
   }
   .page-hero::after {
-    content: attr(data-section);
+    content: attr(data-reflection);
     position: absolute;
-    z-index: -1;
+    z-index: 0;
     right: -0.03em;
     bottom: -0.15em;
+    pointer-events: none;
     color: var(--accent-tint);
     font-family: var(--f-sans);
     font-size: clamp(72px, 15vw, 220px);
@@ -71,7 +72,11 @@ const { section, title, deck, crumbs = [], facts = [], flush = false } = Astro.p
     text-transform: uppercase;
     white-space: nowrap;
   }
-  .page-hero > .container { padding-block: clamp(34px, 5vw, 72px) clamp(34px, 5vw, 72px); }
+  .page-hero > .container {
+    position: relative;
+    z-index: 1;
+    padding-block: clamp(34px, 5vw, 72px) clamp(34px, 5vw, 72px);
+  }
   .page-hero--flush > .container { padding-bottom: clamp(30px, 4.5vw, 64px); }
   .page-hero .crumbs {
     margin-bottom: clamp(14px, 1.8vw, 22px);

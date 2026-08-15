@@ -18,6 +18,7 @@ interface Props {
   image?: string | null;
   imageAlt?: string;
   imageCredit?: string | null;
+  imageInHero?: boolean;
   score?: number | null;
   bookmark?: { kind: 'review' | 'news'; id: string | number; href: string };
   crumbs?: Array<{ label: string; href?: string }>;
@@ -27,7 +28,6 @@ const {
   kind = 'news',
   section,
   sectionHref,
-  eyebrow,
   title,
   standfirst,
   publishedDate,
@@ -37,6 +37,7 @@ const {
   image,
   imageAlt = '',
   imageCredit,
+  imageInHero = false,
   score,
   bookmark,
   crumbs = [
@@ -70,9 +71,11 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
 </div>
 
 <article class:list={['editorial-article', `editorial-article--${kind}`]}>
-  <header class:list={['container', 'editorial-hero', { 'editorial-hero--with-cover': kind === 'review' && image }]}>
+  <header class:list={['container', 'editorial-hero', {
+    'editorial-hero--with-cover': kind === 'review' && image,
+    'editorial-hero--with-feature': kind === 'news' && image && imageInHero,
+  }]}>
     <div class="editorial-hero__copy">
-      <div class="editorial-hero__eyebrow">{eyebrow || section}</div>
       {tags.length > 0 && (
         <div class="editorial-hero__tags">
           {tags.slice(0, 5).map((tag, index) => <Tag variant={index === 0 ? 'accent' : 'default'}>{tag.toUpperCase()}</Tag>)}
@@ -100,9 +103,16 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
         )}
       </figure>
     )}
+
+    {kind === 'news' && image && imageInHero && (
+      <figure class="editorial-side-image">
+        <img src={image} alt={imageAlt} width="1200" height="800" decoding="async" />
+        {imageCredit && <figcaption>{imageCredit}</figcaption>}
+      </figure>
+    )}
   </header>
 
-  {kind === 'news' && image && (
+  {kind === 'news' && image && !imageInHero && (
     <figure class="container editorial-feature">
       <img src={image} alt={imageAlt} width="1600" height="900" decoding="async" />
       {imageCredit && <figcaption>{imageCredit}</figcaption>}
@@ -128,12 +138,12 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
     padding-top: clamp(22px, 3vw, 40px);
   }
   .editorial-tools .crumbs { min-width: 0; }
-  .editorial-tools .crumbs__list { flex-wrap: nowrap; }
+  .editorial-tools .crumbs__list { flex-wrap: wrap; }
   .editorial-tools .crumbs__item { white-space: nowrap; }
   .editorial-tools .crumbs__item:last-child {
-    max-width: 28ch;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   .editorial-article {
@@ -153,22 +163,27 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
     align-items: center;
   }
 
-  .editorial-hero__copy { min-width: 0; }
-
-  .editorial-hero__eyebrow {
-    color: var(--accent-3);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .23em;
-    text-transform: uppercase;
+  .editorial-hero--with-feature {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(460px, 1.1fr);
+    gap: clamp(36px, 5vw, 76px);
+    align-items: center;
   }
+
+  .editorial-hero__copy { min-width: 0; }
 
   .editorial-hero__tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 14px;
+  }
+
+  .editorial-hero__tags .tag,
+  .editorial-hero__tags .tag--accent {
+    border-color: var(--rule);
+    background: var(--bg-2);
+    color: var(--ink-2);
   }
 
   .editorial-hero h1 {
@@ -237,6 +252,31 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
   }
 
   .editorial-cover img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+
+  .editorial-side-image {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--rule-strong);
+    background: var(--bg-2);
+  }
+
+  .editorial-side-image img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .editorial-side-image figcaption {
+    padding: 9px 12px;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
 
   .editorial-score {
     position: absolute;
@@ -340,6 +380,8 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
 
   @media (max-width: 900px) {
     .editorial-hero--with-cover { grid-template-columns: minmax(0, 1fr) minmax(230px, 310px); gap: 42px; }
+    .editorial-hero--with-feature { grid-template-columns: 1fr; gap: 36px; }
+    .editorial-side-image { width: 100%; }
     .editorial-layout { grid-template-columns: minmax(0, 680px); }
     .editorial-rail { border-top: 1px solid var(--rule); padding-top: 32px; }
     .editorial-rail > * { position: static; }
@@ -350,14 +392,17 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
     .editorial-tools .bookmark__label { display: none; }
     .editorial-tools .bookmark { width: 40px; min-height: 38px; justify-content: center; padding: 0; }
     .editorial-tools .crumbs { font-size: 9px; letter-spacing: .12em; }
-    .editorial-tools .crumbs__item:last-child { max-width: 16ch; }
+    .editorial-tools .crumbs__list { flex-wrap: nowrap; }
+    .editorial-tools .crumbs__item:last-child { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; }
     .editorial-hero { padding-top: 28px; }
     .editorial-hero--with-cover { display: flex; flex-direction: column; align-items: stretch; gap: 36px; }
+    .editorial-hero--with-feature { display: flex; flex-direction: column; align-items: stretch; gap: 34px; }
     .editorial-hero h1 { max-width: 100%; font-size: clamp(42px, 13vw, 66px); line-height: .98; }
     .editorial-hero__standfirst { font-size: 19px; line-height: 1.5; }
     .editorial-cover { width: min(88vw, 430px); align-self: center; }
     .editorial-cover::before { inset: 8px -8px -8px 8px; }
     .editorial-cover::after { inset: 16px -16px -16px 16px; }
+    .editorial-side-image { width: calc(100% + (2 * var(--gutter))); margin-inline: calc(-1 * var(--gutter)); border-right: 0; border-left: 0; }
     .editorial-score { right: -12px; bottom: -18px; width: 88px; }
     .editorial-score span { font-size: 39px; }
     .editorial-feature { padding-inline: 0; }

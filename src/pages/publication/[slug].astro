@@ -84,6 +84,7 @@ const articleSchema = {
     image={coverUrl}
     imageAlt={article.title}
     imageCredit={article.image_credit}
+    imageInHero={true}
     bookmark={{ kind: 'news', id: article.id, href: `/publication/${article.slug}` }}
     crumbs={[
       { label: 'Home', href: '/' },
