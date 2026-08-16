@@ -106,17 +106,16 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   ogImage={asset(album.cover_art, 'og')}
 >
 
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
       { label: 'Home',        href: '/' },
       { label: 'Discography', href: '/discography' },
       { label: album.title },
     ]} />
-    <Bookmark kind="album" id={album.id} label={album.title} href={`/discography/${album.slug}`} />
   </div>
 
   <!-- HEADER -->
-  <section class="container album-head">
+  <section id="album-dossier" class="container album-head detail-anchor">
     <div class="album-head__art">
       <figure class="cover-plate" style={`view-transition-name: album-${album.slug};`}>
         <div class="cover-plate__corner cover-plate__corner--tl">
@@ -137,11 +136,14 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
     </div>
 
     <div class="album-head__body">
-      <div class="cluster" style="gap: .4rem;">
-        {album.type && ordinal && <Tag>STUDIO · {ordinal.toUpperCase()}</Tag>}
-        {album.type && !ordinal && <Tag>{album.type.toUpperCase()}</Tag>}
-        {era?.short_name && <Tag>{era.short_name.toUpperCase()}</Tag>}
-        {featuredChartLine && <Tag variant="accent">{featuredChartLine.toUpperCase()}</Tag>}
+      <div class="album-head__utility">
+        <div class="cluster" style="gap: .4rem;">
+          {album.type && ordinal && <Tag>STUDIO · {ordinal.toUpperCase()}</Tag>}
+          {album.type && !ordinal && <Tag>{album.type.toUpperCase()}</Tag>}
+          {era?.short_name && <Tag>{era.short_name.toUpperCase()}</Tag>}
+          {featuredChartLine && <Tag variant="accent">{featuredChartLine.toUpperCase()}</Tag>}
+        </div>
+        <Bookmark kind="album" id={album.id} label={album.title} href={`/discography/${album.slug}`} />
       </div>
 
       <h1 class="album-head__title serif" style={`view-transition-name: album-title-${album.slug};`}>
@@ -204,32 +206,32 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
 
   <!-- TABS -->
   <div class="container album-tabs-wrap">
-    <div class="album-tabs" data-tabs role="tablist">
-      <button class="album-tab is-active" role="tab" data-target="tracks">
+    <div class="album-tabs" data-tabs role="tablist" aria-label="Album dossier">
+      <button id="album-tab-tracks" class="album-tab is-active" type="button" role="tab" data-target="tracks" aria-controls="album-panel-tracks" aria-selected="true">
         Tracklist <span class="album-tab__count">{songs.length}</span>
       </button>
       {(album.credits || album.producer) && (
-        <button class="album-tab" role="tab" data-target="personnel">
+        <button id="album-tab-personnel" class="album-tab" type="button" role="tab" data-target="personnel" aria-controls="album-panel-personnel" aria-selected="false" tabindex="-1">
           Personnel <span class="album-tab__count">·</span>
         </button>
       )}
       {trivia.length > 0 && (
-        <button class="album-tab" role="tab" data-target="trivia">
+        <button id="album-tab-trivia" class="album-tab" type="button" role="tab" data-target="trivia" aria-controls="album-panel-trivia" aria-selected="false" tabindex="-1">
           Trivia & sessions <span class="album-tab__count">{trivia.length}</span>
         </button>
       )}
       {(charts.length > 0 || singles.length > 0) && (
-        <button class="album-tab" role="tab" data-target="charts">
+        <button id="album-tab-charts" class="album-tab" type="button" role="tab" data-target="charts" aria-controls="album-panel-charts" aria-selected="false" tabindex="-1">
           Charts & singles <span class="album-tab__count">{charts.length + singles.length}</span>
         </button>
       )}
       {totalLivePlays > 0 && (
-        <button class="album-tab" role="tab" data-target="live">
+        <button id="album-tab-live" class="album-tab" type="button" role="tab" data-target="live" aria-controls="album-panel-live" aria-selected="false" tabindex="-1">
           Live performances <span class="album-tab__count">{totalLivePlays.toLocaleString()}</span>
         </button>
       )}
       {variants.length > 0 && (
-        <button class="album-tab" role="tab" data-target="variants">
+        <button id="album-tab-variants" class="album-tab" type="button" role="tab" data-target="variants" aria-controls="album-panel-variants" aria-selected="false" tabindex="-1">
           Pressings <span class="album-tab__count">{variants.length}</span>
         </button>
       )}
@@ -237,7 +239,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   </div>
 
   <!-- TRACKS -->
-  <section class="container album-section" data-panel="tracks">
+  <section id="album-panel-tracks" class="container album-section detail-anchor" data-panel="tracks" role="tabpanel" aria-labelledby="album-tab-tracks">
     <div class="tracks-grid">
       <div>
         <table class="data">
@@ -338,7 +340,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
 
   <!-- PERSONNEL -->
   {(album.credits || album.producer) && (
-    <section class="container album-section" data-panel="personnel" hidden>
+    <section id="album-panel-personnel" class="container album-section detail-anchor" data-panel="personnel" role="tabpanel" aria-labelledby="album-tab-personnel" hidden>
       <div class="personnel-grid">
         <div>
           <h3 class="serif" style="font-size: clamp(26px, 3vw, 36px); margin: 0 0 20px;">Credits</h3>
@@ -388,7 +390,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
 
   <!-- TRIVIA -->
   {trivia.length > 0 && (
-    <section class="container album-section" data-panel="trivia" hidden>
+    <section id="album-panel-trivia" class="container album-section detail-anchor" data-panel="trivia" role="tabpanel" aria-labelledby="album-tab-trivia" hidden>
       <div class="trivia-list">
         {trivia.map((t: any, i: number) => (
           <div class="trivia-row">
@@ -413,7 +415,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
 
   <!-- CHARTS & SINGLES -->
   {(charts.length > 0 || singles.length > 0) && (
-    <section class="container album-section" data-panel="charts" hidden>
+    <section id="album-panel-charts" class="container album-section detail-anchor" data-panel="charts" role="tabpanel" aria-labelledby="album-tab-charts" hidden>
       <div class="charts-grid">
         {charts.length > 0 && (
           <div>
@@ -466,7 +468,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
 
   <!-- LIVE -->
   {totalLivePlays > 0 && (
-    <section class="container album-section" data-panel="live" hidden>
+    <section id="album-panel-live" class="container album-section detail-anchor" data-panel="live" role="tabpanel" aria-labelledby="album-tab-live" hidden>
       <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px;">
         <div class="mono muted">Album tracks ranked by documented live performances</div>
         <div style="flex: 1; border-top: 1px solid var(--rule);"></div>
@@ -489,7 +491,7 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   )}
 
   {variants.length > 0 && (
-    <section class="container album-section" data-panel="variants" hidden>
+    <section id="album-panel-variants" class="container album-section detail-anchor" data-panel="variants" role="tabpanel" aria-labelledby="album-tab-variants" hidden>
       <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px;">
         <div class="mono muted">Regional pressings & sleeve variants on file</div>
         <div style="flex: 1; border-top: 1px solid var(--rule);"></div>
@@ -553,13 +555,23 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   }
 
   /* Head body */
+  .album-head__utility {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
   .album-head__title {
     font-weight: 500;
-    font-size: clamp(56px, 11vw, 128px);
+    font-size: clamp(52px, 8vw, 104px);
     line-height: 0.92;
     margin: 16px 0 0;
     letter-spacing: -0.03em;
     color: var(--ink);
+    overflow-wrap: anywhere;
+    text-wrap: balance;
   }
   .album-head__lede {
     font-size: 17px; line-height: 1.6; color: var(--ink-2);
@@ -576,21 +588,53 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   /* Tabs */
   .album-tabs-wrap { margin-top: clamp(20px, 2.4vw, 32px); padding-bottom: 0; }
   .album-tabs {
-    display: flex; gap: 4px; flex-wrap: wrap;
-    border-bottom: 1px solid var(--rule);
+    position: relative;
+    display: flex;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background:
+      radial-gradient(circle at 88% -20%, var(--violet-tint), transparent 44%),
+      var(--bg-2);
+    scrollbar-width: thin;
+  }
+  .album-tabs::before {
+    position: absolute;
+    z-index: 1;
+    top: -1px;
+    right: -1px;
+    left: -1px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent) 0 28%, var(--violet) 28% 54%, var(--cool) 54% 77%, var(--gold) 77% 100%);
+    content: '';
+    pointer-events: none;
   }
   .album-tab {
+    --tab-tone: var(--accent);
+    position: relative;
+    flex: 1 0 auto;
     font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.22em;
     text-transform: uppercase; color: var(--muted);
     background: transparent; border: none;
-    padding: 12px 18px 14px; cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color .18s, border-color .18s;
+    border-right: 1px solid var(--rule);
+    padding: 18px 18px 15px; cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color .18s, border-color .18s, background-color .18s;
     display: inline-flex; align-items: baseline; gap: 6px;
+    white-space: nowrap;
   }
-  .album-tab:hover { color: var(--accent); }
-  .album-tab.is-active { color: var(--accent-3); border-bottom-color: var(--accent); }
-  :root[data-theme='papers'] .album-tab.is-active { color: var(--accent); }
+  .album-tab:nth-child(2) { --tab-tone: var(--violet); }
+  .album-tab:nth-child(3) { --tab-tone: var(--cool); }
+  .album-tab:nth-child(4) { --tab-tone: var(--gold); }
+  .album-tab:nth-child(5) { --tab-tone: var(--accent); }
+  .album-tab:nth-child(6) { --tab-tone: var(--violet); }
+  .album-tab:last-child { border-right: 0; }
+  .album-tab:hover { color: var(--tab-tone); }
+  .album-tab.is-active {
+    color: var(--ink);
+    border-bottom-color: var(--tab-tone);
+    background: color-mix(in srgb, var(--tab-tone) 12%, transparent);
+  }
+  :root[data-theme='papers'] .album-tab.is-active { color: var(--tab-tone); }
   .album-tab__count { font-size: 10px; opacity: 0.5; letter-spacing: 0.1em; }
 
   .album-section {
@@ -668,20 +712,62 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   .variant__format { position: absolute; top: 8px; left: 8px; background: var(--bg); padding: 3px 6px; border: 1px solid var(--rule); font-size: 9.5px; letter-spacing: .18em; }
   .variant__title { font-size: 18px; font-style: italic; margin-top: .5rem; }
   .variant__notes { font-family: var(--f-serif); font-size: 14px; color: var(--ink-2); line-height: 1.5; margin-top: .3rem; }
+
+  @media (max-width: 720px) {
+    .album-tabs-wrap { padding-inline: 0; }
+    .album-tabs {
+      border-inline: 0;
+      scroll-snap-type: x proximity;
+    }
+    .album-tab {
+      min-width: min(66vw, 230px);
+      justify-content: space-between;
+      padding-inline: var(--gutter);
+      scroll-snap-align: start;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .album-head__title { font-size: clamp(46px, 14vw, 64px); }
+  }
 </style>
 
 <script>
   function wireTabs() {
-    const tabs = document.querySelectorAll<HTMLButtonElement>('[data-tabs] .album-tab');
+    const tablist = document.querySelector<HTMLElement>('[data-tabs]');
+    if (!tablist || tablist.dataset.wired === 'true') return;
+    tablist.dataset.wired = 'true';
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('.album-tab'));
     const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
     if (!tabs.length) return;
-    tabs.forEach((t) => {
-      t.addEventListener('click', () => {
-        const target = t.getAttribute('data-target');
-        tabs.forEach((x) => x.classList.toggle('is-active', x === t));
-        panels.forEach((p) => {
-          p.hidden = p.getAttribute('data-panel') !== target;
-        });
+
+    const activate = (tab: HTMLButtonElement, moveFocus = false) => {
+      const target = tab.getAttribute('data-target');
+      tabs.forEach((item) => {
+        const isActive = item === tab;
+        item.classList.toggle('is-active', isActive);
+        item.setAttribute('aria-selected', String(isActive));
+        item.tabIndex = isActive ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.getAttribute('data-panel') !== target;
+      });
+      tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      if (moveFocus) tab.focus();
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activate(tab));
+      tab.addEventListener('keydown', (event) => {
+        const current = tabs.indexOf(tab);
+        let next = current;
+        if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        activate(tabs[next], true);
       });
     });
   }

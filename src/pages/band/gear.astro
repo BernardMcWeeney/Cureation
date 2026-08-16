@@ -209,7 +209,7 @@ const sourceLabel: Record<LinkSource, string> = {
     ]} />
   </div>
 
-  <section class="container gear-head">
+  <section id="gear-dossier" class="container gear-head detail-anchor">
     <div class="gear-head__art">
       <figure class="gear-plate">
         <div class="gear-plate__corner gear-plate__corner--tl">
@@ -279,23 +279,23 @@ const sourceLabel: Record<LinkSource, string> = {
   </section>
 
   <div class="container gear-tabs-wrap">
-    <div class="gear-tabs" data-gear-tabs role="tablist">
-      <button class="gear-tab is-active" role="tab" data-target="overview">
+    <div class="gear-tabs" data-gear-tabs role="tablist" aria-label="Equipment dossier">
+      <button id="gear-tab-overview" class="gear-tab is-active" type="button" role="tab" data-target="overview" aria-controls="gear-panel-overview" aria-selected="true">
         Overview <span class="gear-tab__count">{gearRows.length}</span>
       </button>
-      <button class="gear-tab" role="tab" data-target="categories">
+      <button id="gear-tab-categories" class="gear-tab" type="button" role="tab" data-target="categories" aria-controls="gear-panel-categories" aria-selected="false" tabindex="-1">
         Categories <span class="gear-tab__count">{categories.length}</span>
       </button>
-      <button class="gear-tab" role="tab" data-target="members">
+      <button id="gear-tab-members" class="gear-tab" type="button" role="tab" data-target="members" aria-controls="gear-panel-members" aria-selected="false" tabindex="-1">
         Member register <span class="gear-tab__count">{members.length}</span>
       </button>
-      <button class="gear-tab" role="tab" data-target="ledger">
+      <button id="gear-tab-ledger" class="gear-tab" type="button" role="tab" data-target="ledger" aria-controls="gear-panel-ledger" aria-selected="false" tabindex="-1">
         Ledger <span class="gear-tab__count">{gearRows.length}</span>
       </button>
     </div>
   </div>
 
-  <section class="container gear-section" data-gear-panel="overview">
+  <section id="gear-panel-overview" class="container gear-section detail-anchor" data-gear-panel="overview" role="tabpanel" aria-labelledby="gear-tab-overview">
     {gearRows.length === 0 ? (
       <div class="empty-note">
         <div class="mono-sm muted">In progress</div>
@@ -306,7 +306,7 @@ const sourceLabel: Record<LinkSource, string> = {
       <div class="gear-layout">
         <div class="gear-stack">
           {gearRows.map((row) => (
-            <article class={`gear-card${row.gear.image ? ' gear-card--image' : ''}`} id={row.gear.slug || row.gear.id}>
+            <article class={`gear-card detail-anchor${row.gear.image ? ' gear-card--image' : ''}`} id={row.gear.slug || row.gear.id} tabindex="-1">
               <div class="gear-card__idx">{String(row.index + 1).padStart(2, '0')}</div>
               {row.gear.image && (
                 <figure class="gear-card__image">
@@ -398,7 +398,7 @@ const sourceLabel: Record<LinkSource, string> = {
     )}
   </section>
 
-  <section class="container gear-section" data-gear-panel="categories" hidden>
+  <section id="gear-panel-categories" class="container gear-section detail-anchor" data-gear-panel="categories" role="tabpanel" aria-labelledby="gear-tab-categories" hidden>
     <div class="gear-section__intro">
       <div>
         <div class="mono muted">Equipment families</div>
@@ -415,7 +415,7 @@ const sourceLabel: Record<LinkSource, string> = {
           </div>
           <div class="category-block__items">
             {category.rows.map((row) => (
-              <a href={`#${row.gear.slug || row.gear.id}`}>
+              <a href={`#${row.gear.slug || row.gear.id}`} data-gear-jump={row.gear.slug || row.gear.id}>
                 <span>{row.gear.name}</span>
                 <small>{row.range}</small>
               </a>
@@ -426,7 +426,7 @@ const sourceLabel: Record<LinkSource, string> = {
     </div>
   </section>
 
-  <section class="container gear-section" data-gear-panel="members" hidden>
+  <section id="gear-panel-members" class="container gear-section detail-anchor" data-gear-panel="members" role="tabpanel" aria-labelledby="gear-tab-members" hidden>
     <div class="gear-section__intro">
       <div>
         <div class="mono muted">Member data model</div>
@@ -451,7 +451,7 @@ const sourceLabel: Record<LinkSource, string> = {
     </div>
   </section>
 
-  <section class="container gear-section" data-gear-panel="ledger" hidden>
+  <section id="gear-panel-ledger" class="container gear-section detail-anchor" data-gear-panel="ledger" role="tabpanel" aria-labelledby="gear-tab-ledger" hidden>
     <div class="gear-section__intro">
       <div>
         <div class="mono muted">Archive ledger</div>
@@ -612,12 +612,13 @@ const sourceLabel: Record<LinkSource, string> = {
   .gear-head__title {
     margin: 16px 0 0;
     color: var(--ink);
-    font-size: clamp(54px, 9vw, 116px);
+    font-size: clamp(50px, 7vw, 88px);
     line-height: .92;
     font-style: italic;
     font-weight: 500;
-    letter-spacing: 0;
-    overflow-wrap: anywhere;
+    letter-spacing: -.015em;
+    overflow-wrap: normal;
+    text-wrap: balance;
   }
 
   .gear-head__meta {
@@ -658,13 +659,32 @@ const sourceLabel: Record<LinkSource, string> = {
   }
 
   .gear-tabs {
+    position: relative;
     display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--rule);
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background:
+      radial-gradient(circle at 88% -20%, var(--violet-tint), transparent 44%),
+      var(--bg-2);
+    scrollbar-width: thin;
+  }
+
+  .gear-tabs::before {
+    position: absolute;
+    z-index: 1;
+    top: -1px;
+    right: -1px;
+    left: -1px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent) 0 28%, var(--violet) 28% 54%, var(--cool) 54% 77%, var(--gold) 77% 100%);
+    content: '';
+    pointer-events: none;
   }
 
   .gear-tab {
+    --tab-tone: var(--accent);
+    position: relative;
+    flex: 1 0 auto;
     font-family: var(--f-mono);
     font-size: 11px;
     letter-spacing: .22em;
@@ -672,26 +692,34 @@ const sourceLabel: Record<LinkSource, string> = {
     color: var(--muted);
     background: transparent;
     border: none;
-    padding: 12px 18px 14px;
+    border-right: 1px solid var(--rule);
+    padding: 18px 18px 15px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     display: inline-flex;
     align-items: baseline;
     gap: 6px;
-    transition: color .18s, border-color .18s;
+    white-space: nowrap;
+    transition: color .18s, border-color .18s, background-color .18s;
   }
 
+  .gear-tab:nth-child(2) { --tab-tone: var(--violet); }
+  .gear-tab:nth-child(3) { --tab-tone: var(--cool); }
+  .gear-tab:nth-child(4) { --tab-tone: var(--gold); }
+  .gear-tab:last-child { border-right: 0; }
+
   .gear-tab:hover {
-    color: var(--accent);
+    color: var(--tab-tone);
   }
 
   .gear-tab.is-active {
-    color: var(--accent-ink);
-    border-bottom-color: var(--accent);
+    color: var(--ink);
+    border-bottom-color: var(--tab-tone);
+    background: color-mix(in srgb, var(--tab-tone) 12%, transparent);
   }
 
   :root[data-theme='papers'] .gear-tab.is-active {
-    color: var(--accent);
+    color: var(--tab-tone);
   }
 
   .gear-tab__count {
@@ -1166,10 +1194,24 @@ const sourceLabel: Record<LinkSource, string> = {
   }
 
   @media (max-width: 720px) {
-    .gear-card,
-    .gear-card--image,
     .member-gear-row {
       grid-template-columns: 1fr;
+    }
+
+    .gear-card,
+    .gear-card--image {
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 12px;
+      padding: 15px 14px;
+    }
+
+    .gear-card__image,
+    .gear-card__body {
+      grid-column: 2;
+    }
+
+    .gear-card__image {
+      width: min(100%, 180px);
     }
 
     .gear-card__top,
@@ -1197,8 +1239,10 @@ const sourceLabel: Record<LinkSource, string> = {
     }
 
     .gear-ledger tr {
-      padding: 14px 0;
-      border-bottom: 1px solid var(--rule);
+      margin-bottom: 10px;
+      padding: 14px;
+      border: 1px solid var(--rule);
+      background: var(--bg-2);
     }
 
     .gear-ledger tbody td {
@@ -1216,20 +1260,86 @@ const sourceLabel: Record<LinkSource, string> = {
       letter-spacing: .16em;
       text-transform: uppercase;
     }
+
+    .gear-tabs-wrap {
+      padding-inline: 0;
+    }
+
+    .gear-tabs {
+      border-inline: 0;
+      scroll-snap-type: x proximity;
+    }
+
+    .gear-tab {
+      min-width: min(66vw, 230px);
+      justify-content: space-between;
+      padding-inline: var(--gutter);
+      scroll-snap-align: start;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gear-head__title {
+      font-size: clamp(44px, 13vw, 58px);
+    }
+
+    .gear-head__lede {
+      font-size: 18px;
+    }
   }
 </style>
 
 <script>
   function wireGearTabs() {
-    const tabs = document.querySelectorAll<HTMLButtonElement>('[data-gear-tabs] .gear-tab');
+    const tablist = document.querySelector<HTMLElement>('[data-gear-tabs]');
+    if (!tablist || tablist.dataset.wired === 'true') return;
+    tablist.dataset.wired = 'true';
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('.gear-tab'));
     const panels = document.querySelectorAll<HTMLElement>('[data-gear-panel]');
     if (!tabs.length) return;
+
+    const activate = (tab: HTMLButtonElement, moveFocus = false) => {
+      const target = tab.getAttribute('data-target');
+      tabs.forEach((item) => {
+        const isActive = item === tab;
+        item.classList.toggle('is-active', isActive);
+        item.setAttribute('aria-selected', String(isActive));
+        item.tabIndex = isActive ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.getAttribute('data-gear-panel') !== target;
+      });
+      tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      if (moveFocus) tab.focus();
+    };
+
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const target = tab.getAttribute('data-target');
-        tabs.forEach((item) => item.classList.toggle('is-active', item === tab));
-        panels.forEach((panel) => {
-          panel.hidden = panel.getAttribute('data-gear-panel') !== target;
+      tab.addEventListener('click', () => activate(tab));
+      tab.addEventListener('keydown', (event) => {
+        const current = tabs.indexOf(tab);
+        let next = current;
+        if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        activate(tabs[next], true);
+      });
+    });
+
+    const overviewTab = tabs.find((tab) => tab.dataset.target === 'overview');
+    document.querySelectorAll<HTMLAnchorElement>('[data-gear-jump]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const targetId = link.dataset.gearJump;
+        const target = targetId ? document.getElementById(targetId) : null;
+        if (!overviewTab || !target) return;
+        event.preventDefault();
+        activate(overviewTab);
+        history.replaceState(null, '', `#${targetId}`);
+        requestAnimationFrame(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          target.focus({ preventScroll: true });
         });
       });
     });

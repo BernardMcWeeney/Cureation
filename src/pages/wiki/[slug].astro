@@ -18,17 +18,19 @@ const tags: string[] = Array.isArray(article.tags) ? article.tags : [];
 ---
 <Layout title={`${article.title} · Wiki · Cureation`}>
   <ReadingProgress target="article" />
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem;">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'The wiki', href: '/wiki' },
       { label: article.title },
     ]} />
-    <Bookmark kind="news" id={article.id} label={article.title} href={`/wiki/${article.slug}`} />
   </div>
 
-  <article class="container" style="padding-block: clamp(24px, 4vw, 48px); max-width: 780px;">
-    <div class="mono-sm muted">WIKI · {article.category?.toUpperCase() || 'REFERENCE'}</div>
+  <article class="container wiki-article detail-anchor" style="padding-block: clamp(24px, 4vw, 48px); max-width: 780px;">
+    <div class="wiki-article__utility">
+      <div class="mono-sm muted">WIKI · {article.category?.toUpperCase() || 'REFERENCE'}</div>
+      <Bookmark kind="news" id={article.id} label={article.title} href={`/wiki/${article.slug}`} />
+    </div>
     <div class="cluster" style="gap: .4rem; margin-top: .6rem;">
       {tags.slice(0, 4).map((t) => <Tag>{t.toUpperCase()}</Tag>)}
     </div>
@@ -47,6 +49,14 @@ const tags: string[] = Array.isArray(article.tags) ? article.tags : [];
 </Layout>
 
 <style>
+  .wiki-article__utility {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
   .prose { font-family: var(--f-serif); font-size: 18px; line-height: 1.75; color: var(--ink); margin-top: 2rem; }
   .prose :global(h2) { font-family: var(--f-display); font-style: italic; font-size: clamp(28px, 3vw, 40px); line-height: 1.1; margin: 2.4rem 0 1rem; letter-spacing: -.01em; }
   .prose :global(h3) { font-family: var(--f-display); font-style: italic; font-size: clamp(22px, 2.2vw, 30px); margin: 2rem 0 .8rem; }

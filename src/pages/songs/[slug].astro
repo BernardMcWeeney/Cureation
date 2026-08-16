@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
 import Bookmark from '../../components/ui/Bookmark.astro';
+import DossierNav from '../../components/ui/DossierNav.astro';
 import Waveform from '../../components/viz/Waveform.astro';
 import { getSongBySlug, listAlbums, fetchRaw } from '../../lib/directus';
 import { asset } from '../../lib/assets';
@@ -66,20 +67,28 @@ const facts: Array<{ k: string; v: string; href?: string }> = [
 
 const listenLinks: any[] = Array.isArray(song.listen_links) ? song.listen_links : [];
 const year = album?.release_date?.slice(0, 4);
+const songFactGroups = [
+  { label: 'Recording', tone: 'hot', facts: facts.slice(0, 5) },
+  { label: 'Sound', tone: 'violet', facts: facts.slice(5, 8) },
+  { label: 'Archive', tone: 'cool', facts: facts.slice(8) },
+];
+const hasContext = Boolean(annotations.length || album || song.music_video_url || listenLinks.length || song.credits);
 ---
 <Layout title={`${song.title} · Cureation`} description={song.song_meaning || undefined} ogImage={album?.cover_art ? asset(album.cover_art, 'og') : undefined}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'Songs', href: '/songs' },
       ...(album ? [{ label: album.title, href: `/discography/${album.slug}` }] : []),
       { label: song.title },
     ]} />
-    <Bookmark kind="song" id={song.id} label={song.title} href={`/songs/${song.slug}`} />
   </div>
 
-  <section class="container" style="margin-top: 1rem;">
-    <div class="mono-sm muted">SONG · {year || '–'}</div>
+  <section id="song-overview" class="container detail-anchor" style="margin-top: 1rem;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+      <div class="mono-sm muted">SONG · {year || '–'}</div>
+      <Bookmark kind="song" id={song.id} label={song.title} href={`/songs/${song.slug}`} />
+    </div>
     <div class="cluster" style="gap:.4rem; margin-top:.6rem;">
       {album && <Tag>{album.title.toUpperCase()}</Tag>}
       {song.is_single && <Tag variant="accent">SINGLE</Tag>}
@@ -95,19 +104,48 @@ const year = album?.release_date?.slice(0, 4);
       <div class="mono-sm muted" style="margin-bottom:.4rem;">WAVEFORM · IMPRESSION</div>
       <Waveform seed={song.slug || song.title || String(song.id)} bars={120} height={70} duration={song.duration} title={song.title} />
     </div>
-    <div class="facts" style="margin-top: 1.4rem;">
-      {facts.map(({ k, v, href }) => (
-        <div class="facts__item">
-          <div class="facts__k">{k}</div>
-          <div class="facts__v">{href ? <a href={href} class="facts__link">{v}</a> : v}</div>
-        </div>
+  </section>
+
+  <div class="container">
+    <DossierNav items={[
+      { label: 'Overview', href: '#song-overview', meta: year || 'Song' },
+      { label: 'Song file', href: '#song-file', meta: `${facts.length} facts` },
+      { label: 'Lyrics', href: '#song-lyrics', meta: structured.length ? `${structured.length} parts` : 'Text' },
+      ...(hasContext ? [{ label: 'Context', href: '#song-context', meta: 'Notes & media' }] : []),
+    ]} />
+  </div>
+
+  <section id="song-file" class="container song-file detail-anchor">
+    <div class="song-file__head">
+      <div>
+        <div class="kicker">Reference</div>
+        <h2>Song file</h2>
+      </div>
+      <span class="mono-sm muted">{facts.length} VERIFIED FIELDS</span>
+    </div>
+    <div class="song-file__groups">
+      {songFactGroups.map((group) => (
+        <section class={`song-file__group song-file__group--${group.tone}`}>
+          <div class="song-file__group-head">
+            <span>{group.label}</span>
+            <span>{String(group.facts.length).padStart(2, '0')}</span>
+          </div>
+          <div class="song-file__facts">
+            {group.facts.map(({ k, v, href }) => (
+              <div class="song-file__fact">
+                <div class="facts__k">{k}</div>
+                <div class="facts__v">{href ? <a href={href} class="facts__link">{v}</a> : v}</div>
+              </div>
+            ))}
+          </div>
+        </section>
       ))}
     </div>
   </section>
 
-  <section class="container" style="padding-block: clamp(32px, 5vw, 64px);">
+  <section class="container song-content" style="padding-block: clamp(32px, 5vw, 64px);">
     <div class="song-grid">
-      <article class="lyrics">
+      <article id="song-lyrics" class="lyrics detail-anchor">
         <div class="panel-head" style="border: 1px solid var(--rule);">
           <span>Lyrics</span>
           <span>{structured.length > 0 ? `${structured.length} SECTIONS` : 'PLAIN TEXT'}</span>
@@ -133,7 +171,7 @@ const year = album?.release_date?.slice(0, 4);
         </div>
       </article>
 
-      <aside class="stack" style="--gap: 1.4rem;">
+      <aside id="song-context" class="stack detail-anchor" style="--gap: 1.4rem;">
         {annotations.length > 0 && (
           <div class="panel--bare annot-focus" data-annot-focus>
             <div class="panel-head">
@@ -257,8 +295,99 @@ const year = album?.release_date?.slice(0, 4);
 </script>
 
 <style>
+  .song-file {
+    padding-block: clamp(10px, 2vw, 24px) clamp(32px, 5vw, 58px);
+  }
+
+  .song-file__head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+
+  .song-file__head h2 {
+    margin: 5px 0 0;
+    font-family: var(--f-display);
+    font-size: clamp(34px, 4.5vw, 58px);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .song-file__groups {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr 1fr;
+    gap: 1px;
+    border: 1px solid var(--rule);
+    border-top: 0;
+    background: var(--rule);
+  }
+
+  .song-file__group {
+    --file-tone: var(--accent);
+    position: relative;
+    min-width: 0;
+    background:
+      linear-gradient(145deg, color-mix(in srgb, var(--file-tone) 7%, transparent), transparent 42%),
+      var(--bg-2);
+  }
+
+  .song-file__group::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: var(--file-tone);
+    content: '';
+  }
+
+  .song-file__group--violet { --file-tone: var(--violet); }
+  .song-file__group--cool { --file-tone: var(--cool); }
+
+  .song-file__group-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 17px 18px 13px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--file-tone);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .song-file__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 5px 18px 12px;
+  }
+
+  .song-file__fact {
+    min-width: 0;
+    padding: 12px 12px 11px 0;
+    border-bottom: 1px solid var(--rule-2);
+  }
+
+  .song-file__fact:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .song-content {
+    border-top: 1px solid var(--rule);
+  }
+
   .song-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); gap: clamp(24px, 3vw, 48px); align-items: start; }
-  @media (max-width: 900px) { .song-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) {
+    .song-file__groups { grid-template-columns: 1fr 1fr; }
+    .song-file__group:first-child { grid-column: 1 / -1; }
+    .song-grid { grid-template-columns: 1fr; }
+  }
 
   .lyrics__body { padding: clamp(18px, 2.4vw, 32px); border: 1px solid var(--rule); border-top: none; background: var(--bg-2); }
   .lyric-section + .lyric-section { margin-top: 1.4rem; }
@@ -281,4 +410,9 @@ const year = album?.release_date?.slice(0, 4);
   .annot-item:first-child { padding-top: 0; border-top: none; }
   .annot-note { font-family: var(--f-serif); font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0 0 .6rem; white-space: pre-wrap; }
   .annot-item a { color: var(--accent-3); }
+
+  @media (max-width: 560px) {
+    .song-file__groups { grid-template-columns: 1fr; }
+    .song-file__group:first-child { grid-column: auto; }
+  }
 </style>

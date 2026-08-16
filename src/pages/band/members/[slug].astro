@@ -71,10 +71,9 @@ const heroFacts = [
       { label: 'The band', href: '/band' },
       { label: member.name },
     ]} />
-    <Bookmark kind="member" id={member.id} label={member.name} href={`/band/members/${member.slug}`} />
   </div>
 
-  <section class="container member-head">
+  <section class="container member-head detail-anchor" id="member-overview">
     <div class="member-head__art">
       <figure class="portrait-plate">
         <div class="portrait-plate__corner portrait-plate__corner--tl">
@@ -95,12 +94,15 @@ const heroFacts = [
     </div>
 
     <div class="member-head__body">
-      <div class="cluster" style="gap: .4rem;">
-        <span class={`tag ${member.is_current_member ? 'tag--gold' : member.death_date ? 'tag--blood' : 'tag--cool'}`}>
-          {statusLabel.toUpperCase()}
-        </span>
-        {primaryTags.map((instrument) => <Tag>{instrument.toUpperCase()}</Tag>)}
-        {liveStats.tenureShowCount > 0 && <Tag variant="accent">{liveStats.tenureShowCount.toLocaleString()} SHOWS</Tag>}
+      <div class="member-head__utility">
+        <div class="cluster" style="gap: .4rem;">
+          <span class={`tag ${member.is_current_member ? 'tag--gold' : member.death_date ? 'tag--blood' : 'tag--cool'}`}>
+            {statusLabel.toUpperCase()}
+          </span>
+          {primaryTags.map((instrument) => <Tag>{instrument.toUpperCase()}</Tag>)}
+          {liveStats.tenureShowCount > 0 && <Tag variant="accent">{liveStats.tenureShowCount.toLocaleString()} SHOWS</Tag>}
+        </div>
+        <Bookmark kind="member" id={member.id} label={member.name} href={`/band/members/${member.slug}`} />
       </div>
 
       <h1 class="member-head__title serif">{member.name}</h1>
@@ -130,27 +132,27 @@ const heroFacts = [
   </section>
 
   <div class="container member-tabs-wrap">
-    <div class="member-tabs" data-member-tabs role="tablist">
-      <button class="member-tab is-active" role="tab" data-target="live">
+    <div class="member-tabs" data-member-tabs role="tablist" aria-label="Member dossier">
+      <button id="member-tab-live" class="member-tab is-active" type="button" role="tab" data-target="live" aria-controls="member-panel-live" aria-selected="true">
         Live record <span class="member-tab__count">{liveStats.tenureShowCount.toLocaleString()}</span>
       </button>
-      <button class="member-tab" role="tab" data-target="lineup">
+      <button id="member-tab-lineup" class="member-tab" type="button" role="tab" data-target="lineup" aria-controls="member-panel-lineup" aria-selected="false" tabindex="-1">
         Lineup history <span class="member-tab__count">{stints.length}</span>
       </button>
       {photos.length > 0 && (
-        <button class="member-tab" role="tab" data-target="photos">
+        <button id="member-tab-photos" class="member-tab" type="button" role="tab" data-target="photos" aria-controls="member-panel-photos" aria-selected="false" tabindex="-1">
           Photo file <span class="member-tab__count">{photos.length}</span>
         </button>
       )}
       {hasNotes && (
-        <button class="member-tab" role="tab" data-target="notes">
+        <button id="member-tab-notes" class="member-tab" type="button" role="tab" data-target="notes" aria-controls="member-panel-notes" aria-selected="false" tabindex="-1">
           Notes <span class="member-tab__count">·</span>
         </button>
       )}
     </div>
   </div>
 
-  <section class="container member-section" data-member-panel="live">
+  <section id="member-panel-live" class="container member-section detail-anchor" data-member-panel="live" role="tabpanel" aria-labelledby="member-tab-live">
     <div class="live-layout">
       <div class="live-stats">
         <div class="live-stat live-stat--primary">
@@ -249,7 +251,7 @@ const heroFacts = [
     )}
   </section>
 
-  <section class="container member-section" data-member-panel="lineup" hidden>
+  <section id="member-panel-lineup" class="container member-section detail-anchor" data-member-panel="lineup" role="tabpanel" aria-labelledby="member-tab-lineup" hidden>
     <div class="member-section__intro">
       <div>
         <div class="mono muted">Member stints</div>
@@ -278,7 +280,7 @@ const heroFacts = [
   </section>
 
   {photos.length > 0 && (
-    <section class="container member-section" data-member-panel="photos" hidden>
+    <section id="member-panel-photos" class="container member-section detail-anchor" data-member-panel="photos" role="tabpanel" aria-labelledby="member-tab-photos" hidden>
       <div class="member-section__intro">
         <div>
           <div class="mono muted">Photo file</div>
@@ -301,7 +303,7 @@ const heroFacts = [
   )}
 
   {hasNotes && (
-    <section class="container member-section" data-member-panel="notes" hidden>
+    <section id="member-panel-notes" class="container member-section detail-anchor" data-member-panel="notes" role="tabpanel" aria-labelledby="member-tab-notes" hidden>
       <div class="member-section__intro">
         <div>
           <div class="mono muted">Archive notes</div>
@@ -429,6 +431,14 @@ const heroFacts = [
     min-width: 0;
   }
 
+  .member-head__utility {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
   .member-head__title {
     margin: 16px 0 0;
     color: var(--ink);
@@ -474,13 +484,32 @@ const heroFacts = [
   }
 
   .member-tabs {
+    position: relative;
     display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--rule);
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background:
+      radial-gradient(circle at 88% -20%, var(--violet-tint), transparent 44%),
+      var(--bg-2);
+    scrollbar-width: thin;
+  }
+
+  .member-tabs::before {
+    position: absolute;
+    z-index: 1;
+    top: -1px;
+    right: -1px;
+    left: -1px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent) 0 28%, var(--violet) 28% 54%, var(--cool) 54% 77%, var(--gold) 77% 100%);
+    content: '';
+    pointer-events: none;
   }
 
   .member-tab {
+    --tab-tone: var(--accent);
+    position: relative;
+    flex: 1 0 auto;
     font-family: var(--f-mono);
     font-size: 11px;
     letter-spacing: .22em;
@@ -488,26 +517,34 @@ const heroFacts = [
     color: var(--muted);
     background: transparent;
     border: none;
-    padding: 12px 18px 14px;
+    border-right: 1px solid var(--rule);
+    padding: 18px 18px 15px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     display: inline-flex;
     align-items: baseline;
     gap: 6px;
-    transition: color .18s, border-color .18s;
+    white-space: nowrap;
+    transition: color .18s, border-color .18s, background-color .18s;
   }
 
+  .member-tab:nth-child(2) { --tab-tone: var(--violet); }
+  .member-tab:nth-child(3) { --tab-tone: var(--cool); }
+  .member-tab:nth-child(4) { --tab-tone: var(--gold); }
+  .member-tab:last-child { border-right: 0; }
+
   .member-tab:hover {
-    color: var(--accent);
+    color: var(--tab-tone);
   }
 
   .member-tab.is-active {
-    color: var(--accent-ink);
-    border-bottom-color: var(--accent);
+    color: var(--ink);
+    border-bottom-color: var(--tab-tone);
+    background: color-mix(in srgb, var(--tab-tone) 12%, transparent);
   }
 
   :root[data-theme='papers'] .member-tab.is-active {
-    color: var(--accent);
+    color: var(--tab-tone);
   }
 
   .member-tab__count {
@@ -937,25 +974,49 @@ const heroFacts = [
     }
 
     .member-tab {
-      width: 100%;
+      min-width: min(66vw, 230px);
       justify-content: space-between;
-      padding-inline: 0;
+      padding-inline: var(--gutter);
     }
   }
 </style>
 
 <script>
   function wireMemberTabs() {
-    const tabs = document.querySelectorAll<HTMLButtonElement>('[data-member-tabs] .member-tab');
+    const tablist = document.querySelector<HTMLElement>('[data-member-tabs]');
+    if (!tablist || tablist.dataset.wired === 'true') return;
+    tablist.dataset.wired = 'true';
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('.member-tab'));
     const panels = document.querySelectorAll<HTMLElement>('[data-member-panel]');
     if (!tabs.length) return;
+
+    const activate = (tab: HTMLButtonElement, moveFocus = false) => {
+      const target = tab.getAttribute('data-target');
+      tabs.forEach((item) => {
+        const isActive = item === tab;
+        item.classList.toggle('is-active', isActive);
+        item.setAttribute('aria-selected', String(isActive));
+        item.tabIndex = isActive ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.getAttribute('data-member-panel') !== target;
+      });
+      tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      if (moveFocus) tab.focus();
+    };
+
     tabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const target = tab.getAttribute('data-target');
-        tabs.forEach((item) => item.classList.toggle('is-active', item === tab));
-        panels.forEach((panel) => {
-          panel.hidden = panel.getAttribute('data-member-panel') !== target;
-        });
+      tab.addEventListener('click', () => activate(tab));
+      tab.addEventListener('keydown', (event) => {
+        const current = tabs.indexOf(tab);
+        let next = current;
+        if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        activate(tabs[next], true);
       });
     });
   }

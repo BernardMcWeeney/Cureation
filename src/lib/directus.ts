@@ -955,9 +955,13 @@ function normalizePhoto(row: any): MemberPhoto {
 
 function gearFamiliesFromText(value: unknown): GearFamily[] {
   const text = normalizeStringList(value).join(' ').toLowerCase();
+  // A bass role is commonly written as “bass guitar” or “bass guitarist”.
+  // Remove those phrases before looking for a separate guitar role so bassists
+  // are not automatically linked to every guitar in the equipment archive.
+  const nonBassText = text.replace(/\b(?:six[- ]string bass|bass(?: guitar(?:ist)?)?)\b/g, ' ');
   const families = new Set<GearFamily>();
   if (/\b(six[- ]string bass|bass guitar|bass)\b/.test(text)) families.add('bass');
-  if (/\b(guitar|baritone|jazzmaster|schecter)\b/.test(text)) families.add('guitar');
+  if (/\b(guitar|guitarist|baritone|jazzmaster|schecter)\b/.test(nonBassText)) families.add('guitar');
   if (/\b(keyboard|keyboards|synth|synthesizer|piano|organ|oberheim|roland)\b/.test(text)) families.add('keyboard');
   if (/\b(drum|drums|percussion|kit)\b/.test(text)) families.add('drums');
   if (/\b(vocal|vocals|voice|singer)\b/.test(text)) families.add('voice');

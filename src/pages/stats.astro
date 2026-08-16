@@ -58,6 +58,13 @@ const facts: Array<[string, string]> = [
   ['Setlists', String(fig.setlists)],
   ['Venues', String(fig.venues)],
 ];
+
+const leadingSong = topSongs[0] || null;
+const leadingAlbum = topAlbums[0] || null;
+const leadingCountry = topCountries[0] || null;
+const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry) => (
+  !best || entry[1] > best[1] ? entry : best
+), null);
 ---
 <Layout title="Statistics · Cureation">
   <PageHero
@@ -68,7 +75,79 @@ const facts: Array<[string, string]> = [
     facts={facts.map(([k, v]) => ({ k, v }))}
   />
 
-  <section class="stats-section stats-section--lead">
+  <div class="container stats-tabs-wrap">
+    <div class="stats-tabs" data-stats-tabs role="tablist" aria-label="Statistics views">
+      <button id="stats-tab-overview" class="stats-tab is-active" type="button" role="tab" data-target="overview" aria-controls="stats-panel-overview" aria-selected="true">
+        Overview <span class="stats-tab__count">04</span>
+      </button>
+      <button id="stats-tab-live" class="stats-tab" type="button" role="tab" data-target="live" aria-controls="stats-panel-live" aria-selected="false" tabindex="-1">
+        Live repertoire <span class="stats-tab__count">20</span>
+      </button>
+      <button id="stats-tab-touring" class="stats-tab" type="button" role="tab" data-target="touring" aria-controls="stats-panel-touring" aria-selected="false" tabindex="-1">
+        Touring <span class="stats-tab__count">{setlists.length}</span>
+      </button>
+      <button id="stats-tab-catalogue" class="stats-tab" type="button" role="tab" data-target="catalogue" aria-controls="stats-panel-catalogue" aria-selected="false" tabindex="-1">
+        Catalogue <span class="stats-tab__count">{eraEntries.length}</span>
+      </button>
+    </div>
+  </div>
+
+  <section id="stats-panel-overview" class="stats-overview detail-anchor" data-stats-panel="overview" role="tabpanel" aria-labelledby="stats-tab-overview">
+    <div class="container">
+      <header class="stats-overview__head">
+        <div>
+          <span>Archive overview</span>
+          <h2>Four signals from<br /><em>the whole collection.</em></h2>
+        </div>
+        <p>Start with the headline patterns, then open a tab for the full rankings, timelines and catalogue breakdown.</p>
+      </header>
+
+      <div class="stats-overview__grid">
+        {leadingSong && (
+          <a class="overview-card overview-card--hot" href={leadingSong.slug ? `/songs/${leadingSong.slug}` : '/songs'}>
+            <span class="overview-card__index">01 · Live repertoire</span>
+            <strong>{leadingSong.title}</strong>
+            <small>{(leadingSong.times_played_live || 0).toLocaleString()} documented performances · most played song</small>
+            <b aria-hidden="true">↗</b>
+          </a>
+        )}
+        {leadingAlbum && (
+          <a class="overview-card overview-card--violet" href={`/discography/${leadingAlbum.album!.slug}`}>
+            <span class="overview-card__index">02 · Record</span>
+            <strong>{leadingAlbum.album!.title}</strong>
+            <small>{leadingAlbum.plays.toLocaleString()} aggregate song performances · leading album</small>
+            <b aria-hidden="true">↗</b>
+          </a>
+        )}
+        {leadingCountry && (
+          <a class="overview-card overview-card--cool" href={`/setlists?country=${encodeURIComponent(leadingCountry[0])}`}>
+            <span class="overview-card__index">03 · Geography</span>
+            <strong>{leadingCountry[0]}</strong>
+            <small>{leadingCountry[1].toLocaleString()} documented shows · most visited country</small>
+            <b aria-hidden="true">↗</b>
+          </a>
+        )}
+        {busiestDecade && (
+          <a class="overview-card overview-card--gold" href={`/setlists?decade=${encodeURIComponent(busiestDecade[0])}`}>
+            <span class="overview-card__index">04 · Timeline</span>
+            <strong>{busiestDecade[0]}</strong>
+            <small>{busiestDecade[1].toLocaleString()} documented shows · busiest decade on file</small>
+            <b aria-hidden="true">↗</b>
+          </a>
+        )}
+      </div>
+
+      <div class="stats-overview__foot">
+        <span>{fig.photos.toLocaleString()} photos</span>
+        <span>{fig.members.toLocaleString()} members</span>
+        <span>{tours.length.toLocaleString()} tours</span>
+        <span>{eras.length.toLocaleString()} archive eras</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="stats-panel-live" data-stats-panel="live" role="tabpanel" aria-labelledby="stats-tab-live" hidden>
+  <section class="stats-section stats-section--lead detail-anchor">
     <div class="container">
       <header class="stats-heading stats-heading--row">
         <div><span>Live frequency</span><h2>The songs played<br /><em>again and again.</em></h2></div>
@@ -85,9 +164,12 @@ const facts: Array<[string, string]> = [
 
   <section class="stats-section stats-section--soft">
     <div class="container">
-      <header class="stats-heading"><span>Two ways through the live archive</span><h2>Records and<br /><em>places.</em></h2></header>
-      <div class="stats-grid">
-        <article class="stats-card">
+      <header class="stats-heading stats-heading--row">
+        <div><span>Records rank</span><h2>The records that<br /><em>shape the stage.</em></h2></div>
+        <small>Aggregate song plays</small>
+      </header>
+      <div class="stats-single-chart">
+        <article class="stats-card stats-card--wide">
           <header><span>Records rank</span><h3>Albums by live prevalence</h3><small>Aggregate song plays</small></header>
           <BarChart bars={topAlbums.map(({ album, plays }) => ({
             label: album!.title,
@@ -96,9 +178,22 @@ const facts: Array<[string, string]> = [
             href: `/discography/${album!.slug}`,
           }))} />
         </article>
-        <article class="stats-card">
-          <header><span>Geography</span><h3>Top touring countries</h3><small>By show count</small></header>
-          <BarChart bars={topCountries.map(([c, n]) => ({ label: c, value: n }))} />
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <div id="stats-panel-touring" data-stats-panel="touring" role="tabpanel" aria-labelledby="stats-tab-touring" hidden>
+  <section class="stats-section stats-section--soft detail-anchor">
+    <div class="container">
+      <header class="stats-heading stats-heading--row">
+        <div><span>Geography</span><h2>Where the archive<br /><em>keeps returning.</em></h2></div>
+        <small>Top 10 · show count</small>
+      </header>
+      <div class="stats-single-chart">
+        <article class="stats-card stats-card--wide">
+          <header><span>Touring countries</span><h3>Top touring countries</h3><small>By show count</small></header>
+          <BarChart bars={topCountries.map(([c, n]) => ({ label: c, value: n, href: `/setlists?country=${encodeURIComponent(c)}` }))} />
         </article>
       </div>
     </div>
@@ -134,19 +229,229 @@ const facts: Array<[string, string]> = [
       </div>
     </div>
   </section>
+  </div>
 
+  <div id="stats-panel-catalogue" data-stats-panel="catalogue" role="tabpanel" aria-labelledby="stats-tab-catalogue" hidden>
   {eraEntries.length > 0 && (
-    <section class="stats-section stats-section--accent">
+    <section class="stats-section stats-section--accent detail-anchor">
       <div class="container stats-era">
         <header><span>Catalogue chronology</span><h2>Every era leaves<br />a different shape.</h2><p>Studio records grouped by the archive's historical eras.</p></header>
         <div class="stats-era__chart"><BarChart showRank={false} bars={eraEntries.map(([k, v]) => ({ label: k, value: v }))} /></div>
       </div>
     </section>
   )}
+  </div>
 </Layout>
 
 <style>
-  .stats-section { padding-block: clamp(80px, 10vw, 148px); }
+  .stats-tabs-wrap {
+    margin-top: clamp(24px, 4vw, 42px);
+    padding-bottom: 0;
+  }
+
+  .stats-tabs {
+    position: relative;
+    display: flex;
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    background:
+      radial-gradient(circle at 88% -20%, var(--violet-tint), transparent 44%),
+      var(--bg-2);
+    scrollbar-width: thin;
+  }
+
+  .stats-tabs::before {
+    position: absolute;
+    z-index: 1;
+    top: -1px;
+    right: -1px;
+    left: -1px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent) 0 28%, var(--violet) 28% 54%, var(--cool) 54% 77%, var(--gold) 77% 100%);
+    content: '';
+    pointer-events: none;
+  }
+
+  .stats-tab {
+    --tab-tone: var(--accent);
+    position: relative;
+    display: inline-flex;
+    flex: 1 0 auto;
+    align-items: baseline;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 18px 20px 15px;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .19em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .18s, border-color .18s, background-color .18s;
+  }
+
+  .stats-tab:nth-child(2) { --tab-tone: var(--violet); }
+  .stats-tab:nth-child(3) { --tab-tone: var(--cool); }
+  .stats-tab:nth-child(4) { --tab-tone: var(--gold); }
+  .stats-tab:last-child { border-right: 0; }
+  .stats-tab:hover { color: var(--tab-tone); }
+  .stats-tab.is-active {
+    border-bottom-color: var(--tab-tone);
+    background: color-mix(in srgb, var(--tab-tone) 12%, transparent);
+    color: var(--ink);
+  }
+  :root[data-theme='papers'] .stats-tab.is-active { color: var(--tab-tone); }
+  .stats-tab__count { font-size: 9px; letter-spacing: .1em; opacity: .62; }
+
+  .stats-overview {
+    padding-block: clamp(54px, 7vw, 96px);
+  }
+
+  .stats-overview__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
+    align-items: end;
+    gap: clamp(28px, 5vw, 72px);
+    margin-bottom: clamp(28px, 4vw, 52px);
+  }
+
+  .stats-overview__head span {
+    color: var(--accent);
+    font-family: var(--f-sans);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  .stats-overview__head h2 {
+    margin: 10px 0 0;
+    color: var(--ink);
+    font-family: var(--f-display);
+    font-size: clamp(46px, 6.5vw, 82px);
+    font-weight: 400;
+    letter-spacing: -.05em;
+    line-height: .85;
+  }
+
+  .stats-overview__head h2 em {
+    color: var(--violet);
+    font-weight: inherit;
+  }
+
+  .stats-overview__head p {
+    max-width: 42ch;
+    margin: 0;
+    color: var(--muted);
+    font-family: var(--f-serif);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .stats-overview__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .overview-card {
+    --card-tone: var(--accent);
+    position: relative;
+    display: flex;
+    min-height: 250px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: clamp(24px, 4vw, 46px);
+    overflow: hidden;
+    border: 0;
+    background:
+      radial-gradient(circle at 90% 4%, color-mix(in srgb, var(--card-tone) 22%, transparent), transparent 38%),
+      var(--bg-2);
+    color: var(--ink);
+  }
+
+  .overview-card::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 4px;
+    background: var(--card-tone);
+    content: '';
+  }
+
+  .overview-card--violet { --card-tone: var(--violet); }
+  .overview-card--cool { --card-tone: var(--cool); }
+  .overview-card--gold { --card-tone: var(--gold); }
+  .overview-card:hover { color: var(--ink); background-color: color-mix(in srgb, var(--card-tone) 10%, var(--bg-2)); }
+  .overview-card__index {
+    margin-bottom: auto;
+    color: var(--card-tone);
+    font-family: var(--f-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+  .overview-card strong {
+    max-width: 13ch;
+    font-family: var(--f-display);
+    font-size: clamp(34px, 4vw, 58px);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -.025em;
+    line-height: .92;
+    text-wrap: balance;
+  }
+  .overview-card small {
+    max-width: 42ch;
+    margin-top: 16px;
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    line-height: 1.55;
+    text-transform: uppercase;
+  }
+  .overview-card b {
+    position: absolute;
+    top: 22px;
+    right: 24px;
+    color: var(--card-tone);
+    font-family: var(--f-sans);
+    font-size: 18px;
+    font-weight: 400;
+  }
+
+  .stats-overview__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    margin-top: 1px;
+    background: var(--rule);
+  }
+
+  .stats-overview__foot span {
+    flex: 1 1 170px;
+    padding: 13px 16px;
+    background: var(--bg);
+    color: var(--muted);
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .stats-section { padding-block: clamp(64px, 8vw, 112px); }
   .stats-section--soft { background: var(--bg-2); }
   .stats-heading { margin-bottom: clamp(42px, 6vw, 76px); }
   .stats-heading--row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 36px; }
@@ -160,6 +465,8 @@ const facts: Array<[string, string]> = [
   .stats-card header { min-height: 145px; margin-bottom: 28px; }
   .stats-card h3 { margin: 10px 0 8px; color: var(--ink); font-family: var(--f-display); font-size: clamp(36px, 4vw, 58px); font-style: italic; font-weight: 400; letter-spacing: -.04em; line-height: .9; }
   .stats-card header small { color: var(--muted); font-family: var(--f-sans); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+  .stats-single-chart { max-width: 980px; }
+  .stats-card--wide header { min-height: 0; }
   .cadence-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 78px); }
   .cadence-grid > article { min-width: 0; padding: clamp(24px, 3vw, 42px); background: var(--bg-2); }
   .cadence-grid h3 { margin: 0 0 32px; color: var(--ink); font-family: var(--f-display); font-size: clamp(31px, 3vw, 46px); font-style: italic; font-weight: 400; }
@@ -168,6 +475,67 @@ const facts: Array<[string, string]> = [
   .stats-era header > span, .stats-era h2, .stats-era header p { color: var(--accent-ink); }
   .stats-era header p { max-width: 36ch; font-size: 17px; line-height: 1.6; }
   .stats-era__chart { padding: clamp(20px, 3vw, 42px); background: var(--bg); color: var(--ink); }
-  @media (max-width: 900px) { .stats-grid, .cadence-grid, .stats-era { grid-template-columns: 1fr; } }
-  @media (max-width: 640px) { .stats-heading--row { grid-template-columns: 1fr; align-items: start; } .stats-heading > small { justify-self: start; } }
+  @media (max-width: 900px) {
+    .stats-overview__head, .stats-grid, .cadence-grid, .stats-era { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    .stats-tabs-wrap { padding-inline: 0; }
+    .stats-tabs { border-inline: 0; scroll-snap-type: x proximity; }
+    .stats-tab { min-width: min(66vw, 230px); padding-inline: var(--gutter); scroll-snap-align: start; }
+  }
+  @media (max-width: 640px) {
+    .stats-overview__grid { grid-template-columns: 1fr; }
+    .overview-card { min-height: 220px; }
+    .stats-heading--row { grid-template-columns: 1fr; align-items: start; }
+    .stats-heading > small { justify-self: start; }
+  }
 </style>
+
+<script>
+  function wireStatsTabs() {
+    const tablist = document.querySelector<HTMLElement>('[data-stats-tabs]');
+    if (!tablist || tablist.dataset.wired === 'true') return;
+    tablist.dataset.wired = 'true';
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('.stats-tab'));
+    const panels = document.querySelectorAll<HTMLElement>('[data-stats-panel]');
+    if (!tabs.length) return;
+
+    const activate = (tab: HTMLButtonElement, moveFocus = false, updateUrl = false) => {
+      const target = tab.dataset.target || 'overview';
+      tabs.forEach((item) => {
+        const isActive = item === tab;
+        item.classList.toggle('is-active', isActive);
+        item.setAttribute('aria-selected', String(isActive));
+        item.tabIndex = isActive ? 0 : -1;
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.statsPanel !== target;
+      });
+      tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      if (updateUrl) history.replaceState(null, '', `#stats-panel-${target}`);
+      if (moveFocus) tab.focus();
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activate(tab, false, true));
+      tab.addEventListener('keydown', (event) => {
+        const current = tabs.indexOf(tab);
+        let next = current;
+        if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        activate(tabs[next], true, true);
+      });
+    });
+
+    const initialTarget = location.hash.match(/^#stats-panel-(overview|live|touring|catalogue)$/)?.[1];
+    const initialTab = initialTarget ? tabs.find((tab) => tab.dataset.target === initialTarget) : null;
+    if (initialTab) activate(initialTab);
+  }
+
+  wireStatsTabs();
+  document.addEventListener('astro:page-load', wireStatsTabs);
+</script>

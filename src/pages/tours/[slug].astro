@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Tag from '../../components/ui/Tag.astro';
 import Bookmark from '../../components/ui/Bookmark.astro';
+import DossierNav from '../../components/ui/DossierNav.astro';
 import TourStrip from '../../components/viz/TourStrip.astro';
 import { getTourBySlug, listSetlists, listAlbums, listVenues } from '../../lib/directus';
 import { asset } from '../../lib/assets';
@@ -173,13 +174,12 @@ const facts: Array<[string, string]> = [
 const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image || null);
 ---
 <Layout title={`${tour.name} · Tours · Cureation`} description={tour.description || undefined} ogImage={(tour.image_file || album?.cover_art) ? asset(tour.image_file || album!.cover_art, 'og') : undefined}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'Tours', href: '/tours' },
       { label: tour.name },
     ]} />
-    <Bookmark kind="tour" id={tour.id} label={tour.name} href={`/tours/${tour.slug}`} />
   </div>
 
   {heroSrc && (
@@ -192,12 +192,15 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     </section>
   )}
 
-  <section class="container tour-head" style="margin-top: 1rem;">
+  <section id="tour-overview" class="container tour-head detail-anchor" style="margin-top: 1rem;">
     {!heroSrc && <div class="mono-sm muted">TOUR · {years}</div>}
-    <div class="cluster" style="gap:.4rem; margin-top:.6rem;">
-      {album && <Tag>{album.title.toUpperCase()}</Tag>}
-      {tour.total_shows && <span class="tag tag--gold">{tour.total_shows} SHOWS</span>}
-      {countries.length > 3 && <span class="tag tag--cool">{countries.length} COUNTRIES</span>}
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-top:.6rem; flex-wrap:wrap;">
+      <div class="cluster" style="gap:.4rem;">
+        {album && <Tag>{album.title.toUpperCase()}</Tag>}
+        {tour.total_shows && <span class="tag tag--gold">{tour.total_shows} SHOWS</span>}
+        {countries.length > 3 && <span class="tag tag--cool">{countries.length} COUNTRIES</span>}
+      </div>
+      <Bookmark kind="tour" id={tour.id} label={tour.name} href={`/tours/${tour.slug}`} />
     </div>
     <h1 class="tour-head__title serif">{tour.name}</h1>
     {tour.description && <p class="tour-head__lede">{tour.description}</p>}
@@ -211,8 +214,18 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     </div>
   </section>
 
+  <div class="container">
+    <DossierNav items={[
+      { label: 'Overview', href: '#tour-overview', meta: years },
+      ...(setlists.length > 1 ? [{ label: 'The run', href: '#tour-run', meta: `${setlists.length} shows` }] : []),
+      ...(tourRoutePoints.length ? [{ label: 'Route', href: '#tour-route', meta: `${tourRoutePoints.length} stops` }] : []),
+      { label: 'Itinerary', href: '#tour-itinerary', meta: `${setlists.length} dates` },
+      { label: 'Tour file', href: '#tour-file', meta: 'Context' },
+    ]} />
+  </div>
+
   {setlists.length > 1 && (
-    <section class="container" style="padding-block: clamp(16px, 3vw, 32px); border-top: 1px solid var(--rule);">
+    <section id="tour-run" class="container detail-anchor" style="padding-block: clamp(16px, 3vw, 32px); border-top: 1px solid var(--rule);">
       <div class="mono-sm muted" style="margin-bottom:.5rem;">THE RUN · SHOW BY SHOW</div>
       <TourStrip total={setlists.length} height={42} />
       <div class="mono-sm muted" style="margin-top:.5rem;">
@@ -225,7 +238,7 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     <>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
       <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-      <section class="container tour-route-section">
+      <section id="tour-route" class="container tour-route-section detail-anchor">
         <div class="tour-route-head">
           <div>
             <div class="kicker">Routes</div>
@@ -249,7 +262,7 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     </>
   )}
 
-  <section class="container tour-board" data-tour-itinerary>
+  <section id="tour-itinerary" class="container tour-board detail-anchor" data-tour-itinerary>
     <div class="tour-grid">
       <div>
         <div class="tour-board__head">
@@ -320,7 +333,7 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
         </div>
       </div>
 
-      <aside class="tour-side stack" style="--gap: 1.4rem;">
+      <aside id="tour-file" class="tour-side stack detail-anchor" style="--gap: 1.4rem;">
         {(notableGaps.length > 0 || multiNightRuns.length > 0) && (
           <div class="run-panel">
             <div class="panel-head"><span>Gaps</span><span>between shows</span></div>

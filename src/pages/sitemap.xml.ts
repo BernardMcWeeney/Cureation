@@ -6,9 +6,9 @@ export const prerender = false;
 const STATIC = [
   '/', '/discography',
   '/songs', '/lyrics', '/setlists', '/setlists/compare', '/tours', '/tours/map', '/venues',
-  '/band', '/band/history', '/band/gear',
+  '/band', '/band/history', '/band/members', '/band/gear',
   '/publication', '/news', '/reviews', '/newsletter', '/wiki', '/stats', '/photos', '/videos',
-  '/on-this-day', '/curiosities', '/community', '/about', '/sources', '/colophon',
+  '/on-this-day', '/curiosities', '/community', '/my-archive', '/about', '/sources',
 ];
 
 export const GET: APIRoute = async ({ site }) => {

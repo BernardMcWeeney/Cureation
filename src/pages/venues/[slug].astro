@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
 import Bookmark from '../../components/ui/Bookmark.astro';
 import Tag from '../../components/ui/Tag.astro';
+import DossierNav from '../../components/ui/DossierNav.astro';
 import { getVenueBySlug, listSetlists } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 
@@ -42,16 +43,15 @@ const heroSrc = venue.photo_file ? asset(venue.photo_file, 'hero') : null;
 const country = (venue.country || 'ROOM').toUpperCase();
 ---
 <Layout title={`${venue.name} · Venues · Cureation`} description={venue.description || `${venue.name}, ${[venue.city, venue.country].filter(Boolean).join(', ')}.`} ogImage={venue.photo_file ? asset(venue.photo_file, 'og') : undefined}>
-  <div class="container" style="padding-top: clamp(24px, 3vw, 40px); display:flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+  <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
       { label: 'Home', href: '/' },
       { label: 'Venues', href: '/venues' },
       { label: venue.name },
     ]} />
-    <Bookmark kind="venue" id={venue.id} label={venue.name} href={`/venues/${venue.slug}`} />
   </div>
 
-  <section class="container dossier">
+  <section class="container dossier detail-anchor" id="venue-overview">
     <figure class="dossier__portrait">
       {heroSrc ? (
         <img src={heroSrc} alt={`${venue.name} photograph`} />
@@ -69,10 +69,13 @@ const country = (venue.country || 'ROOM').toUpperCase();
     </figure>
 
     <div class="dossier__body stack" style="--gap: 1rem;">
-      <div class="cluster" style="gap:.4rem;">
-        {venue.venue_type && <Tag>{venue.venue_type.toUpperCase()}</Tag>}
-        {(venue.cure_show_count || 0) >= 5 && <span class="tag tag--gold">MARQUEE ROOM</span>}
-        {firstY && Number(firstY) < 1985 && <span class="tag tag--cool">VINTAGE · {firstY}</span>}
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+        <div class="cluster" style="gap:.4rem;">
+          {venue.venue_type && <Tag>{venue.venue_type.toUpperCase()}</Tag>}
+          {(venue.cure_show_count || 0) >= 5 && <span class="tag tag--gold">MARQUEE ROOM</span>}
+          {firstY && Number(firstY) < 1985 && <span class="tag tag--cool">VINTAGE · {firstY}</span>}
+        </div>
+        <Bookmark kind="venue" id={venue.id} label={venue.name} href={`/venues/${venue.slug}`} />
       </div>
       <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">{venue.name}</h1>
       <div class="mono-sm muted">
@@ -107,8 +110,15 @@ const country = (venue.country || 'ROOM').toUpperCase();
     </div>
   </section>
 
+  <div class="container">
+    <DossierNav items={[
+      { label: 'Venue file', href: '#venue-overview', meta: 'Profile' },
+      ...(shows.length ? [{ label: 'Chronology', href: '#venue-chronology', meta: `${shows.length} shows` }] : []),
+    ]} />
+  </div>
+
   {shows.length > 0 && (
-    <section class="container" style="padding-block: clamp(32px, 5vw, 64px);">
+    <section id="venue-chronology" class="container detail-anchor" style="padding-block: clamp(32px, 5vw, 64px);">
       <div class="panel-head" style="border: 1px solid var(--rule);">
         <span>A chronology</span>
         <span>{shows.length} APPEARANCES</span>

@@ -1,0 +1,163 @@
+---
+interface DossierItem {
+  label: string;
+  href: string;
+  meta?: string | number;
+}
+
+interface Props {
+  items: DossierItem[];
+  label?: string;
+}
+
+const { items, label = 'In this file' } = Astro.props;
+---
+
+<nav class="dossier-nav" aria-label={label}>
+  <div class="dossier-nav__label">
+    <span>{label}</span>
+    <span aria-hidden="true">↘</span>
+  </div>
+  <ol class="dossier-nav__list">
+    {items.map((item, index) => (
+      <li>
+        <a href={item.href}>
+          <span class="dossier-nav__number">{String(index + 1).padStart(2, '0')}</span>
+          <span class="dossier-nav__name">{item.label}</span>
+          {item.meta !== undefined && <span class="dossier-nav__meta">{item.meta}</span>}
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .dossier-nav {
+    --nav-signal: linear-gradient(90deg, var(--accent) 0 28%, var(--violet) 28% 54%, var(--cool) 54% 77%, var(--gold) 77% 100%);
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(150px, .5fr) minmax(0, 2.5fr);
+    margin-block: clamp(24px, 4vw, 42px);
+    border: 1px solid var(--rule);
+    background:
+      radial-gradient(circle at 88% -20%, var(--violet-tint), transparent 44%),
+      var(--bg-2);
+  }
+
+  .dossier-nav::before {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    left: -1px;
+    height: 4px;
+    background: var(--nav-signal);
+    content: '';
+  }
+
+  .dossier-nav__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 19px 18px 16px;
+    border-right: 1px solid var(--rule);
+    color: var(--ink-2);
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  .dossier-nav__label span:last-child {
+    color: var(--violet);
+    font-size: 16px;
+  }
+
+  .dossier-nav__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dossier-nav__list li + li {
+    border-left: 1px solid var(--rule);
+  }
+
+  .dossier-nav__list a {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: 9px;
+    min-height: 100%;
+    padding: 19px 16px 16px;
+    border: 0;
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color .18s ease, color .18s ease;
+  }
+
+  .dossier-nav__list li:nth-child(4n + 1) .dossier-nav__number { color: var(--accent-3); }
+  .dossier-nav__list li:nth-child(4n + 2) .dossier-nav__number { color: var(--violet); }
+  .dossier-nav__list li:nth-child(4n + 3) .dossier-nav__number { color: var(--cool); }
+  .dossier-nav__list li:nth-child(4n + 4) .dossier-nav__number { color: var(--gold); }
+
+  .dossier-nav__list a:hover,
+  .dossier-nav__list a:focus-visible {
+    background: color-mix(in srgb, var(--violet) 10%, transparent);
+    color: var(--ink);
+  }
+
+  .dossier-nav__number,
+  .dossier-nav__meta {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .dossier-nav__name {
+    font-family: var(--f-serif);
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.1;
+  }
+
+  .dossier-nav__meta {
+    color: var(--muted);
+  }
+
+  @media (max-width: 720px) {
+    .dossier-nav {
+      display: block;
+      margin-inline: calc(var(--gutter) * -1);
+      border-inline: 0;
+    }
+
+    .dossier-nav__label {
+      padding: 15px var(--gutter) 11px;
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .dossier-nav__list {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scroll-snap-type: x proximity;
+    }
+
+    .dossier-nav__list li {
+      flex: 0 0 auto;
+      min-width: min(44vw, 190px);
+      scroll-snap-align: start;
+    }
+
+    .dossier-nav__list a {
+      padding: 16px var(--gutter);
+      white-space: nowrap;
+    }
+  }
+</style>
