@@ -28,19 +28,8 @@ const entryImage = (entry: any, index = 0) => {
   title="News"
   deck="Verified updates, announcements, performances and releases: the present tense of The Cure, filed newest first."
   crumbs={[{ label: 'Home', href: '/' }, { label: 'Publication', href: '/publication' }, { label: 'News' }]}
-  facts={[
-    { k: 'Dispatches', v: latestNews.length },
-    { k: 'Order', v: 'Newest first' },
-    { k: 'Desk', v: 'News' },
-  ]}
   flush
->
-  <nav class="desk-nav" aria-label="Publication desks">
-    <a href="/publication"><span>01</span><strong>Publication</strong></a>
-    <a href="/reviews"><span>02</span><strong>Reviews</strong></a>
-    <a href="/wiki"><span>03</span><strong>Wiki</strong></a>
-  </nav>
-</PageHero>
+/>
 
 <section class="news-page">
   <div class="container">
@@ -100,13 +89,6 @@ const entryImage = (entry: any, index = 0) => {
 </section>
 
 <style>
-  .desk-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
-  .desk-nav a { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: baseline; padding: 17px 0; border: 0; color: inherit; }
-  .desk-nav a + a { padding-left: clamp(16px, 2.8vw, 38px); border-left: 1px solid var(--rule); }
-  .desk-nav span { color: var(--accent); font: 650 var(--micro-sm)/1 var(--f-mono); letter-spacing: .12em; }
-  .desk-nav strong { font-family: var(--f-display); font-size: 22px; font-style: italic; font-weight: 500; line-height: 1; }
-  .desk-nav a:hover strong { color: var(--accent); }
-
   .news-page { padding-block: clamp(60px, 8vw, 112px); }
   .news-page__head { display: grid; grid-template-columns: minmax(108px, .2fr) minmax(0, 1fr) minmax(260px, .42fr); gap: clamp(24px, 4.5vw, 74px); align-items: end; margin-bottom: clamp(38px, 5vw, 68px); }
   .news-page__index { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; padding-top: 10px; border-top: 2px solid var(--accent); }
@@ -171,8 +153,6 @@ const entryImage = (entry: any, index = 0) => {
     .news-ledger b { grid-column: 3; grid-row: 1 / span 2; }
   }
   @media (max-width: 560px) {
-    .desk-nav { grid-template-columns: 1fr; }
-    .desk-nav a + a { padding-left: 0; border-top: 1px solid var(--rule); border-left: 0; }
     .news-page__head { grid-template-columns: 1fr; gap: 18px; }
     .news-page__index { min-height: 0; flex-direction: row; align-items: baseline; }
     .news-page__head > p { grid-column: 1; }

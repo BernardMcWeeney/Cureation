@@ -1,5 +1,10 @@
 import { prepareSocialThread } from './social-content.js';
 import {
+  buildLyricPostText,
+  normalizeLyricSections,
+  selectLyricPassage,
+} from './lyric-social.js';
+import {
   CUREATION_2026_TOUR_NAME,
   CUREATION_2026_TOUR_SLUG,
   GENERIC_2026_TOUR_SLUG,
@@ -3086,7 +3091,7 @@ __name(isRecord3, "isRecord");
 async function getLyricOfDay(directus, now = /* @__PURE__ */ new Date()) {
   const songs = await directus.list("songs", {
     filter: { lyrics: { _nnull: true } },
-    fields: ["id", "title", "slug", "album", "lyrics", "lyrics_structured"],
+    fields: ["id", "title", "slug", "album.id", "album.title", "track_number", "lyrics", "lyrics_structured"],
     limit: -1
   });
   if (songs.length === 0) {
@@ -3094,18 +3099,21 @@ async function getLyricOfDay(directus, now = /* @__PURE__ */ new Date()) {
   }
   const index = dayIndex(now);
   const song = songs[index % songs.length];
-  const lines = lyricLines(song);
+  const sections = normalizeLyricSections(song.lyrics_structured, song.lyrics);
+  const lines = selectLyricPassage(sections, index, 3);
   if (lines.length === 0) {
     return null;
   }
   return {
-    line: lines[index % lines.length],
+    lines,
     dayIndex: index,
     song: {
       id: song.id,
       title: song.title || "Untitled",
       slug: song.slug || null,
-      album: song.album ?? null
+      albumId: relationId(song.album),
+      albumTitle: isRecord3(song.album) && typeof song.album.title === "string" ? song.album.title : null,
+      trackNumber: Number.isInteger(Number(song.track_number)) ? Number(song.track_number) : null
     }
   };
 }
@@ -3116,46 +3124,8 @@ function dayIndex(now = /* @__PURE__ */ new Date()) {
   return Math.floor(diff / 864e5);
 }
 __name(dayIndex, "dayIndex");
-function lyricLines(song) {
-  const lines = [];
-  const structured = parseStructuredLyrics(song.lyrics_structured);
-  if (Array.isArray(structured)) {
-    for (const section of structured) {
-      if (!isRecord4(section) || !Array.isArray(section.lines)) {
-        continue;
-      }
-      for (const line of section.lines) {
-        const text = isRecord4(line) ? line.text : line;
-        if (typeof text === "string" && text.trim()) {
-          lines.push(text.trim());
-        }
-      }
-    }
-  }
-  if (lines.length === 0 && song.lyrics) {
-    lines.push(...song.lyrics.split(/\n+/).map((line) => line.trim()).filter(Boolean));
-  }
-  return lines;
-}
-__name(lyricLines, "lyricLines");
-function parseStructuredLyrics(value) {
-  if (typeof value !== "string") {
-    return value;
-  }
-  try {
-    return JSON.parse(value);
-  } catch {
-    return value;
-  }
-}
-__name(parseStructuredLyrics, "parseStructuredLyrics");
-function isRecord4(value) {
-  return typeof value === "object" && value !== null;
-}
-__name(isRecord4, "isRecord");
 
 // src/jobs/postLyricOfDay.ts
-var MAX_SOCIAL_LENGTH = 280;
 async function postLyricOfDay(env, options = {}) {
   const directus = new DirectusClient(env);
   const run = await startAutomationRun(directus, SOCIAL_LYRIC_JOB_NAME);
@@ -3164,7 +3134,12 @@ async function postLyricOfDay(env, options = {}) {
     if (!lyric) {
       throw new Error("No lyric of the day is available from Directus songs");
     }
-    const text = buildLyricPostText(lyric.line, lyric.song.title);
+    const text = buildLyricPostText({
+      lines: lyric.lines,
+      title: lyric.song.title,
+      trackNumber: lyric.song.trackNumber,
+      albumTitle: lyric.song.albumTitle
+    });
     const publish = options.publish === true;
     const channels = await publishToSocialChannels(env, text, publish, options.channels);
     const publishedCount = channels.filter((channel) => channel.published).length;
@@ -3183,7 +3158,11 @@ async function postLyricOfDay(env, options = {}) {
           dayIndex: lyric.dayIndex,
           songId: lyric.song.id,
           songTitle: lyric.song.title,
-          songSlug: lyric.song.slug
+          songSlug: lyric.song.slug,
+          albumId: lyric.song.albumId,
+          albumTitle: lyric.song.albumTitle,
+          trackNumber: lyric.song.trackNumber,
+          lines: lyric.lines
         },
         channels
       }
@@ -3196,17 +3175,6 @@ async function postLyricOfDay(env, options = {}) {
   }
 }
 __name(postLyricOfDay, "postLyricOfDay");
-function buildLyricPostText(line, title) {
-  const suffix = `
-
-The Cure – ${title}
-
-#TheCure #Cureation`;
-  const availableLineLength = MAX_SOCIAL_LENGTH - suffix.length - 2;
-  const fittedLine = line.length <= availableLineLength ? line : `${line.slice(0, Math.max(0, availableLineLength - 3)).trimEnd()}...`;
-  return `"${fittedLine}"${suffix}`;
-}
-__name(buildLyricPostText, "buildLyricPostText");
 
 // src/lib/socialLog.ts
 async function successfulChannels(directus, contentKey) {
@@ -3425,9 +3393,7 @@ function buildOnThisDayPost(setlist, songs) {
       "",
       `${songs.length} songs documented${setlist.tour_name ? ` - ${setlist.tour_name}` : ""}.`,
       ...preview.map((title, index) => `${index + 1}. ${title}`),
-      moreCount > 0 && previewCount > 0 ? `...and ${moreCount} more.` : null,
-      "",
-      "#TheCure #Cureation"
+      moreCount > 0 && previewCount > 0 ? `...and ${moreCount} more.` : null
     ].filter((line) => line !== null).join("\n");
     if (text.length <= MAX_POST_LENGTH) {
       return text;
@@ -3436,8 +3402,7 @@ function buildOnThisDayPost(setlist, songs) {
   return fitText(
     [
       `On this day in ${year}: The Cure at ${showLocation(setlist)}.`,
-      `${songs.length} songs documented.`,
-      "#TheCure #Cureation"
+      `${songs.length} songs documented.`
     ].join("\n"),
     MAX_POST_LENGTH
   );
@@ -3449,9 +3414,7 @@ function buildFullSetlistThread(setlist, songs) {
     [setlist.date, setlist.tour_name].filter(Boolean).join(" - "),
     "",
     "Full setlist:",
-    ...songLines(songs),
-    "",
-    "#TheCure #Cureation"
+    ...songLines(songs)
   ].filter(Boolean);
   return packLines(lines, MAX_POST_LENGTH);
 }

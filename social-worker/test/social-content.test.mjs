@@ -8,11 +8,11 @@ import {
 } from '../src/social-content.js';
 
 test('removes archive links while preserving the Cureation copy', () => {
-  const input = `"Plainsong"\n\nThe Cure – Plainsong\nhttps://cureation.com/songs/plainsong\n#TheCure #Cureation`;
+  const input = `“I think it’s dark and it looks like rain”\n\nPlainsong, the 1st track on Disintegration by The Cure.\nhttps://cureation.com/songs/plainsong`;
 
   assert.equal(
     removeSocialLinks(input),
-    `"Plainsong"\n\nThe Cure – Plainsong\n#TheCure #Cureation`
+    `“I think it’s dark and it looks like rain”\n\nPlainsong, the 1st track on Disintegration by The Cure.`
   );
 });
 
@@ -23,7 +23,7 @@ test('removes every http and www link from shared posts', () => {
 });
 
 test('returns one unchanged thread for both channels', () => {
-  const input = 'On this day in 1989: The Cure in London.\n\n#TheCure #Cureation';
+  const input = 'On this day in 1989: The Cure in London.';
 
   assert.deepEqual(prepareSocialThread([input]), [input]);
 });
