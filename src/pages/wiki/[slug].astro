@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copySource } from '../../lib/visual-editing';
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
@@ -16,34 +17,34 @@ if (!article) return new Response('Not found', { status: 404 });
 
 const tags: string[] = Array.isArray(article.tags) ? article.tags : [];
 ---
-<Layout title={`${article.title} · Wiki · Cureation`}>
+<Layout editRecord={article} title={`${article.title} · Wiki · Cureation`}>
   <ReadingProgress target="article" />
   <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
-      { label: 'Home', href: '/' },
-      { label: 'The wiki', href: '/wiki' },
+      { ...copySource({"label":"pages_wiki__slug__data-cf579cb8892a"}),  label: copyText("pages_wiki__slug__data-cf579cb8892a", "Home"), href: '/' },
+      { ...copySource({"label":"pages_wiki__slug__data-ae9fe9ff4c7f"}),  label: copyText("pages_wiki__slug__data-ae9fe9ff4c7f", "Wiki"), href: '/wiki' },
       { label: article.title },
     ]} />
   </div>
 
-  <article class="container wiki-article detail-anchor" style="padding-block: clamp(24px, 4vw, 48px); max-width: 780px;">
+  <article  class="container wiki-article detail-anchor" style="padding-block: clamp(24px, 4vw, 48px); max-width: 780px;">
     <div class="wiki-article__utility">
-      <div class="mono-sm muted">WIKI · {article.category?.toUpperCase() || 'REFERENCE'}</div>
+      <div data-directus={editable(article, ["category"])} class="mono-sm muted">WIKI · {article.category?.toUpperCase() || 'REFERENCE'}</div>
       <Bookmark kind="news" id={article.id} label={article.title} href={`/wiki/${article.slug}`} />
     </div>
     <div class="cluster" style="gap: .4rem; margin-top: .6rem;">
       {tags.slice(0, 4).map((t) => <Tag>{t.toUpperCase()}</Tag>)}
     </div>
-    <h1 class="serif" style="font-size: clamp(40px, 6vw, 80px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0;">{article.title}</h1>
-    {article.excerpt && <p style="font-family: var(--f-serif); font-size: 20px; line-height: 1.55; color: var(--ink-2); margin-top: 1rem;">{article.excerpt}</p>}
-    <div class="mono-sm muted" style="margin-top: 1rem;">
+    <h1 data-directus={editable(article, ["title"])} class="serif" style="font-size: clamp(40px, 6vw, 80px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0;">{article.title}</h1>
+    {article.excerpt && <p data-directus={editable(article, ["excerpt"])} style="font-family: var(--f-serif); font-size: 20px; line-height: 1.55; color: var(--ink-2); margin-top: 1rem;">{article.excerpt}</p>}
+    <div data-directus={editable(article, ["published_date","reading_time","author_name"])} class="mono-sm muted" style="margin-top: 1rem;">
       {article.published_date || '–'}
       {article.reading_time && <> · {article.reading_time} MIN READ</>}
       {article.author_name && <> · {article.author_name.toUpperCase()}</>}
     </div>
 
     {article.content && (
-      <div class="prose" set:html={article.content} />
+      <div data-directus={editable(article, ["content"])} class="prose" set:html={article.content} />
     )}
   </article>
 </Layout>

@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../../../lib/visual-editing';
 export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import Crumbs from '../../../components/ui/Crumbs.astro';
@@ -58,17 +59,17 @@ const photoSrc = (photo: any, preset: 'card' | 'hero' = 'card') =>
   photo.image_file ? asset(photo.image_file, preset) : photo.image_url;
 
 const heroFacts = [
-  { k: 'Tenure', v: tenure },
-  { k: 'Documented shows', v: liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : 'To be filed' },
-  { k: 'Countries', v: liveStats.countries ? liveStats.countries.toLocaleString() : '–' },
-  { k: 'Active years', v: activeYears ? `${activeYears}` : '–' },
+  { ...copySource({"k":"pages_band_members__slug__data-9cdea4b1793b"}),  k: copyText("pages_band_members__slug__data-9cdea4b1793b", "Tenure"), v: tenure },
+  { ...copySource({"k":"pages_band_members__slug__data-77ba775a8090"}),  k: copyText("pages_band_members__slug__data-77ba775a8090", "Documented shows"), v: liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : 'To be filed' },
+  { ...copySource({"k":"pages_band_members__slug__data-c7f62328653b"}),  k: copyText("pages_band_members__slug__data-c7f62328653b", "Countries"), v: liveStats.countries ? liveStats.countries.toLocaleString() : '–' },
+  { ...copySource({"k":"pages_band_members__slug__data-661c76329c31"}),  k: copyText("pages_band_members__slug__data-661c76329c31", "Active years"), v: activeYears ? `${activeYears}` : '–' },
 ];
 ---
-<Layout title={`${member.name} · The band · Cureation`} description={member.bio || `${member.name}, ${statusLabel.toLowerCase()} member of The Cure.`} ogImage={portrait && !String(portrait).startsWith('http') ? asset(portrait, 'og') : undefined}>
+<Layout editRecord={member} title={`${member.name} · The band · Cureation`} description={member.bio || `${member.name}, ${statusLabel.toLowerCase()} member of The Cure.`} ogImage={portrait && !String(portrait).startsWith('http') ? asset(portrait, 'og') : undefined}>
   <div class="container member-topbar">
     <Crumbs items={[
-      { label: 'Home', href: '/' },
-      { label: 'The band', href: '/band' },
+      { ...copySource({"label":"pages_band_members__slug__data-d9e535c1d60e"}),  label: copyText("pages_band_members__slug__data-d9e535c1d60e", "Home"), href: '/' },
+      { ...copySource({"label":"pages_band_members__slug__data-b8ea4bdfc57e"}),  label: copyText("pages_band_members__slug__data-b8ea4bdfc57e", "The band"), href: '/band' },
       { label: member.name },
     ]} />
   </div>
@@ -83,9 +84,9 @@ const heroFacts = [
           <span class="mono-sm muted">{role || 'ROLE TBC'}</span>
         </div>
         {portraitSrc ? (
-          <img src={portraitSrc} alt={member.name} />
+          <img data-directus={editable(member, ["photo", "photo_file"])} src={portraitSrc} alt={member.name} />
         ) : (
-          <div class="portrait-plate__fallback">{member.name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2)}</div>
+          <div data-directus={editable(member.name, ["split"]) ?? editable(member, ["name"])} class="portrait-plate__fallback">{member.name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2)}</div>
         )}
         <div class="portrait-plate__corner portrait-plate__corner--bl">
           <span class="mono-sm muted">{tenure}</span>
@@ -93,9 +94,9 @@ const heroFacts = [
       </figure>
     </div>
 
-    <div class="member-head__body">
+    <div  class="member-head__body">
       <div class="member-head__utility">
-        <div class="cluster" style="gap: .4rem;">
+        <div data-directus={editable(liveStats, ["tenureShowCount"])} class="cluster" style="gap: .4rem;">
           <span class={`tag ${member.is_current_member ? 'tag--gold' : member.death_date ? 'tag--blood' : 'tag--cool'}`}>
             {statusLabel.toUpperCase()}
           </span>
@@ -105,17 +106,17 @@ const heroFacts = [
         <Bookmark kind="member" id={member.id} label={member.name} href={`/band/members/${member.slug}`} />
       </div>
 
-      <h1 class="member-head__title serif">{member.name}</h1>
+      <h1 data-directus={editable(member, ["name"])} class="member-head__title serif">{member.name}</h1>
       <div class="mono-sm member-head__meta">
         {role || 'Role to be filed'} · {tenure}
         {lifeDates !== 'Life dates to be filed' && <> · {lifeDates}</>}
       </div>
 
-      {member.bio && <p class="member-head__lede">{member.bio}</p>}
+      {member.bio && <p data-directus={editable(member, ["bio"])} class="member-head__lede">{member.bio}</p>}
 
       {liveStats.firstShow && liveStats.lastShow && (
-        <div class="archivist">
-          <span class="mono-sm muted">Live archive:</span>
+        <div  class="archivist">
+          <span data-directus={copyAttr("pages_band_members_slug_31ed3955af53")} set:html={copyText("pages_band_members_slug_31ed3955af53", "Live archive:")} class="mono-sm muted"></span>
           documented setlists place {member.name} inside {liveStats.tenureShowCount.toLocaleString()} Cure show{liveStats.tenureShowCount === 1 ? '' : 's'} from {showDate(liveStats.firstShow.date)} to {showDate(liveStats.lastShow.date)}.
         </div>
       )}
@@ -123,8 +124,8 @@ const heroFacts = [
       <div class="facts">
         {heroFacts.map((fact) => (
           <div class="facts__item">
-            <div class="facts__k">{fact.k}</div>
-            <div class="facts__v">{fact.v}</div>
+            <div data-directus={editable(fact, ["k"])} class="facts__k">{fact.k}</div>
+            <div data-directus={editable(fact, ["v"])} class="facts__v">{fact.v}</div>
           </div>
         ))}
       </div>
@@ -132,9 +133,9 @@ const heroFacts = [
   </section>
 
   <div class="container member-tabs-wrap">
-    <div class="member-tabs" data-member-tabs role="tablist" aria-label="Member dossier">
+    <div class="member-tabs" data-member-tabs role="tablist" aria-label="Member details">
       <button id="member-tab-live" class="member-tab is-active" type="button" role="tab" data-target="live" aria-controls="member-panel-live" aria-selected="true">
-        Live record <span class="member-tab__count">{liveStats.tenureShowCount.toLocaleString()}</span>
+        Live record <span data-directus={editable(liveStats, ["tenureShowCount"])} class="member-tab__count">{liveStats.tenureShowCount.toLocaleString()}</span>
       </button>
       <button id="member-tab-lineup" class="member-tab" type="button" role="tab" data-target="lineup" aria-controls="member-panel-lineup" aria-selected="false" tabindex="-1">
         Lineup history <span class="member-tab__count">{stints.length}</span>
@@ -152,53 +153,53 @@ const heroFacts = [
     </div>
   </div>
 
-  <section id="member-panel-live" class="container member-section detail-anchor" data-member-panel="live" role="tabpanel" aria-labelledby="member-tab-live">
+  <section  id="member-panel-live" class="container member-section detail-anchor" data-member-panel="live" role="tabpanel" aria-labelledby="member-tab-live">
     <div class="live-layout">
       <div class="live-stats">
         <div class="live-stat live-stat--primary">
-          <span>Documented tenure-window shows</span>
-          <strong>{liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : '–'}</strong>
-          <p>Counted from dated setlists that fall inside the member stint windows.</p>
+          <span data-directus={copyAttr("pages_band_members_slug_9151e0dcc38f")} set:html={copyText("pages_band_members_slug_9151e0dcc38f", "Documented tenure-window shows")}></span>
+          <strong data-directus={editable(liveStats, ["tenureShowCount"])}>{liveStats.tenureShowCount ? liveStats.tenureShowCount.toLocaleString() : '–'}</strong>
+          <p data-directus={copyAttr("pages_band_members_slug_f1264aeb8e96")} set:html={copyText("pages_band_members_slug_f1264aeb8e96", "Counted from dated setlists that fall inside the member stint windows.")}></p>
         </div>
         <div class="live-stat">
-          <span>Lineup-tagged appearances</span>
-          <strong>{liveStats.lineupTaggedCount ? liveStats.lineupTaggedCount.toLocaleString() : '–'}</strong>
+          <span data-directus={copyAttr("pages_band_members_slug_29868aa755a7")} set:html={copyText("pages_band_members_slug_29868aa755a7", "Lineup-tagged appearances")}></span>
+          <strong data-directus={editable(liveStats, ["lineupTaggedCount"])}>{liveStats.lineupTaggedCount ? liveStats.lineupTaggedCount.toLocaleString() : '–'}</strong>
         </div>
         <div class="live-stat">
-          <span>Average set length</span>
-          <strong>{liveStats.avgSongCount ? `${liveStats.avgSongCount} songs` : '–'}</strong>
+          <span data-directus={copyAttr("pages_band_members_slug_586353fee0c7")} set:html={copyText("pages_band_members_slug_586353fee0c7", "Average set length")}></span>
+          <strong data-directus={editable(liveStats, ["avgSongCount"])}>{liveStats.avgSongCount ? `${liveStats.avgSongCount} songs` : '–'}</strong>
         </div>
         <div class="live-stat">
-          <span>Tours / countries</span>
-          <strong>{liveStats.tours || '–'} / {liveStats.countries || '–'}</strong>
+          <span data-directus={copyAttr("pages_band_members_slug_aba74a3a961f")} set:html={copyText("pages_band_members_slug_aba74a3a961f", "Tours / countries")}></span>
+          <strong data-directus={editable(liveStats, ["tours","countries"])}>{liveStats.tours || '–'} / {liveStats.countries || '–'}</strong>
         </div>
       </div>
 
       <aside class="live-focus panel--bare">
         <div class="panel-head">
-          <span>Archive markers</span>
-          <span>Setlist archive</span>
+          <span data-directus={copyAttr("pages_band_members_slug_285fafb1f8d5")} set:html={copyText("pages_band_members_slug_285fafb1f8d5", "Archive markers")}></span>
+          <span data-directus={copyAttr("pages_band_members_slug_84f464411323")} set:html={copyText("pages_band_members_slug_84f464411323", "Setlist archive")}></span>
         </div>
-        <div class="marker-list">
+        <div  class="marker-list">
           {liveStats.firstShow && (
             <a href={showHref(liveStats.firstShow)} class="marker-row">
-              <span>First on file</span>
-              <strong>{showDate(liveStats.firstShow.date)}</strong>
-              <small>{showPlace(liveStats.firstShow)}</small>
+              <span data-directus={copyAttr("pages_band_members_slug_8d193a5ce6b7")} set:html={copyText("pages_band_members_slug_8d193a5ce6b7", "First recorded")}></span>
+              <strong data-directus={editable(liveStats.firstShow, ["date"]) ?? editable(liveStats, ["firstShow"])}>{showDate(liveStats.firstShow.date)}</strong>
+              <small data-directus={editable(liveStats, ["firstShow"])}>{showPlace(liveStats.firstShow)}</small>
             </a>
           )}
           {liveStats.lastShow && (
             <a href={showHref(liveStats.lastShow)} class="marker-row">
-              <span>Latest on file</span>
-              <strong>{showDate(liveStats.lastShow.date)}</strong>
-              <small>{showPlace(liveStats.lastShow)}</small>
+              <span data-directus={copyAttr("pages_band_members_slug_1327c123ce33")} set:html={copyText("pages_band_members_slug_1327c123ce33", "Latest recorded")}></span>
+              <strong data-directus={editable(liveStats.lastShow, ["date"]) ?? editable(liveStats, ["lastShow"])}>{showDate(liveStats.lastShow.date)}</strong>
+              <small data-directus={editable(liveStats, ["lastShow"])}>{showPlace(liveStats.lastShow)}</small>
             </a>
           )}
           {liveStats.longestShow && (
             <a href={showHref(liveStats.longestShow)} class="marker-row">
-              <span>Longest set</span>
-              <strong>{liveStats.longestShow.song_count} songs</strong>
-              <small>{showDate(liveStats.longestShow.date)} · {liveStats.longestShow.venue}</small>
+              <span data-directus={copyAttr("pages_band_members_slug_5f0c75bbbe32")} set:html={copyText("pages_band_members_slug_5f0c75bbbe32", "Longest set")}></span>
+              <strong data-directus={editable(liveStats.longestShow, ["song_count"]) ?? editable(liveStats, ["longestShow"])}>{liveStats.longestShow.song_count} songs</strong>
+              <small data-directus={editable(liveStats.longestShow, ["date","venue"]) ?? editable(liveStats, ["longestShow"])}>{showDate(liveStats.longestShow.date)} · {liveStats.longestShow.venue}</small>
             </a>
           )}
         </div>
@@ -210,7 +211,7 @@ const heroFacts = [
         <div class="member-section__intro">
           <div>
             <div class="mono muted">Year density</div>
-            <h2 class="serif">Setlists across the tenure window</h2>
+            <h2 data-directus={copyAttr("pages_band_members_slug_d7e10e19d00b")} set:html={copyText("pages_band_members_slug_d7e10e19d00b", "Setlists across the tenure window")} class="serif"></h2>
           </div>
           <div class="mono-sm muted">Latest {recentYearCounts.length} active years on file</div>
         </div>
@@ -218,7 +219,7 @@ const heroFacts = [
           {recentYearCounts.map((item) => (
             <div class="year-bar" title={`${item.year}: ${item.count} shows`}>
               <div class="year-bar__fill" style={`height: ${Math.max(4, (item.count / maxYearCount) * 100)}%;`}></div>
-              <span>{String(item.year).slice(2)}</span>
+              <span data-directus={editable(item, ["year"])}>{String(item.year).slice(2)}</span>
             </div>
           ))}
         </div>
@@ -230,19 +231,19 @@ const heroFacts = [
         <div class="member-section__intro">
           <div>
             <div class="mono muted">Recent setlists</div>
-            <h2 class="serif">Latest appearances in the archive</h2>
+            <h2 data-directus={copyAttr("pages_band_members_slug_44852dfd0471")} set:html={copyText("pages_band_members_slug_44852dfd0471", "Latest appearances in the archive")} class="serif"></h2>
           </div>
-          <a href="/setlists" class="mono-sm">Open setlists →</a>
+          <a data-directus={copyAttr("pages_band_members_slug_98b77f060161")} set:html={copyText("pages_band_members_slug_98b77f060161", "Open setlists →")} href="/setlists" class="mono-sm"></a>
         </div>
-        <div class="show-list">
+        <div  class="show-list">
           {liveStats.recentShows.map((show, i) => (
             <a href={showHref(show)} class="show-row">
               <span class="idx">{String(i + 1).padStart(2, '0')}</span>
               <span>
-                <strong>{show.venue || 'Venue to be filed'}</strong>
+                <strong data-directus={editable(show, ["venue"])}>{show.venue || 'Venue to be filed'}</strong>
                 <small>{showPlace(show)}</small>
               </span>
-              <span class="show-row__date">{showDate(show.date)}</span>
+              <span data-directus={editable(show, ["date"])} class="show-row__date">{showDate(show.date)}</span>
               <span class="show-row__meta">{showMeta(show) || 'Setlist'}</span>
             </a>
           ))}
@@ -255,7 +256,7 @@ const heroFacts = [
     <div class="member-section__intro">
       <div>
         <div class="mono muted">Member stints</div>
-        <h2 class="serif">Lineup history</h2>
+        <h2 data-directus={copyAttr("pages_band_members_slug_e2378de7aa2b")} set:html={copyText("pages_band_members_slug_e2378de7aa2b", "Lineup history")} class="serif"></h2>
       </div>
       <div class="mono-sm muted">{stints.length ? `${stints.length} stint${stints.length === 1 ? '' : 's'}` : 'No stints filed'}</div>
     </div>
@@ -264,18 +265,18 @@ const heroFacts = [
       <ol class="stint-ledger">
         {stints.map((stint, i) => (
           <li class={stint.end_year === null ? 'is-active' : undefined}>
-            <div class="stint-ledger__n">{String(stint.stint_number || i + 1).padStart(2, '0')}</div>
-            <div>
+            <div data-directus={editable(stint, ["stint_number"])} class="stint-ledger__n">{String(stint.stint_number || i + 1).padStart(2, '0')}</div>
+            <div >
               <div class="stint-ledger__years">{formatStintYears(stint)}</div>
-              <h3 class="serif">{stint.role || 'Band member'}</h3>
-              {stint.notes && <p>{stint.notes}</p>}
+              <h3 data-directus={editable(stint, ["role"])} class="serif">{stint.role || 'Band member'}</h3>
+              {stint.notes && <p data-directus={editable(stint, ["notes"])}>{stint.notes}</p>}
             </div>
-            <div class="stint-ledger__flag">{stint.end_year === null ? 'Active' : 'Archive'}</div>
+            <div data-directus={editable(stint, ["end_year"])} class="stint-ledger__flag">{stint.end_year === null ? 'Active' : 'Archive'}</div>
           </li>
         ))}
       </ol>
     ) : (
-      <p class="empty-note">No linked member stints have been filed yet.</p>
+      <p data-directus={copyAttr("pages_band_members_slug_f740e30956ba")} set:html={copyText("pages_band_members_slug_f740e30956ba", "No linked member stints have been filed yet.")} class="empty-note"></p>
     )}
   </section>
 
@@ -284,17 +285,17 @@ const heroFacts = [
       <div class="member-section__intro">
         <div>
           <div class="mono muted">Photo file</div>
-          <h2 class="serif">Contact sheet</h2>
+          <h2 data-directus={copyAttr("pages_band_members_slug_82db523246cd")} set:html={copyText("pages_band_members_slug_82db523246cd", "Contact sheet")} class="serif"></h2>
         </div>
         <div class="mono-sm muted">Linked, searched, and tenure-window photos</div>
       </div>
       <div class="contact-sheet">
         {photos.map((photo) => (
           <figure>
-            <img src={photoSrc(photo, 'card')} alt={photo.title || member.name} loading="lazy" />
+            <img data-directus={editable(photo, ["image_file", "image_url"])} src={photoSrc(photo, 'card')} alt={photo.title || member.name} loading="lazy" />
             <figcaption>
-              <span>{photo.title || 'Archive photograph'}</span>
-              <small>{[photo.formatted_date, photo.photographer, photo.location].filter(Boolean).join(' · ') || 'Cureation photo archive'}</small>
+              <span data-directus={editable(photo, ["title"])}>{photo.title || 'Archive photograph'}</span>
+              <small data-directus={editable(photo, ["formatted_date","photographer","location"])}>{[photo.formatted_date, photo.photographer, photo.location].filter(Boolean).join(' · ') || 'Cureation photo archive'}</small>
             </figcaption>
           </figure>
         ))}
@@ -307,10 +308,10 @@ const heroFacts = [
       <div class="member-section__intro">
         <div>
           <div class="mono muted">Archive notes</div>
-          <h2 class="serif">Roles, aliases, sources</h2>
+          <h2 data-directus={copyAttr("pages_band_members_slug_501600761e57")} set:html={copyText("pages_band_members_slug_501600761e57", "Roles, aliases, sources")} class="serif"></h2>
         </div>
       </div>
-      <div class="notes-grid">
+      <div class="notes-grid archive-columns">
         {instruments.length > 0 && (
           <section>
             <div class="member-section__label">Instrument register</div>
@@ -330,7 +331,7 @@ const heroFacts = [
         {hasLifeNote && (
           <section>
             <div class="member-section__label">Life dates</div>
-            <p>{lifeDates}{member.death_place ? ` · ${member.death_place}` : ''}</p>
+            <p data-directus={editable(member, ["death_place"])}>{lifeDates}{member.death_place ? ` · ${member.death_place}` : ''}</p>
           </section>
         )}
         {sideProjects.length > 0 && (
@@ -338,10 +339,10 @@ const heroFacts = [
             <div class="member-section__label">Other work</div>
             <ul class="project-list">
               {sideProjects.map((project: any) => (
-                <li>
-                  <strong>{project.name || project.project || project}</strong>
+                <li >
+                  <strong data-directus={editable(project, ["name","project"])}>{project.name || project.project || project}</strong>
                   {(project.role || project.years || project.start) && (
-                    <span>{[project.role, project.years || project.start].filter(Boolean).join(' · ')}</span>
+                    <span data-directus={editable(project, ["role","years","start"])}>{[project.role, project.years || project.start].filter(Boolean).join(' · ')}</span>
                   )}
                 </li>
               ))}
@@ -469,7 +470,7 @@ const heroFacts = [
     max-width: 680px;
     color: var(--muted);
     font-family: var(--f-serif);
-    font-size: 14px;
+    font-size: var(--text-small);
     font-style: italic;
     line-height: 1.6;
   }
@@ -510,9 +511,9 @@ const heroFacts = [
     --tab-tone: var(--accent);
     position: relative;
     flex: 1 0 auto;
-    font-family: var(--f-mono);
-    font-size: 11px;
-    letter-spacing: .22em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
     background: transparent;
@@ -548,7 +549,7 @@ const heroFacts = [
   }
 
   .member-tab__count {
-    font-size: 10px;
+    font-size: var(--text-label);
     letter-spacing: .1em;
     opacity: .56;
   }
@@ -578,9 +579,9 @@ const heroFacts = [
   .member-section__label {
     margin-bottom: 14px;
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10.5px;
-    letter-spacing: .2em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
@@ -613,13 +614,13 @@ const heroFacts = [
   .stint-ledger__flag {
     display: block;
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .16em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
-  .live-stat strong {
+  .live-stat :global(strong) {
     display: block;
     margin-top: 12px;
     color: var(--ink);
@@ -630,7 +631,7 @@ const heroFacts = [
     line-height: 1.05;
   }
 
-  .live-stat--primary strong {
+  .live-stat--primary :global(strong) {
     font-size: 72px;
   }
 
@@ -639,7 +640,7 @@ const heroFacts = [
     margin: 16px 0 0;
     color: var(--ink-2);
     font-family: var(--f-serif);
-    font-size: 15px;
+    font-size: var(--text-small);
     line-height: 1.55;
   }
 
@@ -659,7 +660,7 @@ const heroFacts = [
     border-bottom: none;
   }
 
-  .marker-row strong {
+  .marker-row :global(strong) {
     display: block;
     margin-top: 6px;
     color: var(--ink);
@@ -674,7 +675,7 @@ const heroFacts = [
     margin-top: 5px;
     color: var(--ink-2);
     font-family: var(--f-serif);
-    font-size: 14px;
+    font-size: var(--text-small);
     line-height: 1.4;
   }
 
@@ -714,8 +715,8 @@ const heroFacts = [
 
   .year-bar span {
     margin-top: 6px;
-    font-family: var(--f-mono);
-    font-size: 9px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .04em;
   }
 
@@ -734,12 +735,12 @@ const heroFacts = [
     border-bottom: 1px solid var(--rule-2);
   }
 
-  .show-row strong,
+  .show-row :global(strong),
   .show-row small {
     display: block;
   }
 
-  .show-row strong {
+  .show-row :global(strong) {
     font-family: var(--f-serif);
     font-size: 18px;
     font-style: italic;
@@ -750,14 +751,14 @@ const heroFacts = [
     margin-top: 3px;
     color: var(--ink-2);
     font-family: var(--f-serif);
-    font-size: 14px;
+    font-size: var(--text-small);
   }
 
   .show-row__date,
   .show-row__meta {
     color: var(--accent-3);
-    font-family: var(--f-mono);
-    font-size: 11px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .1em;
     text-transform: uppercase;
   }
@@ -791,8 +792,8 @@ const heroFacts = [
   .stint-ledger__n,
   .stint-ledger__years {
     color: var(--accent-3);
-    font-family: var(--f-mono);
-    font-size: 12px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .1em;
     text-transform: uppercase;
   }
@@ -811,7 +812,7 @@ const heroFacts = [
     margin: 8px 0 0;
     color: var(--ink-2);
     font-family: var(--f-serif);
-    font-size: 15px;
+    font-size: var(--text-small);
     line-height: 1.55;
   }
 
@@ -847,7 +848,7 @@ const heroFacts = [
   .contact-sheet figcaption span {
     color: var(--ink);
     font-family: var(--f-serif);
-    font-size: 17px;
+    font-size: var(--text-small);
     font-style: italic;
     line-height: 1.25;
   }
@@ -855,8 +856,8 @@ const heroFacts = [
   .contact-sheet figcaption small {
     margin-top: 4px;
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1.4;
     text-transform: uppercase;
@@ -885,9 +886,9 @@ const heroFacts = [
     border: 1px solid var(--rule);
     padding: 7px 9px;
     color: var(--ink-2);
-    font-family: var(--f-mono);
-    font-size: 10.5px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
@@ -900,7 +901,7 @@ const heroFacts = [
     padding-top: 14px;
   }
 
-  .project-list strong {
+  .project-list :global(strong) {
     display: block;
     font-family: var(--f-serif);
     font-size: 19px;
@@ -911,7 +912,7 @@ const heroFacts = [
   .empty-note {
     color: var(--muted);
     font-family: var(--f-serif);
-    font-size: 16px;
+    font-size: var(--text-small);
   }
 
   @media (max-width: 900px) {
@@ -945,7 +946,7 @@ const heroFacts = [
       min-height: 190px;
     }
 
-    .live-stat--primary strong {
+    .live-stat--primary :global(strong) {
       font-size: 54px;
     }
 

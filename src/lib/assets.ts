@@ -16,6 +16,19 @@ export function asset(
   fallback: string = '/hero-image1.jpg'
 ): string {
   if (!id) return fallback;
+  if (/^https?:\/\//i.test(id)) return id;
   const base = `${DIRECTUS_URL}/assets/${id}`;
   return preset ? `${base}?${INLINE[preset]}` : base;
+}
+
+/** Resize only our Directus assets; external image URLs retain their original semantics. */
+export function responsiveAsset(src: string | null | undefined, width: number): string | undefined {
+  if (!src) return undefined;
+  try {
+    const url = new URL(src);
+    if (url.origin !== new URL(DIRECTUS_URL).origin || !url.pathname.startsWith('/assets/')) return undefined;
+    url.searchParams.set('width', String(width));
+    url.searchParams.set('quality', '75');
+    return url.href;
+  } catch { return undefined; }
 }

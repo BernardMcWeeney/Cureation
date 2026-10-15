@@ -1,0 +1,24 @@
+
+> cureation@0.0.1 build
+> astro build
+
+(node:98075) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+20:12:00 [@astrojs/cloudflare] Enabling image processing with Cloudflare Images for production with the "IMAGES" Images binding.
+20:12:00 [@astrojs/cloudflare] Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
+20:12:00 [types] Generated 42ms
+20:12:00 [build] output: "server"
+20:12:00 [build] mode: "server"
+20:12:00 [build] directory: /Users/bernardmcweeney/cureation/Cureation/dist/
+20:12:00 [build] adapter: @astrojs/cloudflare
+20:12:00 [build] Collecting build info...
+20:12:00 [build] ✓ Completed in 76ms.
+20:12:00 [build] Building server entrypoints...
+20:12:00 [vite] ✓ built in 119ms
+20:12:01 [vite] ✓ built in 542ms
+20:12:01 [vite] ✓ built in 54ms
+20:12:01 [build] Rearranging server assets...
+20:12:01 [build] ✓ Completed in 756ms.
+20:12:01 [@astrojs/cloudflare] Injected immutable Cache-Control for /_astro/* into _headers.
+20:12:01 [build] Server built in 850ms
+20:12:01 [build] Complete!

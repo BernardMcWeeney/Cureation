@@ -1,0 +1,5213 @@
+{
+  "incompleteness": {
+    "songsWithoutAlbum": 4,
+    "concertsWithoutVenueRelation": 1,
+    "concertsWithoutTourRelation": 227
+  },
+  "datePrecision": {
+    "discography": {
+      "day": 45
+    },
+    "setlists": {
+      "day": 1692
+    },
+    "tours": {
+      "day": 64
+    }
+  },
+  "time": "2026-10-14T15:19:40.306Z",
+  "access": "Anonymous public API; no historical records modified",
+  "scope": "Public rows and available relationships; similarity is a review candidate, not proof of duplication",
+  "counts": {
+    "discography": 45,
+    "songs": 850,
+    "venues": 1047,
+    "tours": 64,
+    "setlists": 1692,
+    "news": 24,
+    "reviews": 14,
+    "sources": 40
+  },
+  "failures": [],
+  "findings": [
+    {
+      "collection": "songs",
+      "id": 245,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 246,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 247,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 248,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 249,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 250,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 251,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 252,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 253,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 254,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 255,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 256,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 257,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 258,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 259,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 260,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 261,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 262,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 263,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 264,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 265,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 266,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 267,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 268,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 269,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 270,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 271,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 272,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 273,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 274,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 275,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 276,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 277,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 278,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 279,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 280,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 281,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 282,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 283,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 284,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 285,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 286,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 287,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 288,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 289,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 290,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 291,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 292,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 293,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 294,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 295,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 296,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 297,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 298,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 299,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 300,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 301,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 302,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 303,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 304,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 305,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 306,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 307,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 308,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 309,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 310,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 311,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 312,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 313,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 314,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 315,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 316,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 317,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 318,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 319,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 320,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 321,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 322,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 323,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 324,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 325,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 326,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 327,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 328,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 329,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 330,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 331,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 332,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 333,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 334,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 335,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 336,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 337,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 338,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 339,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 340,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 341,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 342,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 343,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 344,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 345,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 346,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 347,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 348,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 349,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 350,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 351,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 352,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 353,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 354,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 355,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 356,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 357,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 358,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 359,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 360,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 361,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 362,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 363,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 364,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 365,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 366,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 367,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 368,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 369,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 370,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 371,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 372,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 373,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 374,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 375,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 376,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 377,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 378,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 379,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 380,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 381,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 382,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 383,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 384,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 385,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 386,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 387,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 388,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 389,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 390,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 391,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 392,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 393,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 394,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 395,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 396,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 397,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 398,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 399,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 400,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 401,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 402,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 403,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 404,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 405,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 406,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 407,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 408,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 409,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 410,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 411,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 412,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 413,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 414,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 415,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 416,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 417,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 418,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 419,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 420,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 421,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 422,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 423,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 424,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 425,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 426,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 427,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 428,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 429,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 430,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 431,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 432,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 433,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 434,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 435,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 436,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 437,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 438,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 439,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 440,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 441,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 442,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 443,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 444,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 445,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 446,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 447,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 448,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 449,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 450,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 451,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 452,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 453,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 454,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 455,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 456,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 457,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 458,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 459,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 460,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 461,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 462,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 463,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 464,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 465,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 466,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 467,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 468,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 469,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 470,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 471,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 472,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 473,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 474,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 475,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 476,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 477,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 478,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 479,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 480,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 481,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 482,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 483,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 484,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 485,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 486,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 487,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 488,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 489,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 490,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 491,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 492,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 493,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 494,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 495,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 496,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 497,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 498,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 499,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 500,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 501,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 502,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 503,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 504,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 505,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 506,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 507,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 508,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 509,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 510,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 511,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 512,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 513,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 514,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 515,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 516,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 517,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 518,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 519,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 520,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 521,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 522,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 523,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 524,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 525,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 526,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 527,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 528,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 529,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 530,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 531,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 532,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 533,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 534,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 535,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 536,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 537,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 538,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 539,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 540,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 541,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 542,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 543,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 544,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 545,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 546,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 547,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 548,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 549,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 550,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 551,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 552,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 553,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 554,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 555,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 556,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 557,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 558,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 559,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 560,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 561,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 562,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 563,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 564,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 565,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 566,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 567,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 568,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 569,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 570,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 571,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 572,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 573,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 574,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 575,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 576,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 577,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 578,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 579,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 580,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 581,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 582,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 583,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 584,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 585,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 586,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 587,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 588,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 589,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 590,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 591,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 592,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 593,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 594,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 595,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 596,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 597,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 598,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 599,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 600,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 601,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 602,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 603,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 604,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 605,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 606,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 607,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 608,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 609,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 610,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 611,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 612,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 613,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 614,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 615,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 616,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 617,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 618,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 619,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 620,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 621,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 622,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 623,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 624,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 625,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 626,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 627,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 628,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 629,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 630,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 631,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 632,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 633,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 634,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 635,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 636,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 637,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 638,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 639,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 640,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 641,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 642,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 643,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 644,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 645,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 646,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 647,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 648,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 649,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 650,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 651,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 652,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 653,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 654,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 655,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 656,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 657,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 658,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 659,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 660,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 661,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 662,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 663,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 664,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 665,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 666,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 667,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 668,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 669,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 670,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 671,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 672,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 673,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 674,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 675,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 676,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 677,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 678,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 679,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 680,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 681,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 682,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 683,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 684,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 685,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 686,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 687,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 688,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 689,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 690,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 691,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 692,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 693,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 694,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 695,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 696,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 697,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 698,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 699,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 700,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 701,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 702,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 703,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 704,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 705,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 706,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 707,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 708,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 709,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 710,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 711,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 712,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 713,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 714,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 715,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 716,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 717,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 718,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 719,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 720,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 721,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 722,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 723,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 724,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 725,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 726,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 727,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 728,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 729,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 730,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 731,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 732,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 733,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 734,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 735,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 736,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 737,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 738,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 739,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 740,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 741,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 742,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 743,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 744,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 745,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 746,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 747,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 748,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 749,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 750,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 751,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 752,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 753,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 754,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 755,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 756,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 757,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 758,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 759,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 760,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 761,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 762,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 763,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 764,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 765,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 766,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 767,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 768,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 769,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 770,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 771,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 772,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 773,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 774,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 775,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 776,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 777,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 778,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 779,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 780,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 781,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 782,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 783,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 784,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 785,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 786,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 787,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 788,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 789,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 790,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 791,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 792,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 793,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 794,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 795,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 796,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 797,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 798,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 799,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 800,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 801,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 802,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 803,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 804,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 805,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 806,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 807,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 808,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 809,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 810,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 811,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 812,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 813,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 814,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 815,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 816,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 817,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 818,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 819,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 820,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 821,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 822,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 823,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 824,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 825,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 826,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 827,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 828,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 829,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 830,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 831,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 832,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 833,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 834,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 835,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 836,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 837,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 838,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 839,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 840,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 841,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 842,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 843,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 844,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 845,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 846,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 847,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 848,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 849,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 850,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 851,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 852,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 853,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 854,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 855,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 856,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 857,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 858,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 859,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 860,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 861,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 862,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 863,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 864,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 865,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 866,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 867,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 868,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 869,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 870,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 871,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 872,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 873,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 874,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 875,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 876,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 877,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 878,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 879,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 880,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 881,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 882,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 883,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 884,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 885,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 886,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 887,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 888,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 889,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 890,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 891,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 892,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 893,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 894,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 895,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 896,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 897,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 898,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 899,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 900,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 901,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 902,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 903,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 904,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 905,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 906,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 907,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 908,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 909,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 910,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 911,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 912,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 913,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 914,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 915,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 916,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 917,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 918,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 919,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 920,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 921,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 922,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 923,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 924,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 925,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 926,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 927,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 928,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 929,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 930,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 931,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 932,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 933,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 938,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 939,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 940,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "id": 941,
+      "issue": "missing_slug"
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_slug",
+      "slug": "bare",
+      "ids": [
+        128,
+        934
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "open",
+      "ids": [
+        15,
+        264,
+        294,
+        794
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "high",
+      "ids": [
+        16,
+        265,
+        333,
+        355,
+        439,
+        459,
+        497,
+        795
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "apart",
+      "ids": [
+        17,
+        285,
+        796
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "from the edge of the deep green sea",
+      "ids": [
+        18,
+        277,
+        344,
+        370,
+        797
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "wendy time",
+      "ids": [
+        19,
+        798
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "doing the unstuck",
+      "ids": [
+        20,
+        272,
+        799
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "friday i'm in love",
+      "ids": [
+        21,
+        275,
+        303,
+        374,
+        440,
+        460,
+        498,
+        800
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "trust",
+      "ids": [
+        22,
+        271,
+        801
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a letter to elise",
+      "ids": [
+        23,
+        289,
+        441,
+        802
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "cut",
+      "ids": [
+        24,
+        279,
+        803
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "to wish impossible things",
+      "ids": [
+        25,
+        804
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "end",
+      "ids": [
+        26,
+        280,
+        311,
+        805
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "plainsong",
+      "ids": [
+        27,
+        293,
+        353,
+        750,
+        782,
+        909
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "pictures of you",
+      "ids": [
+        28,
+        255,
+        266,
+        332,
+        354,
+        436,
+        751,
+        783,
+        910
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "closedown",
+      "ids": [
+        29,
+        256,
+        752,
+        784,
+        911
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "lovesong",
+      "ids": [
+        30,
+        287,
+        298,
+        359,
+        435,
+        457,
+        495,
+        753,
+        785,
+        912
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "last dance",
+      "ids": [
+        31,
+        257,
+        754,
+        786,
+        913
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "lullaby",
+      "ids": [
+        32,
+        267,
+        313,
+        372,
+        433,
+        456,
+        494,
+        755,
+        787,
+        914
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "fascination street",
+      "ids": [
+        33,
+        258,
+        269,
+        295,
+        368,
+        434,
+        756,
+        788,
+        915
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "prayers for rain",
+      "ids": [
+        34,
+        259,
+        757,
+        789,
+        916
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the same deep water as you",
+      "ids": [
+        35,
+        758,
+        790,
+        917
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "disintegration",
+      "ids": [
+        36,
+        260,
+        312,
+        345,
+        371,
+        759,
+        791,
+        918
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "homesick",
+      "ids": [
+        37,
+        261,
+        760,
+        792,
+        919
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "untitled",
+      "ids": [
+        38,
+        262,
+        761,
+        793,
+        920
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "10:15 saturday night",
+      "ids": [
+        39,
+        253,
+        323,
+        394,
+        413,
+        555,
+        839
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "accuracy",
+      "ids": [
+        40,
+        395,
+        556
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "grinding halt",
+      "ids": [
+        41,
+        322,
+        380,
+        401,
+        557
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "another day",
+      "ids": [
+        42,
+        400,
+        558
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "object",
+      "ids": [
+        43,
+        396,
+        559
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "subway song",
+      "ids": [
+        44,
+        397,
+        560
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "foxy lady",
+      "ids": [
+        45,
+        561
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "meathook",
+      "ids": [
+        46,
+        562
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "so what",
+      "ids": [
+        47,
+        563
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "fire in cairo",
+      "ids": [
+        48,
+        399,
+        564
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "it's not you",
+      "ids": [
+        49,
+        565
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "three imaginary boys",
+      "ids": [
+        50,
+        325,
+        403,
+        566
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a reflection",
+      "ids": [
+        51,
+        588
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "play for today",
+      "ids": [
+        52,
+        284,
+        305,
+        364,
+        417,
+        589
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "secrets",
+      "ids": [
+        53,
+        590
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "in your house",
+      "ids": [
+        54,
+        286,
+        591
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "three",
+      "ids": [
+        55,
+        592
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the final sound",
+      "ids": [
+        56,
+        593
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a forest",
+      "ids": [
+        57,
+        252,
+        306,
+        351,
+        365,
+        416,
+        448,
+        486,
+        594
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "m",
+      "ids": [
+        58,
+        595
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "at night",
+      "ids": [
+        59,
+        283,
+        326,
+        596
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "seventeen seconds",
+      "ids": [
+        60,
+        597
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the holy hour",
+      "ids": [
+        61,
+        613
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "primary",
+      "ids": [
+        62,
+        246,
+        307,
+        350,
+        418,
+        614
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "other voices",
+      "ids": [
+        63,
+        327,
+        419,
+        615
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "all cats are grey",
+      "ids": [
+        64,
+        616
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the funeral party",
+      "ids": [
+        65,
+        617
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "doubt",
+      "ids": [
+        66,
+        618
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the drowning man",
+      "ids": [
+        67,
+        619
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "faith",
+      "ids": [
+        68,
+        620
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "one hundred years",
+      "ids": [
+        69,
+        251,
+        282,
+        310,
+        349,
+        637
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a short term effect",
+      "ids": [
+        70,
+        638
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the hanging garden",
+      "ids": [
+        71,
+        248,
+        421,
+        639
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "siamese twins",
+      "ids": [
+        72,
+        640
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the figurehead",
+      "ids": [
+        73,
+        281,
+        641
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a strange day",
+      "ids": [
+        74,
+        328,
+        642
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "cold",
+      "ids": [
+        75,
+        643
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "pornography",
+      "ids": [
+        76,
+        644
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "shake dog shake",
+      "ids": [
+        77,
+        245,
+        308,
+        348,
+        366,
+        659
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "wailing wall",
+      "ids": [
+        79,
+        661
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "give me it",
+      "ids": [
+        80,
+        249,
+        662
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "dressing up",
+      "ids": [
+        81,
+        290,
+        663
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the caterpillar",
+      "ids": [
+        82,
+        315,
+        373,
+        425,
+        664
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "piggy in the mirror",
+      "ids": [
+        83,
+        665
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the empty world",
+      "ids": [
+        84,
+        666
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "bananafishbones",
+      "ids": [
+        85,
+        329,
+        667
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the top",
+      "ids": [
+        86,
+        668
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "in between days",
+      "ids": [
+        87,
+        276,
+        452,
+        490,
+        686
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "kyoto song",
+      "ids": [
+        88,
+        687
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the blood",
+      "ids": [
+        89,
+        688
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "six different ways",
+      "ids": [
+        90,
+        689
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "push",
+      "ids": [
+        91,
+        302,
+        360,
+        690
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the baby screams",
+      "ids": [
+        92,
+        691
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "close to me",
+      "ids": [
+        93,
+        292,
+        316,
+        375,
+        427,
+        453,
+        491,
+        692
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a night like this",
+      "ids": [
+        94,
+        270,
+        296,
+        330,
+        356,
+        428,
+        693
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "screw",
+      "ids": [
+        95,
+        694
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "sinking",
+      "ids": [
+        96,
+        347,
+        695
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the kiss",
+      "ids": [
+        97,
+        714
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "catch",
+      "ids": [
+        98,
+        288,
+        430,
+        715
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "torture",
+      "ids": [
+        99,
+        716
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "if only tonight we could sleep",
+      "ids": [
+        100,
+        346,
+        363,
+        717
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "why can't i be you?",
+      "ids": [
+        101,
+        319,
+        376,
+        429,
+        454,
+        492,
+        718
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "how beautiful you are...",
+      "ids": [
+        102,
+        719
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the snakepit",
+      "ids": [
+        103,
+        720
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "just like heaven",
+      "ids": [
+        105,
+        268,
+        299,
+        362,
+        431,
+        455,
+        493,
+        722
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "all i want",
+      "ids": [
+        106,
+        723
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "hot hot hot!!!",
+      "ids": [
+        107,
+        317,
+        432,
+        724
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "one more time",
+      "ids": [
+        108,
+        725
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "like cockatoos",
+      "ids": [
+        109,
+        331,
+        726
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "icing sugar",
+      "ids": [
+        110,
+        727,
+        866
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the perfect girl",
+      "ids": [
+        111,
+        728
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a thousand hours",
+      "ids": [
+        112,
+        729
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "shiver and shake",
+      "ids": [
+        113,
+        730
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "fight",
+      "ids": [
+        114,
+        731
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "want",
+      "ids": [
+        115,
+        343
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "mint car",
+      "ids": [
+        120,
+        461,
+        499
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "jupiter crash",
+      "ids": [
+        121,
+        334
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "bare",
+      "ids": [
+        128,
+        934
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the last day of summer",
+      "ids": [
+        133,
+        342
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "39",
+      "ids": [
+        136,
+        335
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the end of the world",
+      "ids": [
+        141,
+        297,
+        358
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "us or them",
+      "ids": [
+        143,
+        336
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "alt.end",
+      "ids": [
+        144,
+        341
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the hungry ghost",
+      "ids": [
+        154,
+        309,
+        340
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "it's over",
+      "ids": [
+        160,
+        337,
+        941
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "alone",
+      "ids": [
+        161,
+        383
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "and nothing is forever",
+      "ids": [
+        162,
+        384
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "a fragile thing",
+      "ids": [
+        163,
+        385
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "warsong",
+      "ids": [
+        164,
+        386
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "drone:nodrone",
+      "ids": [
+        165,
+        387
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "i can never say goodbye",
+      "ids": [
+        166,
+        388
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "all i ever am",
+      "ids": [
+        167,
+        389
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "endsong",
+      "ids": [
+        168,
+        390
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "charlotte sometimes",
+      "ids": [
+        247,
+        291,
+        420,
+        636,
+        921
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the walk",
+      "ids": [
+        250,
+        273,
+        301,
+        357,
+        408,
+        423,
+        450,
+        488,
+        926
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "killing an arab",
+      "ids": [
+        254,
+        382,
+        398,
+        412
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "let's go to bed",
+      "ids": [
+        274,
+        318,
+        404,
+        422,
+        449,
+        487,
+        928
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "never enough",
+      "ids": [
+        278,
+        369,
+        437,
+        458,
+        496
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the only one",
+      "ids": [
+        300,
+        938
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "inbetween days",
+      "ids": [
+        304,
+        361,
+        426
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the lovecats",
+      "ids": [
+        314,
+        411,
+        424,
+        451,
+        489
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "boys don't cry",
+      "ids": [
+        320,
+        352,
+        378,
+        392,
+        414,
+        447,
+        485,
+        583
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "jumping someone else's train",
+      "ids": [
+        321,
+        379,
+        391,
+        415,
+        584
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "burn",
+      "ids": [
+        367,
+        888
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "plastic passion",
+      "ids": [
+        393,
+        840
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "world war",
+      "ids": [
+        402,
+        582
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the dream",
+      "ids": [
+        405,
+        849,
+        925
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "just one kiss",
+      "ids": [
+        406,
+        848,
+        924
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the upstairs room",
+      "ids": [
+        407,
+        850,
+        923
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "speak my language",
+      "ids": [
+        409,
+        852
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "lament",
+      "ids": [
+        410,
+        851,
+        927
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "wrong number",
+      "ids": [
+        446,
+        462,
+        500
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "cut here",
+      "ids": [
+        463,
+        501
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "just say yes",
+      "ids": [
+        464,
+        502
+      ]
+    },
+    {
+      "collection": "songs",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "splintered in her head",
+      "ids": [
+        846,
+        922
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "olympiahalle",
+      "ids": [
+        10,
+        631
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "le zénith",
+      "ids": [
+        16,
+        142,
+        592
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "top of the pops",
+      "ids": [
+        23,
+        54
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "palasport",
+      "ids": [
+        57,
+        692
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "palais des sports",
+      "ids": [
+        60,
+        240,
+        251,
+        630
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "green stage",
+      "ids": [
+        81,
+        438
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "orpheum theatre",
+      "ids": [
+        99,
+        734
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "stadthalle",
+      "ids": [
+        108,
+        724,
+        843,
+        844
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "the forum",
+      "ids": [
+        114,
+        561
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "capitol theatre",
+      "ids": [
+        122,
+        293
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "salle omnisports",
+      "ids": [
+        207,
+        799
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "bombay rock",
+      "ids": [
+        261,
+        886
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "gaumont theatre",
+      "ids": [
+        275,
+        299
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "tiffany's",
+      "ids": [
+        294,
+        933,
+        980,
+        1009
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "top rank",
+      "ids": [
+        302,
+        1010
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "estadio nacional",
+      "ids": [
+        426,
+        427
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "troubadour",
+      "ids": [
+        445,
+        975
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "velodrom",
+      "ids": [
+        468,
+        562
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "messehalle 7",
+      "ids": [
+        484,
+        585
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "coors amphitheatre",
+      "ids": [
+        495,
+        497
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "parc des expositions",
+      "ids": [
+        672,
+        870
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "top rank suite",
+      "ids": [
+        805,
+        929
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "stadspark",
+      "ids": [
+        827,
+        906
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "zuiderpark",
+      "ids": [
+        832,
+        966
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "main stage",
+      "ids": [
+        1026,
+        1032
+      ]
+    },
+    {
+      "collection": "venues",
+      "issue": "duplicate_name_candidate_not_confirmed",
+      "name": "grande scène",
+      "ids": [
+        1039,
+        1046
+      ]
+    }
+  ]
+}

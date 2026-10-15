@@ -24,13 +24,13 @@ const { kind, id, label, href, actionLabel = 'Save' } = Astro.props;
   .bookmark {
     display: inline-flex; align-items: center; gap: .4rem;
     background: transparent; border: 1px solid var(--rule); color: var(--ink);
-    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase;
     padding: .4rem .7rem; cursor: pointer; transition: all .2s ease;
   }
   .bookmark:hover { border-color: var(--accent); color: var(--accent-3); }
   .bookmark[data-saved="true"] { background: var(--accent-tint); border-color: var(--accent); color: var(--accent-3); }
   .bookmark[data-saved="true"] .bookmark__icon::before { content: '★'; }
-  .bookmark__icon { font-size: 12px; line-height: 1; }
+  .bookmark__icon { font-size: var(--text-label); line-height: 1; }
   .bookmark[data-saved="true"] .bookmark__icon { display: none; }
   .bookmark[data-saved="true"] .bookmark__label::before { content: 'Saved · '; opacity: .7; }
 </style>
@@ -49,6 +49,9 @@ const { kind, id, label, href, actionLabel = 'Save' } = Astro.props;
       const id = btn.dataset.id || '';
       const saved = list.some((b) => b.kind === kind && b.id === id);
       btn.setAttribute('data-saved', saved ? 'true' : 'false');
+      btn.setAttribute('aria-pressed', String(saved));
+      if (btn.dataset.bookmarkWired) return;
+      btn.dataset.bookmarkWired = 'true';
       btn.addEventListener('click', () => {
         const cur = read();
         const idx = cur.findIndex((b) => b.kind === kind && b.id === id);
@@ -59,6 +62,7 @@ const { kind, id, label, href, actionLabel = 'Save' } = Astro.props;
           cur.push({ kind, id, label: btn.dataset.label || '', href: btn.dataset.href || '', added: Date.now() });
           btn.setAttribute('data-saved', 'true');
         }
+        btn.setAttribute('aria-pressed', String(btn.dataset.saved === 'true'));
         write(cur);
       });
     });

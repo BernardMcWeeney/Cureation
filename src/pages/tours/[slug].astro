@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple } from '../../lib/visual-editing';
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
@@ -113,8 +114,8 @@ const statusTone = (label: string) => label === 'Completed' ? 'tag--gold' : labe
 const upcomingSetlists = sortedByDate.filter((s) => !isPastShow(s));
 const completedSetlists = sortedByDate.filter(isPastShow);
 const scheduleGroups = [
-  { key: 'upcoming', title: 'Upcoming', items: upcomingSetlists },
-  { key: 'completed', title: 'Completed', items: completedSetlists },
+  { ...copySource({"title":"pages_tours__slug__data-e7d746f646ca"}),  key: 'upcoming', title: copyText("pages_tours__slug__data-e7d746f646ca", "Upcoming"), items: upcomingSetlists },
+  { ...copySource({"title":"pages_tours__slug__data-2303acf68482"}),  key: 'completed', title: copyText("pages_tours__slug__data-2303acf68482", "Completed"), items: completedSetlists },
 ].filter((group) => group.items.length > 0);
 
 const gaps = sortedByDate.slice(1).map((s, index) => {
@@ -161,23 +162,23 @@ const supportActs: string[] = Array.isArray(tour.support_acts)
   : [];
 
 const facts: Array<[string, string]> = [
-  ['Years', years],
-  ['Start', tour.start_date || '–'],
-  ['End', tour.end_date || '–'],
-  ['Shows on file', String(setlists.length)],
-  ['Total shows', String(tour.total_shows || setlists.length || '–')],
-  ['Countries', String(countries.length)],
-  ['Associated record', album?.title || '–'],
-  ['Lineup size', String(lineup.length || '–')],
+  copyTuple([copyText("pages_tours__slug__tuple-2e621cc5faa1", "Years"), years], {"0":"pages_tours__slug__tuple-2e621cc5faa1"}),
+  copyTuple([copyText("pages_tours__slug__tuple-087af4512670", "Start"), tour.start_date || '–'], {"0":"pages_tours__slug__tuple-087af4512670"}),
+  copyTuple([copyText("pages_tours__slug__tuple-5dc8acf8afcc", "End"), tour.end_date || '–'], {"0":"pages_tours__slug__tuple-5dc8acf8afcc"}),
+  copyTuple([copyText("pages_tours__slug__tuple-90d0281e753c", "Shows"), String(setlists.length)], {"0":"pages_tours__slug__tuple-90d0281e753c"}),
+  copyTuple([copyText("pages_tours__slug__tuple-56e6950070c6", "Total shows"), String(tour.total_shows || setlists.length || '–')], {"0":"pages_tours__slug__tuple-56e6950070c6"}),
+  copyTuple([copyText("pages_tours__slug__tuple-642c474471ca", "Countries"), String(countries.length)], {"0":"pages_tours__slug__tuple-642c474471ca"}),
+  copyTuple([copyText("pages_tours__slug__tuple-59a2ff031d68", "Associated record"), album?.title || '–'], {"0":"pages_tours__slug__tuple-59a2ff031d68"}),
+  copyTuple([copyText("pages_tours__slug__tuple-d888bcfa8415", "Lineup size"), String(lineup.length || '–')], {"0":"pages_tours__slug__tuple-d888bcfa8415"}),
 ];
 
 const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image || null);
 ---
-<Layout title={`${tour.name} · Tours · Cureation`} description={tour.description || undefined} ogImage={(tour.image_file || album?.cover_art) ? asset(tour.image_file || album!.cover_art, 'og') : undefined}>
+<Layout editRecord={tour} title={`${tour.name} · Tours · Cureation`} description={tour.description || undefined} ogImage={(tour.image_file || album?.cover_art) ? asset(tour.image_file || album!.cover_art, 'og') : undefined}>
   <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
-      { label: 'Home', href: '/' },
-      { label: 'Tours', href: '/tours' },
+      { ...copySource({"label":"pages_tours__slug__data-485bce7598ce"}),  label: copyText("pages_tours__slug__data-485bce7598ce", "Home"), href: '/' },
+      { ...copySource({"label":"pages_tours__slug__data-2bcff7f3bde7"}),  label: copyText("pages_tours__slug__data-2bcff7f3bde7", "Tours"), href: '/tours' },
       { label: tour.name },
     ]} />
   </div>
@@ -192,35 +193,35 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     </section>
   )}
 
-  <section id="tour-overview" class="container tour-head detail-anchor" style="margin-top: 1rem;">
+  <section  id="tour-overview" class="container tour-head detail-anchor" style="margin-top: 1rem;">
     {!heroSrc && <div class="mono-sm muted">TOUR · {years}</div>}
     <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-top:.6rem; flex-wrap:wrap;">
-      <div class="cluster" style="gap:.4rem;">
+      <div  class="cluster" style="gap:.4rem;">
         {album && <Tag>{album.title.toUpperCase()}</Tag>}
-        {tour.total_shows && <span class="tag tag--gold">{tour.total_shows} SHOWS</span>}
+        {tour.total_shows && <span data-directus={editable(tour, ["total_shows"])} class="tag tag--gold">{tour.total_shows} SHOWS</span>}
         {countries.length > 3 && <span class="tag tag--cool">{countries.length} COUNTRIES</span>}
       </div>
       <Bookmark kind="tour" id={tour.id} label={tour.name} href={`/tours/${tour.slug}`} />
     </div>
-    <h1 class="tour-head__title serif">{tour.name}</h1>
-    {tour.description && <p class="tour-head__lede">{tour.description}</p>}
+    <h1 data-directus={editable(tour, ["name"])} class="tour-head__title serif">{tour.name}</h1>
+    {tour.description && <p data-directus={editable(tour, ["description"])} class="tour-head__lede">{tour.description}</p>}
     <div class="facts" style="margin-top: 1.4rem;">
-      {facts.map(([k, v]) => (
+      {facts.map((__copyRow9871) => { const [k, v] = __copyRow9871; return (
         <div class="facts__item">
-          <div class="facts__k">{k}</div>
-          <div class="facts__v">{v}</div>
+          <div data-directus={editable(__copyRow9871, ["0"])} class="facts__k">{k}</div>
+          <div data-directus={editable(__copyRow9871, ["1"])} class="facts__v">{v}</div>
         </div>
-      ))}
+      ); })}
     </div>
   </section>
 
   <div class="container">
     <DossierNav items={[
-      { label: 'Overview', href: '#tour-overview', meta: years },
-      ...(setlists.length > 1 ? [{ label: 'The run', href: '#tour-run', meta: `${setlists.length} shows` }] : []),
-      ...(tourRoutePoints.length ? [{ label: 'Route', href: '#tour-route', meta: `${tourRoutePoints.length} stops` }] : []),
-      { label: 'Itinerary', href: '#tour-itinerary', meta: `${setlists.length} dates` },
-      { label: 'Tour file', href: '#tour-file', meta: 'Context' },
+      { ...copySource({"label":"pages_tours__slug__data-5a000c7b6586"}),  label: copyText("pages_tours__slug__data-5a000c7b6586", "Overview"), href: '#tour-overview', meta: years },
+      ...(setlists.length > 1 ? [{ ...copySource({"label":"pages_tours__slug__data-e14ccd7a8437"}),  label: copyText("pages_tours__slug__data-e14ccd7a8437", "The run"), href: '#tour-run', meta: `${setlists.length} shows` }] : []),
+      ...(tourRoutePoints.length ? [{ ...copySource({"label":"pages_tours__slug__data-d221f84795d8"}),  label: copyText("pages_tours__slug__data-d221f84795d8", "Route"), href: '#tour-route', meta: `${tourRoutePoints.length} stops` }] : []),
+      { ...copySource({"label":"pages_tours__slug__data-e8d48a3c724f"}),  label: copyText("pages_tours__slug__data-e8d48a3c724f", "Itinerary"), href: '#tour-itinerary', meta: `${setlists.length} dates` },
+      { ...copySource({"label":"pages_tours__slug__data-0b3c7c0871fe","meta":"pages_tours__slug__data-70c1f26c351f"}),  label: copyText("pages_tours__slug__data-0b3c7c0871fe", "Tour details"), href: '#tour-file', meta: copyText("pages_tours__slug__data-70c1f26c351f", "Context") },
     ]} />
   </div>
 
@@ -228,7 +229,7 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     <section id="tour-run" class="container detail-anchor" style="padding-block: clamp(16px, 3vw, 32px); border-top: 1px solid var(--rule);">
       <div class="mono-sm muted" style="margin-bottom:.5rem;">THE RUN · SHOW BY SHOW</div>
       <TourStrip total={setlists.length} height={42} />
-      <div class="mono-sm muted" style="margin-top:.5rem;">
+      <div data-directus={editable(tour, ["start_date","end_date"])} class="mono-sm muted" style="margin-top:.5rem;">
         {setlists.length} shows on file · {tour.start_date || '?'} → {tour.end_date || '?'}
       </div>
     </section>
@@ -242,7 +243,7 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
         <div class="tour-route-head">
           <div>
             <div class="kicker">Routes</div>
-            <h2 class="tour-route-title">Tour route</h2>
+            <h2 data-directus={copyAttr("pages_tours_slug_1b1bac1f11cc")} set:html={copyText("pages_tours_slug_1b1bac1f11cc", "Tour route")} class="tour-route-title"></h2>
           </div>
           <div class="tour-route-meta mono-sm">
             <span>{tourRoutePoints.length} mapped stops</span>
@@ -263,21 +264,21 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
   )}
 
   <section id="tour-itinerary" class="container tour-board detail-anchor" data-tour-itinerary>
-    <div class="tour-grid">
+    <div class="tour-grid archive-columns">
       <div>
         <div class="tour-board__head">
           <div>
             <div class="kicker">Date list</div>
-            <h2 class="tour-board__title">Full itinerary</h2>
+            <h2 data-directus={copyAttr("pages_tours_slug_05b6f0a04ada")} set:html={copyText("pages_tours_slug_05b6f0a04ada", "Full itinerary")} class="tour-board__title"></h2>
           </div>
           <div class="mono-sm muted" data-visible-count>{setlists.length} shows</div>
         </div>
 
         {countryFilters.length > 1 && (
           <div class="country-filters" data-country-filters aria-label="Country filters">
-            <button type="button" class="chip is-active" aria-pressed="true" data-country="all">All countries</button>
+            <button data-directus={copyAttr("pages_tours_slug_28a3abaea320")} set:html={copyText("pages_tours_slug_28a3abaea320", "All countries")} type="button" class="chip is-active" aria-pressed="true" data-country="all"></button>
             {countryFilters.map((country) => (
-              <button type="button" class="chip" aria-pressed="false" data-country={country.code}>{country.label}</button>
+              <button data-directus={editable(country, ["label"])} type="button" class="chip" aria-pressed="false" data-country={country.code}>{country.label}</button>
             ))}
           </div>
         )}
@@ -286,10 +287,10 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
           {scheduleGroups.map((group) => (
             <section class="schedule-group" data-group={group.key}>
               <div class="schedule-group__head">
-                <h3>{group.title}</h3>
-                <span class="mono-sm">{group.items.length}</span>
+                <h3 data-directus={editable(group, ["title"])}>{group.title}</h3>
+                <span data-directus={editable(group, ["items"])} class="mono-sm">{group.items.length}</span>
               </div>
-              <div class="show-list">
+              <div  class="show-list">
                 {group.items.map((s, i) => {
                   const kind = showKind(s);
                   const label = statusLabel(s);
@@ -301,18 +302,18 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
                       data-country={s.country_code || s.country || ''}
                     >
                       <time class="show-row__date" datetime={s.date || undefined}>
-                        <span>{formatDate(s.date)}</span>
+                        <span data-directus={editable(s, ["date"])}>{formatDate(s.date)}</span>
                         <small>Show {String(sequence || i + 1).padStart(2, '0')}</small>
                       </time>
                       <div class="show-row__main">
-                        <a class="show-row__title" href={`/setlists/${s.slug}`}>{s.venue || 'Venue TBD'}</a>
-                        <div class="show-row__place mono-sm">
+                        <a data-directus={editable(s, ["venue"])} class="show-row__title" href={`/setlists/${s.slug}`}>{s.venue || 'Venue TBD'}</a>
+                        <div data-directus={editable(s, ["city","state_province","country"])} class="show-row__place mono-sm">
                           {[s.city, s.state_province, s.country].filter(Boolean).join(', ') || 'Location TBD'}
                         </div>
-                        <div class="show-row__badges">
+                        <div  class="show-row__badges">
                           <span class={`tag ${kind === 'festival' ? 'tag--hot' : 'tag--cool'}`}>{kind}</span>
                           <span class={`tag ${statusTone(label)}`}>{label}</span>
-                          {(s.song_count || 0) > 0 && <span class="tag tag--gold">{s.song_count} songs</span>}
+                          {(s.song_count || 0) > 0 && <span data-directus={editable(s, ["song_count"])} class="tag tag--gold">{s.song_count} songs</span>}
                         </div>
                       </div>
                       <div class="show-row__actions">
@@ -336,29 +337,29 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
       <aside id="tour-file" class="tour-side stack detail-anchor" style="--gap: 1.4rem;">
         {(notableGaps.length > 0 || multiNightRuns.length > 0) && (
           <div class="run-panel">
-            <div class="panel-head"><span>Gaps</span><span>between shows</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_slug_cb74917d203c")} set:html={copyText("pages_tours_slug_cb74917d203c", "Gaps")}></span><span data-directus={copyAttr("pages_tours_slug_24f9e9900a8b")} set:html={copyText("pages_tours_slug_24f9e9900a8b", "between shows")}></span></div>
             <div class="run-panel__body">
               {notableGaps.length > 0 ? notableGaps.slice(0, 5).map((gap) => (
                 <div class="run-line">
-                  <strong>{gap.days} days</strong>
-                  <span>{gap.from.city || gap.from.venue} to {gap.to.city || gap.to.venue}</span>
-                  <small>{formatDate(gap.from.date)} - {formatDate(gap.to.date)}</small>
+                  <strong data-directus={editable(gap, ["days"])}>{gap.days} days</strong>
+                  <span data-directus={editable(gap.from, ["city","venue"]) ?? editable(gap, ["from","to"]) ?? editable(gap.to, ["city","venue"])}>{gap.from.city || gap.from.venue} to {gap.to.city || gap.to.venue}</span>
+                  <small data-directus={editable(gap.from, ["date"]) ?? editable(gap, ["from","to"]) ?? editable(gap.to, ["date"])}>{formatDate(gap.from.date)} - {formatDate(gap.to.date)}</small>
                 </div>
               )) : (
-                <p class="muted">No large gaps on file.</p>
+                <p data-directus={copyAttr("pages_tours_slug_cd206c17df00")} set:html={copyText("pages_tours_slug_cd206c17df00", "No long breaks between shows.")} class="muted"></p>
               )}
             </div>
 
-            <div class="panel-head"><span>Multi-night runs</span><span>{multiNightRuns.length}</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_slug_01d76cf92764")} set:html={copyText("pages_tours_slug_01d76cf92764", "Multi-night runs")}></span><span>{multiNightRuns.length}</span></div>
             <div class="run-panel__body">
               {multiNightRuns.length > 0 ? multiNightRuns.map((item) => (
                 <div class="run-line">
-                  <strong>{item.shows.length} nights</strong>
-                  <span>{item.venue} - {item.city}</span>
-                  <small>{formatDate(item.shows[0].date)} - {formatDate(item.shows[item.shows.length - 1].date)}</small>
+                  <strong data-directus={editable(item, ["shows"])}>{item.shows.length} nights</strong>
+                  <span data-directus={editable(item, ["venue","city"])}>{item.venue} - {item.city}</span>
+                  <small data-directus={editable(item.shows[0], ["date"]) ?? editable(item, ["shows"]) ?? editable(item.shows[item.shows.length - 1], ["date"])}>{formatDate(item.shows[0].date)} - {formatDate(item.shows[item.shows.length - 1].date)}</small>
                 </div>
               )) : (
-                <p class="muted">No multi-night stands on file.</p>
+                <p data-directus={copyAttr("pages_tours_slug_c5cc3ae2e30d")} set:html={copyText("pages_tours_slug_c5cc3ae2e30d", "No venues with consecutive shows.")} class="muted"></p>
               )}
             </div>
           </div>
@@ -366,23 +367,23 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
 
         {lineup.length > 0 && (
           <div class="panel--bare">
-            <div class="panel-head"><span>Lineup</span><span>ON THE ROAD</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_slug_5f4e197c5c82")} set:html={copyText("pages_tours_slug_5f4e197c5c82", "Lineup")}></span><span data-directus={copyAttr("pages_tours_slug_b5a8e8315e0e")} set:html={copyText("pages_tours_slug_b5a8e8315e0e", "ON THE ROAD")}></span></div>
             <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
-              {lineup.map((m) => <li class="serif" style="font-size:17px; font-style:italic; padding: 4px 0;"><span class="pip pip--cool"></span>{m}</li>)}
+              {lineup.map((m) => <li class="serif" style="font-size:var(--text-small); font-style:italic; padding: 4px 0;"><span class="pip pip--cool"></span>{m}</li>)}
             </ul>
           </div>
         )}
         {supportActs.length > 0 && (
           <div class="panel--bare">
-            <div class="panel-head"><span>Support acts</span><span>ROTATING BILL</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_slug_e5cf5a8e1b2f")} set:html={copyText("pages_tours_slug_e5cf5a8e1b2f", "Support acts")}></span><span data-directus={copyAttr("pages_tours_slug_d87523d7867e")} set:html={copyText("pages_tours_slug_d87523d7867e", "ROTATING BILL")}></span></div>
             <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
-              {supportActs.map((a) => <li class="serif" style="font-size:16px; font-style:italic; padding: 4px 0;">{a}</li>)}
+              {supportActs.map((a) => <li class="serif" style="font-size:var(--text-small); font-style:italic; padding: 4px 0;">{a}</li>)}
             </ul>
           </div>
         )}
         {countries.length > 0 && (
           <div class="panel--bare">
-            <div class="panel-head"><span>Countries</span><span>{countries.length}</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_slug_f931419c43aa")} set:html={copyText("pages_tours_slug_f931419c43aa", "Countries")}></span><span>{countries.length}</span></div>
             <div class="cluster" style="gap:.3rem; padding: 12px 16px 16px;">
               {countries.map(c => <span class="tag">{c}</span>)}
             </div>
@@ -390,13 +391,13 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
         )}
         {album && (
           <a href={`/discography/${album.slug}`} style="display:block; border: 1px solid var(--rule); background: var(--bg-2); text-decoration: none;">
-            <div class="panel-head"><span>Supporting record</span><span>{album.release_date?.slice(0,4)}</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_slug_d3295f35f8e7")} set:html={copyText("pages_tours_slug_d3295f35f8e7", "Supporting record")}></span><span data-directus={editable(album, ["release_date"])}>{album.release_date?.slice(0,4)}</span></div>
             <div style="padding: 12px;">
-              <div style="display:grid; grid-template-columns: 72px 1fr; gap: 12px; align-items:center;">
-                {album.cover_art && <img src={asset(album.cover_art, 'card')} alt={album.title} style="width:72px; height:72px; object-fit:cover; border:1px solid var(--rule);" />}
+              <div  style="display:grid; grid-template-columns: 72px 1fr; gap: 12px; align-items:center;">
+                {album.cover_art && <img data-directus={editable(album, ["cover_art"])} src={asset(album.cover_art, 'card')} alt={album.title} style="width:72px; height:72px; object-fit:cover; border:1px solid var(--rule);" />}
                 <div>
-                  <div class="serif" style="font-size:22px; font-style:italic; line-height:1.1;">{album.title}</div>
-                  <div class="mono-sm" style="color: var(--accent-3); margin-top:.3rem;">{(album.type || '').toUpperCase()}</div>
+                  <div data-directus={editable(album, ["title"])} class="serif" style="font-size:22px; font-style:italic; line-height:1.1;">{album.title}</div>
+                  <div data-directus={editable(album, ["type"])} class="mono-sm" style="color: var(--accent-3); margin-top:.3rem;">{(album.type || '').toUpperCase()}</div>
                 </div>
               </div>
             </div>
@@ -661,8 +662,8 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
   :global(.tour-route-map .leaflet-control-attribution) {
     background: color-mix(in srgb, var(--bg) 84%, transparent);
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
   }
   :global(.tour-route-map .leaflet-control-attribution a) { color: var(--accent-3); }
   :global(.tour-route-map .english-country-label) {
@@ -673,8 +674,8 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
   :global(.tour-route-map .english-country-label span) {
     color: color-mix(in srgb, var(--ink) 72%, var(--accent) 28%);
     display: inline-block;
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1;
     opacity: .78;
@@ -701,8 +702,8 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
   :global(.tour-route-popup__place),
   :global(.tour-route-popup__date),
   :global(.tour-route-popup__link) {
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
   }
@@ -777,13 +778,13 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-family: var(--f-mono);
+    font-family: var(--f-ui);
     color: var(--accent-3);
     text-transform: uppercase;
-    letter-spacing: .16em;
-    font-size: 10.5px;
+    letter-spacing: .1em;
+    font-size: var(--text-label);
   }
-  .show-row__date small { color: var(--muted); font-size: 10px; }
+  .show-row__date small { color: var(--muted); font-size: var(--text-label); }
   .show-row__title {
     display: inline;
     border-bottom: 0;
@@ -816,7 +817,7 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
     border-bottom: 1px solid var(--rule-2);
   }
   .run-line:last-child { border-bottom: 0; padding-bottom: 0; }
-  .run-line strong {
+  .run-line :global(strong) {
     font-family: var(--f-display);
     font-style: italic;
     font-size: 24px;
@@ -825,9 +826,9 @@ const heroSrc = tour.image_file ? asset(tour.image_file, 'hero') : (tour.image |
   }
   .run-line span { color: var(--ink-2); }
   .run-line small {
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
   }

@@ -1,0 +1,74 @@
+[
+  {
+    "route": "/venues",
+    "status": 200,
+    "cache": "public, max-age=0, must-revalidate",
+    "edgeCache": "public, max-age=600",
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": false,
+    "hasPreviewNoindex": false
+  },
+  {
+    "route": "/venues?visual-editing=true",
+    "status": 200,
+    "cache": "private, no-store",
+    "edgeCache": "no-store",
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": true,
+    "hasPreviewNoindex": true
+  },
+  {
+    "route": "/reviews/definitely-missing-20261014",
+    "status": 404,
+    "cache": "private, no-store",
+    "edgeCache": "no-store",
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": false,
+    "hasPreviewNoindex": false
+  },
+  {
+    "route": "/publication/author/bernard-mcweeney",
+    "status": 200,
+    "cache": "public, max-age=0, must-revalidate",
+    "edgeCache": "public, max-age=600",
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": false,
+    "hasPreviewNoindex": false
+  },
+  {
+    "route": "/videos",
+    "status": 200,
+    "cache": "public, max-age=0, must-revalidate",
+    "edgeCache": "public, max-age=600",
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": false,
+    "hasPreviewNoindex": false
+  },
+  {
+    "route": "/rss.xml",
+    "status": 200,
+    "cache": "private, no-store",
+    "edgeCache": "no-store",
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": false,
+    "hasPreviewNoindex": false
+  },
+  {
+    "route": "/publication/rss.xml",
+    "status": 200,
+    "cache": "private, no-store",
+    "edgeCache": "no-store",
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": false,
+    "hasPreviewNoindex": false
+  },
+  {
+    "route": "/robots.txt",
+    "status": 200,
+    "cache": "public, max-age=0, must-revalidate",
+    "edgeCache": null,
+    "framePolicy": "frame-ancestors 'self' https://dash.cureation.net",
+    "hasEditorAttributes": false,
+    "hasPreviewNoindex": false
+  }
+]

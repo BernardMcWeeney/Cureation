@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copySource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -9,14 +10,14 @@ const items: any[] = await fetchRaw('did_you_know', { limit: -1, sort: '-id' }).
 const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean))).sort();
 ---
 <Layout title="Curiosities · Cureation">
-  <PageHero
-    section="Did you know"
-    title="Curiosities"
-    deck="Footnotes, trivia and minor observations: the marginalia that keep an archive honest about what it knows."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Curiosities' }]}
+  <PageHero copyKeys={{"section":"pages_curiosities_324a9a24f8b5","title":"pages_curiosities_45a31d30d7cd","deck":"pages_curiosities_840fa235f297"}}
+    section={copyText("pages_curiosities_324a9a24f8b5", "Did you know")}
+    title={copyText("pages_curiosities_45a31d30d7cd", "Trivia")}
+
+    crumbs={[{ ...copySource({"label":"pages_curiosities_data-d4aa29dfe274"}),  label: copyText("pages_curiosities_data-d4aa29dfe274", "Home"), href: '/' }, { ...copySource({"label":"pages_curiosities_data-11ecfbfd8267"}),  label: copyText("pages_curiosities_data-11ecfbfd8267", "Trivia") }]}
     facts={[
-      { k: 'On file', v: items.length },
-      { k: 'Categories', v: categories.length },
+      { ...copySource({"k":"pages_curiosities_data-cf0cfbdd7062"}),  k: copyText("pages_curiosities_data-cf0cfbdd7062", "On file"), v: items.length },
+      { ...copySource({"k":"pages_curiosities_data-bd39b151fedb"}),  k: copyText("pages_curiosities_data-bd39b151fedb", "Categories"), v: categories.length },
     ]}
     flush
   >
@@ -28,15 +29,15 @@ const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolea
     )}
   </PageHero>
 
-  <IssueSection kicker="Marginalia" title="Annotations">
+  <IssueSection title="Trivia">
     <div class="curios" data-curios>
       {items.map((it, i) => (
         <article class="curio" data-cat={it.category || ''}>
           <div class="curio__idx mono-sm">№ {String(i + 1).padStart(3, '0')}</div>
           <div>
-            <div class="mono-sm muted" style="letter-spacing:.18em;">{(it.category || '–').toUpperCase()}</div>
-            <div class="curio__title serif">{it.title || '–'}</div>
-            <p class="curio__body">{it.content || it.body || ''}</p>
+            <div data-directus={editable(it, ["category"])} class="mono-sm muted" style="letter-spacing:.1em;">{(it.category || '–').toUpperCase()}</div>
+            <div data-directus={editable(it, ["title"])} class="curio__title serif">{it.title || '–'}</div>
+            <p data-directus={editable(it, ["content","body"])} class="curio__body">{it.content || it.body || ''}</p>
           </div>
         </article>
       ))}
@@ -65,5 +66,5 @@ const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolea
   .curio:nth-child(odd) { border-left: none; }
   .curio__idx { color: var(--accent-3); }
   .curio__title { font-size: clamp(20px, 2.2vw, 26px); font-style: italic; line-height: 1.15; margin: .2rem 0 .4rem; }
-  .curio__body { font-family: var(--f-serif); font-size: 16px; line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 52ch; }
+  .curio__body { font-family: var(--f-serif); font-size: var(--text-small); line-height: 1.6; color: var(--ink-2); margin: 0; max-width: 52ch; }
 </style>

@@ -1,16 +1,17 @@
 ---
 interface Props {
   title: string;
+  hideHeader?: boolean;
   kicker?: string;
   meta?: string;
   href?: string;
   id?: string;
 }
-const { title, kicker, meta, href, id } = Astro.props;
+const { title, kicker, meta, href, id, hideHeader = false } = Astro.props;
 ---
 <section class="issue-section" id={id}>
   <div class="container">
-    <header class="issue-section__head">
+    {!hideHeader && <header class="issue-section__head">
       <div class:list={['issue-section__intro', { 'issue-section__intro--solo': !kicker }]}>
         {kicker && <div class="kicker">{kicker}</div>}
         <h2 class="issue-section__title">
@@ -18,7 +19,7 @@ const { title, kicker, meta, href, id } = Astro.props;
         </h2>
       </div>
       {meta && <div class="issue-section__meta">{meta}</div>}
-    </header>
+    </header>}
     <slot />
   </div>
 </section>

@@ -1,3 +1,7 @@
+import { editingContext } from './editing-context';
+import { identify } from './visual-editing';
+import { hasSensitiveParameters, publicCollections } from './cache-policy';
+
 /**
  * Cureation – typed Directus client.
  * Small, focused helpers per entity; field projection at call site.
@@ -8,10 +12,23 @@ export const DIRECTUS_URL =
   (import.meta.env.PUBLIC_DIRECTUS_URL as string | undefined) ||
   'https://dash.cureation.net';
 
-const TOKEN =
-  (import.meta.env.DIRECTUS_TOKEN as string | undefined) ||
-  (import.meta.env.PUBLIC_DIRECTUS_TOKEN as string | undefined) ||
-  '';
+// Website reads are anonymous, including published-content editor previews.
+// Admin credentials belong in migration scripts, never in public render requests.
+export class DirectusRequestError extends Error {
+  constructor(public collection: string, public status: number, message = 'Archive data is temporarily unavailable') {
+    super(message);
+    this.name = 'DirectusRequestError';
+  }
+}
+
+function recordDataFailure(collection: string, status: number) {
+  const state = editingContext.getStore();
+  if (state) {
+    state.privateData = true;
+    (state.dataFailures ??= new Set()).add(collection);
+  }
+  console.error(JSON.stringify({ event: 'directus_read_failed', collection, status }));
+}
 
 type Params = Record<string, string | number | boolean | undefined>;
 
@@ -27,43 +44,66 @@ function qs(p: Params): string {
 async function directusFetch<T = any>(
   path: string,
   params: Params = {},
-  { ttl = 60 }: { ttl?: number } = {}
+  { ttl = 600 }: { ttl?: number } = {}
 ): Promise<T> {
   const url = `${DIRECTUS_URL}${path}${qs(params)}`;
   const headers = new Headers({ Accept: 'application/json' });
-  if (TOKEN) headers.set('Authorization', `Bearer ${TOKEN}`);
+
   const req = new Request(url, {
     headers,
+    signal: AbortSignal.timeout(path === '/items/site_copy' ? 3000 : 10000),
   });
 
-  // Cloudflare edge cache
-  const cache = (globalThis as any).caches?.default;
+  const state = editingContext.getStore();
+  const sourceUrl = new URL(url);
+  const collection = path.split('/')[2] || '';
+  const publicData = publicCollections.has(collection) && !hasSensitiveParameters(sourceUrl);
+  if (!publicData && state) state.privateData = true;
+  const bypass = state?.preview || state?.bypassCache || !publicData || ttl <= 0;
+  const cache = bypass ? undefined : (globalThis as any).caches?.default;
+  // A new namespace avoids reusing any previously cached authenticated responses.
+  const cacheKey = new Request(`${sourceUrl.origin}/__cureation_public_v2${sourceUrl.pathname}${sourceUrl.search}`);
   if (cache) {
-    const cached = await cache.match(req);
+    const cached = await cache.match(cacheKey);
     if (cached) {
       const json = (await cached.json()) as { data: T };
-      return json.data;
+      return identify(json.data, path.split('/')[2] || '');
     }
   }
 
-  const res = await fetch(req);
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Directus ${path} ${res.status}: ${body.slice(0, 300)}`);
+  let res: Response;
+  try {
+    res = await fetch(req, { cache: 'no-store' });
+  } catch (error) {
+    recordDataFailure(collection, 503);
+    throw new DirectusRequestError(collection, 503);
   }
-  const json = (await res.json()) as { data: T };
+  if (!res.ok) {
+    recordDataFailure(collection, res.status);
+    throw new DirectusRequestError(collection, res.status, (await res.text()).slice(0, 300));
+  }
+  let json: { data: T };
+  try {
+    json = await res.json() as { data: T };
+    if (!json || !Array.isArray(json.data)) throw new Error(`Invalid Directus list response for ${path}`);
+  } catch (error) {
+    recordDataFailure(collection, 503);
+    throw new DirectusRequestError(collection, 503);
+  }
 
-  if (cache && ttl > 0) {
+  const privateResponse = /(?:private|no-store)/i.test(res.headers.get('Cache-Control') || '') || res.headers.has('Set-Cookie');
+  if (privateResponse && state) state.privateData = true;
+  if (cache && !privateResponse) {
     const response = new Response(JSON.stringify(json), {
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': `public, max-age=${ttl}`,
+        'Cache-Control': `public, max-age=${Math.min(ttl, 1800)}`,
       },
     });
-    await cache.put(req, response);
+    await cache.put(cacheKey, response);
   }
 
-  return json.data;
+  return identify(json.data, path.split('/')[2] || '');
 }
 
 /* =======================================================================
@@ -310,14 +350,14 @@ export async function topLivePlayedSongs(limit = 10): Promise<Song[]> {
 
 /** Raw counts for stat-hero. */
 export async function getRunningFigures(): Promise<{
-  albums: number;
-  songs: number;
-  setlists: number;
-  venues: number;
-  photos: number;
-  members: number;
+  albums: number | null;
+  songs: number | null;
+  setlists: number | null;
+  venues: number | null;
+  photos: number | null;
+  members: number | null;
 }> {
-  async function count(coll: string, filter?: Params): Promise<number> {
+  async function count(coll: string, filter?: Params): Promise<number | null> {
     try {
       const data = await directusFetch<Array<{ count: { id: number } }>>(
         `/items/${coll}`,
@@ -326,9 +366,10 @@ export async function getRunningFigures(): Promise<{
           ...(filter || {}),
         }
       );
-      return Number(data?.[0]?.count?.id) || 0;
+      const raw = data?.[0]?.count?.id;
+      return raw != null && Number.isFinite(Number(raw)) ? Number(raw) : null;
     } catch {
-      return 0;
+      return null;
     }
   }
   const [albums, songs, setlists, venues, photos, members] = await Promise.all([
@@ -366,31 +407,23 @@ const REVIEW_LIST_FIELDS = [
 
 /** Published long-form album reviews, newest album first. */
 export async function listReviews(limit = -1): Promise<Review[]> {
-  try {
     return await directusFetch<Review[]>('/items/reviews', {
       limit,
       'filter[status][_eq]': 'published',
       fields: REVIEW_LIST_FIELDS,
       sort: '-album.release_date',
-    }, { ttl: 300 });
-  } catch {
-    return [];
-  }
+    }, { ttl: 600 });
 }
 
 /** A single published review by its public slug. */
 export async function getReviewBySlug(slug: string): Promise<Review | null> {
-  try {
     const rows = await directusFetch<Review[]>('/items/reviews', {
       limit: 1,
       'filter[status][_eq]': 'published',
       'filter[slug][_eq]': slug,
       fields: `${REVIEW_LIST_FIELDS},body`,
-    }, { ttl: 300 });
+    }, { ttl: 600 });
     return rows?.[0] || null;
-  } catch {
-    return null;
-  }
 }
 
 /** The published Cureation review attached to an album. */
@@ -401,7 +434,7 @@ export async function getReviewByAlbum(albumId: number): Promise<Review | null> 
       'filter[status][_eq]': 'published',
       'filter[album][_eq]': albumId,
       fields: REVIEW_LIST_FIELDS,
-    }, { ttl: 300 });
+    }, { ttl: 600 });
     return rows?.[0] || null;
   } catch {
     return null;
@@ -457,7 +490,7 @@ export async function searchAll(q: string): Promise<{
   albums: Array<{ id: number; title: string; slug: string; type: string; cover_art: string | null }>;
   songs: Array<{ id: number; title: string; slug: string; album: number | null; cover_art: string | null; album_title: string | null }>;
   lyrics: Array<{ id: number; title: string; slug: string; album: number | null; cover_art: string | null; album_title: string | null; snippet: string }>;
-  setlists: Array<{ id: number; date: string | null; venue: string | null; venue_link: any }>;
+  setlists: Array<{ id: number; slug: string; date: string | null; venue: string | null; venue_link: any }>;
   venues: Array<{ id: number; name: string; slug: string | null; city: string | null; country: string | null }>;
 }> {
   const limit = 6;
@@ -465,26 +498,26 @@ export async function searchAll(q: string): Promise<{
     directusFetch<any[]>('/items/discography', {
       limit, 'filter[title][_icontains]': q,
       fields: 'id,title,slug,type,cover_art', sort: '-release_date',
-    }).catch(() => []),
+    }),
     directusFetch<any[]>('/items/songs', {
       limit, 'filter[title][_icontains]': q,
       'filter[slug][_nnull]': true,
       fields: 'id,title,slug,album,album.cover_art,album.title',
-    }).catch(() => []),
+    }),
     directusFetch<any[]>('/items/songs', {
       limit, 'filter[lyrics][_icontains]': q,
       'filter[slug][_nnull]': true,
-      'filter[title][_nicontains]': q,
       fields: 'id,title,slug,album,lyrics,album.cover_art,album.title',
-    }).catch(() => []),
+    }),
     directusFetch<any[]>('/items/setlists', {
-      limit, 'filter[venue][_icontains]': q,
-      fields: 'id,date,venue,venue_link', sort: '-date',
-    }).catch(() => []),
+      limit, 'search': q,
+      fields: 'id,slug,date,venue,venue_link,city,country', sort: '-date',
+      'filter[slug][_nnull]': true,
+    }),
     directusFetch<any[]>('/items/venues', {
-      limit, 'filter[name][_icontains]': q,
+      limit, 'filter[name][_icontains]': q, 'filter[slug][_nnull]': true,
       fields: 'id,name,slug,city,country',
-    }).catch(() => []),
+    }),
   ]);
 
   const flattenSong = (s: any) => ({
@@ -506,7 +539,8 @@ export async function searchAll(q: string): Promise<{
   return {
     albums,
     songs: songs.map(flattenSong),
-    lyrics: lyricsHits.map((s: any) => ({
+    // The running Directus instance rejects _nicontains; de-duplicate lyric titles locally.
+    lyrics: lyricsHits.filter((s: any) => !String(s.title || '').toLowerCase().includes(q.toLowerCase())).map((s: any) => ({
       ...flattenSong(s),
       snippet: lyricsLine(s.lyrics, q),
     })).filter((x) => x.snippet),
@@ -551,15 +585,15 @@ export function tracksLivePlays(songs: Song[]): Record<number, number> {
   return out;
 }
 
-let _playCountsPromise: Promise<Map<number, number>> | null = null;
 
 /** Map of song id -> live play count.
  *  Uses Directus's count + groupBy aggregate so the response is one row
  *  per song (~250) instead of one row per performance (~27k). Cached at
- *  the module level (per isolate) and at the Cloudflare edge. */
+ *  the request level and at the Cloudflare edge. */
 export async function getAllSongPlayCounts(): Promise<Map<number, number>> {
-  if (_playCountsPromise) return _playCountsPromise;
-  _playCountsPromise = (async () => {
+  const context = editingContext.getStore();
+  if (context?.playCounts) return context.playCounts;
+  const promise = (async () => {
     const rows = await directusFetch<Array<{ song: number | null; count: { id: number } }>>(
       '/items/setlist_songs',
       {
@@ -576,7 +610,8 @@ export async function getAllSongPlayCounts(): Promise<Map<number, number>> {
     }
     return out;
   })();
-  return _playCountsPromise;
+  if (context) context.playCounts = promise;
+  return promise;
 }
 
 async function enrichSongsWithLivePlays<T extends { id: number } & Partial<Pick<Song, 'times_played_live'>>>(songs: T[]): Promise<T[]> {
@@ -928,6 +963,7 @@ function compareStints(a: MemberStint, b: MemberStint): number {
 
 function normalizeStint(row: any, memberId?: number): MemberStint {
   return {
+    ...row,
     id: Number(row.id),
     member: row.member ?? memberId ?? null,
     start_year: normalizeYear(row.start_year),
@@ -940,6 +976,7 @@ function normalizeStint(row: any, memberId?: number): MemberStint {
 
 function normalizePhoto(row: any): MemberPhoto {
   return {
+    ...row,
     id: Number(row.id),
     title: row.title || null,
     description: row.description || null,
@@ -980,6 +1017,7 @@ export function memberGearFamilies(member: Pick<Member, 'instruments' | 'stints'
 function normalizeGear(row: any): Gear {
   const kind = row.kind ?? row.category ?? null;
   return {
+    ...row,
     id: String(row.id),
     slug: row.slug ?? null,
     name: row.name || row.model || row.title || 'Untitled equipment',
@@ -1427,7 +1465,7 @@ export async function getSongOfDay(): Promise<Song | null> {
   const aggregate = await directusFetch<Array<{ count: { id: number | string } }>>('/items/songs', {
     'aggregate[count]': 'id',
     ...filter,
-  }, { ttl: 3600 });
+  }, { ttl: 1800 });
   const count = Number(aggregate?.[0]?.count?.id || 0);
   if (!count) return null;
   const rows = await directusFetch<Song[]>('/items/songs', {
@@ -1436,7 +1474,7 @@ export async function getSongOfDay(): Promise<Song | null> {
     fields: 'id,title,slug,album,lyrics,lyrics_structured',
     sort: 'id',
     ...filter,
-  }, { ttl: 3600 });
+  }, { ttl: 1800 });
   return rows[0] || null;
 }
 
@@ -1470,7 +1508,7 @@ export async function getPhotoOfDay(): Promise<any | null> {
   const aggregate = await directusFetch<Array<{ count: { id: number | string } }>>('/items/photos', {
     'aggregate[count]': 'id',
     ...filter,
-  }, { ttl: 3600 });
+  }, { ttl: 1800 });
   const count = Number(aggregate?.[0]?.count?.id || 0);
   if (!count) return null;
   const rows = await directusFetch<any[]>('/items/photos', {
@@ -1479,7 +1517,7 @@ export async function getPhotoOfDay(): Promise<any | null> {
     sort: 'id',
     fields: 'id,title,description,image_file,image_url,date_taken,formatted_date,photographer,location,tour,album,album_slug',
     ...filter,
-  }, { ttl: 3600 });
+  }, { ttl: 1800 });
   return rows[0] || null;
 }
 
@@ -1513,4 +1551,19 @@ export async function allAlbumCovers(): Promise<Pick<Album, 'id' | 'title' | 'sl
     sort: 'release_date',
     'filter[cover_art][_nnull]': 'true',
   });
+}
+
+/** Citation totals: one grouped aggregate per collection instead of nine queries per source. */
+export async function getSourceUsage(): Promise<Record<string, Map<number, number> | null>> {
+  const collections = ['discography', 'songs', 'setlists', 'tours', 'members', 'photos', 'news', 'did_you_know', 'timeline'];
+  const entries = await Promise.all(collections.map(async (collection) => {
+    const field = collection === 'setlists' ? 'source_id' : 'source';
+    try {
+      const rows = await fetchRaw<Record<string, any>>(collection, { 'aggregate[count]': 'id', 'groupBy[]': field, limit: -1 });
+      const counts = new Map<number, number>();
+      for (const row of rows) if (row[field] != null) counts.set(Number(row[field]), Number(row.count?.id) || 0);
+      return [collection, counts] as const;
+    } catch { return [collection, null] as const; }
+  }));
+  return Object.fromEntries(entries);
 }

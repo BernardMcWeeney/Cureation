@@ -1,0 +1,39 @@
+
+> cureation@0.0.1 check
+> astro check
+
+(node:98938) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+20:12:48 [@astrojs/cloudflare] Enabling image processing with Cloudflare Images for production with the "IMAGES" Images binding.
+20:12:48 [@astrojs/cloudflare] Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
+20:12:48 [types] Generated 52ms
+20:12:48 [check] Getting diagnostics for Astro files in /Users/bernardmcweeney/cureation/Cureation...
+[96mscripts/seed-content.mjs[0m:[93m200[0m:[93m11[0m - [93mwarning[0m[90m ts(6133): [0m'row' is declared but its value is never read.
+
+[7m200[0m     const row = await post('/items/on_this_day_cache', e);
+[7m   [0m [93m          ~~~[0m
+
+[96msrc/components/ui/PageHero.astro[0m:[93m22[0m:[93m9[0m - [93mwarning[0m[90m ts(6133): [0m'section' is declared but its value is never read.
+
+[7m22[0m const { section, title, deck, crumbs = [], facts = [], flush = false, copyKeys = {} } = Astro.props;
+[7m  [0m [93m        ~~~~~~~[0m
+
+[96msrc/lib/visual-editing-client.ts[0m:[93m30[0m:[93m38[0m - [93mwarning[0m[90m ts(80007): [0m'await' has no effect on the type of this expression.
+
+[7m30[0m   enqueue(async () => { if (library) await (await library).remove(); });
+[7m  [0m [93m                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/lib/visual-editing-client.ts[0m:[93m18[0m:[93m3[0m - [93mwarning[0m[90m ts(80007): [0m'await' has no effect on the type of this expression.
+
+[7m18[0m   await remove();
+[7m  [0m [93m  ~~~~~~~~~~~~~~[0m
+
+[96msrc/pages/venues/[slug].astro[0m:[93m135[0m:[93m58[0m - [93mwarning[0m[90m ts(6133): [0m'i' is declared but its value is never read.
+
+[7m135[0m               {(showsByDecade.get(decade) || []).map((s, i) => {
+[7m   [0m [93m                                                         ~[0m
+
+Result (128 files): 
+- 0 errors
+- 0 warnings
+- 5 hints
+

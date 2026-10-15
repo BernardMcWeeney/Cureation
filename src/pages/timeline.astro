@@ -1,0 +1,148 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/ui/PageHero.astro';
+import { listTimeline, listAlbums } from '../lib/directus';
+import { asset } from '../lib/assets';
+import { editable } from '../lib/visual-editing';
+const [records, albums] = await Promise.all([listTimeline(), listAlbums({ type: 'studio' })]);
+const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const releases = albums.filter((album) => album.release_date).sort((a, b) => a.release_date!.localeCompare(b.release_date!));
+const seenAlbums = new Set<number>();
+const milestones = records.map((event) => {
+  const relatedId = typeof event.related_album_id === 'object' ? event.related_album_id?.id : event.related_album_id;
+  const candidate = releases.find((album) => album.id === Number(relatedId)) || releases.find((album) =>
+    normalize(event.title || '').includes(normalize(album.title)) &&
+    String(event.date || event.year).slice(0, 4) === album.release_date?.slice(0, 4) &&
+    /releas|album|record/i.test(`${event.type || ''} ${event.title || ''}`));
+  const album = candidate && !seenAlbums.has(candidate.id) && String(event.date || event.year).slice(0, 4) === candidate.release_date?.slice(0, 4) ? candidate : undefined;
+  if (album) seenAlbums.add(album.id);
+  return { ...event, album, sortDate: event.date || (event.year ? `${event.year}-01-01` : '9999') };
+});
+for (const album of releases) {
+  if (!seenAlbums.has(album.id)) milestones.push({ id: `album-${album.id}`, title: album.title, description: album.description, date: album.release_date, year: Number(album.release_date!.slice(0, 4)), type: 'Album release', album, sortDate: album.release_date });
+}
+const events = [...new Map(milestones.map((event) => [`${event.date || event.year}:${normalize(event.title || '')}`, event])).values()]
+  .sort((a, b) => a.sortDate.localeCompare(b.sortDate));
+const eventYear = (event: any) => String(event.date || event.year || '').slice(0, 4) || 'Undated';
+const dateLabel = (event: any) => {
+  // Some archive dates use 1 January as storage for a year-only milestone.
+  if (String(event.formatted_date || '').trim() === eventYear(event)) return '';
+  if (event.date && /^\d{4}-\d{2}-\d{2}$/.test(event.date)) return new Date(`${event.date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+  return String(event.formatted_date || event.date || '').replace(eventYear(event), '').replace(/^[,\s–-]+|[,\s–-]+$/g, '');
+};
+const decadeOf = (event: any) => /^\d{4}$/.test(eventYear(event)) ? `${Math.floor(Number(eventYear(event)) / 10) * 10}s` : 'Undated';
+const decades = [...new Set(events.map(decadeOf))];
+---
+<Layout title="The Cure timeline · Cureation" description="Follow The Cure’s history through the years: milestone moments and studio albums, with artwork and links into the archive.">
+  <PageHero title="The Cure timeline" deck="A band in motion. Follow the years, the turning points and the records that changed everything." crumbs={[{ label: 'Home', href: '/' }, { label: 'Timeline' }]} />
+  <div class="container chronology" data-chronology>
+    {events.length ? <>
+      <aside class="year-marker" aria-label="Timeline position">
+        <span class="year-marker__label">The Cure through the years</span>
+        <span class="year-marker__year" data-current-year aria-hidden="true">{eventYear(events[0])}</span>
+        <span class="year-marker__date" data-current-date aria-hidden="true">{dateLabel(events[0])}</span>
+        <div class="timeline-progress" aria-hidden="true"><span data-timeline-progress></span></div>
+        <nav class="decade-jumps" aria-label="Jump to a decade">
+          {decades.map((decade, index) => <a href={`#decade-${decade}`} data-decade-link={decade} aria-current={index === 0 ? 'location' : undefined}>{decade}</a>)}
+        </nav>
+      </aside>
+      <ol class="timeline">
+        {events.map((event, index) => {
+          const decade = decadeOf(event);
+          const firstInDecade = index === 0 || decadeOf(events[index - 1]) !== decade;
+          return <li id={firstInDecade ? `decade-${decade}` : `event-${index}`} class:list={['timeline-event', { 'is-current': index === 0, 'timeline-event--release': event.album }]} data-timeline-event data-year={eventYear(event)} data-date={dateLabel(event)} data-decade={decade}>
+            <div class="timeline-event__stamp"><span>{eventYear(event)}</span>{dateLabel(event) && <time datetime={event.date || undefined}>{dateLabel(event)}</time>}</div>
+            <article>
+              <span class="timeline__type">{event.album ? 'Studio album' : String(event.type || 'Milestone').replaceAll('_', ' ')}</span>
+              <h2 data-directus={editable(event, ['title'])}>{event.title}</h2>
+              {event.album?.cover_art && <a class="timeline-art" href={`/discography/${event.album.slug}`} aria-label={`Explore ${event.album.title}`}><img src={asset(event.album.cover_art, 'card')} alt={`${event.album.title} cover`} width="480" height="480" loading="lazy" decoding="async" /></a>}
+              {event.description && <p data-directus={editable(event, ['description'])}>{event.description}</p>}
+              {event.album && <a class="timeline-record-link" href={`/discography/${event.album.slug}`}>Explore the record <span aria-hidden="true">↗</span></a>}
+            </article>
+          </li>;
+        })}
+      </ol>
+    </> : <p>Timeline entries are currently unavailable. <a href="/band/history">Explore the band’s history</a>.</p>}
+  </div>
+</Layout>
+<style>
+  .chronology { display: grid; grid-template-columns: 300px minmax(0, 1fr); align-items: start; gap: clamp(32px, 6vw, 100px); padding-block: 48px; }
+  .year-marker { position: sticky; top: 104px; padding-block: 20px; }
+  .year-marker__label { display: block; color: var(--muted); font: var(--text-label)/1.5 var(--f-ui); }
+  .year-marker__year { display: block; color: var(--accent); font: 500 clamp(74px, 9vw, 132px)/1.1 var(--f-display); letter-spacing: -.055em; font-variant-numeric: tabular-nums; }
+  .year-marker__date { display: block; min-height: 24px; color: var(--ink-2); font: var(--text-small)/1.5 var(--f-ui); }
+  .timeline-progress { height: 2px; background: var(--rule); margin-block: 28px; }
+  .timeline-progress span { display: block; height: 100%; background: var(--accent); transform: scaleX(var(--progress, 0)); transform-origin: left; }
+  .decade-jumps { display: flex; flex-wrap: wrap; gap: 8px; }
+  .decade-jumps a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 12px; border: 1px solid var(--rule); color: var(--ink-2); font: var(--text-small) var(--f-ui); }
+  .decade-jumps a[aria-current] { border-color: var(--accent); color: var(--accent); background: var(--accent-tint); }
+  .timeline { margin: 0; padding: 0; list-style: none; }
+  .timeline-event { min-height: 52vh; padding: 24px 0 80px 32px; border-left: 2px solid var(--rule); position: relative; scroll-margin-top: 110px; }
+  .timeline-event::before { content: ''; position: absolute; left: -6px; top: 31px; width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+  .timeline-event.is-current { border-left-color: var(--accent); }
+  .timeline-event.is-current::before { background: var(--accent); box-shadow: 0 0 0 5px var(--accent-tint); }
+  .timeline-event__stamp { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; color: var(--muted); font: var(--text-small)/1.5 var(--f-ui); }
+  .timeline__type { color: var(--accent); font: var(--text-label)/1.5 var(--f-ui); text-transform: capitalize; }
+  h2 { font: 500 clamp(32px, 4vw, 52px)/1.1 var(--f-display); margin: 8px 0 24px; }
+  p { max-width: 55ch; margin-block: 24px; color: var(--ink-2); font: 20px/1.65 var(--f-serif); }
+  .timeline-art { display: block; max-width: 420px; border: 1px solid var(--rule); }
+  .timeline-art img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
+  .timeline-event.is-current .timeline-art { animation: record-arrives .5s ease both; }
+  @keyframes record-arrives { from { opacity: .6; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .timeline-event.is-current .timeline-art { animation: none; } }
+  .timeline-record-link { display: inline-flex; gap: 24px; min-height: 44px; align-items: center; font: var(--text-small) var(--f-ui); }
+  @media (max-width: 900px) {
+    .chronology { grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
+    .year-marker__year { font-size: 88px; }
+  }
+  @media (max-width: 640px) {
+    .chronology { display: block; padding-top: 0; }
+    .year-marker { top: 58px; z-index: 10; margin-inline: calc(-1 * var(--gutter)); padding: 12px var(--gutter); background: var(--bg); border-bottom: 1px solid var(--rule-strong); display: grid; grid-template-columns: auto 1fr; gap: 0 20px; align-items: center; }
+    .year-marker__label { display: none; }
+    .year-marker__year { font-size: 46px; }
+    .year-marker__date { min-height: 0; }
+    .timeline-progress { grid-column: 1 / -1; margin-block: 8px; }
+    .decade-jumps { grid-column: 1 / -1; flex-wrap: nowrap; overflow-x: auto; }
+    .decade-jumps a { flex-shrink: 0; }
+    .timeline-event { min-height: 0; padding: 32px 0 64px 20px; scroll-margin-top: 220px; }
+  }
+</style>
+<script>
+  let timelineCleanup: (() => void) | undefined;
+  function wireTimeline() {
+    timelineCleanup?.();
+    const root = document.querySelector<HTMLElement>('[data-chronology]');
+    if (!root) return;
+    const events = [...root.querySelectorAll<HTMLElement>('[data-timeline-event]')];
+    const year = root.querySelector<HTMLElement>('[data-current-year]');
+    const date = root.querySelector<HTMLElement>('[data-current-date]');
+    const progress = root.querySelector<HTMLElement>('[data-timeline-progress]');
+    let scheduled = 0;
+    let active = -1;
+    const update = () => {
+      scheduled = 0;
+      const readingLine = window.innerWidth <= 640 ? 250 : window.innerHeight * .35;
+      let index = 0;
+      events.forEach((event, i) => { if (event.getBoundingClientRect().top <= readingLine) index = i; });
+      if (index === active || !events[index]) return;
+      active = index;
+      const current = events[index];
+      if (year) year.textContent = current.dataset.year || '';
+      if (date) date.textContent = current.dataset.date || '';
+      events.forEach((event, i) => event.classList.toggle('is-current', i === index));
+      root.querySelectorAll<HTMLElement>('[data-decade-link]').forEach((link) => {
+        if (link.dataset.decadeLink === current.dataset.decade) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      progress?.style.setProperty('--progress', String(events.length > 1 ? index / (events.length - 1) : 1));
+    };
+    const schedule = () => { if (!scheduled) scheduled = requestAnimationFrame(update); };
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    update();
+    timelineCleanup = () => { window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule); cancelAnimationFrame(scheduled); };
+  }
+  wireTimeline();
+  document.addEventListener('astro:page-load', wireTimeline);
+  document.addEventListener('astro:before-swap', () => timelineCleanup?.());
+</script>

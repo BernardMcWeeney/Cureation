@@ -1,0 +1,58 @@
+{
+  "method": "Lighthouse 13.5.0 simulated mobile, headless installed Chrome, local Cloudflare Worker builds on ports 4326 (pre-task snapshot) and 4325 (final). Anonymous live Directus, no fabricated data. Single runs, not statistically significant or production CrUX. Different cache warmth and normal run variation may affect timing.",
+  "templates": [
+    {
+      "template": "Homepage",
+      "before": {
+        "performance": 82,
+        "accessibility": 94,
+        "seo": 100,
+        "lcpMs": 4225.9615,
+        "fcpMs": 2588.94225,
+        "cls": 0.001802855353295419,
+        "tbtMs": 0
+      },
+      "after": {
+        "performance": 93,
+        "accessibility": 100,
+        "seo": 100,
+        "lcpMs": 3026.7743,
+        "fcpMs": 1822.9494,
+        "cls": 0.00284971066014197,
+        "tbtMs": 0
+      }
+    },
+    {
+      "template": "Faith review",
+      "before": {
+        "performance": 88,
+        "accessibility": 89,
+        "seo": 100,
+        "lcpMs": 3867.2853,
+        "fcpMs": 1667.97405,
+        "cls": 0,
+        "tbtMs": 0
+      },
+      "after": {
+        "performance": 90,
+        "accessibility": 100,
+        "seo": 100,
+        "lcpMs": 3525.2331249999993,
+        "fcpMs": 1821.72075,
+        "cls": 0,
+        "tbtMs": 0
+      }
+    }
+  ],
+  "heroBytes": {
+    "before": 197802,
+    "after800": 27387,
+    "after1200": 50653,
+    "after1440": 67386
+  },
+  "sourceCitationQueries": {
+    "before": 360,
+    "after": 9
+  },
+  "INP": "Not measured; TBT is not a substitute for real-user INP."
+}

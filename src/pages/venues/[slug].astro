@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple } from '../../lib/visual-editing';
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
@@ -29,32 +30,32 @@ const lastY = venue.latest_cure_show?.slice(0, 4);
 const span = firstY && lastY ? (firstY === lastY ? firstY : `${firstY}–${lastY}`) : '–';
 
 const facts: Array<[string, string]> = [
-  ['Location', [venue.city, venue.state_province, venue.country].filter(Boolean).join(', ') || '–'],
-  ['Capacity', venue.capacity ? venue.capacity.toLocaleString() : '–'],
-  ['Opened', venue.opened_year ? String(venue.opened_year) : '–'],
-  ['Type', venue.venue_type || '–'],
-  ['Cure shows', String(venue.cure_show_count || shows.length || '–')],
-  ['First appearance', venue.first_cure_show || '–'],
-  ['Latest appearance', venue.latest_cure_show || '–'],
-  ['Span', span],
+  copyTuple([copyText("pages_venues__slug__tuple-138b10d6e409", "Location"), [venue.city, venue.state_province, venue.country].filter(Boolean).join(', ') || '–'], {"0":"pages_venues__slug__tuple-138b10d6e409"}),
+  copyTuple([copyText("pages_venues__slug__tuple-6f70c74333a2", "Capacity"), venue.capacity ? venue.capacity.toLocaleString() : '–'], {"0":"pages_venues__slug__tuple-6f70c74333a2"}),
+  copyTuple([copyText("pages_venues__slug__tuple-2351a7f3d66a", "Opened"), venue.opened_year ? String(venue.opened_year) : '–'], {"0":"pages_venues__slug__tuple-2351a7f3d66a"}),
+  copyTuple([copyText("pages_venues__slug__tuple-45c76b86aa1d", "Type"), venue.venue_type || '–'], {"0":"pages_venues__slug__tuple-45c76b86aa1d"}),
+  copyTuple([copyText("pages_venues__slug__tuple-631ac4d505b7", "Cure shows"), String(venue.cure_show_count || shows.length || '–')], {"0":"pages_venues__slug__tuple-631ac4d505b7"}),
+  copyTuple([copyText("pages_venues__slug__tuple-7d8b0ebd1888", "First appearance"), venue.first_cure_show || '–'], {"0":"pages_venues__slug__tuple-7d8b0ebd1888"}),
+  copyTuple([copyText("pages_venues__slug__tuple-73403134900b", "Latest appearance"), venue.latest_cure_show || '–'], {"0":"pages_venues__slug__tuple-73403134900b"}),
+  copyTuple([copyText("pages_venues__slug__tuple-971f4af84484", "Span"), span], {"0":"pages_venues__slug__tuple-971f4af84484"}),
 ];
 
 const heroSrc = venue.photo_file ? asset(venue.photo_file, 'hero') : null;
 const country = (venue.country || 'ROOM').toUpperCase();
 ---
-<Layout title={`${venue.name} · Venues · Cureation`} description={venue.description || `${venue.name}, ${[venue.city, venue.country].filter(Boolean).join(', ')}.`} ogImage={venue.photo_file ? asset(venue.photo_file, 'og') : undefined}>
+<Layout editRecord={venue} title={`${venue.name} · Venues · Cureation`} description={venue.description || `${venue.name}, ${[venue.city, venue.country].filter(Boolean).join(', ')}.`} ogImage={venue.photo_file ? asset(venue.photo_file, 'og') : undefined}>
   <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
-      { label: 'Home', href: '/' },
-      { label: 'Venues', href: '/venues' },
+      { ...copySource({"label":"pages_venues__slug__data-418425c8b6b5"}),  label: copyText("pages_venues__slug__data-418425c8b6b5", "Home"), href: '/' },
+      { ...copySource({"label":"pages_venues__slug__data-dd2204c160a7"}),  label: copyText("pages_venues__slug__data-dd2204c160a7", "Venues"), href: '/venues' },
       { label: venue.name },
     ]} />
   </div>
 
   <section class="container dossier detail-anchor" id="venue-overview">
-    <figure class="dossier__portrait">
+    <figure  class="dossier__portrait">
       {heroSrc ? (
-        <img src={heroSrc} alt={`${venue.name} photograph`} />
+        <img data-directus={editable(venue, "photo_file")} src={heroSrc} alt={`${venue.name} photograph`} />
       ) : (
         <div class="placeholder" style="aspect-ratio: 3/4;">No photograph</div>
       )}
@@ -63,48 +64,48 @@ const country = (venue.country || 'ROOM').toUpperCase();
       </div>
       {venue.cure_show_count ? (
         <div class="cover-plate__corner cover-plate__corner--br" style="border-color: var(--gold); color: var(--gold);">
-          <span>{venue.cure_show_count} CURE SHOWS</span>
+          <span data-directus={editable(venue, ["cure_show_count"])}>{venue.cure_show_count} CURE SHOWS</span>
         </div>
       ) : null}
     </figure>
 
-    <div class="dossier__body stack" style="--gap: 1rem;">
+    <div  class="dossier__body stack" style="--gap: 1rem;">
       <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
-        <div class="cluster" style="gap:.4rem;">
+        <div  class="cluster" style="gap:.4rem;">
           {venue.venue_type && <Tag>{venue.venue_type.toUpperCase()}</Tag>}
-          {(venue.cure_show_count || 0) >= 5 && <span class="tag tag--gold">MARQUEE ROOM</span>}
+          {(venue.cure_show_count || 0) >= 5 && <span data-directus={copyAttr("pages_venues_slug_367bc4079398")} set:html={copyText("pages_venues_slug_367bc4079398", "MARQUEE ROOM")} class="tag tag--gold"></span>}
           {firstY && Number(firstY) < 1985 && <span class="tag tag--cool">VINTAGE · {firstY}</span>}
         </div>
         <Bookmark kind="venue" id={venue.id} label={venue.name} href={`/venues/${venue.slug}`} />
       </div>
-      <h1 class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">{venue.name}</h1>
-      <div class="mono-sm muted">
+      <h1 data-directus={editable(venue, ["name"])} class="serif" style="font-size: clamp(44px, 7vw, 96px); line-height:.95; font-style: italic; margin: 0;">{venue.name}</h1>
+      <div data-directus={editable(venue, ["city","state_province","country","latitude","longitude"])} class="mono-sm muted">
         {[venue.city, venue.state_province, venue.country].filter(Boolean).join(', ')}
         {venue.latitude && venue.longitude && <> · {venue.latitude.toFixed(3)}, {venue.longitude.toFixed(3)}</>}
       </div>
 
-      {venue.description && <p style="font-family: var(--f-serif); font-size: 18px; line-height:1.55; color: var(--ink-2); max-width: 58ch;">{venue.description}</p>}
+      {venue.description && <p data-directus={editable(venue, ["description"])} style="font-family: var(--f-serif); font-size: 18px; line-height:1.55; color: var(--ink-2); max-width: 58ch;">{venue.description}</p>}
 
       {venue.famous_moment && (
         <div class="voices">
           <div class="mono-sm muted" style="margin-bottom:.3rem;"><span class="pip pip--gold"></span>FAMOUS MOMENT</div>
-          <div class="voices__quote">{venue.famous_moment}</div>
+          <div data-directus={editable(venue, ["famous_moment"])} class="voices__quote">{venue.famous_moment}</div>
         </div>
       )}
 
       <div class="facts">
-        {facts.map(([k, v]) => (
+        {facts.map((__copyRow5213) => { const [k, v] = __copyRow5213; return (
           <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
+            <div data-directus={editable(__copyRow5213, ["0"])} class="facts__k">{k}</div>
+            <div data-directus={editable(__copyRow5213, ["1"])} class="facts__v">{v}</div>
           </div>
-        ))}
+        ); })}
       </div>
 
       {(venue.wikipedia_url || venue.official_website) && (
-        <div class="cluster" style="gap: 1rem; margin-top: .6rem;">
-          {venue.wikipedia_url && <a href={venue.wikipedia_url} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);">WIKIPEDIA →</a>}
-          {venue.official_website && <a href={venue.official_website} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);">OFFICIAL SITE →</a>}
+        <div  class="cluster" style="gap: 1rem; margin-top: .6rem;">
+          {venue.wikipedia_url && <a data-directus={copyAttr("pages_venues_slug_f4212f1d8502")} set:html={copyText("pages_venues_slug_f4212f1d8502", "WIKIPEDIA →")} href={venue.wikipedia_url} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);"></a>}
+          {venue.official_website && <a data-directus={copyAttr("pages_venues_slug_5b3175afdc43")} set:html={copyText("pages_venues_slug_5b3175afdc43", "OFFICIAL SITE →")} href={venue.official_website} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);"></a>}
         </div>
       )}
     </div>
@@ -112,15 +113,15 @@ const country = (venue.country || 'ROOM').toUpperCase();
 
   <div class="container">
     <DossierNav items={[
-      { label: 'Venue file', href: '#venue-overview', meta: 'Profile' },
-      ...(shows.length ? [{ label: 'Chronology', href: '#venue-chronology', meta: `${shows.length} shows` }] : []),
+      { ...copySource({"label":"pages_venues__slug__data-ad5c5c977d3e","meta":"pages_venues__slug__data-7799a610f940"}),  label: copyText("pages_venues__slug__data-ad5c5c977d3e", "Venue file"), href: '#venue-overview', meta: copyText("pages_venues__slug__data-7799a610f940", "Profile") },
+      ...(shows.length ? [{ ...copySource({"label":"pages_venues__slug__data-9c560f263026"}),  label: copyText("pages_venues__slug__data-9c560f263026", "Chronology"), href: '#venue-chronology', meta: `${shows.length} shows` }] : []),
     ]} />
   </div>
 
   {shows.length > 0 && (
     <section id="venue-chronology" class="container detail-anchor" style="padding-block: clamp(32px, 5vw, 64px);">
       <div class="panel-head" style="border: 1px solid var(--rule);">
-        <span>A chronology</span>
+        <span data-directus={copyAttr("pages_venues_slug_905cdda9661d")} set:html={copyText("pages_venues_slug_905cdda9661d", "History")}></span>
         <span>{shows.length} APPEARANCES</span>
       </div>
 
@@ -136,11 +137,11 @@ const country = (venue.country || 'ROOM').toUpperCase();
                 const isLast = s.date === venue.latest_cure_show;
                 return (
                   <div class={`rail__item${isFirst ? ' rail__item--gold' : isLast ? ' rail__item--hot' : ''}`}>
-                    <div class="rail__date">{s.date}{isFirst ? ' · FIRST APPEARANCE' : isLast ? ' · LATEST' : ''}</div>
+                    <div data-directus={editable(s, ["date"])} class="rail__date">{s.date}{isFirst ? ' · FIRST APPEARANCE' : isLast ? ' · LATEST' : ''}</div>
                     <a href={`/setlists/${s.slug}`} style="border:none;">
-                      <div class="rail__title">{s.tour_name || 'Live'}</div>
+                      <div data-directus={editable(s, ["tour_name"])} class="rail__title">{s.tour_name || 'Live'}</div>
                     </a>
-                    <div class="rail__body mono-sm">{s.song_count ? `${s.song_count} songs performed` : 'Setlist on file'}</div>
+                    <div data-directus={editable(s, ["song_count"])} class="rail__body mono-sm">{s.song_count ? `${s.song_count} songs performed` : 'Setlist on file'}</div>
                   </div>
                 );
               })}

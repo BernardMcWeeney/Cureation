@@ -1,0 +1,48 @@
+
+> cureation@0.0.1 test
+> node --test test/*.test.mjs
+
+✔ responsive cover images transform Directus URLs and preserve external URLs (4.718208ms)
+✔ archive dates retain precision and tour labels follow confirmed full dates (4.717709ms)
+✔ record metadata is factual, preserves date precision and cannot break out of JSON-LD (9.788792ms)
+✔ sitemap pagination includes records beyond former caps, de-duplicates URLs and excludes invalid slugs (33.085125ms)
+✔ migration creates public-readable copy, preserves editor changes, and never grants public write (452.856542ms)
+✔ attributes are preview-only, use original fields, and survive normalization spreads (1.172167ms)
+✔ nested relations use their own collection and computed song statistics are excluded (0.42825ms)
+✔ copy edits preserve empty strings and local object/tuple identity (0.160125ms)
+{"event":"directus_read_failed","collection":"reviews","status":502}
+{"event":"directus_read_failed","collection":"reviews","status":502}
+{"event":"directus_read_failed","collection":"discography","status":503}
+{"event":"directus_read_failed","collection":"songs","status":503}
+{"event":"directus_read_failed","collection":"setlists","status":503}
+{"event":"directus_read_failed","collection":"venues","status":503}
+{"event":"directus_read_failed","collection":"photos","status":503}
+{"event":"directus_read_failed","collection":"members","status":503}
+{"event":"directus_read_failed","collection":"reviews","status":503}
+{"event":"directus_read_failed","collection":"reviews","status":503}
+{"event":"directus_read_failed","collection":"reviews","status":503}
+{"event":"directus_read_failed","collection":"reviews","status":503}
+{"event":"directus_read_failed","collection":"photos","status":503}
+{"event":"directus_read_failed","collection":"discography","status":503}
+{"event":"directus_read_failed","collection":"songs","status":503}
+{"event":"directus_read_failed","collection":"songs","status":503}
+{"event":"directus_read_failed","collection":"setlists","status":503}
+{"event":"directus_read_failed","collection":"venues","status":503}
+✔ concurrent preview and public requests cannot leak context (10.574ms)
+✔ preview reads bypass both cache reads and writes, and count promises are request-scoped (13.857166ms)
+✔ middleware preserves CSP directives, removes frame conflicts, and retains preview through redirects (1.443958ms)
+✔ public HTML gets a ten-minute edge policy, while unsafe requests and responses never do (3.128875ms)
+✔ only allowlisted, anonymous Directus data is cached; private results and bypass requests are excluded (0.607042ms)
+✔ upstream failures return uncached 503s, including when a page catches the data error (0.894416ms)
+✔ unavailable counts remain unknown; valid zero counts remain zero (1.081ms)
+✔ malformed and null API list payloads are unavailable rather than empty archives (0.725625ms)
+✔ sources use nine grouped count queries and preserve unknown citation categories (0.804708ms)
+✔ concert search returns canonical slugs and exposes upstream failures (2.687791ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 518.645709

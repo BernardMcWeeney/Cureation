@@ -1,0 +1,226 @@
+{
+  "base": "https://cureation.com",
+  "time": "2026-10-14T14:50:48.050Z",
+  "results": [
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/",
+      "status": 200,
+      "title": "Cureation | The Cure, in obsessive detail",
+      "bodyText": "INDEPENDENT ARCHIVE · UPDATED DAILY\nThe Cure,\nall of it.\n\nWhat they are doing now, what they did then, and every strange, perfect detail in between.\n\nFOLLOW THE 2026 TOUR\n→\nOPEN THE PUBLICATION\nPUBLISHED · XIV.X.MMXXVI · VERSION MMXXVI.CCLXXXVII\n14\nRECORDS\n157\nSONGS\n1,692\nSHOWS\n1,047\nVENUES\n ON TOUR NOW\n2026 European Summer Shows\n→\nLATEST NEWS\nFrom Oslo to Gothenburg, The Cure’s summer keeps changing shape\n→\nALBUM REVIEWS\nEvery studio album, closely listened to.\n→\nFROM THE ARCHIVE\nOne story,\nproperly told.\nOPEN THE PUBLICATION →\nREVIEWS · 8 MIN READ\nFEATURED ARTICLE · 28 NOVEMBER 2024\nSongs of a Lost World: A Deep Dive Into The Cure's Masterpiece\n\nAn in-depth look at the themes, production, and emotional weight of The Cure's long-awaited fourteenth album.\n\nREAD THE FEATURE →\nLIVE · SUMMER 2026\nThe Cure are\nout there now.\nTOUR SIGNAL / LIVE\nTOUR TRACKER\n2026 European Summer Shows\n\nDates, maps, setlists, gaps and updates from the European summer run.\n\nOPEN TOUR TRACKER\n→\nLIVE ARCHIVE",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/reviews",
+      "status": 200,
+      "title": "Album Reviews · Cureation",
+      "bodyText": "HOME\nREVIEWS\nReviews\n\nFourteen studio albums. Fourteen close listens. Long-form criticism written for fans who know the songs and still want to hear them differently.\n\n9.5\n/ 10\nFEATURED REVIEW · 2024\nSongs of a Lost World: An ending that opens outward\n\nAfter sixteen years, The Cure returned with an album of grief and mortality that feels monumental because it never mistakes scale for spectacle.\n\nBY BERNARD MCWEENEY\n2 MIN READ\nREAD THE FULL REVIEW\n→\nCOMPLETE STUDIO ARCHIVE\nEvery album reviewed\n14 REVIEWS\n7.3\n2008 · 2 MIN\n4:13 Dream: Colour after the storm\n\nBright guitars and direct melodies give The Cure’s thirteenth album an appealing lift, even when the larger design feels unfinished.\n\nREAD REVIEW →\n6.9\n2004 · 2 MIN\nThe Cure: Raw edges, mixed results\n\nThe self-titled album pushes The Cure toward a harsher, more immediate sound, gaining force while sacrificing some of their mystery.\n\nREAD REVIEW →\n8.5\n2000 · 2 MIN\nBloodflowers: The beauty of the long goodbye\n\nPatient and autumnal, Bloodflowers finds The Cure returning to long-form melancholy without pretending the past can be repeated.\n\nREAD REVIEW →\n7.1\n1996 · 2 MIN\nWild Mood Swings: The argument for inconsistency\n\nThe Cure’s most disputed album is overstuffed and tonally unstable, but its risks deserve more than a dismissive verdict.\n\nREAD REVIEW →\n9.2\n1992 · 2 MIN\nWish: Bright light, deep water\n\nAt their commercial peak, The Cure made a record that holds euphoria and collapse in the same wide-open sound.\n\nREAD REVIEW →\n10\n1989 · 2 MIN\nDisintegration: The masterpiece that keeps moving\n\nImmense yet intimate, Disintegration turns time, memory and romantic fear into The Cure’s most complete album.\n\nREAD REVIEW →\n9\n1987 · 2 MIN\nKiss Me, Kiss Me, Kiss Me: Desire in every direction\n\nThe Cure’s great double album is excessive, romantic, abrasive and alive—the catalogue at its most gloriously plural.\n\nREAD REVIEW →\n9\n1985 · 2 MIN\nThe Head on the Door: Ten songs, a whole world\n\nCompact, varied and endlessly replayable, The Head on the Door turns The Cure’s contradictions into pop perfection.\n\nREAD REVIEW →\n7.5\n1984 · 2 MIN\nThe Top: Fever dreams and loose ends\n\nMessy by design and fascinating in practice, The Top catches Robert Smith rebuilding The Cure in public.\n\nREAD REVIEW →\n9.3\n1982 · 2 MIN\nPornography: No exit, no wasted motion\n\nThe Cure’s darkest record remains overwhelming because its chaos is shaped with absolute purpose.\n\nREAD REVIEW →\n8.7\n1981 · 2 MIN\nFaith: The long grey afternoon\n\nSlow, severe and quietly beautiful, Faith turns doubt and grief into an album of remarkable physical presence.\n\nREAD REVIEW →\n8.8\n1980 · 2 MIN\nSeventeen Seconds: Empty space, perfect tension\n\nWith one decisive turn toward silence, repetition and atmosphere, The Cure found a language that still feels entirely their own.\n\nREAD REVIEW →\n7.4\n1979 · 2 MIN\nThree Imaginary Boys: The sound of a band becoming itself\n\nRestless, sharp and not entirely under its creators’ control, The Cure’s debut is most compelling when the future briefly comes into focus.\n\nREAD REVIEW →",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/sources",
+      "status": 200,
+      "title": "Sources · Cureation",
+      "bodyText": "HOME\nSOURCES\nSources\n\nEvery claim traces back to something. This ledger records where the archive's facts came from, with citations, counts and reliability rankings.\n\nSOURCES ON FILE\n40\nRECORDS SOURCED\n3,911\nTYPES\n6\nRANKING\nRELIABILITY\nCITATIONS\nThe ledger\n40 SOURCES\nTYPE\nAll types\nAPI\nBOOK\nFAN\nMAGAZINE\nOFFICIAL\nWEBSITE\nSTATUS\nAny status\nOfficial\nIndependent\nSEARCH\n40 SOURCES\n№\tSOURCE\tTYPE\tAUTHOR\tRECORDS\tRELIABILITY\n01\tCure Concerts↗0\nExtensive fan-run Cure concert archive used for show dates, setlists, ticket scans, and concert imagery.\n\tFAN\t–\t2,162\t4\n02\tsetlist.fm↗0\nCrowd-sourced setlist database. Primary source for concert setlists.\n\tWEBSITE\t–\t1,695\t4\n03\tWikipedia↗0\nGeneral reference for biographical and discographical data.\n\tWEBSITE\t–\t40\t3\n04\tThe Cure Official Website↗OFFICIAL\nOfficial band website and announcements.\n\tOFFICIAL\t–\t4\t5\n05\tRock and Roll Hall of Fame↗OFFICIAL\nOfficial Rock Hall artist induction profile.\n\tOFFICIAL\t–\t3\t5\n06\tNME↗0\nMusic journalism - interviews, reviews, features.\n\tMAGAZINE\t–\t3\t4\n07\tThe Cure Official YouTube↗OFFICIAL\nOfficial The Cure YouTube channel and music videos.\n\tOFFICIAL\t–\t2\t5\n08\tBBC↗OFFICIAL\nOfficial BBC source for broadcast and archive references.\n\tOFFICIAL\t–\t1\t4\n09\tBillboard↗0\nBillboard chart history pages for The Cure.\n\tWEBSITE\t–\t1\t4\n10\tFiction Records / PolydorOFFICIAL\nOfficial label discography and press materials.\n\tOFFICIAL\t–\t0\t5\n11\tTen Imaginary Years (Book)OFFICIAL\nOfficial illustrated biography covering 1978-1988.\n\tBOOK\tSTEVE SUTHERLAND\t0\t5\n12\tAllMusic↗0\nAlbum reviews, ratings, and editorial content.\n\tWEBSITE\t–\t0\t4\n13\tCureation Staff↗0\nOriginal research and editorial by the Cureation team.\n\tFAN\t–\t0\t4\n14\tDiscogs↗0\nComprehensive discography database with release details, credits, and catalog numbers.\n\tWEBSITE\t–\t0\t4\n15\tINA↗OFFICIAL\nInstitut national de l’audiovisuel archive source for broadcast material.\n\tOFFICIAL\t–\t0\t4\n16\tInternet Archive / Wayback Machine↗0\nArchived web pages and media used when original source pages are unavailable.\n\tWEBSITE\t–\t0\t4\n17\tRoskilde Festival↗OFFICIAL\nOfficial Roskilde Festival history and lineup reference.\n\tOFFICIAL\t–\t0\t4\n18\tWikidata↗0\nStructured public reference data used alongside Wikipedia for venue metadata.\n\tAPI\t–\t0\t4\n19\tA Chain of Flowers↗0\nLong-running Cure fan community and archive; older pages are also cited via archived copies.\n\tFAN\t–\t0\t3\n20\tA Foolish Arrangement↗0\nFan archive cited in setlist and live-history credits.\n\tFAN\t–\t0\t3\n21\tArusha Baker↗0\nSite cited in concert credits and live-history references.\n\tWEBSITE\t–\t0\t3\n22\tBeach of Stone↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\t0\t3\n23\tCureconcerts.com↗0\nLegacy Cure concert archive domain cited in setlist credits.\n\tFAN\t–\t0\t3\n24\tForever Drowning↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\t0\t3\n25\tNEMS World↗0\nMusic-history reference site cited in external live-history links.\n\tWEBSITE\t–\t0\t3\n26\tNew Day↗0\nFan archive cited in setlist and live-history links.\n\tFAN\t–\t0\t3\n27\tOpening Time↗0\nFan-run Cure live archive cited in concert credits.\n\tFAN\t–\t0\t3\n28\tPictures of You↗0\nFan-run Cure archive cited for concert and media references.\n\tFAN\t–\t0\t3\n29\tThe Banshees and Other Creatures↗0\nPost-punk reference site cited for contextual live-history links.\n\tWEBSITE\t–\t0\t3\n30\tThe Cure in Holland↗0\nFan-run archive focused on The Cure in the Netherlands.\n\tFAN\t–\t0\t3\n31\tThe Cure.cz↗0\nFan archive cited for Cure concert and setlist information.\n\tFAN\t–\t0\t3\n32\tThe Side↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\t0\t3\n33\tUK Rock Festivals↗0\nFestival history reference cited in setlist and live-history links.\n\tWEBSITE\t–\t0\t3\n34\tDailymotion↗0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\n\tWEBSITE\t–\t0\t2\n35\tFacebook↗0\nSocial media source used for contemporary posts and embedded video references.\n\tWEBSITE\t–\t0\t2\n36\tInstagram↗0\nSocial media source used for contemporary posts and media references.\n\tWEBSITE\t–\t0\t2\n37\tSoundCloud↗0\nPublic audio platform used for embedded audio links; individual uploader reliability varies.\n\tWEBSITE\t–\t0\t2\n38\tTicket Collector↗0\nFan ticket archive cited for concert-history references.\n\tFAN\t–\t0\t2\n39\tVimeo↗0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\n\tWEBSITE\t–\t0\t2\n40\tYouTube↗0\nPublic video platform used for embedded live footage and promo clips; individual uploader reliability varies.\n\tWEBSITE\t–\t0\t2",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/wiki",
+      "status": 200,
+      "title": "The wiki · Cureation",
+      "bodyText": "HOME\nTHE WIKI\nThe wiki\n\nLong-form reference articles, deeper than a liner note and shorter than a biography, cross-referenced to everything else in the archive.\n\nARTICLES\n5\nSORT\nA–Z\n5 ARTICLES\nA living reference,\nnot a filing cabinet.\n\nStories, people, places and ideas are connected back to the records, songs and shows they belong to.\n\n01\nREFERENCE ARTICLE\nFrom Easy Cure to The Cure, 1978\n\nHow a Crawley four-piece dropped half their name — and most of their original set — in the year between signing with Hansa and releasing their first single on Fiction.\n\n5 MIN READ\n↗\n02\nREFERENCE ARTICLE\nRobert Smith's guitars: a short ledger\n\nThe instruments that made the records — from the hand-me-down Top Twenty of 1977 to the Gibsons and Fenders that defined the imperial-era tone.\n\n6 MIN READ\n↗\n03\nREFERENCE ARTICLE\nThe Cure at Glastonbury: four headline slots\n\nA short chronicle of the band's four Pyramid Stage headline appearances — 1986, 1990, 1995 and 2019 — and what each marked within the band's arc.\n\n5 MIN READ\n↗\n04\nREFERENCE ARTICLE\nThe Disintegration sessions, winter 1988–89\n\nRecorded between November 1988 and February 1989 at Outside Studios in Berkshire and Hook End Manor in Oxfordshire, Disintegration took shape against the band's own stated intention to make something \"darker and slower.\"\n\n7 MIN READ\n↗\n05\nREFERENCE ARTICLE\nWhy Pornography still sounds the way it does\n\nA note on the production choices — drum treatment, flanging, mix-bus compression — that made The Cure's fourth album harder for the band to make and harder for their audience to place.\n\n6 MIN READ\n↗",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/",
+      "status": 200,
+      "title": "Cureation | The Cure, in obsessive detail",
+      "bodyText": "INDEPENDENT ARCHIVE · UPDATED DAILY\nThe Cure,\nall of it.\n\nWhat they are doing now, what they did then, and every strange, perfect detail in between.\n\nFOLLOW THE 2026 TOUR\n→\nOPEN THE PUBLICATION\nPUBLISHED · XIV.X.MMXXVI · VERSION MMXXVI.CCLXXXVII\n14\nRECORDS\n157\nSONGS\n1,692\nSHOWS\n1,047\nVENUES\n ON TOUR NOW\n2026 European Summer Shows\n→\nLATEST NEWS\nFrom Oslo to Gothenburg, The Cure’s summer keeps changing shape\n→\nALBUM REVIEWS\nEvery studio album, closely listened to.\n→\nFROM THE ARCHIVE\nOne story,\nproperly told.\nOPEN THE PUBLICATION →\nREVIEWS · 8 MIN READ\nFEATURED ARTICLE · 28 NOVEMBER 2024\nSongs of a Lost World: A Deep Dive Into The Cure's Masterpiece\n\nAn in-depth look at the themes, production, and emotional weight of The Cure's long-awaited fourteenth album.\n\nREAD THE FEATURE →",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/reviews",
+      "status": 200,
+      "title": "Album Reviews · Cureation",
+      "bodyText": "HOME\nREVIEWS\nReviews\n\nFourteen studio albums. Fourteen close listens. Long-form criticism written for fans who know the songs and still want to hear them differently.\n\n9.5\n/ 10\nFEATURED REVIEW · 2024\nSongs of a Lost World: An ending that opens outward\n\nAfter sixteen years, The Cure returned with an album of grief and mortality that feels monumental because it never mistakes scale for spectacle.\n\nBY BERNARD MCWEENEY\n2 MIN READ\nREAD THE FULL REVIEW\n→\nCOMPLETE STUDIO ARCHIVE\nEvery album reviewed\n14 REVIEWS\n7.3\n2008 · 2 MIN\n4:13 Dream: Colour after the storm\n\nBright guitars and direct melodies give The Cure’s thirteenth album an appealing lift, even when the larger design feels unfinished.\n\nREAD REVIEW →\n6.9\n2004 · 2 MIN\nThe Cure: Raw edges, mixed results\n\nThe self-titled album pushes The Cure toward a harsher, more immediate sound, gaining force while sacrificing some of their mystery.\n\nREAD REVIEW →\n8.5\n2000 · 2 MIN\nBloodflowers: The beauty of the long goodbye\n\nPatient and autumnal, Bloodflowers finds The Cure returning to long-form melancholy without pretending the past can be repeated.\n\nREAD REVIEW →\n7.1\n1996 · 2 MIN\nWild Mood Swings: The argument for inconsistency\n\nThe Cure’s most disputed album is overstuffed and tonally unstable, but its risks deserve more than a dismissive verdict.\n\nREAD REVIEW →\n9.2\n1992 · 2 MIN\nWish: Bright light, deep water\n\nAt their commercial peak, The Cure made a record that holds euphoria and collapse in the same wide-open sound.\n\nREAD REVIEW →\n10\n1989 · 2 MIN\nDisintegration: The masterpiece that keeps moving\n\nImmense yet intimate, Disintegration turns time, memory and romantic fear into The Cure’s most complete album.\n\nREAD REVIEW →\n9\n1987 · 2 MIN\nKiss Me, Kiss Me, Kiss Me: Desire in every direction\n\nThe Cure’s great double album is excessive, romantic, abrasive and alive—the catalogue at its most gloriously plural.\n\nREAD REVIEW →\n9\n1985 · 2 MIN\nThe Head on the Door: Ten songs, a whole world\n\nCompact, varied and endlessly replayable, The Head on the Door turns The Cure’s contradictions into pop perfection.\n\nREAD REVIEW →\n7.5\n1984 · 2 MIN\nThe Top: Fever dreams and loose ends\n\nMessy by design and fascinating in practice, The Top catches Robert Smith rebuilding The Cure in public.\n\nREAD REVIEW →\n9.3\n1982 · 2 MIN\nPornography: No exit, no wasted motion\n\nThe Cure’s darkest record remains overwhelming because its chaos is shaped with absolute purpose.\n\nREAD REVIEW →\n8.7\n1981 · 2 MIN\nFaith: The long grey afternoon\n\nSlow, severe and quietly beautiful, Faith turns doubt and grief into an album of remarkable physical presence.\n\nREAD REVIEW →\n8.8\n1980 · 2 MIN\nSeventeen Seconds: Empty space, perfect tension\n\nWith one decisive turn toward silence, repetition and atmosphere, The Cure found a language that still feels entirely their own.\n\nREAD REVIEW →\n7.4\n1979 · 2 MIN\nThree Imaginary Boys: The sound of a band becoming itself\n\nRestless, sharp and not entirely under its creators’ control, The Cure’s debut is most compelling when the future briefly comes into focus.\n\nREAD REVIEW →",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/sources",
+      "status": 200,
+      "title": "Sources · Cureation",
+      "bodyText": "HOME\nSOURCES\nSources\n\nEvery claim traces back to something. This ledger records where the archive's facts came from, with citations, counts and reliability rankings.\n\nSOURCES ON FILE\n40\nRECORDS SOURCED\n3,911\nTYPES\n6\nRANKING\nRELIABILITY\nCITATIONS\nThe ledger\n40 SOURCES\nTYPE\nAll types\nAPI\nBOOK\nFAN\nMAGAZINE\nOFFICIAL\nWEBSITE\nSTATUS\nAny status\nOfficial\nIndependent\nSEARCH\n40 SOURCES\n№\tSOURCE\tTYPE\tAUTHOR\tRECORDS\tRELIABILITY\n01\nCure Concerts\n↗\n0\nExtensive fan-run Cure concert archive used for show dates, setlists, ticket scans, and concert imagery.\nFAN\n–\n2,162\n4\n02\nsetlist.fm\n↗\n0\nCrowd-sourced setlist database. Primary source for concert setlists.\nWEBSITE\n–\n1,695\n4\n03\nWikipedia\n↗\n0\nGeneral reference for biographical and discographical data.\nWEBSITE\n–\n40\n3\n04\nThe Cure Official Website\n↗\nOFFICIAL\nOfficial band website and announcements.\nOFFICIAL\n–\n4\n5\n05\nRock and Roll Hall of Fame\n↗\nOFFICIAL\nOfficial Rock Hall artist induction profile.\nOFFICIAL\n–\n3\n5\n06\nNME\n↗\n0\nMusic journalism - interviews, reviews, features.\nMAGAZINE\n–\n3\n4\n07\nThe Cure Official YouTube\n↗\nOFFICIAL\nOfficial The Cure YouTube channel and music videos.\nOFFICIAL\n–\n2\n5\n08\nBBC\n↗\nOFFICIAL\nOfficial BBC source for broadcast and archive references.\nOFFICIAL\n–\n1\n4\n09\nBillboard\n↗\n0\nBillboard chart history pages for The Cure.\nWEBSITE\n–\n1\n4\n10\nFiction Records / Polydor\nOFFICIAL\nOfficial label discography and press materials.\nOFFICIAL\n–\n0\n5\n11\nTen Imaginary Years (Book)\nOFFICIAL\nOfficial illustrated biography covering 1978-1988.\nBOOK\nSTEVE SUTHERLAND\n0\n5\n12\nAllMusic\n↗\n0\nAlbum reviews, ratings, and editorial content.\nWEBSITE\n–\n0\n4\n13\nCureation Staff\n↗\n0\nOriginal research and editorial by the Cureation team.\nFAN\n–\n0\n4\n14\nDiscogs\n↗\n0\nComprehensive discography database with release details, credits, and catalog numbers.\nWEBSITE\n–\n0\n4\n15\nINA\n↗\nOFFICIAL\nInstitut national de l’audiovisuel archive source for broadcast material.\nOFFICIAL\n–\n0\n4\n16\nInternet Archive / Wayback Machine\n↗\n0\nArchived web pages and media used when original source pages are unavailable.\nWEBSITE\n–\n0\n4\n17\nRoskilde Festival\n↗\nOFFICIAL\nOfficial Roskilde Festival history and lineup reference.\nOFFICIAL\n–\n0\n4\n18\nWikidata\n↗\n0\nStructured public reference data used alongside Wikipedia for venue metadata.\nAPI\n–\n0\n4\n19\nA Chain of Flowers\n↗\n0\nLong-running Cure fan community and archive; older pages are also cited via archived copies.\nFAN\n–\n0\n3\n20\nA Foolish Arrangement\n↗\n0\nFan archive cited in setlist and live-history credits.\nFAN\n–\n0\n3\n21\nArusha Baker\n↗\n0\nSite cited in concert credits and live-history references.\nWEBSITE\n–\n0\n3\n22\nBeach of Stone\n↗\n0\nFan site cited in concert credits and live-history references.\nFAN\n–\n0\n3\n23\nCureconcerts.com\n↗\n0\nLegacy Cure concert archive domain cited in setlist credits.\nFAN\n–\n0\n3\n24\nForever Drowning\n↗\n0\nFan site cited in concert credits and live-history references.\nFAN\n–\n0\n3\n25\nNEMS World\n↗\n0\nMusic-history reference site cited in external live-history links.\nWEBSITE\n–\n0\n3\n26\nNew Day\n↗\n0\nFan archive cited in setlist and live-history links.\nFAN\n–\n0\n3\n27\nOpening Time\n↗\n0\nFan-run Cure live archive cited in concert credits.\nFAN\n–\n0\n3\n28\nPictures of You\n↗\n0\nFan-run Cure archive cited for concert and media references.\nFAN\n–\n0\n3\n29\nThe Banshees and Other Creatures\n↗\n0\nPost-punk reference site cited for contextual live-history links.\nWEBSITE\n–\n0\n3\n30\nThe Cure in Holland\n↗\n0\nFan-run archive focused on The Cure in the Netherlands.\nFAN\n–\n0\n3\n31\nThe Cure.cz\n↗\n0\nFan archive cited for Cure concert and setlist information.\nFAN\n–\n0\n3\n32\nThe Side\n↗\n0\nFan site cited in concert credits and live-history references.\nFAN\n–\n0\n3\n33\nUK Rock Festivals\n↗\n0\nFestival history reference cited in setlist and live-history links.\nWEBSITE\n–\n0\n3\n34\nDailymotion\n↗\n0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\nWEBSITE\n–\n0\n2\n35\nFacebook\n↗\n0\nSocial media source used for contemporary posts and embedded video references.\nWEBSITE\n–\n0\n2\n36\nInstagram\n↗\n0\nSocial media source used for contemporary posts and media references.\nWEBSITE\n–\n0\n2\n37\nSoundCloud\n↗\n0\nPublic audio platform used for embedded audio links; individual uploader reliability varies.\nWEBSITE\n–\n0\n2\n38\nTicket Collector\n↗\n0\nFan ticket archive cited for concert-history references.\nFAN\n–\n0\n2\n39\nVimeo\n↗\n0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\nWEBSITE\n–\n0\n2\n40\nYouTube\n↗\n0\nPublic video platform used for embedded live footage and promo clips; individual uploader reliability varies.\nWEBSITE\n–\n0\n2",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/wiki",
+      "status": 200,
+      "title": "The wiki · Cureation",
+      "bodyText": "HOME\nTHE WIKI\nThe wiki\n\nLong-form reference articles, deeper than a liner note and shorter than a biography, cross-referenced to everything else in the archive.\n\nARTICLES\n5\nSORT\nA–Z\n5 ARTICLES\nA living reference,\nnot a filing cabinet.\n\nStories, people, places and ideas are connected back to the records, songs and shows they belong to.\n\n01\nREFERENCE ARTICLE\nFrom Easy Cure to The Cure, 1978\n\nHow a Crawley four-piece dropped half their name — and most of their original set — in the year between signing with Hansa and releasing their first single on Fiction.\n\n5 MIN READ\n↗\n02\nREFERENCE ARTICLE\nRobert Smith's guitars: a short ledger\n\nThe instruments that made the records — from the hand-me-down Top Twenty of 1977 to the Gibsons and Fenders that defined the imperial-era tone.\n\n6 MIN READ\n↗\n03\nREFERENCE ARTICLE\nThe Cure at Glastonbury: four headline slots\n\nA short chronicle of the band's four Pyramid Stage headline appearances — 1986, 1990, 1995 and 2019 — and what each marked within the band's arc.\n\n5 MIN READ\n↗\n04\nREFERENCE ARTICLE\nThe Disintegration sessions, winter 1988–89\n\nRecorded between November 1988 and February 1989 at Outside Studios in Berkshire and Hook End Manor in Oxfordshire, Disintegration took shape against the band's own stated intention to make something \"darker and slower.\"\n\n7 MIN READ\n↗\n05\nREFERENCE ARTICLE\nWhy Pornography still sounds the way it does\n\nA note on the production choices — drum treatment, flanging, mix-bus compression — that made The Cure's fourth album harder for the band to make and harder for their audience to place.\n\n6 MIN READ\n↗",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "aria-allowed-attr",
+          "impact": "critical",
+          "description": "Ensure an element's role supports its ARIA attributes",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/aria-allowed-attr?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "html"
+              ],
+              "failureSummary": "Fix all of the following:\n  ARIA attribute is not allowed: aria-pressed=\"true\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "limitation": "browserType.launch: Failed to launch the browser process.\nBrowser logs:\n\n<launching> /Users/bernardmcweeney/Library/Caches/ms-playwright/firefox-1555/firefox/Nightly.app/Contents/MacOS/firefox -no-remote -headless -profile /tmp/playwright_firefoxdev_profile-OV3BTt -juggler-pipe -silent\n<launched> pid=56870\n[pid=56870][err] *** You are running in headless mode.\n[pid=56870][err] Could not find profile folder.\n[pid=56870] <process did exit: exitCode=1, signal=null>\n[pid=56870] starting temporary directories cleanup\nCall log:\n\u001b[2m  - <launching> /Users/bernardmcweeney/Library/Caches/ms-playwright/firefox-1555/firefox/Nightly.app/Contents/MacOS/firefox -no-remote -headless -profile /tmp/playwright_firefoxdev_profile-OV3BTt -juggler-pipe -silent\u001b[22m\n\u001b[2m  - <launched> pid=56870\u001b[22m\n\u001b[2m  - [pid=56870][err] *** You are running in headless mode.\u001b[22m\n\u001b[2m  - [pid=56870][err] Could not find profile folder.\u001b[22m\n\u001b[2m  - [pid=56870] <process did exit: exitCode=1, signal=null>\u001b[22m\n\u001b[2m  - [pid=56870] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=56870] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=56870] <kill>\u001b[22m\n\u001b[2m  - [pid=56870] <skipped force kill spawnedProcess.killed=false processClosed=true>\u001b[22m\n\u001b[2m  - [pid=56870] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=56870] <gracefully close end>\u001b[22m\n"
+    }
+  ]
+}

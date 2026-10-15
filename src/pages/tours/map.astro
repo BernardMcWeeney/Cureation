@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../../lib/visual-editing';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/ui/PageHero.astro';
 import DotMap from '../../components/viz/DotMap.astro';
@@ -164,16 +165,16 @@ const venueMappedCityCount = cityPoints.filter((city: any) => city.coordinateKin
 const topCities = cityRows.slice(0, 12);
 ---
 <Layout title="Touring world map · Cureation">
-  <PageHero
-    section="Geography"
-    title="Touring world map."
-    deck="The Cure's show history by country, with city bubbles plotted from linked venues first and city centroids where venue coordinates are missing."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Tours', href: '/tours' }, { label: 'World map' }]}
+  <PageHero copyKeys={{"section":"pages_tours_map_5f8e31aeb242","title":"pages_tours_map_aaa55f8ddf3d","deck":"pages_tours_map_9c67040fece6"}}
+    section={copyText("pages_tours_map_5f8e31aeb242", "Geography")}
+    title={copyText("pages_tours_map_aaa55f8ddf3d", "Touring world map.")}
+
+    crumbs={[{ ...copySource({"label":"pages_tours_map_data-d1818738f383"}),  label: copyText("pages_tours_map_data-d1818738f383", "Home"), href: '/' }, { ...copySource({"label":"pages_tours_map_data-3e558613bb37"}),  label: copyText("pages_tours_map_data-3e558613bb37", "Tours"), href: '/tours' }, { ...copySource({"label":"pages_tours_map_data-94fae0288b35"}),  label: copyText("pages_tours_map_data-94fae0288b35", "World map") }]}
     facts={[
-      { k: 'Shows counted', v: setlists.length },
-      { k: 'Cities on file', v: cityRows.length },
-      { k: 'Countries', v: countryRows.length },
-      { k: 'City bubbles', v: cityPoints.length },
+      { ...copySource({"k":"pages_tours_map_data-48d1b3ad9efa"}),  k: copyText("pages_tours_map_data-48d1b3ad9efa", "Shows counted"), v: setlists.length },
+      { ...copySource({"k":"pages_tours_map_data-c7ca54265366"}),  k: copyText("pages_tours_map_data-c7ca54265366", "Cities"), v: cityRows.length },
+      { ...copySource({"k":"pages_tours_map_data-ef0d5a36e2e8"}),  k: copyText("pages_tours_map_data-ef0d5a36e2e8", "Countries"), v: countryRows.length },
+      { ...copySource({"k":"pages_tours_map_data-6977d8adf8da"}),  k: copyText("pages_tours_map_data-6977d8adf8da", "City bubbles"), v: cityPoints.length },
     ]}
   />
 
@@ -184,9 +185,9 @@ const topCities = cityRows.slice(0, 12);
     <div class="live-map-shell">
       <div class="live-map-main">
         <div class="live-map-toolbar" aria-label="Map layers">
-          <button type="button" class="live-map-tab is-active" data-map-mode="all">All</button>
-          <button type="button" class="live-map-tab" data-map-mode="cities">Cities</button>
-          <button type="button" class="live-map-tab" data-map-mode="countries">Countries</button>
+          <button data-directus={copyAttr("pages_tours_map_4f112d8a2862")} set:html={copyText("pages_tours_map_4f112d8a2862", "All")} type="button" class="live-map-tab is-active" data-map-mode="all"></button>
+          <button data-directus={copyAttr("pages_tours_map_67a358dce336")} set:html={copyText("pages_tours_map_67a358dce336", "Cities")} type="button" class="live-map-tab" data-map-mode="cities"></button>
+          <button data-directus={copyAttr("pages_tours_map_2bd80cca223f")} set:html={copyText("pages_tours_map_2bd80cca223f", "Countries")} type="button" class="live-map-tab" data-map-mode="countries"></button>
         </div>
         <div
           id="shows-map"
@@ -198,7 +199,7 @@ const topCities = cityRows.slice(0, 12);
         </div>
         <div class="live-map-fallback" data-map-fallback>
           <div class="panel-head">
-            <span>Static coverage</span>
+            <span data-directus={copyAttr("pages_tours_map_b612a4360fc7")} set:html={copyText("pages_tours_map_b612a4360fc7", "Static coverage")}></span>
             <span>{countryPoints.length} COUNTRIES</span>
           </div>
           <DotMap
@@ -215,24 +216,24 @@ const topCities = cityRows.slice(0, 12);
 
       <aside class="live-map-summary">
         <div class="panel-head">
-          <span>Coverage</span>
+          <span data-directus={copyAttr("pages_tours_map_d45c4a7bed13")} set:html={copyText("pages_tours_map_d45c4a7bed13", "Coverage")}></span>
           <span>{mappedShowCount} CITY-MAPPED SHOWS</span>
         </div>
         <div class="live-map-metrics">
           <div>
-            <span class="mono-sm muted">SHOWS</span>
+            <span data-directus={copyAttr("pages_tours_map_2fb6402e0e12")} set:html={copyText("pages_tours_map_2fb6402e0e12", "SHOWS")} class="mono-sm muted"></span>
             <strong>{setlists.length.toLocaleString()}</strong>
           </div>
           <div>
-            <span class="mono-sm muted">CITY DATA</span>
+            <span data-directus={copyAttr("pages_tours_map_eaad8bf0fa36")} set:html={copyText("pages_tours_map_eaad8bf0fa36", "CITY DATA")} class="mono-sm muted"></span>
             <strong>{cityRows.length.toLocaleString()}</strong>
           </div>
           <div>
-            <span class="mono-sm muted">COUNTRIES</span>
+            <span data-directus={copyAttr("pages_tours_map_7ff0e7449d7a")} set:html={copyText("pages_tours_map_7ff0e7449d7a", "COUNTRIES")} class="mono-sm muted"></span>
             <strong>{countryRows.length.toLocaleString()}</strong>
           </div>
           <div>
-            <span class="mono-sm muted">CITY BUBBLES</span>
+            <span data-directus={copyAttr("pages_tours_map_57a6d5c995ea")} set:html={copyText("pages_tours_map_57a6d5c995ea", "CITY BUBBLES")} class="mono-sm muted"></span>
             <strong>{cityPoints.length.toLocaleString()}</strong>
           </div>
         </div>
@@ -245,7 +246,7 @@ const topCities = cityRows.slice(0, 12);
 
   <section class="container live-map-cities">
     <div class="panel-head">
-      <span>Most visited cities</span>
+      <span data-directus={copyAttr("pages_tours_map_be7bebd80217")} set:html={copyText("pages_tours_map_be7bebd80217", "Most visited cities")}></span>
       <span>TOP {topCities.length}</span>
     </div>
     <div class="table-wrap">
@@ -253,22 +254,22 @@ const topCities = cityRows.slice(0, 12);
         <thead>
           <tr>
             <th style="width:50px;">№</th>
-            <th>City</th>
-            <th>Country</th>
-            <th class="num" style="text-align:right;">Shows</th>
-            <th class="num" style="text-align:right;">Venues</th>
-            <th class="num" style="text-align:right;">Latest</th>
+            <th data-directus={copyAttr("pages_tours_map_830bef61ead6")} set:html={copyText("pages_tours_map_830bef61ead6", "City")}></th>
+            <th data-directus={copyAttr("pages_tours_map_1aadb617ba2c")} set:html={copyText("pages_tours_map_1aadb617ba2c", "Country")}></th>
+            <th data-directus={copyAttr("pages_tours_map_5779b1ab24a6")} set:html={copyText("pages_tours_map_5779b1ab24a6", "Shows")} class="num" style="text-align:right;"></th>
+            <th data-directus={copyAttr("pages_tours_map_c25e5cda0636")} set:html={copyText("pages_tours_map_c25e5cda0636", "Venues")} class="num" style="text-align:right;"></th>
+            <th data-directus={copyAttr("pages_tours_map_903b8967f23e")} set:html={copyText("pages_tours_map_903b8967f23e", "Latest")} class="num" style="text-align:right;"></th>
           </tr>
         </thead>
         <tbody>
           {topCities.map((city, index) => (
-            <tr data-clickable={!!city.latestSlug} onclick={city.latestSlug ? `location.href='/setlists/${city.latestSlug}'` : undefined}>
+            <tr data-clickable={!!city.latestSlug} data-row-href={city.latestSlug ? `/setlists/${city.latestSlug}` : undefined}>
               <td class="idx">{String(index + 1).padStart(2, '0')}</td>
-              <td><span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{city.name}</span></td>
-              <td class="mono-sm muted">{city.country}</td>
-              <td class="num" style="color: var(--accent-3);">{city.shows}</td>
-              <td class="num">{city.venues.size || '–'}</td>
-              <td class="num">{city.latest || '–'}</td>
+              <td><span data-directus={editable(city, ["name"])} class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{city.latestSlug ? <a href={`/setlists/${city.latestSlug}`}>{city.name}</a> : city.name}</span></td>
+              <td data-directus={editable(city, ["country"])} class="mono-sm muted">{city.country}</td>
+              <td data-directus={editable(city, ["shows"])} class="num" style="color: var(--accent-3);">{city.shows}</td>
+              <td data-directus={editable(city, ["venues"])} class="num">{city.venues.size || '–'}</td>
+              <td data-directus={editable(city, ["latest"])} class="num">{city.latest || '–'}</td>
             </tr>
           ))}
         </tbody>
@@ -528,9 +529,9 @@ const topCities = cityRows.slice(0, 12);
     background: transparent;
     color: var(--ink-2);
     cursor: pointer;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     line-height: 1;
     min-height: 38px;
     padding: 0 14px;
@@ -568,14 +569,14 @@ const topCities = cityRows.slice(0, 12);
 
   .shows-map .leaflet-container,
   .shows-map.leaflet-container {
-    font-family: var(--f-sans);
+    font-family: var(--f-ui);
   }
 
   .shows-map .leaflet-control-attribution {
     background: color-mix(in srgb, var(--bg) 84%, transparent);
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
   }
 
   .shows-map .leaflet-control-attribution a {
@@ -591,8 +592,8 @@ const topCities = cityRows.slice(0, 12);
   .shows-map .english-country-label span {
     color: color-mix(in srgb, var(--ink) 72%, var(--accent) 28%);
     display: inline-block;
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1;
     opacity: .78;
@@ -628,8 +629,8 @@ const topCities = cityRows.slice(0, 12);
   .live-map-popup__meta,
   .live-map-popup__dates,
   .live-map-popup__link {
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
   }

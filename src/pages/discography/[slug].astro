@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple } from '../../lib/visual-editing';
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
@@ -49,7 +50,6 @@ const m = Math.floor((totalSec % 3600) / 60);
 const s = totalSec % 60;
 const runtime = h ? `${h}h ${m}m` : totalSec ? `${m}:${String(s).padStart(2, '0')}` : '–';
 
-const year = album.release_date?.slice(0, 4) || '–';
 
 const totalLivePlays = songs.reduce((n, s) => n + (s.times_played_live || 0), 0);
 const maxPlays = Math.max(1, ...songs.map((s) => s.times_played_live || 0));
@@ -64,43 +64,28 @@ const albumOrdinalMap: Record<string, string> = {
 const ordinal = album.type === 'studio' && albumOrdinalMap[album.slug!] ? albumOrdinalMap[album.slug!] : null;
 
 const externalLinks = [
-  { label: 'Spotify', href: album.spotify_url },
-  { label: 'Apple Music', href: album.apple_music_url },
-  { label: 'Bandcamp', href: album.bandcamp_url },
-  { label: 'Amazon', href: album.amazon_url },
-  { label: 'Official Store', href: album.official_store_url },
+  { ...copySource({"label":"pages_discography__slug__data-5c9c9fdb2fbc"}),  label: copyText("pages_discography__slug__data-5c9c9fdb2fbc", "Spotify"), href: album.spotify_url },
+  { ...copySource({"label":"pages_discography__slug__data-02efd1da69e0"}),  label: copyText("pages_discography__slug__data-02efd1da69e0", "Apple Music"), href: album.apple_music_url },
+  { ...copySource({"label":"pages_discography__slug__data-36df878e7dc0"}),  label: copyText("pages_discography__slug__data-36df878e7dc0", "Bandcamp"), href: album.bandcamp_url },
+  { ...copySource({"label":"pages_discography__slug__data-10ca2a944b47"}),  label: copyText("pages_discography__slug__data-10ca2a944b47", "Amazon"), href: album.amazon_url },
+  { ...copySource({"label":"pages_discography__slug__data-2fe2bce8fc03"}),  label: copyText("pages_discography__slug__data-2fe2bce8fc03", "Official Store"), href: album.official_store_url },
 ].filter((l) => l.href);
 
-const firstReceptionSentence = album.critical_reception
-  ? album.critical_reception.split(/(?<=[\.\!\?])\s/)[0]?.trim().replace(/^["""]|["""]$/g, '')
-  : null;
 
 const singles = (album.singles || []).slice().sort((a, b) =>
   (a.release_date || '').localeCompare(b.release_date || '')
 );
 
-const featuredChartLine = (() => {
-  if (charts && charts.length > 0) {
-    const best = charts.reduce((a, b) => ((a.peak ?? 999) < (b.peak ?? 999) ? a : b));
-    return `#${best.peak} ${best.territory}`;
-  }
-  return null;
-})();
 
 const facts: Array<[string, string]> = [
-  ['Released', album.release_date || '–'],
-  ['Label', album.label || '–'],
-  ['Producer', album.producer?.split(/[\/,]/)[0]?.trim() || '–'],
-  ['Catalog', album.catalog_number || '–'],
-  ['Runtime', runtime],
-  ['Tracks', String(album.track_count || songs.length || '–')],
-  ['Era', era?.name || '–'],
-  ['Peak', featuredChartLine || '–'],
+  copyTuple([copyText("pages_discography__slug__tuple-725d3f092c12", "Released"), album.release_date || '–'], {"0":"pages_discography__slug__tuple-725d3f092c12"}),
+  copyTuple([copyText("pages_discography__slug__tuple-9a20f1a58fae", "Label"), album.label || '–'], {"0":"pages_discography__slug__tuple-9a20f1a58fae"}),
+  copyTuple([copyText("pages_discography__slug__tuple-c5c2b06e06d0", "Runtime"), runtime], {"0":"pages_discography__slug__tuple-c5c2b06e06d0"}),
+  copyTuple([copyText("pages_discography__slug__tuple-43ca86df41d9", "Tracks"), String(album.track_count || songs.length || '–')], {"0":"pages_discography__slug__tuple-43ca86df41d9"}),
 ];
 
-function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' : t; }
 ---
-<Layout
+<Layout editRecord={album}
   title={`${album.title} · Cureation`}
   description={album.description || undefined}
   ogImage={asset(album.cover_art, 'og')}
@@ -108,8 +93,8 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
 
   <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
-      { label: 'Home',        href: '/' },
-      { label: 'Discography', href: '/discography' },
+      { ...copySource({"label":"pages_discography__slug__data-6838272f3ab8"}),  label: copyText("pages_discography__slug__data-6838272f3ab8", "Home"),        href: '/' },
+      { ...copySource({"label":"pages_discography__slug__data-a41c9de8a0e8"}),  label: copyText("pages_discography__slug__data-a41c9de8a0e8", "Discography"), href: '/discography' },
       { label: album.title },
     ]} />
   </div>
@@ -117,320 +102,131 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   <!-- HEADER -->
   <section id="album-dossier" class="container album-head detail-anchor">
     <div class="album-head__art">
-      <figure class="cover-plate" style={`view-transition-name: album-${album.slug};`}>
-        <div class="cover-plate__corner cover-plate__corner--tl">
-          <span class="mono-sm muted">{album.type?.toUpperCase()} · {year}</span>
-        </div>
-        <div class="cover-plate__corner cover-plate__corner--tr">
-          <span class="mono-sm muted">FIX · {album.catalog_number || '–'}</span>
-        </div>
+      <figure  class="cover-plate" style={`view-transition-name: album-${album.slug};`}>
         {album.cover_art ? (
-          <img src={asset(album.cover_art, 'card')} alt={`${album.title} cover`} />
+          <img data-directus={editable(album, ["cover_art"])} src={asset(album.cover_art, 'card')} alt={`${album.title} cover`} />
         ) : (
           <div class="cover-plate__fallback" aria-hidden="true"></div>
         )}
-        <div class="cover-plate__corner cover-plate__corner--bl">
-          <span class="mono-sm muted">{album.label ? album.label.split(/[\/]/)[0].trim().toUpperCase() : '–'}</span>
-        </div>
       </figure>
     </div>
 
-    <div class="album-head__body">
+    <div  class="album-head__body">
       <div class="album-head__utility">
-        <div class="cluster" style="gap: .4rem;">
+        <div data-directus={editable(album, ["type"]) ?? editable(era, ["short_name"])} class="cluster" style="gap: .4rem;">
           {album.type && ordinal && <Tag>STUDIO · {ordinal.toUpperCase()}</Tag>}
           {album.type && !ordinal && <Tag>{album.type.toUpperCase()}</Tag>}
-          {era?.short_name && <Tag>{era.short_name.toUpperCase()}</Tag>}
-          {featuredChartLine && <Tag variant="accent">{featuredChartLine.toUpperCase()}</Tag>}
         </div>
         <Bookmark kind="album" id={album.id} label={album.title} href={`/discography/${album.slug}`} />
       </div>
 
-      <h1 class="album-head__title serif" style={`view-transition-name: album-title-${album.slug};`}>
+      <h1 data-directus={editable(album, ["title"])} class="album-head__title serif" style={`view-transition-name: album-title-${album.slug};`}>
         {album.title}
       </h1>
 
-      <div class="mono-sm" style="color: var(--ink-2); margin-top: 10px;">
-        {year} · {runtime} · {songs.length || album.track_count || '–'} TRACKS
-        {featuredChartLine && <> · {featuredChartLine.toUpperCase()}</>}
-      </div>
 
       {album.description && (
-        <p class="album-head__lede">{album.description}</p>
-      )}
-
-      {firstReceptionSentence && (
-        <div class="voices">
-          <div class="mono-sm muted" style="margin-bottom: 8px;">
-            CRITICAL RECEPTION · ARCHIVE EXCERPT
-          </div>
-          <div class="voices__quote">"{firstReceptionSentence}"</div>
-          <div class="mono-sm muted" style="margin-top: 8px;">Press, {year}</div>
-        </div>
-      )}
-
-      {album.background_text && (
-        <div class="archivist">
-          <span class="mono-sm muted" style="margin-right: .4em;">Archivist's note:</span>
-          {album.background_text.split(/\n{2,}/)[0]}
-        </div>
+        <p data-directus={editable(album, ["description"])} class="album-head__lede">{album.description}</p>
       )}
 
       <!-- QUICK FACTS -->
       <div class="facts">
-        {facts.map(([k, v]) => (
+        {facts.filter(([, value]) => value !== '–').map((__copyRow8474) => { const [k, v] = __copyRow8474; return (
           <div class="facts__item">
-            <div class="facts__k">{k}</div>
-            <div class="facts__v">{v}</div>
+            <div data-directus={editable(__copyRow8474, ["0"])} class="facts__k">{k}</div>
+            <div data-directus={editable(__copyRow8474, ["1"])} class="facts__v">{v}</div>
           </div>
-        ))}
+        ); })}
       </div>
 
       <div class="cluster" style="gap: .5rem; margin-top: 22px;">
-        {review && (
-          <Button href={`/reviews/${review.slug}`} variant="default">
-            Read the {review.score}/10 review →
-          </Button>
-        )}
         {totalLivePlays > 0 && (
-          <Button href={`/setlists?album=${album.slug}`} variant={review ? 'ghost' : 'default'}>
-            View {totalLivePlays.toLocaleString()} performances →
+          <Button href="#album-panel-live" variant="ghost">
+            Explore live performances →
           </Button>
         )}
-        {externalLinks.slice(0, 2).map((l) => (
-          <Button href={l.href!} variant="ghost" target="_blank" rel="noopener">{l.label} →</Button>
-        ))}
       </div>
     </div>
   </section>
 
-  <!-- TABS -->
-  <div class="container album-tabs-wrap">
-    <div class="album-tabs" data-tabs role="tablist" aria-label="Album dossier">
-      <button id="album-tab-tracks" class="album-tab is-active" type="button" role="tab" data-target="tracks" aria-controls="album-panel-tracks" aria-selected="true">
-        Tracklist <span class="album-tab__count">{songs.length}</span>
-      </button>
-      {(album.credits || album.producer) && (
-        <button id="album-tab-personnel" class="album-tab" type="button" role="tab" data-target="personnel" aria-controls="album-panel-personnel" aria-selected="false" tabindex="-1">
-          Personnel <span class="album-tab__count">·</span>
-        </button>
-      )}
-      {trivia.length > 0 && (
-        <button id="album-tab-trivia" class="album-tab" type="button" role="tab" data-target="trivia" aria-controls="album-panel-trivia" aria-selected="false" tabindex="-1">
-          Trivia & sessions <span class="album-tab__count">{trivia.length}</span>
-        </button>
-      )}
-      {(charts.length > 0 || singles.length > 0) && (
-        <button id="album-tab-charts" class="album-tab" type="button" role="tab" data-target="charts" aria-controls="album-panel-charts" aria-selected="false" tabindex="-1">
-          Charts & singles <span class="album-tab__count">{charts.length + singles.length}</span>
-        </button>
-      )}
-      {totalLivePlays > 0 && (
-        <button id="album-tab-live" class="album-tab" type="button" role="tab" data-target="live" aria-controls="album-panel-live" aria-selected="false" tabindex="-1">
-          Live performances <span class="album-tab__count">{totalLivePlays.toLocaleString()}</span>
-        </button>
-      )}
-      {variants.length > 0 && (
-        <button id="album-tab-variants" class="album-tab" type="button" role="tab" data-target="variants" aria-controls="album-panel-variants" aria-selected="false" tabindex="-1">
-          Pressings <span class="album-tab__count">{variants.length}</span>
-        </button>
-      )}
-    </div>
-  </div>
-
-  <!-- TRACKS -->
-  <section id="album-panel-tracks" class="container album-section detail-anchor" data-panel="tracks" role="tabpanel" aria-labelledby="album-tab-tracks">
-    <div class="tracks-grid">
+  <div class="container album-file">
+    <div class="archive-columns">
+      <div class="album-file__main">
+<section id="album-panel-tracks" class="album-tracklist detail-anchor" data-panel="tracks">
+    <h2 class="record-section-title">Tracklist</h2>
       <div>
         <table class="data">
           <thead>
             <tr>
               <th style="width: 36px;">#</th>
-              <th>Title</th>
-              <th>Notes</th>
-              <th style="text-align: right; width: 90px;">Length</th>
-              <th style="text-align: right; width: 90px;">Live</th>
+              <th data-directus={copyAttr("pages_discography_slug_1d03c6a90888")} set:html={copyText("pages_discography_slug_1d03c6a90888", "Title")}></th>
+              <th data-directus={copyAttr("pages_discography_slug_aa9fbd2f5255")} set:html={copyText("pages_discography_slug_aa9fbd2f5255", "Notes")}></th>
+              <th data-directus={copyAttr("pages_discography_slug_2b03d744648e")} set:html={copyText("pages_discography_slug_2b03d744648e", "Length")} style="text-align: right; width: 90px;"></th>
             </tr>
           </thead>
           <tbody>
             {songs.map((song) => {
-              const plays = song.times_played_live || 0;
               return (
                 <tr
                   data-clickable
                   data-track-row
-                  data-track-id={song.id}
-                  data-track-n={song.track_number}
-                  data-track-title={song.title}
-                  data-track-slug={song.slug || ''}
-                  data-track-dur={song.duration || ''}
-                  data-track-plays={plays}
-                  data-track-meaning={(song.song_meaning || '').slice(0, 260)}
-                  onclick={song.slug ? `window.location='/songs/${song.slug}'` : ''}
+                  data-row-href={song.slug ? `/songs/${song.slug}` : undefined}
                 >
-                  <td class="idx">{String(song.track_number ?? 0).padStart(2, '0')}</td>
-                  <td><span class="serif" style="font-size: 18px;">{song.title}</span></td>
-                  <td><span class="mono-sm muted">
+                  <td data-directus={editable(song, ["track_number"])} class="idx">{String(song.track_number ?? 0).padStart(2, '0')}</td>
+                  <td><a data-directus={editable(song, ["title"])} href={song.slug ? `/songs/${encodeURIComponent(song.slug)}` : undefined} class="serif" style="font-size: 18px;">{song.title}</a></td>
+                  <td><span data-directus={editable(song, ["is_single","writer"])} class="mono-sm muted">
                     {song.is_single ? 'SINGLE' : song.writer && song.writer.toLowerCase() !== 'robert smith' ? `CO-WRITTEN` : ''}
                   </span></td>
-                  <td class="num">{song.duration || '–'}</td>
-                  <td class="num" style="color: var(--accent-3);">{plays ? plays.toLocaleString() : '–'}</td>
+                  <td data-directus={editable(song, ["duration"])} class="num">{song.duration || '–'}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-
-      <aside class="stack" style="--gap: 18px;">
-        <div class="panel--bare" data-focus>
-          <div class="panel-head">
-            <span>Track in focus</span>
-            <span data-focus-label>HOVER TO PREVIEW</span>
-          </div>
-          <div style="padding: 18px;" data-focus-body>
-            <div class="muted" style="font-size: 13px; font-family: var(--f-serif);">
-              Hover any track for cross-references, a preview waveform, and the song's documented live-performance count.
-            </div>
-          </div>
-        </div>
-
-        <div class="panel--bare">
-          <div class="panel-head">
-            <span>Variants</span>
-            <span>{(album.disc_count || 1) + (album.type === 'deluxe' ? 1 : 0)}</span>
-          </div>
-          <div>
-            {[
-              ['Original', `${songs.length || album.track_count || '–'} tracks`, runtime],
-              album.disc_count && album.disc_count > 1 ? ['Multi-disc', `${album.disc_count} discs`, runtime] : null,
-              album.type === 'deluxe' ? ['Deluxe edition', 'Expanded', '–'] : null,
-            ].filter(Boolean).map((v, i, arr) => (
-              <div style={`display: grid; grid-template-columns: 1fr auto auto; gap: 14px; padding: 10px 18px; border-bottom: ${i < arr.length - 1 ? '1px solid var(--rule-2)' : 'none'}; font-size: 13px;`}>
-                <div>{(v as string[])[0]}</div>
-                <div class="mono-sm muted">{(v as string[])[1]}</div>
-                <div class="mono-sm">{(v as string[])[2]}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {externalLinks.length > 0 && (
-          <div class="panel--bare">
-            <div class="panel-head">
-              <span>Listen</span>
-              <span>{externalLinks.length}</span>
-            </div>
-            <div style="padding: 10px 0;">
-              {externalLinks.map((l, i) => (
-                <a
-                  href={l.href!} target="_blank" rel="noopener"
-                  style={`display: flex; justify-content: space-between; padding: 10px 18px; border-bottom: ${i < externalLinks.length - 1 ? '1px solid var(--rule-2)' : 'none'}; border-left: none; border-right: none; border-top: none; color: var(--ink); font-family: var(--f-serif); font-size: 15px;`}
-                >
-                  <span>{l.label}</span>
-                  <span class="mono-sm muted">OPEN →</span>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-      </aside>
-    </div>
-  </section>
-
-  <!-- PERSONNEL -->
-  {(album.credits || album.producer) && (
-    <section id="album-panel-personnel" class="container album-section detail-anchor" data-panel="personnel" role="tabpanel" aria-labelledby="album-tab-personnel" hidden>
-      <div class="personnel-grid">
-        <div>
-          <h3 class="serif" style="font-size: clamp(26px, 3vw, 36px); margin: 0 0 20px;">Credits</h3>
-          {album.credits ? (
-            <table class="data">
-              <tbody>
-                {album.credits.split(/\n+/).filter((l) => l.trim()).slice(0, 24).map((line) => {
-                  const m = line.match(/^([^:]+?):\s*(.+)$/);
-                  if (m) return (
-                    <tr>
-                      <td style="width: 220px;"><span class="serif" style="font-size: 16px;">{m[1].trim()}</span></td>
-                      <td><span class="mono-sm muted">{m[2].trim()}</span></td>
-                    </tr>
-                  );
-                  return (
-                    <tr>
-                      <td colspan="2"><span style="font-family: var(--f-serif); font-size: 15px; color: var(--ink-2);">{line}</span></td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <p class="muted">Personnel not yet catalogued.</p>
-          )}
-        </div>
-        <div>
-          <h3 class="serif" style="font-size: clamp(26px, 3vw, 36px); margin: 0 0 20px;">Session intensity</h3>
-          <p class="mono-sm muted" style="margin-bottom: 12px;">
-            Heuristic · 16-week schematic based on release date.
-          </p>
-          <div class="session-grid">
-            {Array.from({ length: 112 }).map((_, i) => {
-              const active = [3,4,5,11,12,13,14,15,18,19,20,21,25,26,32,33,34,35,40,41,42,48,55,56,57,63,70,71,72,73,80,81,82,88,95,102,103,104].includes(i);
-              const intense = [13,14,20,21,33,34,41,56,72,81,103].includes(i);
-              return <div class={`session-cell ${intense ? 'is-intense' : active ? 'is-active' : ''}`}></div>;
-            })}
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-            <div class="mono-sm muted">WEEK 1</div>
-            <div class="mono-sm muted">WEEK 16</div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- TRIVIA -->
-  {trivia.length > 0 && (
-    <section id="album-panel-trivia" class="container album-section detail-anchor" data-panel="trivia" role="tabpanel" aria-labelledby="album-tab-trivia" hidden>
-      <div class="trivia-list">
+</section>
+        <div class="album-archive" aria-label="More from the archive">
+        {(trivia.length > 0) && <details id="album-panel-trivia" class="album-disclosure detail-anchor">
+<summary><h2>Archive notes</h2><span aria-hidden="true">+</span></summary>
+<div class="album-disclosure__body">
+            <div class="trivia-list">
         {trivia.map((t: any, i: number) => (
           <div class="trivia-row">
             <div class="mono" style="color: var(--accent-3);">№ {String(i + 1).padStart(2, '0')}</div>
-            <div>
-              <p class="serif" style="font-size: clamp(19px, 2vw, 24px); line-height: 1.45; margin: 0; color: var(--ink);">
+            <div >
+              <p data-directus={editable(t, ["fact"])} class="serif" style="font-size: clamp(19px, 2vw, 24px); line-height: 1.45; margin: 0; color: var(--ink);">
                 {t.fact}
               </p>
               {(t.category || t.is_verified) && (
-                <div class="cluster mono-sm muted" style="margin-top: 8px; gap: 12px;">
-                  {t.category && <span>{t.category.toUpperCase()}</span>}
-                  {t.is_verified && <span style="color: var(--accent-3);">VERIFIED</span>}
-                  {t.source_detail && <a href={t.source_detail} target="_blank" rel="noopener" style="border: none; color: var(--muted);">SOURCE →</a>}
+                <div  class="cluster mono-sm muted" style="margin-top: 8px; gap: 12px;">
+                  {t.category && <span data-directus={editable(t, ["category"])}>{t.category.toUpperCase()}</span>}
+                  {t.is_verified && <span data-directus={copyAttr("pages_discography_slug_a754146c1ea8")} set:html={copyText("pages_discography_slug_a754146c1ea8", "VERIFIED")} style="color: var(--accent-3);"></span>}
+                  {t.source_detail && <a data-directus={copyAttr("pages_discography_slug_60633641ceb9")} set:html={copyText("pages_discography_slug_60633641ceb9", "SOURCE →")} href={t.source_detail} target="_blank" rel="noopener" style="border: none; color: var(--muted);"></a>}
                 </div>
               )}
             </div>
           </div>
         ))}
       </div>
-    </section>
-  )}
-
-  <!-- CHARTS & SINGLES -->
-  {(charts.length > 0 || singles.length > 0) && (
-    <section id="album-panel-charts" class="container album-section detail-anchor" data-panel="charts" role="tabpanel" aria-labelledby="album-tab-charts" hidden>
-      <div class="charts-grid">
+    </div></details>}
+        {(charts.length > 0 || singles.length > 0) && <details id="album-panel-charts" class="album-disclosure detail-anchor">
+<summary><h2>Charts &amp; singles</h2><span aria-hidden="true">+</span></summary>
+<div class="album-disclosure__body">
+            <div class="charts-grid">
         {charts.length > 0 && (
           <div>
-            <h3 class="serif" style="font-size: clamp(22px, 2.4vw, 30px); margin: 0 0 16px;">Chart peaks</h3>
+            <h3 data-directus={copyAttr("pages_discography_slug_5b882d520756")} set:html={copyText("pages_discography_slug_5b882d520756", "Chart peaks")} class="serif" style="font-size: clamp(22px, 2.4vw, 30px); margin: 0 0 16px;"></h3>
             <table class="data">
               <thead>
-                <tr><th>Territory</th><th style="text-align:right;">Peak</th><th style="text-align:right;">Weeks</th><th style="text-align:right;">Year</th></tr>
+                <tr><th data-directus={copyAttr("pages_discography_slug_5da37c195a03")} set:html={copyText("pages_discography_slug_5da37c195a03", "Territory")}></th><th data-directus={copyAttr("pages_discography_slug_50ffde7d7ab8")} set:html={copyText("pages_discography_slug_50ffde7d7ab8", "Peak")} style="text-align:right;"></th><th data-directus={copyAttr("pages_discography_slug_3ae37cf9aef0")} set:html={copyText("pages_discography_slug_3ae37cf9aef0", "Weeks")} style="text-align:right;"></th><th data-directus={copyAttr("pages_discography_slug_c3c5a6e70c68")} set:html={copyText("pages_discography_slug_c3c5a6e70c68", "Year")} style="text-align:right;"></th></tr>
               </thead>
               <tbody>
                 {charts.map((c: any) => (
                   <tr>
-                    <td>{c.territory}</td>
-                    <td class="num">{c.peak ? '#' + c.peak : '–'}</td>
-                    <td class="num">{c.weeks ?? '–'}</td>
-                    <td class="num">{c.year ?? '–'}</td>
+                    <td data-directus={editable(c, ["territory"])}>{c.territory}</td>
+                    <td data-directus={editable(c, ["peak"])} class="num">{c.peak ? '#' + c.peak : '–'}</td>
+                    <td data-directus={editable(c, ["weeks"])} class="num">{c.weeks ?? '–'}</td>
+                    <td data-directus={editable(c, ["year"])} class="num">{c.year ?? '–'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -439,10 +235,10 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
         )}
         {singles.length > 0 && (
           <div>
-            <h3 class="serif" style="font-size: clamp(22px, 2.4vw, 30px); margin: 0 0 16px;">Singles</h3>
+            <h3 data-directus={copyAttr("pages_discography_slug_fff528604f56")} set:html={copyText("pages_discography_slug_fff528604f56", "Singles")} class="serif" style="font-size: clamp(22px, 2.4vw, 30px); margin: 0 0 16px;"></h3>
             <table class="data">
               <thead>
-                <tr><th>Title</th><th>Released</th><th style="text-align:right;">Peak</th></tr>
+                <tr><th data-directus={copyAttr("pages_discography_slug_c8535a5b6f5c")} set:html={copyText("pages_discography_slug_c8535a5b6f5c", "Title")}></th><th data-directus={copyAttr("pages_discography_slug_226f1cde4cfd")} set:html={copyText("pages_discography_slug_226f1cde4cfd", "Released")}></th><th data-directus={copyAttr("pages_discography_slug_77c166a99aa7")} set:html={copyText("pages_discography_slug_77c166a99aa7", "Peak")} style="text-align:right;"></th></tr>
               </thead>
               <tbody>
                 {singles.map((s) => {
@@ -452,8 +248,8 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
                   const peak = peaks.length ? Math.min(...peaks) : null;
                   return (
                     <tr>
-                      <td><span class="serif" style="font-size: 16px;">{s.title}</span></td>
-                      <td class="mono-sm">{s.release_date?.slice(0, 7).toUpperCase() || '–'}</td>
+                      <td><span data-directus={editable(s, ["title"])} class="serif" style="font-size: var(--text-small);">{s.title}</span></td>
+                      <td data-directus={editable(s, ["release_date"])} class="mono-sm">{s.release_date?.slice(0, 7).toUpperCase() || '–'}</td>
                       <td class="num" style="color: var(--accent-3);">{peak !== null ? `#${peak}` : '–'}</td>
                     </tr>
                   );
@@ -463,63 +259,163 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
           </div>
         )}
       </div>
-    </section>
-  )}
-
-  <!-- LIVE -->
-  {totalLivePlays > 0 && (
-    <section id="album-panel-live" class="container album-section detail-anchor" data-panel="live" role="tabpanel" aria-labelledby="album-tab-live" hidden>
-      <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px;">
+    </div></details>}
+        {(totalLivePlays > 0) && <details id="album-panel-live" class="album-disclosure detail-anchor">
+<summary><h2>Live performances</h2><span aria-hidden="true">+</span></summary>
+<div class="album-disclosure__body">
+            <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px;">
         <div class="mono muted">Album tracks ranked by documented live performances</div>
         <div style="flex: 1; border-top: 1px solid var(--rule);"></div>
-        <a href="/setlists" class="mono-sm" style="border: none; color: var(--accent-3);">OPEN SETLISTS →</a>
+        <a data-directus={copyAttr("pages_discography_slug_826c278f1a6a")} set:html={copyText("pages_discography_slug_826c278f1a6a", "OPEN SETLISTS →")} href="/setlists" class="mono-sm" style="border: none; color: var(--accent-3);"></a>
       </div>
       <div class="live-bars">
-        {songs.map((song) => {
+        {songs.slice().sort((a, b) => (b.times_played_live || 0) - (a.times_played_live || 0)).map((song) => {
           const plays = song.times_played_live || 0;
           const pct = (plays / maxPlays) * 100;
           return (
             <a class="live-bar" href={song.slug ? `/songs/${song.slug}` : '#'}>
-              <div class="live-bar__fill" style={`height: ${pct}%; background: ${plays > maxPlays * 0.6 ? 'var(--accent)' : 'var(--ink-2)'};`}></div>
-              <div class="mono-sm live-bar__label">{shortTitle(song.title)}</div>
+              <div data-directus={editable(song, ["title"])} class="live-bar__label">{song.title}</div>
+              <div class="live-bar__track" aria-hidden="true"><div class="live-bar__fill" style={`width: ${pct}%;`}></div></div>
               <div class="mono-sm muted live-bar__count">{plays ? plays.toLocaleString() : '–'}</div>
             </a>
           );
         })}
       </div>
-    </section>
-  )}
-
-  {variants.length > 0 && (
-    <section id="album-panel-variants" class="container album-section detail-anchor" data-panel="variants" role="tabpanel" aria-labelledby="album-tab-variants" hidden>
+    </div></details>}
+        {(variants.length > 0) && <details id="album-panel-variants" class="album-disclosure detail-anchor">
+<summary><h2>Editions &amp; artwork</h2><span aria-hidden="true">+</span></summary>
+<div class="album-disclosure__body">
       <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 24px;">
-        <div class="mono muted">Regional pressings & sleeve variants on file</div>
+        <div class="mono muted">Album editions and cover artwork</div>
         <div style="flex: 1; border-top: 1px solid var(--rule);"></div>
         <div class="mono-sm muted">{variants.length} VARIANT{variants.length === 1 ? '' : 'S'}</div>
       </div>
-      <div class="variants-grid">
+            <div class="variants-grid">
         {variants.map((v: any) => (
           <figure class="variant">
-            <div class="variant__img">
+            <div  class="variant__img">
               {v.image
-                ? <img src={asset(v.image, 'card')} alt={`${album.title} · ${v.territory || ''}`} loading="lazy" />
+                ? <img data-directus={editable(v, ["image"])} src={asset(v.image, 'card')} alt={`${album.title} · ${v.territory || ''}`} loading="lazy" />
                 : <div class="placeholder" style="aspect-ratio: 1/1;">No sleeve</div>}
-              {v.format && <span class="variant__format mono-sm">{String(v.format).toUpperCase()}</span>}
+              {v.format && <span data-directus={editable(v, ["format"])} class="variant__format mono-sm">{String(v.format).toUpperCase()}</span>}
             </div>
-            <figcaption>
-              <div class="serif variant__title">{v.territory || '–'}{v.release_year ? ` · ${v.release_year}` : ''}</div>
-              {v.catalog_number && <div class="mono-sm muted">{v.catalog_number}{v.label ? ` · ${v.label}` : ''}</div>}
-              {v.notes && <div class="variant__notes">{v.notes}</div>}
+            <figcaption >
+              <div data-directus={editable(v, ["territory","release_year"])} class="serif variant__title">{v.territory || '–'}{v.release_year ? ` · ${v.release_year}` : ''}</div>
+              {v.catalog_number && <div data-directus={editable(v, ["catalog_number","label"])} class="mono-sm muted">{v.catalog_number}{v.label ? ` · ${v.label}` : ''}</div>}
+              {v.notes && <div data-directus={editable(v, ["notes"])} class="variant__notes">{v.notes}</div>}
             </figcaption>
           </figure>
         ))}
       </div>
-    </section>
-  )}
+    </div></details>}
+        </div>
+      </div>
+      <aside class="album-sidebar stack" aria-label="About this record">
+        <section class="album-sidebar__card">
+          <h2>Album details</h2>
+          <dl class="album-sidebar__facts">
+            {album.producer && <div><dt>Producer</dt><dd>{album.producer}</dd></div>}
+            {album.catalog_number && <div><dt>Catalogue</dt><dd>{album.catalog_number}</dd></div>}
+            {era?.name && <div><dt>Era</dt><dd>{era.name}</dd></div>}
+          </dl>
+          {review && <a class="album-sidebar__review" href={`/reviews/${review.slug}`}>Read our review <span>→</span></a>}
+        </section>
+        {(album.background_text || album.critical_reception) && <details id="album-story" class="album-disclosure detail-anchor">
+<summary><h2>About the album</h2><span aria-hidden="true">+</span></summary>
+<div class="album-disclosure__body">
+        <div class="record-story">
+      {album.background_text && <div data-directus={editable(album, ['background_text'])}>{album.background_text.split(/\n{2,}/).map((paragraph) => <p>{paragraph}</p>)}</div>}
+      {album.critical_reception && <div data-directus={editable(album, ['critical_reception'])}><h3>Reception</h3><p>{album.critical_reception}</p></div>}
+    </div>
+  </div></details>}
+        {(album.credits || album.producer) && <details id="album-panel-personnel" class="album-disclosure detail-anchor">
+<summary><h2>Credits</h2><span aria-hidden="true">+</span></summary>
+<div class="album-disclosure__body">
+            {album.producer && !/produc/i.test(album.credits || '') && <p class="record-producer">Produced by {album.producer}</p>}
+      <div class="personnel-grid">
+        <div >
+          {album.credits ? (
+            <table class="data">
+              <tbody>
+                {album.credits.split(/\n+/).filter((l) => l.trim()).slice(0, 24).map((line) => {
+                  const m = line.match(/^([^:]+?):\s*(.+)$/);
+                  if (m) return (
+                    <tr>
+                      <td style="width: 220px;"><span data-directus={editable(m[1], ["trim"])} class="serif" style="font-size: var(--text-small);">{m[1].trim()}</span></td>
+                      <td><span data-directus={editable(m[2], ["trim"])} class="mono-sm muted">{m[2].trim()}</span></td>
+                    </tr>
+                  );
+                  return (
+                    <tr>
+                      <td colspan="2"><span style="font-family: var(--f-serif); font-size: var(--text-small); color: var(--ink-2);">{line}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <p data-directus={copyAttr("pages_discography_slug_aafc3e312afb")} set:html={copyText("pages_discography_slug_aafc3e312afb", "Credits are not available yet.")} class="muted"></p>
+          )}
+        </div>
+
+      </div>
+    </div></details>}
+        {externalLinks.length > 0 && (
+          <div class="panel--bare">
+            <div class="panel-head">
+              <span data-directus={copyAttr("pages_discography_slug_b90cba95652f")} set:html={copyText("pages_discography_slug_b90cba95652f", "Listen")}></span>
+              <span>{externalLinks.length}</span>
+            </div>
+            <div style="padding: 10px 0;">
+              {externalLinks.map((l, i) => (
+                <a
+                  href={l.href!} target="_blank" rel="noopener"
+                  style={`display: flex; justify-content: space-between; padding: 10px 18px; border-bottom: ${i < externalLinks.length - 1 ? '1px solid var(--rule-2)' : 'none'}; border-left: none; border-right: none; border-top: none; color: var(--ink); font-family: var(--f-serif); font-size: var(--text-small);`}
+                >
+                  <span data-directus={editable(l, ["label"])}>{l.label}</span>
+                  <span data-directus={copyAttr("pages_discography_slug_a3bc522c0626")} set:html={copyText("pages_discography_slug_a3bc522c0626", "OPEN →")} class="mono-sm muted"></span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+  </div>
 
 </Layout>
 
 <style>
+  .album-file { padding-block: var(--content-space); }
+  .album-file__main { min-width: 0; }
+  .album-archive { margin-top: 28px; }
+  .album-disclosure { border-top: 1px solid var(--rule); }
+  .album-disclosure:last-child { border-bottom: 1px solid var(--rule); }
+  .album-disclosure > summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; cursor: pointer; list-style: none; color: var(--ink); }
+  .album-disclosure > summary::-webkit-details-marker { display: none; }
+  .album-disclosure > summary h2 { margin: 0; font: 500 24px/1.2 var(--f-display); }
+  .album-disclosure > summary > span { color: var(--accent); font: 22px var(--f-ui); }
+  .album-disclosure[open] > summary > span { transform: rotate(45deg); }
+  .album-disclosure__body { padding-bottom: 24px; }
+  .album-sidebar > * + * { margin-top: 20px; }
+  .album-sidebar__card { padding: 20px; border: 1px solid var(--rule); background: var(--bg-2); }
+  .album-sidebar__card h2 { margin: 0 0 16px; font: 500 26px var(--f-display); }
+  .album-sidebar__facts { margin: 0; }
+  .album-sidebar__facts > div { margin-bottom: 14px; }
+  .album-sidebar__facts dt { color: var(--muted); font: var(--text-label) var(--f-ui); margin-bottom: 4px; }
+  .album-sidebar__facts dd { margin: 0; font: var(--text-small)/1.45 var(--f-serif); overflow-wrap: anywhere; }
+  .album-sidebar__review { display: flex; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--rule); }
+  .album-sidebar .record-story { font-size: 18px; }
+  .album-sidebar .record-story h3 { font-size: 22px; }
+  .album-sidebar .personnel-grid { display: block; }
+  .album-sidebar table.data td { width: auto !important; padding: 10px 6px; }
+
+  .record-section-title { margin: 0 0 24px; font: 500 clamp(30px, 4vw, 44px)/1.15 var(--f-display); }
+  .record-story { max-width: var(--max-w-reading); font: 20px/1.7 var(--f-serif); color: var(--ink-2); }
+  .record-story p { margin: 0 0 1.2em; }
+  .record-story h3 { font-size: 26px; margin-bottom: 12px; }
+  .record-producer { margin-bottom: 20px; color: var(--ink-2); }
+  .album-section + .album-section { border-top: 1px solid var(--rule); }
   /* Header grid */
   .album-head {
     display: grid;
@@ -574,68 +470,16 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
     text-wrap: balance;
   }
   .album-head__lede {
-    font-size: 17px; line-height: 1.6; color: var(--ink-2);
+    font-size: 20px; line-height: 1.6; color: var(--ink-2);
     max-width: 640px; margin: 22px 0 0;
   }
   .archivist {
-    margin-top: 18px; font-size: 13px; line-height: 1.6;
+    margin-top: 18px; font-size: var(--text-label); line-height: 1.6;
     color: var(--muted); max-width: 640px; font-style: italic;
     font-family: var(--f-serif);
   }
   .album-head__body .facts { margin-top: 28px; }
   .album-head__body .voices { margin-top: 24px; }
-
-  /* Tabs */
-  .album-tabs-wrap { margin-top: clamp(20px, 2.4vw, 32px); padding-bottom: 0; }
-  .album-tabs {
-    position: relative;
-    display: flex;
-    overflow-x: auto;
-    border: 1px solid var(--rule);
-    background:
-      radial-gradient(circle at 88% -20%, var(--violet-tint), transparent 44%),
-      var(--bg-2);
-    scrollbar-width: thin;
-  }
-  .album-tabs::before {
-    position: absolute;
-    z-index: 1;
-    top: -1px;
-    right: -1px;
-    left: -1px;
-    height: 4px;
-    background: linear-gradient(90deg, var(--accent) 0 28%, var(--violet) 28% 54%, var(--cool) 54% 77%, var(--gold) 77% 100%);
-    content: '';
-    pointer-events: none;
-  }
-  .album-tab {
-    --tab-tone: var(--accent);
-    position: relative;
-    flex: 1 0 auto;
-    font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted);
-    background: transparent; border: none;
-    border-right: 1px solid var(--rule);
-    padding: 18px 18px 15px; cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: color .18s, border-color .18s, background-color .18s;
-    display: inline-flex; align-items: baseline; gap: 6px;
-    white-space: nowrap;
-  }
-  .album-tab:nth-child(2) { --tab-tone: var(--violet); }
-  .album-tab:nth-child(3) { --tab-tone: var(--cool); }
-  .album-tab:nth-child(4) { --tab-tone: var(--gold); }
-  .album-tab:nth-child(5) { --tab-tone: var(--accent); }
-  .album-tab:nth-child(6) { --tab-tone: var(--violet); }
-  .album-tab:last-child { border-right: 0; }
-  .album-tab:hover { color: var(--tab-tone); }
-  .album-tab.is-active {
-    color: var(--ink);
-    border-bottom-color: var(--tab-tone);
-    background: color-mix(in srgb, var(--tab-tone) 12%, transparent);
-  }
-  :root[data-theme='papers'] .album-tab.is-active { color: var(--tab-tone); }
-  .album-tab__count { font-size: 10px; opacity: 0.5; letter-spacing: 0.1em; }
 
   .album-section {
     padding: clamp(32px, 5vw, 56px) var(--gutter);
@@ -653,8 +497,8 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
   /* Personnel */
   .personnel-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(24px, 3vw, 48px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--content-gap);
   }
   @media (max-width: 780px) { .personnel-grid { grid-template-columns: 1fr; } }
 
@@ -684,119 +528,39 @@ function shortTitle(t: string) { return t.length > 12 ? t.slice(0, 11) + '…' :
     gap: clamp(24px, 3vw, 48px);
   }
 
-  /* Live bars */
-  .live-bars {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
-    gap: 4px;
-    align-items: end;
-    height: 260px;
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: 8px;
-  }
-  .live-bar {
-    display: flex; flex-direction: column; align-items: stretch;
-    text-align: center; border: none; color: var(--ink-2);
-    height: 100%; justify-content: flex-end;
-  }
-  .live-bar:hover .live-bar__fill { background: var(--accent-3) !important; }
-  .live-bar__fill { transition: background .2s; min-height: 2px; }
-  .live-bar__label { font-size: 9px; margin-top: 6px; letter-spacing: 0.06em; }
-  .live-bar__count { font-size: 9px; margin-top: 2px; color: var(--accent-3); }
+  /* Documented live performances, with complete song titles. */
+  .live-bars { display: grid; gap: 0; max-width: var(--max-w-reading); }
+  .live-bar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(40px, 1fr) 60px; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); color: var(--ink); }
+  .live-bar__label { font: 18px/1.35 var(--f-serif); overflow-wrap: anywhere; }
+  .live-bar__track { height: 8px; background: var(--rule); }
+  .live-bar__fill { height: 100%; background: var(--accent); }
+  .live-bar__count { text-align: right; font: var(--text-label) var(--f-ui); color: var(--muted); }
 
   /* Variants */
   .variants-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(16px, 2vw, 28px); }
   .variant { margin: 0; }
   .variant__img { position: relative; aspect-ratio: 1/1; overflow: hidden; border: 1px solid var(--rule); background: var(--bg-2); }
   .variant__img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .variant__format { position: absolute; top: 8px; left: 8px; background: var(--bg); padding: 3px 6px; border: 1px solid var(--rule); font-size: 9.5px; letter-spacing: .18em; }
+  .variant__format { position: absolute; top: 8px; left: 8px; background: var(--bg); padding: 3px 6px; border: 1px solid var(--rule); font-size: var(--text-label); letter-spacing: .1em; }
   .variant__title { font-size: 18px; font-style: italic; margin-top: .5rem; }
-  .variant__notes { font-family: var(--f-serif); font-size: 14px; color: var(--ink-2); line-height: 1.5; margin-top: .3rem; }
+  .variant__notes { font-family: var(--f-serif); font-size: var(--text-small); color: var(--ink-2); line-height: 1.5; margin-top: .3rem; }
 
-  @media (max-width: 720px) {
-    .album-tabs-wrap { padding-inline: 0; }
-    .album-tabs {
-      border-inline: 0;
-      scroll-snap-type: x proximity;
-    }
-    .album-tab {
-      min-width: min(66vw, 230px);
-      justify-content: space-between;
-      padding-inline: var(--gutter);
-      scroll-snap-align: start;
-    }
-  }
 
   @media (max-width: 480px) {
     .album-head__title { font-size: clamp(46px, 14vw, 64px); }
   }
 </style>
 
+
+
 <script>
-  function wireTabs() {
-    const tablist = document.querySelector<HTMLElement>('[data-tabs]');
-    if (!tablist || tablist.dataset.wired === 'true') return;
-    tablist.dataset.wired = 'true';
-    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('.album-tab'));
-    const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
-    if (!tabs.length) return;
-
-    const activate = (tab: HTMLButtonElement, moveFocus = false) => {
-      const target = tab.getAttribute('data-target');
-      tabs.forEach((item) => {
-        const isActive = item === tab;
-        item.classList.toggle('is-active', isActive);
-        item.setAttribute('aria-selected', String(isActive));
-        item.tabIndex = isActive ? 0 : -1;
-      });
-      panels.forEach((panel) => {
-        panel.hidden = panel.getAttribute('data-panel') !== target;
-      });
-      tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-      if (moveFocus) tab.focus();
-    };
-
-    tabs.forEach((tab) => {
-      tab.addEventListener('click', () => activate(tab));
-      tab.addEventListener('keydown', (event) => {
-        const current = tabs.indexOf(tab);
-        let next = current;
-        if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
-        else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
-        else if (event.key === 'Home') next = 0;
-        else if (event.key === 'End') next = tabs.length - 1;
-        else return;
-        event.preventDefault();
-        activate(tabs[next], true);
-      });
-    });
+  function revealAlbumSection() {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id.startsWith('album-')) return;
+    const target = document.getElementById(id);
+    if (target instanceof HTMLDetailsElement) { target.open = true; requestAnimationFrame(() => target.scrollIntoView({ block: 'start' })); }
   }
-  function wireTrackFocus() {
-    const focus = document.querySelector<HTMLElement>('[data-focus]');
-    const focusLabel = document.querySelector<HTMLElement>('[data-focus-label]');
-    const focusBody = document.querySelector<HTMLElement>('[data-focus-body]');
-    const rows = document.querySelectorAll<HTMLElement>('[data-track-row]');
-    if (!focus || !rows.length) return;
-    rows.forEach((r) => {
-      r.addEventListener('mouseenter', () => {
-        const n = r.getAttribute('data-track-n') || '–';
-        const title = r.getAttribute('data-track-title') || '';
-        const dur = r.getAttribute('data-track-dur') || '';
-        const plays = parseInt(r.getAttribute('data-track-plays') || '0', 10);
-        const meaning = r.getAttribute('data-track-meaning') || '';
-        if (focusLabel) focusLabel.textContent = `#${String(n).padStart(2, '0')}`;
-        if (focusBody) focusBody.innerHTML = `
-          <div class="serif" style="font-size: 28px; line-height: 1.1;">${title}</div>
-          <div class="mono-sm muted" style="margin-top: 6px;">Track ${n} · ${dur || '–'}</div>
-          ${meaning ? `<p style="margin-top: 14px; font-size: 14px; color: var(--ink-2); line-height: 1.55;">${meaning}${meaning.length >= 260 ? '…' : ''}</p>` : ''}
-          ${plays ? `<p style="margin-top: 14px; font-size: 13px; color: var(--accent-3); font-family: var(--f-mono); letter-spacing: .14em;">${plays.toLocaleString()} DOCUMENTED PLAYS</p>` : ''}
-          <div style="margin-top: 14px; height: 48px; display: flex; align-items: end; gap: 2px;">
-            ${Array.from({length:64}).map((_,i)=>`<div style="flex:1;height:${15+Math.abs(Math.sin((i+(+n)*7)*0.4))*80}%;background:${i<32?'var(--ink-2)':'var(--muted-2)'};"></div>`).join('')}
-          </div>
-        `;
-      });
-    });
-  }
-  wireTabs(); wireTrackFocus();
-  document.addEventListener('astro:page-load', () => { wireTabs(); wireTrackFocus(); });
+  document.addEventListener('astro:page-load', revealAlbumSection);
+  window.addEventListener('hashchange', revealAlbumSection);
+  revealAlbumSection();
 </script>

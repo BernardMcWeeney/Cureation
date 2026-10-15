@@ -5,6 +5,10 @@ import {
   selectLyricPassage,
 } from './lyric-social.js';
 import {
+  buildFullSetlistThread,
+  buildOnThisDaySetlistThread,
+} from './setlist-social.js';
+import {
   CUREATION_2026_TOUR_NAME,
   CUREATION_2026_TOUR_SLUG,
   GENERIC_2026_TOUR_SLUG,
@@ -3216,7 +3220,6 @@ __name(missingChannels, "missingChannels");
 
 // src/jobs/postSetlists.ts
 var DEFAULT_CHANNELS = ["x", "bluesky"];
-var MAX_POST_LENGTH = 280;
 var RECENT_EVENT_DAYS = 14;
 async function postOnThisDaySetlist(env, options = {}) {
   const directus = new DirectusClient(env);
@@ -3234,15 +3237,20 @@ async function postOnThisDaySetlist(env, options = {}) {
     const songs = await getSetlistSongs(directus, setlist.id);
     const contentKey = `on-this-day-setlist:${today}`;
     const channels = await channelsToPublish(directus, contentKey, options);
-    const text = buildOnThisDayPost(setlist, songs);
-    const results = await publishToSocialChannels(env, text, options.publish === true, channels);
+    const thread = buildOnThisDaySetlistThread(setlist, songs);
+    const results = await publishThreadToSocialChannels(
+      env,
+      thread,
+      options.publish === true,
+      channels
+    );
     if (options.publish === true && results.length > 0) {
       await recordSocialResults(directus, {
         jobName: SOCIAL_ON_THIS_DAY_SETLIST_JOB_NAME,
         contentType: "setlist",
         contentKey,
         contentId: setlist.id,
-        postText: text,
+        postText: thread.join("\n\n---\n\n"),
         results
       });
     }
@@ -3257,7 +3265,7 @@ async function postOnThisDaySetlist(env, options = {}) {
         setlist: summary(setlist),
         requestedChannels: options.channels ?? DEFAULT_CHANNELS,
         channels,
-        text,
+        posts: thread,
         results
       }
     };
@@ -3382,108 +3390,6 @@ async function getSetlistSongs(directus, setlistId) {
   });
 }
 __name(getSetlistSongs, "getSetlistSongs");
-function buildOnThisDayPost(setlist, songs) {
-  const year = setlist.date?.slice(0, 4) ?? "the archive";
-  const titles = songs.map((song) => songTitle(song)).filter(Boolean);
-  for (let previewCount = Math.min(8, titles.length); previewCount >= 0; previewCount -= 1) {
-    const preview = titles.slice(0, previewCount);
-    const moreCount = Math.max(0, titles.length - preview.length);
-    const text = [
-      `On this day in ${year}: The Cure at ${showLocation(setlist)}.`,
-      "",
-      `${songs.length} songs documented${setlist.tour_name ? ` - ${setlist.tour_name}` : ""}.`,
-      ...preview.map((title, index) => `${index + 1}. ${title}`),
-      moreCount > 0 && previewCount > 0 ? `...and ${moreCount} more.` : null
-    ].filter((line) => line !== null).join("\n");
-    if (text.length <= MAX_POST_LENGTH) {
-      return text;
-    }
-  }
-  return fitText(
-    [
-      `On this day in ${year}: The Cure at ${showLocation(setlist)}.`,
-      `${songs.length} songs documented.`
-    ].join("\n"),
-    MAX_POST_LENGTH
-  );
-}
-__name(buildOnThisDayPost, "buildOnThisDayPost");
-function buildFullSetlistThread(setlist, songs) {
-  const lines = [
-    `The Cure at ${showLocation(setlist)}`,
-    [setlist.date, setlist.tour_name].filter(Boolean).join(" - "),
-    "",
-    "Full setlist:",
-    ...songLines(songs)
-  ].filter(Boolean);
-  return packLines(lines, MAX_POST_LENGTH);
-}
-__name(buildFullSetlistThread, "buildFullSetlistThread");
-function songLines(songs) {
-  let currentSetType = "";
-  const lines = [];
-  for (const song of songs) {
-    const setType = song.set_type || "";
-    if (setType && setType !== currentSetType) {
-      currentSetType = setType;
-      lines.push("");
-      lines.push(titleCase(setType));
-    }
-    const notes = song.notes ? ` (${song.notes})` : "";
-    const cover = song.is_cover && song.cover_artist ? ` [${song.cover_artist}]` : "";
-    lines.push(`${song.position ?? lines.length}. ${songTitle(song)}${cover}${notes}`);
-  }
-  return lines;
-}
-__name(songLines, "songLines");
-function packLines(lines, maxLength) {
-  const posts = [];
-  let current = "";
-  for (const line of lines) {
-    const safeLine = fitLine(line, maxLength);
-    const candidate = current ? `${current}
-${safeLine}` : safeLine;
-    if (candidate.length <= maxLength) {
-      current = candidate;
-      continue;
-    }
-    if (current) {
-      posts.push(current);
-    }
-    current = safeLine;
-  }
-  if (current) {
-    posts.push(current);
-  }
-  return posts;
-}
-__name(packLines, "packLines");
-function fitText(value, maxLength) {
-  if (value.length <= maxLength) {
-    return value;
-  }
-  return `${value.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
-}
-__name(fitText, "fitText");
-function fitLine(value, maxLength) {
-  if (value.length <= maxLength) {
-    return value;
-  }
-  return `${value.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
-}
-__name(fitLine, "fitLine");
-function songTitle(song) {
-  return song.song_title || "Untitled";
-}
-__name(songTitle, "songTitle");
-function showLocation(setlist) {
-  return [
-    setlist.venue || "Unknown venue",
-    setlist.city,
-    setlist.country
-  ].filter(Boolean).join(", ");
-}
-__name(showLocation, "showLocation");
 function summary(setlist) {
   return {
     id: setlist.id,
@@ -3518,10 +3424,6 @@ function setlistFields() {
   ];
 }
 __name(setlistFields, "setlistFields");
-function titleCase(value) {
-  return value.split(/[\s_-]+/).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
-}
-__name(titleCase, "titleCase");
 function isoDate(date) {
   return date.toISOString().slice(0, 10);
 }

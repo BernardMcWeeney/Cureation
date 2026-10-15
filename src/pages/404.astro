@@ -1,14 +1,13 @@
 ---
+import { copyText, copyAttr } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import Button from '../components/ui/Button.astro';
 ---
 <Layout title="Not found · Cureation">
   <section class="container" style="padding-block: clamp(60px, 10vw, 140px); text-align: center;">
     <div class="kicker">Error 404</div>
-    <h1 class="headline headline--xxl" style="margin: 1rem 0;">A missing page.</h1>
-    <p class="deck" style="margin: 0 auto; max-width: 48ch;">
-      This record isn't in the archive. It may not have been catalogued yet, or you may have followed a dead link.
-    </p>
+    <h1 data-directus={copyAttr("pages_404_28119b820147")} set:html={copyText("pages_404_28119b820147", "A missing page.")} class="headline headline--xxl" style="margin: 1rem 0;"></h1>
+    <p data-directus={copyAttr("pages_404_bfa7520a339b")} set:html={copyText("pages_404_bfa7520a339b", "\n      This record isn't in the archive. It may not have been catalogued yet, or you may have followed a dead link.\n    ")} class="deck" style="margin: 0 auto; max-width: 48ch;"></p>
     <div class="cluster" style="justify-content: center; margin-top: 2rem; gap: .6rem;">
       <Button href="/" variant="accent">Return home</Button>
       <Button href="/discography" variant="ghost">Browse discography</Button>

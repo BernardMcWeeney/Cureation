@@ -1,127 +1,48 @@
 ---
+import { editable, copyText, copyAttr } from '../../lib/visual-editing';
+import { navigationSections as sections, isNavigationLinkCurrent } from '../../lib/site-navigation';
 const current = Astro.url.pathname;
-
-type MegaSection = {
-  id: string;
-  label: string;
-  href: string;
-  match: string[];
-  columns: Array<{ title: string; links: Array<{ href: string; label: string; meta?: string }> }>;
-  feature: { eyebrow: string; title: string; href: string; image: string; meta: string };
-};
-
-const sections: MegaSection[] = [
-  {
-    id: 'music', label: 'Music', href: '/discography', match: ['/discography', '/songs', '/lyrics'],
-    columns: [
-      { title: 'Records', links: [
-        { href: '/discography', label: 'Discography', meta: 'all releases' },
-        { href: '/discography?type=studio', label: 'Albums', meta: '14 records' },
-        { href: '/discography?type=single', label: 'Singles' },
-        { href: '/discography?type=compilation', label: 'Compilations' },
-      ]},
-      { title: 'Song library', links: [
-        { href: '/songs', label: 'Songs', meta: 'A–Z' },
-        { href: '/lyrics', label: 'Lyrics' },
-        { href: '/stats', label: 'Most performed' },
-        { href: '/band/history', label: 'Browse by era' },
-      ]},
-    ],
-    feature: { eyebrow: 'Start here', title: 'The records, in full', href: '/discography', image: '/images/albums/disintegration.jpg', meta: 'Albums · singles · songs · credits' },
-  },
-  {
-    id: 'live', label: 'Live', href: '/tours/2026-european-summer-shows', match: ['/tours', '/setlists', '/venues', '/on-this-day'],
-    columns: [
-      { title: 'On tour now', links: [
-        { href: '/tours/2026-european-summer-shows', label: '2026 Summer Shows Tour Tracker', meta: 'live' },
-        { href: '/calendar.ics', label: 'Add dates to calendar' },
-        { href: '/tours/map', label: 'Tour map' },
-        { href: '/tours', label: 'All tours' },
-      ]},
-      { title: 'The live archive', links: [
-        { href: '/setlists', label: 'Setlists' },
-        { href: '/venues', label: 'Venues' },
-        { href: '/setlists/compare', label: 'Compare shows' },
-        { href: '/on-this-day', label: 'On this day' },
-      ]},
-    ],
-    feature: { eyebrow: 'Tour now', title: 'The 2026 Summer Shows Tour Tracker', href: '/tours/2026-european-summer-shows', image: '/hero-image1.jpg', meta: 'Dates · maps · setlists · updates' },
-  },
-  {
-    id: 'stories', label: 'Publication', href: '/publication', match: ['/publication', '/news', '/reviews', '/newsletter'],
-    columns: [
-      { title: 'The desks', links: [
-        { href: '/publication', label: 'Publication', meta: 'essays & interviews' },
-        { href: '/news', label: 'News', meta: 'the present tense' },
-        { href: '/reviews', label: 'Reviews', meta: 'close listening' },
-        { href: '/wiki', label: 'Wiki', meta: 'the reference desk' },
-      ]},
-      { title: 'Keep up', links: [
-        { href: '/publication#editorials', label: 'Editorials' },
-        { href: '/newsletter', label: 'Newsletter' },
-        { href: '/publication/rss.xml', label: 'Publication RSS' },
-        { href: '/news/rss.xml', label: 'News RSS' },
-      ]},
-    ],
-    feature: { eyebrow: 'Fourteen close listens', title: 'Every studio album, reviewed', href: '/reviews', image: '/images/albums/disintegration.jpg', meta: 'Reviews · scores · standout tracks' },
-  },
-  {
-    id: 'archive', label: 'Archive', href: '/wiki', match: ['/wiki', '/band', '/photos', '/videos', '/stats', '/curiosities', '/community', '/my-archive'],
-    columns: [
-      { title: 'The detail', links: [
-        { href: '/wiki', label: 'Cure wiki' },
-        { href: '/band', label: 'The band' },
-        { href: '/band/gear', label: 'Gear' },
-        { href: '/curiosities', label: 'Curiosities' },
-      ]},
-      { title: 'Look & count', links: [
-        { href: '/photos', label: 'Photographs' },
-        { href: '/videos', label: 'Video archive' },
-        { href: '/stats', label: 'Statistics' },
-        { href: '/my-archive', label: 'My archive' },
-      ]},
-    ],
-    feature: { eyebrow: 'Go deeper', title: 'Every beautiful detail', href: '/wiki', image: '/logo-mark.webp', meta: 'People · places · pictures · numbers' },
-  },
-];
 
 const isActive = (paths: string[]) => paths.some((path) => current.startsWith(path));
 ---
 <header class="mega-nav" data-nav>
   <div class="container mega-nav__row">
     <a href="/" class="mega-nav__brand" aria-label="Cureation home">
-      <span class="mega-nav__logo"><img src="/logo-mark.webp" alt="" width="42" height="42" decoding="async" /></span>
-      <span class="mega-nav__word">Cureation</span>
+      <span class="mega-nav__logo"><img data-directus={copyAttr("components_nav_Nav_asset-735c85bab5c5")} src={copyText("components_nav_Nav_asset-735c85bab5c5", "/logo-mark.webp")} alt="" width="42" height="42" decoding="async" /></span>
+      <span data-directus={copyAttr("components_nav_Nav_a5a31bdafcd8")} set:html={copyText("components_nav_Nav_a5a31bdafcd8", "Cureation")} class="mega-nav__word"></span>
     </a>
 
     <nav class="mega-nav__links" aria-label="Primary navigation">
       {sections.map((section) => (
-        <a href={section.href} class:list={{ 'is-active': isActive(section.match) }} data-mega-toggle={section.id} aria-haspopup="true" aria-expanded="false">
+        <>
+        <button type="button" data-directus={editable(section, ["label"])} aria-controls={`mega-${section.id}`} class:list={{ 'is-active': isActive(section.match) }} data-mega-toggle={section.id} aria-haspopup="true" aria-expanded="false">
           {section.label}
           <svg viewBox="0 0 10 6" width="9" height="6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.2" /></svg>
-        </a>
+        </button>
+        {section.id === 'live' && <a href="/timeline" class:list={{ 'is-active': current === '/timeline' }} aria-current={current === '/timeline' ? 'page' : undefined}>Timeline</a>}
+        </>
       ))}
     </nav>
 
     <div class="mega-nav__actions">
       <button class="mega-nav__search" data-search-open aria-label="Search the archive">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-        <span>Search</span><kbd>⌘K</kbd>
+        <span data-directus={copyAttr("components_nav_Nav_56c141995f09")} set:html={copyText("components_nav_Nav_56c141995f09", "Search")}></span><kbd>⌘K</kbd>
       </button>
       <details class="mega-nav__palette">
         <summary aria-label="Choose colour theme" title="Choose colour theme">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <circle cx="7" cy="8" r="3"></circle><circle cx="16.5" cy="7" r="2.5"></circle><circle cx="15" cy="16" r="3.5"></circle><path d="M9.5 10.5 12.7 13M13.8 8.8l-2.3 2.7"></path>
+            <path d="M12 3a9 9 0 1 0 0 18h1.5a2 2 0 0 0 1.4-3.4 1.5 1.5 0 0 1 1.1-2.6H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9Z"/><circle cx="7.5" cy="10" r="1" fill="currentColor"/><circle cx="11" cy="6.8" r="1" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1" fill="currentColor"/>
           </svg>
         </summary>
         <div class="mega-nav__palette-panel">
-          <div><span>Colour theme</span><strong data-colour-theme-current>Bloodflowers</strong></div>
-          <button type="button" data-colour-theme="wish" aria-pressed="false"><i style="--swatch:#4D8DFF"></i><span>Wish</span></button>
-          <button type="button" data-colour-theme="disintegration" aria-pressed="false"><i style="--swatch:#9B5CFF"></i><span>Disintegration</span></button>
-          <button type="button" data-colour-theme="pornography" aria-pressed="false"><i style="--swatch:#D33A55"></i><span>Pornography</span></button>
-          <button type="button" data-colour-theme="faith" aria-pressed="false"><i style="--swatch:#7894C2"></i><span>Faith</span></button>
-          <button type="button" data-colour-theme="head-on-the-door" aria-pressed="false"><i style="--swatch:#D6A64A"></i><span>The Head on the Door</span></button>
-          <button type="button" data-colour-theme="bloodflowers" aria-pressed="true"><i style="--swatch:#F70D1A"></i><span>Bloodflowers</span></button>
+          <div><span data-directus={copyAttr("components_nav_Nav_28d80199ab4d")} set:html={copyText("components_nav_Nav_28d80199ab4d", "Colour theme")}></span><strong data-directus={copyAttr("components_nav_Nav_f5326b71e69b")} set:html={copyText("components_nav_Nav_f5326b71e69b", "Bloodflowers")} data-colour-theme-current></strong></div>
+          <button type="button" data-colour-theme="wish" aria-pressed="false"><i style="--swatch:#4D8DFF"></i><span data-directus={copyAttr("components_nav_Nav_f3f6579113c5")} set:html={copyText("components_nav_Nav_f3f6579113c5", "Wish")}></span></button>
+          <button type="button" data-colour-theme="disintegration" aria-pressed="false"><i style="--swatch:#9B5CFF"></i><span data-directus={copyAttr("components_nav_Nav_4ac20b8cfac6")} set:html={copyText("components_nav_Nav_4ac20b8cfac6", "Disintegration")}></span></button>
+          <button type="button" data-colour-theme="pornography" aria-pressed="false"><i style="--swatch:#D33A55"></i><span data-directus={copyAttr("components_nav_Nav_0b3427d855d9")} set:html={copyText("components_nav_Nav_0b3427d855d9", "Pornography")}></span></button>
+          <button type="button" data-colour-theme="faith" aria-pressed="false"><i style="--swatch:#7894C2"></i><span data-directus={copyAttr("components_nav_Nav_ca8bfd1f7933")} set:html={copyText("components_nav_Nav_ca8bfd1f7933", "Faith")}></span></button>
+          <button type="button" data-colour-theme="head-on-the-door" aria-pressed="false"><i style="--swatch:#D6A64A"></i><span data-directus={copyAttr("components_nav_Nav_0083d3410cb6")} set:html={copyText("components_nav_Nav_0083d3410cb6", "The Head on the Door")}></span></button>
+          <button type="button" data-colour-theme="bloodflowers" aria-pressed="true"><i style="--swatch:#F70D1A"></i><span data-directus={copyAttr("components_nav_Nav_db4b6af8f8a3")} set:html={copyText("components_nav_Nav_db4b6af8f8a3", "Bloodflowers")}></span></button>
         </div>
       </details>
       <button class="mega-nav__theme" type="button" data-theme-toggle aria-label="Switch to light mode" title="Switch to light mode">
@@ -139,47 +60,41 @@ const isActive = (paths: string[]) => paths.some((path) => current.startsWith(pa
   </div>
 
   {sections.map((section) => (
-    <div class="mega-panel" data-mega-panel={section.id} hidden>
-      <div class="container mega-panel__grid">
+    <div class="mega-panel" id={`mega-${section.id}`} data-mega-panel={section.id} hidden>
+      <div  class="container mega-panel__grid" style={`--menu-columns: ${section.columns.length};`}>
         {section.columns.map((column) => (
-          <div class="mega-panel__column">
-            <span class="mega-panel__eyebrow">{column.title}</span>
+          <div  class="mega-panel__column">
+            <span data-directus={editable(column, ["title"])} class="mega-panel__eyebrow">{column.title}</span>
             {column.links.map((link) => (
-              <a class="mega-panel__link" href={link.href}><span>{link.label}</span>{link.meta && <small>{link.meta}</small>}</a>
+              <a  class="mega-panel__link" href={link.href} aria-current={isNavigationLinkCurrent(link.href, current, Astro.url.search) ? 'page' : undefined}><span data-directus={editable(link, ["label"])}>{link.label}</span></a>
             ))}
           </div>
         ))}
-        <a class="mega-panel__feature" href={section.feature.href}>
-          <span class="mega-panel__image">
-            <img src={section.feature.image} alt="" width="480" height="270" loading="lazy" decoding="async" />
-            <small>{section.feature.eyebrow}</small>
-          </span>
-          <span class="mega-panel__feature-copy">
-            <strong>{section.feature.title}</strong><small>{section.feature.meta}</small><b>Open →</b>
-          </span>
-        </a>
+
       </div>
     </div>
   ))}
 </header>
 
 <style>
+  .mega-nav__links button { background: transparent; cursor: pointer; }
+  .mega-nav__palette-panel button { min-height: 44px; }
   .mega-nav { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--rule); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
   .mega-nav__row { min-height: 72px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: clamp(18px, 3vw, 42px); }
   .mega-nav__brand { display: inline-flex; align-items: center; gap: 11px; border: 0; color: var(--ink); }
   .mega-nav__logo { width: 42px; height: 42px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent) 75%, white 10%); border-radius: 50%; background: var(--bg-2); box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 28%, transparent); }
   .mega-nav__logo img { width: 100%; height: 100%; object-fit: cover; }
-  .mega-nav__word { font-family: var(--f-display); font-size: 25px; font-style: italic; line-height: 1; }
+  .mega-nav__word { font-family: var(--f-display); font-size: 38px; font-style: italic; line-height: 1; }
   .mega-nav__links { display: flex; justify-content: center; align-items: center; gap: clamp(6px, 1.5vw, 22px); }
-  .mega-nav__links a { min-height: 72px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; border: 0; color: var(--muted); font-family: var(--f-sans); font-size: var(--micro); font-weight: 750; letter-spacing: .15em; text-transform: uppercase; }
-  .mega-nav__links a:hover, .mega-nav__links a[aria-expanded='true'] { color: var(--accent); }
-  .mega-nav__links a.is-active { color: var(--ink); }
-  .mega-nav__links a.is-active { box-shadow: inset 0 -2px var(--accent); }
+  .mega-nav__links button, .mega-nav__links > a { min-height: 72px; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px; border: 0; color: var(--muted); font-family: var(--f-ui); font-size: var(--micro); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .mega-nav__links button:hover, .mega-nav__links button[aria-expanded='true'] { color: var(--accent); }
+  .mega-nav__links button.is-active, .mega-nav__links > a.is-active { color: var(--ink); }
+  .mega-nav__links button.is-active, .mega-nav__links > a.is-active { box-shadow: inset 0 -2px var(--accent); }
   .mega-nav__links svg { opacity: .55; transition: transform .18s ease; }
-  .mega-nav__links a[aria-expanded='true'] svg { transform: rotate(180deg); }
+  .mega-nav__links button[aria-expanded='true'] svg { transform: rotate(180deg); }
   .mega-nav__actions { display: flex; align-items: center; justify-content: end; gap: 8px; }
   .mega-nav__search, .mega-nav__theme, .mega-nav__menu, .mega-nav__palette > summary { min-height: 42px; border: 1px solid var(--rule); background: transparent; color: var(--ink-2); cursor: pointer; }
-  .mega-nav__search { display: inline-flex; align-items: center; gap: 9px; padding: 0 11px; font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+  .mega-nav__search { display: inline-flex; align-items: center; gap: 9px; padding: 0 11px; font-family: var(--f-ui); font-size: var(--micro-sm); font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
   .mega-nav__search kbd { margin-left: 8px; color: var(--muted); font: inherit; }
   .mega-nav__theme { width: 42px; display: inline-grid; place-items: center; padding: 0; }
   .mega-nav__theme-moon { display: none; }
@@ -188,13 +103,15 @@ const isActive = (paths: string[]) => paths.some((path) => current.startsWith(pa
   .mega-nav__palette { position: relative; }
   .mega-nav__palette > summary { width: 42px; display: grid; place-items: center; list-style: none; }
   .mega-nav__palette > summary::-webkit-details-marker { display: none; }
+  .mega-nav__palette:not([open]) .mega-nav__palette-panel { display: none; }
+  .mega-nav__palette-panel > div, .mega-nav__palette-panel strong, .mega-nav__palette-panel button { min-width: 0; overflow-wrap: anywhere; }
   .mega-nav__palette-panel { position: absolute; top: calc(100% + 10px); right: 0; z-index: 70; width: 270px; display: grid; padding: 12px; border: 1px solid var(--rule-strong); background: var(--bg); box-shadow: var(--shadow-2); }
-  .mega-nav__palette-panel > div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 6px 12px; border-bottom: 1px solid var(--rule); font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+  .mega-nav__palette-panel > div { display: flex; justify-content: space-between; gap: 12px; padding: 4px 6px 12px; border-bottom: 1px solid var(--rule); font-family: var(--f-ui); font-size: var(--micro-sm); font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
   .mega-nav__palette-panel > div span { color: var(--muted); }
-  .mega-nav__palette-panel > div strong { color: var(--accent); font-weight: 750; }
-  .mega-nav__palette-panel button { display: grid; grid-template-columns: 18px 1fr; align-items: center; gap: 10px; min-height: 38px; padding: 6px; border: 0; border-bottom: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); font-family: var(--f-display); font-size: 16px; font-style: italic; text-align: left; cursor: pointer; }
+  .mega-nav__palette-panel > div :global(strong) { color: var(--accent); font-weight: 600; }
+  .mega-nav__palette-panel button { display: grid; grid-template-columns: 18px 1fr; align-items: center; gap: 10px; min-height: 38px; padding: 6px; border: 0; border-bottom: 1px solid var(--rule-2); background: transparent; color: var(--ink-2); font-family: var(--f-display); font-size: var(--text-small); font-style: italic; text-align: left; cursor: pointer; }
   .mega-nav__palette-panel button:last-child { border-bottom: 0; }
-  .mega-nav__palette-panel button i { width: 14px; height: 14px; border: 1px solid color-mix(in srgb, var(--swatch) 70%, var(--ink)); border-radius: 50%; background: var(--swatch); box-shadow: 0 0 12px color-mix(in srgb, var(--swatch) 42%, transparent); }
+  .mega-nav__palette-panel button :global(i) { width: 14px; height: 14px; border: 1px solid color-mix(in srgb, var(--swatch) 70%, var(--ink)); border-radius: 50%; background: var(--swatch); box-shadow: 0 0 12px color-mix(in srgb, var(--swatch) 42%, transparent); }
   .mega-nav__palette-panel button:hover, .mega-nav__palette-panel button[aria-pressed='true'] { color: var(--accent); }
   .mega-nav__palette-panel button[aria-pressed='true'] { background: var(--accent-tint); }
   .mega-nav__search:hover, .mega-nav__theme:hover, .mega-nav__menu:hover, .mega-nav__palette > summary:hover { border-color: var(--accent); color: var(--accent); }
@@ -203,32 +120,34 @@ const isActive = (paths: string[]) => paths.some((path) => current.startsWith(pa
   .mega-panel { position: absolute; top: 100%; right: 0; left: 0; z-index: 51; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule-strong); background: color-mix(in srgb, var(--bg) 96%, transparent); box-shadow: 0 28px 70px rgba(0,0,0,.6); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); animation: panel-in .16s ease-out; }
   .mega-panel[hidden] { display: none; }
   @keyframes panel-in { from { opacity: 0; transform: translateY(-5px); } }
-  .mega-panel__grid { display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: clamp(24px, 4vw, 58px); padding-block: 34px 40px; }
-  .mega-panel__eyebrow { display: block; padding-bottom: 11px; border-bottom: 1px solid var(--rule); color: var(--violet); font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+  .mega-panel__grid { display: grid; grid-template-columns: repeat(var(--menu-columns, 2), minmax(0, 1fr)); gap: clamp(24px, 4vw, 58px); padding-block: 34px 40px; }
+  .mega-panel__eyebrow { display: block; padding-bottom: 11px; border-bottom: 1px solid var(--rule); color: var(--violet); font-family: var(--f-ui); font-size: var(--micro-sm); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
   .mega-panel__link { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--rule-2); color: var(--ink); }
   .mega-panel__link span { font-family: var(--f-display); font-size: 19px; font-style: italic; }
-  .mega-panel__link small { align-self: center; color: var(--muted); font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .mega-panel__link small { align-self: center; color: var(--muted); font-family: var(--f-ui); font-size: var(--micro-sm); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .mega-panel__link[aria-current] { color: var(--accent); }
   .mega-panel__link:hover { padding-left: 6px; color: var(--accent); }
   .mega-panel__feature { display: grid; grid-template-columns: 150px 1fr; min-height: 186px; border: 1px solid var(--rule); background: var(--bg-2); color: inherit; }
   .mega-panel__image { position: relative; min-height: 100%; overflow: hidden; }
   .mega-panel__image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.12) contrast(1.08); transition: transform .5s ease; }
   .mega-panel__image::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.78), transparent 62%); }
-  .mega-panel__image small { position: absolute; z-index: 1; bottom: 11px; left: 11px; color: #fff; font-family: var(--f-sans); font-size: var(--micro-sm); font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .mega-panel__image small { position: absolute; z-index: 1; bottom: 11px; left: 11px; color: #fff; font-family: var(--f-ui); font-size: var(--micro-sm); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
   .mega-panel__feature-copy { display: flex; flex-direction: column; align-items: flex-start; padding: 20px; }
-  .mega-panel__feature-copy strong { color: var(--ink); font-family: var(--f-display); font-size: 28px; font-weight: 400; line-height: .95; }
-  .mega-panel__feature-copy small { margin-top: 10px; color: var(--muted); font-family: var(--f-sans); font-size: var(--micro-sm); letter-spacing: .08em; text-transform: uppercase; }
-  .mega-panel__feature-copy b { margin-top: auto; color: var(--accent-3); font-family: var(--f-sans); font-size: var(--micro-sm); letter-spacing: .13em; text-transform: uppercase; }
+  .mega-panel__feature-copy :global(strong) { color: var(--ink); font-family: var(--f-display); font-size: 28px; font-weight: 400; line-height: .95; }
+  .mega-panel__feature-copy small { margin-top: 10px; color: var(--muted); font-family: var(--f-ui); font-size: var(--micro-sm); letter-spacing: .08em; text-transform: uppercase; }
+  .mega-panel__feature-copy :global(b) { margin-top: auto; color: var(--accent-3); font-family: var(--f-ui); font-size: var(--micro-sm); letter-spacing: .13em; text-transform: uppercase; }
   .mega-panel__feature:hover { border-color: var(--accent); }
   .mega-panel__feature:hover img { transform: scale(1.035); }
-  @media (max-width: 1080px) {
+  @media (max-width: 1200px) {
     .mega-nav__links, .mega-nav__search, .mega-panel { display: none !important; }
     .mega-nav__menu { display: grid; }
     .mega-nav__row { min-height: 62px; grid-template-columns: 1fr auto; }
   }
   @media (max-width: 520px) {
-    .mega-nav__row { min-height: 58px; }
+    .mega-nav__row { min-height: 62px; gap: 10px; }
+    .mega-nav__brand { gap: 8px; }
     .mega-nav__logo { width: 36px; height: 36px; }
-    .mega-nav__word { font-size: 22px; }
+    .mega-nav__word { font-size: 30px; }
     .mega-nav__theme { width: 40px; min-height: 40px; padding: 0; }
     .mega-nav__palette > summary { width: 40px; min-height: 40px; }
     .mega-nav__palette-panel { position: fixed; top: 66px; right: var(--gutter); left: var(--gutter); width: auto; }
@@ -238,11 +157,15 @@ const isActive = (paths: string[]) => paths.some((path) => current.startsWith(pa
 </style>
 
 <script>
+  let listeners: AbortController | undefined;
   function wireMegaMenu() {
     const nav = document.querySelector<HTMLElement>('[data-nav]');
     if (!nav || nav.dataset.megaWired) return;
     nav.dataset.megaWired = 'true';
-    const toggles = [...nav.querySelectorAll<HTMLAnchorElement>('[data-mega-toggle]')];
+    listeners?.abort();
+    listeners = new AbortController();
+    const signal = listeners.signal;
+    const toggles = [...nav.querySelectorAll<HTMLButtonElement>('[data-mega-toggle]')];
     const panels = [...nav.querySelectorAll<HTMLElement>('[data-mega-panel]')];
     const palette = nav.querySelector<HTMLDetailsElement>('.mega-nav__palette');
     let openId: string | null = null;
@@ -256,20 +179,21 @@ const isActive = (paths: string[]) => paths.some((path) => current.startsWith(pa
     const scheduleClose = () => { closeTimer = window.setTimeout(() => show(null), 140); };
     toggles.forEach((toggle) => {
       const id = toggle.dataset.megaToggle || '';
-      toggle.addEventListener('mouseenter', () => { cancelClose(); show(id); });
-      toggle.addEventListener('focus', () => { cancelClose(); show(id); });
-      toggle.addEventListener('click', (event) => { if (openId !== id) { event.preventDefault(); show(id); } });
+      toggle.addEventListener('mouseenter', cancelClose);
+      toggle.addEventListener('keydown', (event) => { if (event.key === 'ArrowDown') { event.preventDefault(); show(id); panels.find((panel) => panel.dataset.megaPanel === id)?.querySelector<HTMLAnchorElement>('a')?.focus(); } });
+      toggle.addEventListener('click', () => { cancelClose(); show(openId === id ? null : id); });
     });
     panels.forEach((panel) => { panel.addEventListener('mouseenter', cancelClose); panel.addEventListener('mouseleave', scheduleClose); });
     nav.addEventListener('mouseleave', scheduleClose);
+    nav.addEventListener('focusout', () => { requestAnimationFrame(() => { if (!nav.contains(document.activeElement)) show(null); }); });
     document.addEventListener('click', (event) => {
       if (openId && !nav.contains(event.target as Node)) show(null);
       if (palette?.open && !palette.contains(event.target as Node)) palette.open = false;
-    });
+    }, { signal });
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && openId) show(null);
+      if (event.key === 'Escape' && openId) { const active = toggles.find((toggle) => toggle.dataset.megaToggle === openId); show(null); active?.focus(); }
       if (event.key === 'Escape' && palette?.open) palette.open = false;
-    });
+    }, { signal });
   }
   wireMegaMenu();
   document.addEventListener('astro:page-load', wireMegaMenu);

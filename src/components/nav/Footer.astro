@@ -1,27 +1,29 @@
 ---
+import { editable, copyText, copyAttr, copyTuple } from '../../lib/visual-editing';
 const year = new Date().getFullYear();
 
 const primary = [
-  ['/discography', 'Music'],
-  ['/setlists', 'Live'],
-  ['/band', 'Band'],
-  ['/publication', 'Publication'],
+  copyTuple(['/discography', copyText("components_nav_Footer_link-05ada863a4cf", "Music")], {"1":"components_nav_Footer_link-05ada863a4cf"}),
+  copyTuple(['/setlists', copyText("components_nav_Footer_link-01d54579da44", "Live")], {"1":"components_nav_Footer_link-01d54579da44"}),
+  copyTuple(['/band', copyText("components_nav_Footer_link-4621c1d55fa4", "Band")], {"1":"components_nav_Footer_link-4621c1d55fa4"}),
+  copyTuple(['/publication', copyText("components_nav_Footer_link-84a5092e4a5b", "Articles")], {"1":"components_nav_Footer_link-84a5092e4a5b"}),
 ];
 
 const archive = [
-  ['/news', 'News'],
-  ['/songs', 'Songs'],
-  ['/photos', 'Photos'],
-  ['/wiki', 'Wiki'],
-  ['/stats', 'Statistics'],
+  ['/timeline', 'Timeline'],
+  copyTuple(['/news', copyText("components_nav_Footer_link-71a1c003a2b8", "News")], {"1":"components_nav_Footer_link-71a1c003a2b8"}),
+  copyTuple(['/songs', copyText("components_nav_Footer_link-f32828acecb4", "Songs")], {"1":"components_nav_Footer_link-f32828acecb4"}),
+  copyTuple(['/photos', copyText("components_nav_Footer_link-9e11c362bc3d", "Photos")], {"1":"components_nav_Footer_link-9e11c362bc3d"}),
+  copyTuple(['/wiki', copyText("components_nav_Footer_link-deeeb5df3f2c", "Wiki")], {"1":"components_nav_Footer_link-deeeb5df3f2c"}),
+  copyTuple(['/stats', copyText("components_nav_Footer_link-9b15fed64ef1", "Statistics")], {"1":"components_nav_Footer_link-9b15fed64ef1"}),
 ];
 ---
 <footer class="foot">
   <div class="container foot__inner">
     <div class="foot__lead">
-      <a href="/" class="foot__word">Cureation</a>
+      <a data-directus={copyAttr("components_nav_Footer_222676f14ce6")} set:html={copyText("components_nav_Footer_222676f14ce6", "Cureation")} href="/" class="foot__word"></a>
       <div class="foot__lead-copy">
-        <p>An independent archive of The Cure. Preserved with care, built by fans.</p>
+        <p data-directus={copyAttr("components_nav_Footer_d8319c35d133")} set:html={copyText("components_nav_Footer_d8319c35d133", "An independent archive of The Cure. Preserved with care, built by fans.")}></p>
         <nav class="foot__social" aria-label="Cureation on social media">
           <a href="https://x.com/cureationx" target="_blank" rel="me noopener" aria-label="Cureation on X" title="X">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.24 2.25h3.31l-7.23 8.26 8.51 11.24h-6.66l-5.21-6.82-5.97 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23Zm-1.16 17.52h1.83L7.08 4.13H5.11l11.97 15.64Z" /></svg>
@@ -29,19 +31,19 @@ const archive = [
           </a>
           <a href="https://bsky.app/profile/cureation.bsky.social" target="_blank" rel="me noopener" aria-label="Cureation on Bluesky (@cureation.bsky.social)" title="Bluesky: @cureation.bsky.social">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 10.8c-1.09-2.11-4.05-6.05-6.8-8.06C2.56.81 1.55 1.14.89 1.44.13 1.78 0 2.93 0 3.61c0 .69.38 5.65.62 6.48.81 2.8 3.69 3.75 6.35 3.45-4.64.69-8.76 2.38-3.36 8.4 5.93 6.14 8.13-1.32 8.39-3 .26 1.68 2.46 9.14 8.39 3 5.4-6.02 1.28-7.71-3.36-8.4 2.66.3 5.54-.65 6.35-3.45.24-.83.62-5.79.62-6.48 0-.68-.13-1.83-.89-2.17-.66-.3-1.67-.63-4.31 1.3C16.05 4.75 13.09 8.69 12 10.8Z" /></svg>
-            <span class="sr-only">Bluesky</span>
+            <span data-directus={copyAttr("components_nav_Footer_9e821fabd2d9")} set:html={copyText("components_nav_Footer_9e821fabd2d9", "Bluesky")} class="sr-only"></span>
           </a>
           <a href="https://www.facebook.com/cureationx/" target="_blank" rel="me noopener" aria-label="Cureation on Facebook" title="Facebook">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 22v-9h3l.45-3.5H13.5V7.27c0-1.01.28-1.7 1.74-1.7H17.1V2.44c-.32-.04-1.43-.14-2.72-.14-2.69 0-4.53 1.64-4.53 4.66V9.5H6.8V13h3.05v9h3.65Z" /></svg>
-            <span class="sr-only">Facebook</span>
+            <span data-directus={copyAttr("components_nav_Footer_2f1bcb28701c")} set:html={copyText("components_nav_Footer_2f1bcb28701c", "Facebook")} class="sr-only"></span>
           </a>
           <a href="https://www.instagram.com/cureationx/" target="_blank" rel="me noopener" aria-label="Cureation on Instagram" title="Instagram">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.5" cy="6.7" r="1.1" /></svg>
-            <span class="sr-only">Instagram</span>
+            <span data-directus={copyAttr("components_nav_Footer_ccb4b8eee266")} set:html={copyText("components_nav_Footer_ccb4b8eee266", "Instagram")} class="sr-only"></span>
           </a>
           <a href="https://www.youtube.com/@cureation" target="_blank" rel="me noopener" aria-label="Cureation on YouTube" title="YouTube">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.2 31.2 0 0 0 0 12a31.2 31.2 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.2 31.2 0 0 0 24 12a31.2 31.2 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z" clip-rule="evenodd" /></svg>
-            <span class="sr-only">YouTube</span>
+            <span data-directus={copyAttr("components_nav_Footer_8c9a1f213431")} set:html={copyText("components_nav_Footer_8c9a1f213431", "YouTube")} class="sr-only"></span>
           </a>
         </nav>
       </div>
@@ -49,24 +51,26 @@ const archive = [
 
     <nav class="foot__links" aria-label="Footer navigation">
       <div>
-        <span>Explore</span>
-        {primary.map(([href, label]) => <a href={href}>{label}</a>)}
+        <span data-directus={copyAttr("components_nav_Footer_e2bd280a48ed")} set:html={copyText("components_nav_Footer_e2bd280a48ed", "Explore")}></span>
+        {primary.map((__copyRow4408) => { const [href, label] = __copyRow4408; return <a data-directus={editable(__copyRow4408, ["1"])} href={href}>{label}</a>; })}
       </div>
       <div>
-        <span>Archive</span>
-        {archive.map(([href, label]) => <a href={href}>{label}</a>)}
+        <span data-directus={copyAttr("components_nav_Footer_a4ba8955a378")} set:html={copyText("components_nav_Footer_a4ba8955a378", "Archive")}></span>
+        {archive.map((__copyRow4656) => { const [href, label] = __copyRow4656; return <a data-directus={editable(__copyRow4656, ["1"])} href={href}>{label}</a>; })}
       </div>
       <div>
-        <span>Elsewhere</span>
-        <a href="/rss.xml">RSS</a>
-        <a href="/about">About</a>
-        <a href="mailto:hello@cureation.net">Contact</a>
+        <span>Stay connected</span>
+        <a href="/newsletter">Newsletter</a>
+        <a href="/rss.xml">Archive RSS</a>
+        <a href="/publication/rss.xml">Articles RSS</a>
+        <a href="/news/rss.xml">News RSS</a>
       </div>
+      <div><span>About the archive</span><a href="/about">Our story</a><a href="/sources">Sources &amp; credits</a><a href="/community">Community</a><a href="mailto:hello@cureation.net">Get in touch</a></div>
     </nav>
 
     <div class="foot__base">
       <span>© {year} Cureation</span>
-      <span>Unofficial · not affiliated with The Cure</span>
+      <span data-directus={copyAttr("components_nav_Footer_a3aaaa17abaf")} set:html={copyText("components_nav_Footer_a3aaaa17abaf", "Unofficial · not affiliated with The Cure")}></span>
     </div>
   </div>
 </footer>
@@ -75,7 +79,7 @@ const archive = [
   .foot {
     margin-top: clamp(72px, 10vw, 144px);
     border-top: 1px solid var(--rule);
-    background: var(--bg);
+    background: var(--bg-2);
   }
 
   .foot__inner { padding-block: clamp(52px, 7vw, 92px) 28px; }
@@ -94,7 +98,7 @@ const archive = [
     border: 0;
     color: var(--ink);
     font-family: var(--f-display);
-    font-size: clamp(64px, 12vw, 154px);
+    font-size: clamp(52px, 8vw, 100px);
     font-style: italic;
     letter-spacing: -.055em;
     line-height: .72;
@@ -105,7 +109,7 @@ const archive = [
     margin: 0;
     color: var(--muted);
     font-family: var(--f-serif);
-    font-size: 16px;
+    font-size: var(--text-small);
     line-height: 1.6;
   }
 
@@ -134,7 +138,7 @@ const archive = [
 
   .foot__links {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 32px;
     padding-block: 40px;
   }
@@ -144,15 +148,15 @@ const archive = [
   .foot__links span,
   .foot__base {
     color: var(--muted-2);
-    font-family: var(--f-sans);
+    font-family: var(--f-ui);
     font-size: var(--micro);
     font-weight: 600;
-    letter-spacing: .16em;
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
   .foot__links span { margin-bottom: 8px; color: var(--accent-3); }
-  .foot__links a { border: 0; color: var(--ink-2); font-size: 16px; }
+  .foot__links a { border: 0; color: var(--ink-2); font-size: var(--text-small); }
   .foot__links a:hover { color: var(--accent); }
 
   .foot__base {

@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -13,11 +14,11 @@ const firstDate = issues[issues.length - 1]?.sent_date?.slice(0, 7);
 const lastDate = issues[0]?.sent_date?.slice(0, 7);
 ---
 <Layout title="Newsletter · Cureation">
-  <PageHero
-    section="Email digest"
-    title="The dispatch"
-    deck="A slow newsletter covering anniversary pieces, reader corrections, new archive additions and anything worth lingering over. Roughly monthly. Unsubscribe at any time."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Newsletter' }]}
+  <PageHero copyKeys={{"section":"pages_newsletter_eb3d92585b67","title":"pages_newsletter_1d29af786983","deck":"pages_newsletter_e12794c165c5"}}
+    section={copyText("pages_newsletter_eb3d92585b67", "Newsletter")}
+    title={copyText("pages_newsletter_1d29af786983", "Newsletter")}
+    deck="Monthly archive updates. Unsubscribe at any time."
+    crumbs={[{ ...copySource({"label":"pages_newsletter_data-03733c8fc7ef"}),  label: copyText("pages_newsletter_data-03733c8fc7ef", "Home"), href: '/' }, { ...copySource({"label":"pages_newsletter_data-a2020f7a5a47"}),  label: copyText("pages_newsletter_data-a2020f7a5a47", "Newsletter") }]}
     facts={issues.length > 0 ? [
       { k: 'Issues sent', v: issues.length },
       { k: 'First', v: firstDate || '–' },
@@ -25,28 +26,28 @@ const lastDate = issues[0]?.sent_date?.slice(0, 7);
     ] : undefined}
   >
     <form class="newsletter-form" style="margin-top: clamp(20px, 3vw, 32px);" action="https://buttondown.email/api/emails/embed-subscribe/cureation" method="post" target="popupwindow">
-      <input type="email" name="email" placeholder="your@email" required class="filter-search" style="flex:1; max-width: 320px;" />
+      <input type="email" name="email" aria-label="Email address" autocomplete="email" placeholder="your@email" required class="filter-search" style="flex:1; max-width: 320px;" />
       <input type="hidden" value="1" name="embed" />
-      <button type="submit" class="btn">Subscribe →</button>
+      <button data-directus={copyAttr("pages_newsletter_1ee70d004ceb")} set:html={copyText("pages_newsletter_1ee70d004ceb", "Subscribe →")} type="submit" class="btn"></button>
     </form>
   </PageHero>
 
   {issues.length === 0 ? (
     <section class="container" style="padding-block: clamp(40px, 6vw, 80px);">
-      <div class="panel-head" style="border: 1px solid var(--rule);"><span>No issues sent yet</span><span>Inaugural issue pending</span></div>
-      <p class="deck" style="margin-top: .8rem; max-width: 62ch;">The newsletter hasn't yet launched in this issue cycle. Once it does, every past edition lives here in a full-text, linkable and searchable format.</p>
+      <div class="panel-head" style="border: 1px solid var(--rule);"><span data-directus={copyAttr("pages_newsletter_cef6e6058c2e")} set:html={copyText("pages_newsletter_cef6e6058c2e", "No issues sent yet")}></span><span data-directus={copyAttr("pages_newsletter_18fb7d40518a")} set:html={copyText("pages_newsletter_18fb7d40518a", "Coming soon")}></span></div>
+      <p data-directus={copyAttr("pages_newsletter_45a7f9f2023e")} set:html={copyText("pages_newsletter_45a7f9f2023e", "The newsletter is coming soon. Past issues will appear here after they are sent.")} class="deck" style="margin-top: .8rem; max-width: 62ch;"></p>
     </section>
   ) : (
-    <IssueSection kicker="Back issues" title="The archive" meta={`${issues.length} editions`}>
+    <IssueSection title="Past newsletters" meta={`${issues.length} editions`}>
       <table class="data data--airy">
-        <thead><tr><th style="width:120px;">Sent</th><th>Issue</th><th class="num" style="text-align:right; width:90px;">№</th></tr></thead>
+        <thead><tr><th data-directus={copyAttr("pages_newsletter_49e2b46e3396")} set:html={copyText("pages_newsletter_49e2b46e3396", "Sent")} style="width:120px;"></th><th data-directus={copyAttr("pages_newsletter_b762a29e5d31")} set:html={copyText("pages_newsletter_b762a29e5d31", "Issue")}></th><th class="num" style="text-align:right; width:90px;">№</th></tr></thead>
         <tbody>
           {issues.map((it, i) => (
-            <tr data-clickable onclick={`location.href='/newsletter/${it.slug}'`}>
-              <td class="mono-sm" style="color: var(--ink);">{(it.sent_date || it.date_created || '').slice(0, 10)}</td>
-              <td>
-                <span class="serif" style="font-size:19px; font-style:italic;">{it.title || it.subject || '–'}</span>
-                {it.deck && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem;">{it.deck}</div>}
+            <tr>
+              <td data-directus={editable(it, ["sent_date","date_created"])} class="mono-sm" style="color: var(--ink);">{(it.sent_date || it.date_created || '').slice(0, 10)}</td>
+              <td >
+                <span data-directus={editable(it, ["title","subject"])} class="serif" style="font-size:19px; font-style:italic;">{it.title || it.subject || '–'}</span>
+                {it.deck && <div data-directus={editable(it, ["deck"])} class="muted" style="font-family:var(--f-serif); font-size:var(--text-small); margin-top:.2rem;">{it.deck}</div>}
               </td>
               <td class="num" style="color: var(--accent-3);">№ {String(issues.length - i).padStart(3, '0')}</td>
             </tr>

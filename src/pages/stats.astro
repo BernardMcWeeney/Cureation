@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple, copyTupleSource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import BarChart from '../components/ui/BarChart.astro';
@@ -7,10 +8,10 @@ import { listAlbums, listSongs, listSetlists, listTours, listEras, getRunningFig
 const [albums, songs, setlists, tours, eras, fig] = await Promise.all([
   listAlbums(),
   listSongs(),
-  listSetlists({ limit: 1500 }),
+  listSetlists({ limit: -1 }),
   listTours(),
   listEras(),
-  getRunningFigures().catch(() => ({ albums: 0, songs: 0, setlists: 0, venues: 0, photos: 0, members: 0 })),
+  getRunningFigures().catch(() => ({ albums: null, songs: null, setlists: null, venues: null, photos: null, members: null })),
 ]);
 
 const albumsById = Object.fromEntries(albums.map((a) => [a.id, a]));
@@ -53,10 +54,10 @@ const tourDecadeEntries = Object.entries(tourDecades).sort((a, b) => a[0].locale
 const maxTourDecade = Math.max(1, ...tourDecadeEntries.map(([, c]) => c));
 
 const facts: Array<[string, string]> = [
-  ['Records', String(fig.albums)],
-  ['Songs', String(fig.songs)],
-  ['Setlists', String(fig.setlists)],
-  ['Venues', String(fig.venues)],
+  copyTuple([copyText("pages_stats_tuple-9c3527d9b6e0", "Albums"), String(fig.albums)], {"0":"pages_stats_tuple-9c3527d9b6e0"}),
+  copyTuple([copyText("pages_stats_tuple-5ff5974895b0", "Songs"), String(fig.songs)], {"0":"pages_stats_tuple-5ff5974895b0"}),
+  copyTuple([copyText("pages_stats_tuple-c3431403bfeb", "Setlists"), String(fig.setlists)], {"0":"pages_stats_tuple-c3431403bfeb"}),
+  copyTuple([copyText("pages_stats_tuple-c3041074b6c6", "Venues"), String(fig.venues)], {"0":"pages_stats_tuple-c3041074b6c6"}),
 ];
 
 const leadingSong = topSongs[0] || null;
@@ -67,12 +68,12 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
 ), null);
 ---
 <Layout title="Statistics · Cureation">
-  <PageHero
-    section="By the numbers"
-    title="Statistics"
-    deck="The archive, quantified through live frequencies, tour cadence and catalogue distribution across decades and geography."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Statistics' }]}
-    facts={facts.map(([k, v]) => ({ k, v }))}
+  <PageHero copyKeys={{"section":"pages_stats_c1a2e4814221","title":"pages_stats_d9e0245a0e30","deck":"pages_stats_0844bc499ccf"}}
+    section={copyText("pages_stats_c1a2e4814221", "By the numbers")}
+    title={copyText("pages_stats_d9e0245a0e30", "Statistics")}
+
+    crumbs={[{ ...copySource({"label":"pages_stats_data-773e2ace8e67"}),  label: copyText("pages_stats_data-773e2ace8e67", "Home"), href: '/' }, { ...copySource({"label":"pages_stats_data-53d50c730fbe"}),  label: copyText("pages_stats_data-53d50c730fbe", "Statistics") }]}
+    facts={facts.map((fact) => ({ ...copyTupleSource(fact, ["k", "v"]), k: fact[0], v: fact[1] }))}
   />
 
   <div class="container stats-tabs-wrap">
@@ -94,34 +95,27 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
 
   <section id="stats-panel-overview" class="stats-overview detail-anchor" data-stats-panel="overview" role="tabpanel" aria-labelledby="stats-tab-overview">
     <div class="container">
-      <header class="stats-overview__head">
-        <div>
-          <span>Archive overview</span>
-          <h2>Four signals from<br /><em>the whole collection.</em></h2>
-        </div>
-        <p>Start with the headline patterns, then open a tab for the full rankings, timelines and catalogue breakdown.</p>
-      </header>
 
       <div class="stats-overview__grid">
         {leadingSong && (
           <a class="overview-card overview-card--hot" href={leadingSong.slug ? `/songs/${leadingSong.slug}` : '/songs'}>
-            <span class="overview-card__index">01 · Live repertoire</span>
-            <strong>{leadingSong.title}</strong>
-            <small>{(leadingSong.times_played_live || 0).toLocaleString()} documented performances · most played song</small>
+            <span data-directus={copyAttr("pages_stats_b211c9445150")} set:html={copyText("pages_stats_b211c9445150", "01 · Live repertoire")} class="overview-card__index"></span>
+            <strong data-directus={editable(leadingSong, ["title"])}>{leadingSong.title}</strong>
+            <small data-directus={editable(leadingSong, ["times_played_live"])}>{(leadingSong.times_played_live || 0).toLocaleString()} documented performances · most played song</small>
             <b aria-hidden="true">↗</b>
           </a>
         )}
         {leadingAlbum && (
           <a class="overview-card overview-card--violet" href={`/discography/${leadingAlbum.album!.slug}`}>
-            <span class="overview-card__index">02 · Record</span>
-            <strong>{leadingAlbum.album!.title}</strong>
-            <small>{leadingAlbum.plays.toLocaleString()} aggregate song performances · leading album</small>
+            <span data-directus={copyAttr("pages_stats_2fa482fa40dc")} set:html={copyText("pages_stats_2fa482fa40dc", "02 · Record")} class="overview-card__index"></span>
+            <strong data-directus={editable(leadingAlbum, ["album"])}>{leadingAlbum.album!.title}</strong>
+            <small data-directus={editable(leadingAlbum, ["plays"])}>{leadingAlbum.plays.toLocaleString()} aggregate song performances · leading album</small>
             <b aria-hidden="true">↗</b>
           </a>
         )}
         {leadingCountry && (
           <a class="overview-card overview-card--cool" href={`/setlists?country=${encodeURIComponent(leadingCountry[0])}`}>
-            <span class="overview-card__index">03 · Geography</span>
+            <span data-directus={copyAttr("pages_stats_836e7b615593")} set:html={copyText("pages_stats_836e7b615593", "03 · Geography")} class="overview-card__index"></span>
             <strong>{leadingCountry[0]}</strong>
             <small>{leadingCountry[1].toLocaleString()} documented shows · most visited country</small>
             <b aria-hidden="true">↗</b>
@@ -129,17 +123,17 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
         )}
         {busiestDecade && (
           <a class="overview-card overview-card--gold" href={`/setlists?decade=${encodeURIComponent(busiestDecade[0])}`}>
-            <span class="overview-card__index">04 · Timeline</span>
+            <span data-directus={copyAttr("pages_stats_00ab22829518")} set:html={copyText("pages_stats_00ab22829518", "04 · Timeline")} class="overview-card__index"></span>
             <strong>{busiestDecade[0]}</strong>
-            <small>{busiestDecade[1].toLocaleString()} documented shows · busiest decade on file</small>
+            <small>{busiestDecade[1].toLocaleString()} documented shows · busiest decade in the archive</small>
             <b aria-hidden="true">↗</b>
           </a>
         )}
       </div>
 
       <div class="stats-overview__foot">
-        <span>{fig.photos.toLocaleString()} photos</span>
-        <span>{fig.members.toLocaleString()} members</span>
+        <span data-directus={editable(fig, ["photos"])}>{fig.photos?.toLocaleString() ?? 'Unavailable'} photos</span>
+        <span data-directus={editable(fig, ["members"])}>{fig.members?.toLocaleString() ?? 'Unavailable'} members</span>
         <span>{tours.length.toLocaleString()} tours</span>
         <span>{eras.length.toLocaleString()} archive eras</span>
       </div>
@@ -149,10 +143,7 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
   <div id="stats-panel-live" data-stats-panel="live" role="tabpanel" aria-labelledby="stats-tab-live" hidden>
   <section class="stats-section stats-section--lead detail-anchor">
     <div class="container">
-      <header class="stats-heading stats-heading--row">
-        <div><span>Live frequency</span><h2>The songs played<br /><em>again and again.</em></h2></div>
-        <small>Top 10 · live archive</small>
-      </header>
+      <header class="stats-heading"><h2>Most played songs</h2></header>
       <div class="stats-lead-chart">
         <BarChart unit="plays" bars={topSongs.map((s) => {
           const alb = s.album ? albumsById[s.album] : null;
@@ -164,13 +155,10 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
 
   <section class="stats-section stats-section--soft">
     <div class="container">
-      <header class="stats-heading stats-heading--row">
-        <div><span>Records rank</span><h2>The records that<br /><em>shape the stage.</em></h2></div>
-        <small>Aggregate song plays</small>
-      </header>
+      <header class="stats-heading"><h2>Albums by live plays</h2></header>
       <div class="stats-single-chart">
         <article class="stats-card stats-card--wide">
-          <header><span>Records rank</span><h3>Albums by live prevalence</h3><small>Aggregate song plays</small></header>
+          
           <BarChart bars={topAlbums.map(({ album, plays }) => ({
             label: album!.title,
             sub: String(album!.release_date || '').slice(0, 4),
@@ -186,13 +174,10 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
   <div id="stats-panel-touring" data-stats-panel="touring" role="tabpanel" aria-labelledby="stats-tab-touring" hidden>
   <section class="stats-section stats-section--soft detail-anchor">
     <div class="container">
-      <header class="stats-heading stats-heading--row">
-        <div><span>Geography</span><h2>Where the archive<br /><em>keeps returning.</em></h2></div>
-        <small>Top 10 · show count</small>
-      </header>
+      <header class="stats-heading"><h2>Shows by country</h2></header>
       <div class="stats-single-chart">
         <article class="stats-card stats-card--wide">
-          <header><span>Touring countries</span><h3>Top touring countries</h3><small>By show count</small></header>
+          
           <BarChart bars={topCountries.map(([c, n]) => ({ label: c, value: n, href: `/setlists?country=${encodeURIComponent(c)}` }))} />
         </article>
       </div>
@@ -201,29 +186,26 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
 
   <section class="stats-section">
     <div class="container">
-      <header class="stats-heading stats-heading--row">
-        <div><span>Cadence</span><h2>How the years<br /><em>fill up.</em></h2></div>
-        <small>{tours.length} tours catalogued</small>
-      </header>
+      <header class="stats-heading"><h2>Shows and tours by decade</h2></header>
       <div class="cadence-grid">
         <article>
-          <h3>Shows per decade</h3>
+          <h3 data-directus={copyAttr("pages_stats_94226ca0b21c")} set:html={copyText("pages_stats_94226ca0b21c", "Shows per decade")}></h3>
           <div class="decade-bars" style="height: 260px;">
-            {decadeEntries.map(([d, c]) => (
+            {decadeEntries.map((__copyRow13532) => { const [d, c] = __copyRow13532; return (
               <div class="decade-bar" style={`--h: ${Math.round((c / maxDecadeShows) * 100)}%;`}>
-                <div class="decade-bar__val">{c}</div><div class="decade-bar__fill"></div><div class="decade-bar__label">{d}</div>
+                <div data-directus={editable(__copyRow13532, ["1"])} class="decade-bar__val">{c}</div><div class="decade-bar__fill"></div><div data-directus={editable(__copyRow13532, ["0"])} class="decade-bar__label">{d}</div>
               </div>
-            ))}
+            ); })}
           </div>
         </article>
         <article>
-          <h3>Tours launched</h3>
+          <h3 data-directus={copyAttr("pages_stats_6334b62b511a")} set:html={copyText("pages_stats_6334b62b511a", "Tours launched")}></h3>
           <div class="decade-bars" style="height: 260px;">
-            {tourDecadeEntries.map(([d, c]) => (
+            {tourDecadeEntries.map((__copyRow14099) => { const [d, c] = __copyRow14099; return (
               <div class="decade-bar" style={`--h: ${Math.round((c / maxTourDecade) * 100)}%;`}>
-                <div class="decade-bar__val">{c}</div><div class="decade-bar__fill"></div><div class="decade-bar__label">{d}</div>
+                <div data-directus={editable(__copyRow14099, ["1"])} class="decade-bar__val">{c}</div><div class="decade-bar__fill"></div><div data-directus={editable(__copyRow14099, ["0"])} class="decade-bar__label">{d}</div>
               </div>
-            ))}
+            ); })}
           </div>
         </article>
       </div>
@@ -235,7 +217,7 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
   {eraEntries.length > 0 && (
     <section class="stats-section stats-section--accent detail-anchor">
       <div class="container stats-era">
-        <header><span>Catalogue chronology</span><h2>Every era leaves<br />a different shape.</h2><p>Studio records grouped by the archive's historical eras.</p></header>
+        <header><h2>Studio albums by era</h2></header>
         <div class="stats-era__chart"><BarChart showRank={false} bars={eraEntries.map(([k, v]) => ({ label: k, value: v }))} /></div>
       </div>
     </section>
@@ -286,9 +268,9 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
     border-bottom: 3px solid transparent;
     background: transparent;
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 11px;
-    letter-spacing: .19em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     white-space: nowrap;
     cursor: pointer;
@@ -306,52 +288,16 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
     color: var(--ink);
   }
   :root[data-theme='papers'] .stats-tab.is-active { color: var(--tab-tone); }
-  .stats-tab__count { font-size: 9px; letter-spacing: .1em; opacity: .62; }
+  .stats-tab__count { font-size: var(--text-label); letter-spacing: .1em; opacity: .62; }
 
   .stats-overview {
     padding-block: clamp(54px, 7vw, 96px);
   }
 
-  .stats-overview__head {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
-    align-items: end;
-    gap: clamp(28px, 5vw, 72px);
-    margin-bottom: clamp(28px, 4vw, 52px);
-  }
 
-  .stats-overview__head span {
-    color: var(--accent);
-    font-family: var(--f-sans);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-  }
 
-  .stats-overview__head h2 {
-    margin: 10px 0 0;
-    color: var(--ink);
-    font-family: var(--f-display);
-    font-size: clamp(46px, 6.5vw, 82px);
-    font-weight: 400;
-    letter-spacing: -.05em;
-    line-height: .85;
-  }
 
-  .stats-overview__head h2 em {
-    color: var(--violet);
-    font-weight: inherit;
-  }
 
-  .stats-overview__head p {
-    max-width: 42ch;
-    margin: 0;
-    color: var(--muted);
-    font-family: var(--f-serif);
-    font-size: 17px;
-    line-height: 1.6;
-  }
 
   .stats-overview__grid {
     display: grid;
@@ -395,13 +341,13 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
   .overview-card__index {
     margin-bottom: auto;
     color: var(--card-tone);
-    font-family: var(--f-mono);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: .18em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    font-weight: 600;
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
-  .overview-card strong {
+  .overview-card :global(strong) {
     max-width: 13ch;
     font-family: var(--f-display);
     font-size: clamp(34px, 4vw, 58px);
@@ -415,18 +361,18 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
     max-width: 42ch;
     margin-top: 16px;
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 9px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1.55;
     text-transform: uppercase;
   }
-  .overview-card b {
+  .overview-card :global(b) {
     position: absolute;
     top: 22px;
     right: 24px;
     color: var(--card-tone);
-    font-family: var(--f-sans);
+    font-family: var(--f-ui);
     font-size: 18px;
     font-weight: 400;
   }
@@ -444,27 +390,27 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
     padding: 13px 16px;
     background: var(--bg);
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 9px;
-    letter-spacing: .16em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-align: center;
     text-transform: uppercase;
   }
 
-  .stats-section { padding-block: clamp(64px, 8vw, 112px); }
+  .stats-section { padding-block: clamp(28px, 4vw, 48px); }
   .stats-section--soft { background: var(--bg-2); }
-  .stats-heading { margin-bottom: clamp(42px, 6vw, 76px); }
+  .stats-heading { margin-bottom: 24px; }
   .stats-heading--row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 36px; }
-  .stats-heading span, .stats-card header > span, .stats-era header > span { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
-  .stats-heading h2, .stats-era h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
-  .stats-heading h2 em { color: var(--accent); font-weight: inherit; }
-  .stats-heading > small { padding: 11px 14px; background: var(--accent); color: var(--accent-ink); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .stats-heading span, .stats-card header > span, .stats-era header > span { color: var(--accent); font-family: var(--f-ui); font-size: var(--text-label); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .stats-heading h2, .stats-era h2 { margin: 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(28px, 3vw, 40px); font-weight: 400; letter-spacing: -.06em; line-height: 1.1; }
+  .stats-heading h2 :global(em) { color: var(--accent); font-weight: inherit; }
+  .stats-heading > small { padding: 11px 14px; background: var(--accent); color: var(--accent-ink); font-family: var(--f-ui); font-size: var(--text-label); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
   .stats-lead-chart { padding: clamp(24px, 4vw, 54px); background: linear-gradient(145deg, var(--accent-tint), transparent 54%), var(--bg-2); }
   .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(18px, 3vw, 42px); }
   .stats-card { min-width: 0; padding: clamp(24px, 3vw, 44px); background: var(--bg); }
   .stats-card header { min-height: 145px; margin-bottom: 28px; }
   .stats-card h3 { margin: 10px 0 8px; color: var(--ink); font-family: var(--f-display); font-size: clamp(36px, 4vw, 58px); font-style: italic; font-weight: 400; letter-spacing: -.04em; line-height: .9; }
-  .stats-card header small { color: var(--muted); font-family: var(--f-sans); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+  .stats-card header small { color: var(--muted); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .12em; text-transform: uppercase; }
   .stats-single-chart { max-width: 980px; }
   .stats-card--wide header { min-height: 0; }
   .cadence-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 78px); }
@@ -473,7 +419,7 @@ const busiestDecade = decadeEntries.reduce<[string, number] | null>((best, entry
   .stats-section--accent { background: var(--accent); color: var(--accent-ink); }
   .stats-era { display: grid; grid-template-columns: minmax(0, .75fr) minmax(360px, 1.25fr); gap: clamp(42px, 8vw, 120px); align-items: center; }
   .stats-era header > span, .stats-era h2, .stats-era header p { color: var(--accent-ink); }
-  .stats-era header p { max-width: 36ch; font-size: 17px; line-height: 1.6; }
+  .stats-era header p { max-width: 36ch; font-size: var(--text-small); line-height: 1.6; }
   .stats-era__chart { padding: clamp(20px, 3vw, 42px); background: var(--bg); color: var(--ink); }
   @media (max-width: 900px) {
     .stats-overview__head, .stats-grid, .cadence-grid, .stats-era { grid-template-columns: 1fr; }

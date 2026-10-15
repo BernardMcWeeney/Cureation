@@ -1,4 +1,5 @@
 ---
+import { editable } from '../../lib/visual-editing';
 interface DossierItem {
   label: string;
   href: string;
@@ -21,10 +22,10 @@ const { items, label = 'In this file' } = Astro.props;
   <ol class="dossier-nav__list">
     {items.map((item, index) => (
       <li>
-        <a href={item.href}>
+        <a  href={item.href}>
           <span class="dossier-nav__number">{String(index + 1).padStart(2, '0')}</span>
-          <span class="dossier-nav__name">{item.label}</span>
-          {item.meta !== undefined && <span class="dossier-nav__meta">{item.meta}</span>}
+          <span data-directus={editable(item, ["label"])} class="dossier-nav__name">{item.label}</span>
+          {item.meta !== undefined && <span data-directus={editable(item, ["meta"])} class="dossier-nav__meta">{item.meta}</span>}
         </a>
       </li>
     ))}
@@ -62,15 +63,15 @@ const { items, label = 'In this file' } = Astro.props;
     padding: 19px 18px 16px;
     border-right: 1px solid var(--rule);
     color: var(--ink-2);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .2em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
   .dossier-nav__label span:last-child {
     color: var(--violet);
-    font-size: 16px;
+    font-size: var(--text-small);
   }
 
   .dossier-nav__list {
@@ -112,15 +113,15 @@ const { items, label = 'In this file' } = Astro.props;
 
   .dossier-nav__number,
   .dossier-nav__meta {
-    font-family: var(--f-mono);
-    font-size: 9px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
   }
 
   .dossier-nav__name {
     font-family: var(--f-serif);
-    font-size: 17px;
+    font-size: var(--text-small);
     font-style: italic;
     line-height: 1.1;
   }
@@ -132,8 +133,8 @@ const { items, label = 'In this file' } = Astro.props;
   @media (max-width: 720px) {
     .dossier-nav {
       display: block;
-      margin-inline: calc(var(--gutter) * -1);
-      border-inline: 0;
+      margin-inline: 0;
+      border-inline: 1px solid var(--rule);
     }
 
     .dossier-nav__label {
@@ -143,21 +144,23 @@ const { items, label = 'In this file' } = Astro.props;
     }
 
     .dossier-nav__list {
-      display: flex;
-      overflow-x: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow-x: visible;
       scrollbar-width: thin;
       scroll-snap-type: x proximity;
     }
 
     .dossier-nav__list li {
       flex: 0 0 auto;
-      min-width: min(44vw, 190px);
+      min-width: 0;
       scroll-snap-align: start;
     }
 
     .dossier-nav__list a {
-      padding: 16px var(--gutter);
-      white-space: nowrap;
+      padding: 14px;
+      min-height: 52px;
+      white-space: normal;
     }
   }
 </style>

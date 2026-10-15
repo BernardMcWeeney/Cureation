@@ -1,0 +1,249 @@
+{
+  "base": "http://localhost:4325",
+  "time": "2026-10-14T15:14:53.184Z",
+  "results": [
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/",
+      "status": 200,
+      "title": "Cureation | The Cure, in obsessive detail",
+      "bodyText": "INDEPENDENT ARCHIVE · UPDATED DAILY\nThe Cure,\nall of it.\n\nWhat they are doing now, what they did then, and every strange, perfect detail in between.\n\nEXPLORE THE 2026 TOUR\n→\nOPEN THE PUBLICATION\nPUBLISHED · XIV.X.MMXXVI · VERSION MMXXVI.CCLXXXVII\n14\nRECORDS\n157\nSONGS\n1,692\nSHOWS\n1,047\nVENUES\n TOUR ARCHIVE\n2026 European Summer Shows\n→\nLATEST NEWS\nFrom Oslo to Gothenburg, The Cure’s summer keeps changing shape\n→\nALBUM REVIEWS\nEvery studio album, closely listened to.\n→\nFROM THE ARCHIVE\nOne story,\nproperly told.\nOPEN THE PUBLICATION →\nREVIEWS · 8 MIN READ\nFEATURED ARTICLE · 28 NOVEMBER 2024\nSongs of a Lost World: A Deep Dive Into The Cure's Masterpiece\n\nAn in-depth look at the themes, production, and emotional weight of The Cure's long-awaited fourteenth album.\n\nREAD THE FEATURE →\nLIVE · SUMMER 2026\nExplore the\nlive archive.\nTOUR ARCHIVE\nTOUR TRACKER\n2026 European Summer Shows\n\nDates, maps, setlists, gaps and updates from the European summer run.\n\nOPEN TOUR TRACKER\n→\nLIVE ARCHIVE",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/reviews",
+      "status": 200,
+      "title": "Album Reviews · Cureation",
+      "bodyText": "HOME\nREVIEWS\nReviews\n\nFourteen studio albums. Fourteen close listens. Long-form criticism written for fans who know the songs and still want to hear them differently.\n\n9.5\n/ 10\nFEATURED REVIEW · 2024\nSongs of a Lost World: An ending that opens outward\n\nAfter sixteen years, The Cure returned with an album of grief and mortality that feels monumental because it never mistakes scale for spectacle.\n\nBY BERNARD MCWEENEY\n2 MIN READ\nREAD THE FULL REVIEW\n→\nCOMPLETE STUDIO ARCHIVE\nEvery album reviewed\n14 REVIEWS\n7.3\n2008 · 2 MIN\n4:13 Dream: Colour after the storm\n\nBright guitars and direct melodies give The Cure’s thirteenth album an appealing lift, even when the larger design feels unfinished.\n\nREAD REVIEW →\n6.9\n2004 · 2 MIN\nThe Cure: Raw edges, mixed results\n\nThe self-titled album pushes The Cure toward a harsher, more immediate sound, gaining force while sacrificing some of their mystery.\n\nREAD REVIEW →\n8.5\n2000 · 2 MIN\nBloodflowers: The beauty of the long goodbye\n\nPatient and autumnal, Bloodflowers finds The Cure returning to long-form melancholy without pretending the past can be repeated.\n\nREAD REVIEW →\n7.1\n1996 · 2 MIN\nWild Mood Swings: The argument for inconsistency\n\nThe Cure’s most disputed album is overstuffed and tonally unstable, but its risks deserve more than a dismissive verdict.\n\nREAD REVIEW →\n9.2\n1992 · 2 MIN\nWish: Bright light, deep water\n\nAt their commercial peak, The Cure made a record that holds euphoria and collapse in the same wide-open sound.\n\nREAD REVIEW →\n10\n1989 · 2 MIN\nDisintegration: The masterpiece that keeps moving\n\nImmense yet intimate, Disintegration turns time, memory and romantic fear into The Cure’s most complete album.\n\nREAD REVIEW →\n9\n1987 · 2 MIN\nKiss Me, Kiss Me, Kiss Me: Desire in every direction\n\nThe Cure’s great double album is excessive, romantic, abrasive and alive—the catalogue at its most gloriously plural.\n\nREAD REVIEW →\n9\n1985 · 2 MIN\nThe Head on the Door: Ten songs, a whole world\n\nCompact, varied and endlessly replayable, The Head on the Door turns The Cure’s contradictions into pop perfection.\n\nREAD REVIEW →\n7.5\n1984 · 2 MIN\nThe Top: Fever dreams and loose ends\n\nMessy by design and fascinating in practice, The Top catches Robert Smith rebuilding The Cure in public.\n\nREAD REVIEW →\n9.3\n1982 · 2 MIN\nPornography: No exit, no wasted motion\n\nThe Cure’s darkest record remains overwhelming because its chaos is shaped with absolute purpose.\n\nREAD REVIEW →\n8.7\n1981 · 2 MIN\nFaith: The long grey afternoon\n\nSlow, severe and quietly beautiful, Faith turns doubt and grief into an album of remarkable physical presence.\n\nREAD REVIEW →\n8.8\n1980 · 2 MIN\nSeventeen Seconds: Empty space, perfect tension\n\nWith one decisive turn toward silence, repetition and atmosphere, The Cure found a language that still feels entirely their own.\n\nREAD REVIEW →\n7.4\n1979 · 2 MIN\nThree Imaginary Boys: The sound of a band becoming itself\n\nRestless, sharp and not entirely under its creators’ control, The Cure’s debut is most compelling when the future briefly comes into focus.\n\nREAD REVIEW →",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/sources",
+      "status": 200,
+      "title": "Sources · Cureation",
+      "bodyText": "HOME\nSOURCES\nSources\n\nEvery claim traces back to something. This ledger records where the archive's facts came from, with citations, counts and reliability rankings.\n\nSOURCES ON FILE\n40\nRECORDS SOURCED\nUnavailable\nTYPES\n6\nRANKING\nRELIABILITY\nCITATIONS\nThe ledger\n40 SOURCES\nTYPE\nAll types\nAPI\nBOOK\nFAN\nMAGAZINE\nOFFICIAL\nWEBSITE\nSTATUS\nAny status\nOfficial\nIndependent\nSEARCH\n40 SOURCES\n№\tSOURCE\tTYPE\tAUTHOR\tRECORDS\tRELIABILITY\n01\tFiction Records / PolydorOFFICIAL\nOfficial label discography and press materials.\n\tOFFICIAL\t–\tUnavailable\t5\n02\tRock and Roll Hall of Fame\n(opens in a new tab)\n↗OFFICIAL\nOfficial Rock Hall artist induction profile.\n\tOFFICIAL\t–\tUnavailable\t5\n03\tTen Imaginary Years (Book)OFFICIAL\nOfficial illustrated biography covering 1978-1988.\n\tBOOK\tSTEVE SUTHERLAND\tUnavailable\t5\n04\tThe Cure Official Website\n(opens in a new tab)\n↗OFFICIAL\nOfficial band website and announcements.\n\tOFFICIAL\t–\tUnavailable\t5\n05\tThe Cure Official YouTube\n(opens in a new tab)\n↗OFFICIAL\nOfficial The Cure YouTube channel and music videos.\n\tOFFICIAL\t–\tUnavailable\t5\n06\tAllMusic\n(opens in a new tab)\n↗0\nAlbum reviews, ratings, and editorial content.\n\tWEBSITE\t–\tUnavailable\t4\n07\tBBC\n(opens in a new tab)\n↗OFFICIAL\nOfficial BBC source for broadcast and archive references.\n\tOFFICIAL\t–\tUnavailable\t4\n08\tBillboard\n(opens in a new tab)\n↗0\nBillboard chart history pages for The Cure.\n\tWEBSITE\t–\tUnavailable\t4\n09\tCure Concerts\n(opens in a new tab)\n↗0\nExtensive fan-run Cure concert archive used for show dates, setlists, ticket scans, and concert imagery.\n\tFAN\t–\tUnavailable\t4\n10\tCureation Staff\n(opens in a new tab)\n↗0\nOriginal research and editorial by the Cureation team.\n\tFAN\t–\tUnavailable\t4\n11\tDiscogs\n(opens in a new tab)\n↗0\nComprehensive discography database with release details, credits, and catalog numbers.\n\tWEBSITE\t–\tUnavailable\t4\n12\tINA\n(opens in a new tab)\n↗OFFICIAL\nInstitut national de l’audiovisuel archive source for broadcast material.\n\tOFFICIAL\t–\tUnavailable\t4\n13\tInternet Archive / Wayback Machine\n(opens in a new tab)\n↗0\nArchived web pages and media used when original source pages are unavailable.\n\tWEBSITE\t–\tUnavailable\t4\n14\tNME\n(opens in a new tab)\n↗0\nMusic journalism - interviews, reviews, features.\n\tMAGAZINE\t–\tUnavailable\t4\n15\tRoskilde Festival\n(opens in a new tab)\n↗OFFICIAL\nOfficial Roskilde Festival history and lineup reference.\n\tOFFICIAL\t–\tUnavailable\t4\n16\tWikidata\n(opens in a new tab)\n↗0\nStructured public reference data used alongside Wikipedia for venue metadata.\n\tAPI\t–\tUnavailable\t4\n17\tsetlist.fm\n(opens in a new tab)\n↗0\nCrowd-sourced setlist database. Primary source for concert setlists.\n\tWEBSITE\t–\tUnavailable\t4\n18\tA Chain of Flowers\n(opens in a new tab)\n↗0\nLong-running Cure fan community and archive; older pages are also cited via archived copies.\n\tFAN\t–\tUnavailable\t3\n19\tA Foolish Arrangement\n(opens in a new tab)\n↗0\nFan archive cited in setlist and live-history credits.\n\tFAN\t–\tUnavailable\t3\n20\tArusha Baker\n(opens in a new tab)\n↗0\nSite cited in concert credits and live-history references.\n\tWEBSITE\t–\tUnavailable\t3\n21\tBeach of Stone\n(opens in a new tab)\n↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\tUnavailable\t3\n22\tCureconcerts.com\n(opens in a new tab)\n↗0\nLegacy Cure concert archive domain cited in setlist credits.\n\tFAN\t–\tUnavailable\t3\n23\tForever Drowning\n(opens in a new tab)\n↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\tUnavailable\t3\n24\tNEMS World\n(opens in a new tab)\n↗0\nMusic-history reference site cited in external live-history links.\n\tWEBSITE\t–\tUnavailable\t3\n25\tNew Day\n(opens in a new tab)\n↗0\nFan archive cited in setlist and live-history links.\n\tFAN\t–\tUnavailable\t3\n26\tOpening Time\n(opens in a new tab)\n↗0\nFan-run Cure live archive cited in concert credits.\n\tFAN\t–\tUnavailable\t3\n27\tPictures of You\n(opens in a new tab)\n↗0\nFan-run Cure archive cited for concert and media references.\n\tFAN\t–\tUnavailable\t3\n28\tThe Banshees and Other Creatures\n(opens in a new tab)\n↗0\nPost-punk reference site cited for contextual live-history links.\n\tWEBSITE\t–\tUnavailable\t3\n29\tThe Cure in Holland\n(opens in a new tab)\n↗0\nFan-run archive focused on The Cure in the Netherlands.\n\tFAN\t–\tUnavailable\t3\n30\tThe Cure.cz\n(opens in a new tab)\n↗0\nFan archive cited for Cure concert and setlist information.\n\tFAN\t–\tUnavailable\t3\n31\tThe Side\n(opens in a new tab)\n↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\tUnavailable\t3\n32\tUK Rock Festivals\n(opens in a new tab)\n↗0\nFestival history reference cited in setlist and live-history links.\n\tWEBSITE\t–\tUnavailable\t3\n33\tWikipedia\n(opens in a new tab)\n↗0\nGeneral reference for biographical and discographical data.\n\tWEBSITE\t–\tUnavailable\t3\n34\tDailymotion\n(opens in a new tab)\n↗0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2\n35\tFacebook\n(opens in a new tab)\n↗0\nSocial media source used for contemporary posts and embedded video references.\n\tWEBSITE\t–\tUnavailable\t2\n36\tInstagram\n(opens in a new tab)\n↗0\nSocial media source used for contemporary posts and media references.\n\tWEBSITE\t–\tUnavailable\t2\n37\tSoundCloud\n(opens in a new tab)\n↗0\nPublic audio platform used for embedded audio links; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2\n38\tTicket Collector\n(opens in a new tab)\n↗0\nFan ticket archive cited for concert-history references.\n\tFAN\t–\tUnavailable\t2\n39\tVimeo\n(opens in a new tab)\n↗0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2\n40\tYouTube\n(opens in a new tab)\n↗0\nPublic video platform used for embedded live footage and promo clips; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2",
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "http://localhost:4325/_astro/jetbrains-mono-cyrillic-wght-normal.D73BlboJ.woff2",
+          "status": 404
+        }
+      ],
+      "horizontalOverflow": false,
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "mobile": false,
+      "route": "/wiki",
+      "status": 200,
+      "title": "The wiki · Cureation",
+      "bodyText": "HOME\nTHE WIKI\nThe wiki\n\nLong-form reference articles, deeper than a liner note and shorter than a biography, cross-referenced to everything else in the archive.\n\nARTICLES\n5\nSORT\nA–Z\n5 ARTICLES\nA living reference,\nnot a filing cabinet.\n\nStories, people, places and ideas are connected back to the records, songs and shows they belong to.\n\n01\nREFERENCE ARTICLE\nFrom Easy Cure to The Cure, 1978\n\nHow a Crawley four-piece dropped half their name — and most of their original set — in the year between signing with Hansa and releasing their first single on Fiction.\n\n5 MIN READ\n↗\n02\nREFERENCE ARTICLE\nRobert Smith's guitars: a short ledger\n\nThe instruments that made the records — from the hand-me-down Top Twenty of 1977 to the Gibsons and Fenders that defined the imperial-era tone.\n\n6 MIN READ\n↗\n03\nREFERENCE ARTICLE\nThe Cure at Glastonbury: four headline slots\n\nA short chronicle of the band's four Pyramid Stage headline appearances — 1986, 1990, 1995 and 2019 — and what each marked within the band's arc.\n\n5 MIN READ\n↗\n04\nREFERENCE ARTICLE\nThe Disintegration sessions, winter 1988–89\n\nRecorded between November 1988 and February 1989 at Outside Studios in Berkshire and Hook End Manor in Oxfordshire, Disintegration took shape against the band's own stated intention to make something \"darker and slower.\"\n\n7 MIN READ\n↗\n05\nREFERENCE ARTICLE\nWhy Pornography still sounds the way it does\n\nA note on the production choices — drum treatment, flanging, mix-bus compression — that made The Cure's fourth album harder for the band to make and harder for their audience to place.\n\n6 MIN READ\n↗",
+      "errors": [],
+      "failedRequests": [],
+      "horizontalOverflow": false,
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/",
+      "error": "page.goto: Timeout 35000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:4325/\", waiting until \"networkidle\"\u001b[22m\n",
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "http://localhost:4325/_astro/ClientRouter.astro_astro_type_script_index_0_lang.BDCjmQ8c.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/Layout.BXlt8j0y.css",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/images/cure-live-800.avif",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/MobileMenu.astro_astro_type_script_index_0_lang.DCM0H_UB.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/index.G17ePxvE.css",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/Layout.astro_astro_type_script_index_0_lang.D64M2yQD.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/logo-mark.webp",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/SearchOverlay.astro_astro_type_script_index_0_lang.Gu40uyHC.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/hero-image1.jpg",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/The-Cure-Live-2.avif",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/favicon-64.png",
+          "status": 404
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/reviews",
+      "status": 503,
+      "title": "Archive temporarily unavailable · Cureation",
+      "bodyText": "The archive is temporarily unavailable\n\nWe couldn't load this part of the archive. Please try again shortly.\n\nReturn to Cureation · Browse releases",
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "http://localhost:4325/reviews",
+          "status": 503
+        }
+      ],
+      "horizontalOverflow": false,
+      "violations": []
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/sources",
+      "status": 200,
+      "title": "Sources · Cureation",
+      "bodyText": "Home\nSources\nSources\n\nEvery claim traces back to something. This ledger records where the archive's facts came from, with citations, counts and reliability rankings.\n\nSources on file\n40\nRecords sourced\nUnavailable\nTypes\n6\nRanking\nRELIABILITY\nCitations\nThe ledger\n40 sources\nType\nAll types\nAPI\nBOOK\nFAN\nMAGAZINE\nOFFICIAL\nWEBSITE\nStatus\nAny status\nOfficial\nIndependent\nSearch\n40 sources\n№\tSource\tType\tAuthor\tRecords\tReliability\n01\tFiction Records / PolydorOFFICIAL\nOfficial label discography and press materials.\n\tOFFICIAL\t–\tUnavailable\t5\n02\tRock and Roll Hall of Fame (opens in a new tab)↗OFFICIAL\nOfficial Rock Hall artist induction profile.\n\tOFFICIAL\t–\tUnavailable\t5\n03\tTen Imaginary Years (Book)OFFICIAL\nOfficial illustrated biography covering 1978-1988.\n\tBOOK\tSteve Sutherland\tUnavailable\t5\n04\tThe Cure Official Website (opens in a new tab)↗OFFICIAL\nOfficial band website and announcements.\n\tOFFICIAL\t–\tUnavailable\t5\n05\tThe Cure Official YouTube (opens in a new tab)↗OFFICIAL\nOfficial The Cure YouTube channel and music videos.\n\tOFFICIAL\t–\tUnavailable\t5\n06\tAllMusic (opens in a new tab)↗0\nAlbum reviews, ratings, and editorial content.\n\tWEBSITE\t–\tUnavailable\t4\n07\tBBC (opens in a new tab)↗OFFICIAL\nOfficial BBC source for broadcast and archive references.\n\tOFFICIAL\t–\tUnavailable\t4\n08\tBillboard (opens in a new tab)↗0\nBillboard chart history pages for The Cure.\n\tWEBSITE\t–\tUnavailable\t4\n09\tCure Concerts (opens in a new tab)↗0\nExtensive fan-run Cure concert archive used for show dates, setlists, ticket scans, and concert imagery.\n\tFAN\t–\tUnavailable\t4\n10\tCureation Staff (opens in a new tab)↗0\nOriginal research and editorial by the Cureation team.\n\tFAN\t–\tUnavailable\t4\n11\tDiscogs (opens in a new tab)↗0\nComprehensive discography database with release details, credits, and catalog numbers.\n\tWEBSITE\t–\tUnavailable\t4\n12\tINA (opens in a new tab)↗OFFICIAL\nInstitut national de l’audiovisuel archive source for broadcast material.\n\tOFFICIAL\t–\tUnavailable\t4\n13\tInternet Archive / Wayback Machine (opens in a new tab)↗0\nArchived web pages and media used when original source pages are unavailable.\n\tWEBSITE\t–\tUnavailable\t4\n14\tNME (opens in a new tab)↗0\nMusic journalism - interviews, reviews, features.\n\tMAGAZINE\t–\tUnavailable\t4\n15\tRoskilde Festival (opens in a new tab)↗OFFICIAL\nOfficial Roskilde Festival history and lineup reference.\n\tOFFICIAL\t–\tUnavailable\t4\n16\tWikidata (opens in a new tab)↗0\nStructured public reference data used alongside Wikipedia for venue metadata.\n\tAPI\t–\tUnavailable\t4\n17\tsetlist.fm (opens in a new tab)↗0\nCrowd-sourced setlist database. Primary source for concert setlists.\n\tWEBSITE\t–\tUnavailable\t4\n18\tA Chain of Flowers (opens in a new tab)↗0\nLong-running Cure fan community and archive; older pages are also cited via archived copies.\n\tFAN\t–\tUnavailable\t3\n19\tA Foolish Arrangement (opens in a new tab)↗0\nFan archive cited in setlist and live-history credits.\n\tFAN\t–\tUnavailable\t3\n20\tArusha Baker (opens in a new tab)↗0\nSite cited in concert credits and live-history references.\n\tWEBSITE\t–\tUnavailable\t3\n21\tBeach of Stone (opens in a new tab)↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\tUnavailable\t3\n22\tCureconcerts.com (opens in a new tab)↗0\nLegacy Cure concert archive domain cited in setlist credits.\n\tFAN\t–\tUnavailable\t3\n23\tForever Drowning (opens in a new tab)↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\tUnavailable\t3\n24\tNEMS World (opens in a new tab)↗0\nMusic-history reference site cited in external live-history links.\n\tWEBSITE\t–\tUnavailable\t3\n25\tNew Day (opens in a new tab)↗0\nFan archive cited in setlist and live-history links.\n\tFAN\t–\tUnavailable\t3\n26\tOpening Time (opens in a new tab)↗0\nFan-run Cure live archive cited in concert credits.\n\tFAN\t–\tUnavailable\t3\n27\tPictures of You (opens in a new tab)↗0\nFan-run Cure archive cited for concert and media references.\n\tFAN\t–\tUnavailable\t3\n28\tThe Banshees and Other Creatures (opens in a new tab)↗0\nPost-punk reference site cited for contextual live-history links.\n\tWEBSITE\t–\tUnavailable\t3\n29\tThe Cure in Holland (opens in a new tab)↗0\nFan-run archive focused on The Cure in the Netherlands.\n\tFAN\t–\tUnavailable\t3\n30\tThe Cure.cz (opens in a new tab)↗0\nFan archive cited for Cure concert and setlist information.\n\tFAN\t–\tUnavailable\t3\n31\tThe Side (opens in a new tab)↗0\nFan site cited in concert credits and live-history references.\n\tFAN\t–\tUnavailable\t3\n32\tUK Rock Festivals (opens in a new tab)↗0\nFestival history reference cited in setlist and live-history links.\n\tWEBSITE\t–\tUnavailable\t3\n33\tWikipedia (opens in a new tab)↗0\nGeneral reference for biographical and discographical data.\n\tWEBSITE\t–\tUnavailable\t3\n34\tDailymotion (opens in a new tab)↗0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2\n35\tFacebook (opens in a new tab)↗0\nSocial media source used for contemporary posts and embedded video references.\n\tWEBSITE\t–\tUnavailable\t2\n36\tInstagram (opens in a new tab)↗0\nSocial media source used for contemporary posts and media references.\n\tWEBSITE\t–\tUnavailable\t2\n37\tSoundCloud (opens in a new tab)↗0\nPublic audio platform used for embedded audio links; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2\n38\tTicket Collector (opens in a new tab)↗0\nFan ticket archive cited for concert-history references.\n\tFAN\t–\tUnavailable\t2\n39\tVimeo (opens in a new tab)↗0\nPublic video platform used for embedded concert and broadcast clips; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2\n40\tYouTube (opens in a new tab)↗0\nPublic video platform used for embedded live footage and promo clips; individual uploader reliability varies.\n\tWEBSITE\t–\tUnavailable\t2",
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "http://localhost:4325/_astro/ClientRouter.astro_astro_type_script_index_0_lang.BDCjmQ8c.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/Layout.astro_astro_type_script_index_0_lang.D64M2yQD.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/logo-mark.webp",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/Layout.BXlt8j0y.css",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/MobileMenu.astro_astro_type_script_index_0_lang.DCM0H_UB.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/SearchOverlay.astro_astro_type_script_index_0_lang.Gu40uyHC.js",
+          "status": 404
+        }
+      ],
+      "horizontalOverflow": true,
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "description": "Ensure touch targets have sufficient size and space",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/target-size?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "a[data-mega-toggle=\"music\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Target has insufficient size (49px by 18px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18px instead of at least 24px."
+            },
+            {
+              "target": [
+                "a[data-mega-toggle=\"live\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Target has insufficient size (38.3px by 18px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18px instead of at least 24px."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "mobile": true,
+      "route": "/wiki",
+      "status": 200,
+      "title": "The wiki · Cureation",
+      "bodyText": "Home\nThe wiki\nThe wiki\n\nLong-form reference articles, deeper than a liner note and shorter than a biography, cross-referenced to everything else in the archive.\n\nArticles\n5\nSort\nA–Z\n5 ARTICLES\nA living reference,\nnot a filing cabinet.\n\nStories, people, places and ideas are connected back to the records, songs and shows they belong to.\n\n01\nREFERENCE ARTICLE\nFrom Easy Cure to The Cure, 1978\n\nHow a Crawley four-piece dropped half their name — and most of their original set — in the year between signing with Hansa and releasing their first single on Fiction.\n\n5 MIN READ\n↗\n02\nREFERENCE ARTICLE\nRobert Smith's guitars: a short ledger\n\nThe instruments that made the records — from the hand-me-down Top Twenty of 1977 to the Gibsons and Fenders that defined the imperial-era tone.\n\n6 MIN READ\n↗\n03\nREFERENCE ARTICLE\nThe Cure at Glastonbury: four headline slots\n\nA short chronicle of the band's four Pyramid Stage headline appearances — 1986, 1990, 1995 and 2019 — and what each marked within the band's arc.\n\n5 MIN READ\n↗\n04\nREFERENCE ARTICLE\nThe Disintegration sessions, winter 1988–89\n\nRecorded between November 1988 and February 1989 at Outside Studios in Berkshire and Hook End Manor in Oxfordshire, Disintegration took shape against the band's own stated intention to make something \"darker and slower.\"\n\n7 MIN READ\n↗\n05\nREFERENCE ARTICLE\nWhy Pornography still sounds the way it does\n\nA note on the production choices — drum treatment, flanging, mix-bus compression — that made The Cure's fourth album harder for the band to make and harder for their audience to place.\n\n6 MIN READ\n↗",
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "http://localhost:4325/_astro/ClientRouter.astro_astro_type_script_index_0_lang.BDCjmQ8c.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/logo-mark.webp",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/Layout.astro_astro_type_script_index_0_lang.D64M2yQD.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/Layout.BXlt8j0y.css",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/MobileMenu.astro_astro_type_script_index_0_lang.DCM0H_UB.js",
+          "status": 404
+        },
+        {
+          "url": "http://localhost:4325/_astro/SearchOverlay.astro_astro_type_script_index_0_lang.Gu40uyHC.js",
+          "status": 404
+        }
+      ],
+      "horizontalOverflow": false,
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "description": "Ensure touch targets have sufficient size and space",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/target-size?application=playwright",
+          "nodes": [
+            {
+              "target": [
+                "a[data-mega-toggle=\"music\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Target has insufficient size (49px by 18px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18px instead of at least 24px."
+            },
+            {
+              "target": [
+                "a[data-mega-toggle=\"live\"]"
+              ],
+              "failureSummary": "Fix any of the following:\n  Target has insufficient size (38.3px by 18px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 18px instead of at least 24px."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "engine": "firefox",
+      "limitation": "browserType.launch: Failed to launch the browser process.\nBrowser logs:\n\n<launching> /Users/bernardmcweeney/Library/Caches/ms-playwright/firefox-1555/firefox/Nightly.app/Contents/MacOS/firefox -no-remote -headless -profile /var/folders/1s/0zcc79vn4mgc30kwpx3l6dz80000gn/T/playwright_firefoxdev_profile-a2oftp -juggler-pipe -silent\n<launched> pid=77658\n[pid=77658][err] *** You are running in headless mode.\n[pid=77658][err] Could not find profile folder.\n[pid=77658] <process did exit: exitCode=1, signal=null>\n[pid=77658] starting temporary directories cleanup\nCall log:\n\u001b[2m  - <launching> /Users/bernardmcweeney/Library/Caches/ms-playwright/firefox-1555/firefox/Nightly.app/Contents/MacOS/firefox -no-remote -headless -profile /var/folders/1s/0zcc79vn4mgc30kwpx3l6dz80000gn/T/playwright_firefoxdev_profile-a2oftp -juggler-pipe -silent\u001b[22m\n\u001b[2m  - <launched> pid=77658\u001b[22m\n\u001b[2m  - [pid=77658][err] *** You are running in headless mode.\u001b[22m\n\u001b[2m  - [pid=77658][err] Could not find profile folder.\u001b[22m\n\u001b[2m  - [pid=77658] <process did exit: exitCode=1, signal=null>\u001b[22m\n\u001b[2m  - [pid=77658] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=77658] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=77658] <kill>\u001b[22m\n\u001b[2m  - [pid=77658] <skipped force kill spawnedProcess.killed=false processClosed=true>\u001b[22m\n\u001b[2m  - [pid=77658] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=77658] <gracefully close end>\u001b[22m\n"
+    }
+  ]
+}

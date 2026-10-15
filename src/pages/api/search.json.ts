@@ -17,10 +17,10 @@ export const GET: APIRoute = async ({ url }) => {
         'Cache-Control': 'public, max-age=30',
       },
     });
-  } catch (e: any) {
+  } catch {
     return new Response(
-      JSON.stringify({ error: e.message, albums: [], songs: [], setlists: [], venues: [] }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'Search is temporarily unavailable. Please try again.', albums: [], songs: [], setlists: [], venues: [] }),
+      { status: 503, headers: { 'Content-Type': 'application/json', 'Retry-After': '60', 'Cache-Control': 'private, no-store' } }
     );
   }
 };

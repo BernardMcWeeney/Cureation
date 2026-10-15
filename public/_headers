@@ -1,0 +1,26 @@
+
+/*
+  Content-Security-Policy: frame-ancestors 'self' https://dash.cureation.net
+  ! X-Frame-Options
+
+# Public image paths; avoid overlapping Astro’s /_astro/* immutable policy.
+/images/*
+  Cache-Control: public, max-age=2592000
+/The-Cure-Live-2.avif
+  Cache-Control: public, max-age=2592000
+/favicon-64.png
+  Cache-Control: public, max-age=2592000
+/favicon.png
+  Cache-Control: public, max-age=2592000
+/hero-image1.jpg
+  Cache-Control: public, max-age=2592000
+/logo-mark.webp
+  Cache-Control: public, max-age=2592000
+/logo.png
+  Cache-Control: public, max-age=2592000
+/og-editorial-v2.png
+  Cache-Control: public, max-age=2592000
+/og.png
+  Cache-Control: public, max-age=2592000
+/thecure-troxyimage.jpg
+  Cache-Control: public, max-age=2592000

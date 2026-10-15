@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple, copyTupleSource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -45,7 +46,7 @@ const lyricRows = songs
   .map((song: LyricSong) => {
     const albumId = typeof song.album === 'object' ? song.album?.id ?? null : song.album;
     const album = albumId ? albumsById[albumId] : null;
-    const sections = normalizeStructuredLyrics(song.lyrics_structured, song.lyrics) || [];
+    const sections = normalizeStructuredLyrics(song.lyrics_structured, song.lyrics ?? undefined) || [];
     const lineCount = sections.reduce((total, section) => total + section.lines.length, 0);
     const firstChar = (song.title?.[0] || '').toUpperCase();
     return {
@@ -112,19 +113,19 @@ const lyricReleaseDate = lyricSingle?.release_date || lyricAlbum?.release_date |
 const lyricHref = lyricSong?.slug ? `/songs/${lyricSong.slug}` : lyricAlbum?.slug ? `/discography/${lyricAlbum.slug}` : '#';
 
 const facts: Array<[string, string]> = [
-  ['Songs in catalogue', String(songs.length)],
-  ['Lyrics on file', String(lyricRows.length)],
-  ['Lyric lines indexed', lineTotal.toLocaleString()],
-  ['Records covered', String(albumOptions.length)],
+  copyTuple([copyText("pages_lyrics_tuple-8489f7065c09", "Songs in catalogue"), String(songs.length)], {"0":"pages_lyrics_tuple-8489f7065c09"}),
+  copyTuple([copyText("pages_lyrics_tuple-9cb441cc2d32", "Songs with lyrics"), String(lyricRows.length)], {"0":"pages_lyrics_tuple-9cb441cc2d32"}),
+  copyTuple([copyText("pages_lyrics_tuple-b0da10601989", "Lyric lines indexed"), lineTotal.toLocaleString()], {"0":"pages_lyrics_tuple-b0da10601989"}),
+  copyTuple([copyText("pages_lyrics_tuple-018b38941911", "Records covered"), String(albumOptions.length)], {"0":"pages_lyrics_tuple-018b38941911"}),
 ];
 ---
 <Layout title="Lyrics · Cureation">
-  <PageHero
-    section="Lyrics"
-    title="Lyrics"
-    deck="Every documented song lyric in the archive, grouped for scanning by title, record, or live history. Full lyrics and annotations live on each song page."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Lyrics' }]}
-    facts={facts.map(([k, v]) => ({ k, v }))}
+  <PageHero copyKeys={{"section":"pages_lyrics_85c1b3fcf150","title":"pages_lyrics_4f3cf4814414","deck":"pages_lyrics_3684997fac04"}}
+    section={copyText("pages_lyrics_85c1b3fcf150", "Lyrics")}
+    title={copyText("pages_lyrics_4f3cf4814414", "Lyrics")}
+
+    crumbs={[{ ...copySource({"label":"pages_lyrics_data-2d4da564bf32"}),  label: copyText("pages_lyrics_data-2d4da564bf32", "Home"), href: '/' }, { ...copySource({"label":"pages_lyrics_data-7f6bc61e752d"}),  label: copyText("pages_lyrics_data-7f6bc61e752d", "Lyrics") }]}
+    facts={facts.map((fact) => ({ ...copyTupleSource(fact, ["k", "v"]), k: fact[0], v: fact[1] }))}
     flush
   />
 
@@ -147,17 +148,17 @@ const facts: Array<[string, string]> = [
           </a>
           <div class="lyrics-feature__body">
             <div class="mono-sm lyrics-feature__kind"><span class="pip"></span>LYRIC OF THE DAY · {today.toUpperCase()}</div>
-            <blockquote class="lyrics-feature__quote">
-              <span class="lyrics-feature__mark">&ldquo;</span>{lyricOfDay.line}<span class="lyrics-feature__mark">&rdquo;</span>
+            <blockquote  class="lyrics-feature__quote">
+              <span data-directus={copyAttr("pages_lyrics_d160ad5ff068")} set:html={copyText("pages_lyrics_d160ad5ff068", "&ldquo;")} class="lyrics-feature__mark"></span>{lyricOfDay.line}<span data-directus={copyAttr("pages_lyrics_df439f7fa7b8")} set:html={copyText("pages_lyrics_df439f7fa7b8", "&rdquo;")} class="lyrics-feature__mark"></span>
             </blockquote>
-            <a class="lyrics-feature__song serif" href={lyricHref}>{lyricSong.title}</a>
+            <a data-directus={editable(lyricSong, ["title"])} class="lyrics-feature__song serif" href={lyricHref}>{lyricSong.title}</a>
             <div class="mono-sm muted">
               {[lyricReleaseTitle, lyricReleaseDate?.slice(0, 4)].filter(Boolean).join(' · ').toUpperCase()}
             </div>
-            <div class="cluster" style="gap:.4rem;">
+            <div  class="cluster" style="gap:.4rem;">
               <Tag>{today.toUpperCase()}</Tag>
               {lyricReleaseKind && <span class="tag tag--cool">{lyricReleaseKind.toUpperCase()}</span>}
-              {(lyricSong.times_played_live || 0) > 0 && <span class="tag tag--gold">{lyricSong.times_played_live.toLocaleString()} LIVE PLAYS</span>}
+              {(lyricSong.times_played_live || 0) > 0 && <span data-directus={editable(lyricSong, ["times_played_live"])} class="tag tag--gold">{(lyricSong.times_played_live ?? 0).toLocaleString()} LIVE PLAYS</span>}
             </div>
           </div>
         </div>
@@ -165,12 +166,12 @@ const facts: Array<[string, string]> = [
     </section>
   )}
 
-  <IssueSection kicker={`${lyricRows.length} songs`} title="Lyric index" meta="Filtered">
+  <IssueSection title="Lyrics" hideHeader>
     <div class="table-controls" aria-label="Lyric table filters">
       <div class="table-controls__grid table-controls__grid--3">
         <Select
           name="record"
-          label="Record"
+          label="Album"
           options={[{ value: 'all', label: 'All records' }, ...albumOptions.map((a: any) => ({ value: String(a.id), label: a.title }))]}
         />
         <Select
@@ -199,7 +200,7 @@ const facts: Array<[string, string]> = [
     </div>
     <div class="table-wrap">
     <table class="data data--airy" data-lyric-table>
-      <thead><tr><th style="width:50px;">№</th><th>Title</th><th>Record</th><th class="num" style="text-align:right; width:120px;">Lyrics</th><th class="num" style="text-align:right; width:100px;">Plays</th></tr></thead>
+      <thead><tr><th style="width:50px;">№</th><th data-directus={copyAttr("pages_lyrics_046fdf52c1fa")} set:html={copyText("pages_lyrics_046fdf52c1fa", "Title")}></th><th data-directus={copyAttr("pages_lyrics_23011bf0c5a5")} set:html={copyText("pages_lyrics_23011bf0c5a5", "Album")}></th><th data-directus={copyAttr("pages_lyrics_1d5856da5820")} set:html={copyText("pages_lyrics_1d5856da5820", "Lyrics")} class="num" style="text-align:right; width:120px;"></th><th data-directus={copyAttr("pages_lyrics_5ba18ae3de37")} set:html={copyText("pages_lyrics_5ba18ae3de37", "Plays")} class="num" style="text-align:right; width:100px;"></th></tr></thead>
       <tbody>
         {lyricRows.map((s, i) => {
           const album = s.album;
@@ -215,19 +216,19 @@ const facts: Array<[string, string]> = [
               data-search={`${s.title || ''} ${album?.title || ''}`.toLowerCase()}
               data-plays={s.plays}
               data-lines={s.lineCount}
-              onclick={s.slug ? `location.href='/songs/${s.slug}'` : undefined}
+              data-row-href={s.slug ? `/songs/${s.slug}` : undefined}
             >
               <td class="idx">{String(i + 1).padStart(3, '0')}</td>
-              <td>
-                <a href={`/songs/${s.slug}`} class="serif lyric-title">{s.title}</a>
-                {s.duration && <div class="mono-sm muted lyric-sub">{s.duration}</div>}
+              <td >
+                <a data-directus={editable(s, ["title"])} href={`/songs/${s.slug}`} class="serif lyric-title">{s.title}</a>
+                {s.duration && <div data-directus={editable(s, ["duration"])} class="mono-sm muted lyric-sub">{s.duration}</div>}
               </td>
               <td>
-                <span class="mono-sm lyric-record">{album?.title || '–'}</span>
-                {albumYear && <div class="mono-sm muted lyric-sub">{albumYear}{s.track_number ? ` · track ${s.track_number}` : ''}</div>}
+                <span data-directus={editable(album, ["title"])} class="mono-sm lyric-record">{album?.title || '–'}</span>
+                {albumYear && <div data-directus={editable(s, ["track_number"])} class="mono-sm muted lyric-sub">{albumYear}{s.track_number ? ` · track ${s.track_number}` : ''}</div>}
               </td>
-              <td class="num">{s.lineCount.toLocaleString()} lines</td>
-              <td class="num" style="color: var(--accent-3);">{s.plays.toLocaleString()}</td>
+              <td data-directus={editable(s, ["lineCount"])} class="num">{s.lineCount.toLocaleString()} lines</td>
+              <td data-directus={editable(s, ["plays"])} class="num" style="color: var(--accent-3);">{s.plays.toLocaleString()}</td>
             </tr>
           );
         })}
@@ -235,7 +236,7 @@ const facts: Array<[string, string]> = [
     </table>
     </div>
     <div class="lyrics-empty mono-sm muted" data-empty hidden>No matching lyric pages.</div>
-    <Pagination label="Lyric index pages" />
+    <Pagination label="Lyrics pages" />
   </IssueSection>
 </Layout>
 
@@ -357,7 +358,7 @@ const facts: Array<[string, string]> = [
   .lyrics-feature__art:hover img { transform: scale(1.03); }
   .lyrics-feature__kind {
     color: var(--accent);
-    letter-spacing: .22em;
+    letter-spacing: .1em;
   }
   :root[data-theme='papers'] .lyrics-feature__kind { color: var(--accent); }
   .lyrics-feature__body {
@@ -407,7 +408,7 @@ const facts: Array<[string, string]> = [
   .lyric-record { color: var(--ink-2); }
   .lyric-sub {
     margin-top: .3rem;
-    letter-spacing: .16em;
+    letter-spacing: .1em;
   }
   .lyrics-empty {
     padding-top: 1rem;

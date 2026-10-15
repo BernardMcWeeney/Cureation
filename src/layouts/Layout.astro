@@ -1,4 +1,6 @@
 ---
+import { editable, copyText, copyAttr } from '../lib/visual-editing';
+import { pageSeo, jsonLd, SITE_URL } from '../lib/seo';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import Nav from '../components/nav/Nav.astro';
@@ -7,6 +9,7 @@ import SearchOverlay from '../components/nav/SearchOverlay.astro';
 import Footer from '../components/nav/Footer.astro';
 
 interface Props {
+  editRecord?: unknown;
   title?: string;
   description?: string;
   ogImage?: string;
@@ -15,14 +18,16 @@ interface Props {
 }
 
 const {
+  editRecord,
   title = 'Cureation | An archive of The Cure',
-  description = 'An editorial archive documenting The Cure: albums, live shows, lyrics, members, photos, news.',
+  description,
   ogImage = '/og-editorial-v2.png',
   ogType = 'website',
   theme = 'dark',
 } = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
+const seo = pageSeo(Astro.url.pathname, editRecord, description);
+const canonical = seo.canonical;
 const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
 ---
 <!doctype html>
@@ -34,18 +39,31 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
   <link rel="icon" type="image/png" href="/favicon-64.png" />
   <link rel="canonical" href={canonical} />
   <link rel="alternate" type="application/rss+xml" title="Cureation | News and shows" href="/rss.xml" />
-  <link rel="alternate" type="application/rss+xml" title="Cureation | Publication" href="/publication/rss.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Cureation | Articles" href="/publication/rss.xml" />
   <link rel="alternate" type="text/calendar" title="The Cure | Tour dates" href="/calendar.ics" />
 
   <title>{title}</title>
-  <meta name="description" content={description} />
+  <meta name="description" content={seo.description} />
   <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
+  <meta property="og:description" content={seo.description} />
   <meta property="og:image" content={ogImageUrl} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:site_name" content="Cureation" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={seo.description} />
+  <meta name="twitter:image" content={ogImageUrl} />
+  {(Astro.url.searchParams.get("visual-editing") === "true" || Astro.url.pathname === "/my-archive") && <meta name="robots" content="noindex, follow" />}
+  {seo.entity && <script type="application/ld+json" set:html={jsonLd(seo.entity)} />}
+  {Astro.url.pathname === "/" && <script type="application/ld+json" set:html={jsonLd({ "@context": "https://schema.org", "@graph": [{ "@type": "WebSite", "@id": `${SITE_URL}/#website`, url: SITE_URL, name: "Cureation", publisher: { "@id": `${SITE_URL}/#organization` } }, { "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: "Cureation", url: SITE_URL, description: "Independent, non-commercial fan archive dedicated to The Cure" }] })} />}
   <meta property="og:type" content={ogType} />
   <meta name="twitter:card" content="summary_large_image" />
 
   <ClientRouter />
+  <script>
+    import '../lib/visual-editing-client';
+    import '../lib/archive-links';
+    import '../lib/navigation';
+  </script>
   <script is:inline>
     (function () {
       try {
@@ -59,13 +77,17 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
   </script>
 </head>
 <body>
-  <a class="sr-only" href="#main">Skip to content</a>
+  {editable(editRecord) && <button class="visual-edit-record" data-directus={editable(editRecord)} type="button">Edit this record</button>}
+  <style>
+    .visual-edit-record { position: fixed; right: 16px; bottom: 16px; z-index: 10000; padding: 10px 16px; border: 1px solid currentColor; border-radius: 4px; background: var(--bg); color: var(--ink); font: var(--text-label) sans-serif; }
+  </style>
+  <a data-directus={copyAttr("layouts_Layout_c9ba8eb6d6bd")} set:html={copyText("layouts_Layout_c9ba8eb6d6bd", "Skip to content")} class="sr-only skip-link" href="#main"></a>
 
   <Nav />
   <MobileMenu />
   <SearchOverlay />
 
-  <main id="main" style="position:relative; z-index:1;">
+  <main id="main" tabindex="-1" style="position:relative; z-index:1;">
     <slot />
   </main>
 
@@ -115,7 +137,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
 
     function paintColourTheme(colourTheme: CureationColourTheme) {
       document.documentElement.setAttribute('data-colour-theme', colourTheme);
-      document.querySelectorAll<HTMLButtonElement>('[data-colour-theme]').forEach((button) => {
+      document.querySelectorAll<HTMLButtonElement>('button[data-colour-theme]').forEach((button) => {
         button.setAttribute('aria-pressed', String(button.dataset.colourTheme === colourTheme));
       });
       document.querySelectorAll<HTMLElement>('[data-colour-theme-current]').forEach((label) => {
@@ -137,7 +159,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url).toString();
           paintTheme(nextTheme);
         });
       });
-      document.querySelectorAll<HTMLButtonElement>('[data-colour-theme]').forEach((button) => {
+      document.querySelectorAll<HTMLButtonElement>('button[data-colour-theme]').forEach((button) => {
         if (button.dataset.colourThemeWired) return;
         button.dataset.colourThemeWired = 'true';
         button.addEventListener('click', () => {

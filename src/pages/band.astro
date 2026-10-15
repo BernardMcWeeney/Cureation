@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple, copyTupleSource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -36,11 +37,11 @@ const timelineRecent = timeline.slice().sort((a, b) => String(b.date || '').loca
 const timelineLead = timelineRecent[0] || null;
 
 const facts: Array<[string, string]> = [
-  ['People on file', String(members.length)],
-  ['Current live lineup', String(current.length)],
-  ['Former members', String(former.length)],
-  ['Guest players', String(guests.length)],
-  ['Setlists', figures.setlists.toLocaleString()],
+  copyTuple([copyText("pages_band_tuple-f50e915c541f", "Members"), String(members.length)], {"0":"pages_band_tuple-f50e915c541f"}),
+  copyTuple([copyText("pages_band_tuple-55bad4c75f69", "Current live lineup"), String(current.length)], {"0":"pages_band_tuple-55bad4c75f69"}),
+  copyTuple([copyText("pages_band_tuple-f6a3ff31b442", "Former members"), String(former.length)], {"0":"pages_band_tuple-f6a3ff31b442"}),
+  copyTuple([copyText("pages_band_tuple-b2a03b10d99b", "Guest players"), String(guests.length)], {"0":"pages_band_tuple-b2a03b10d99b"}),
+  copyTuple([copyText("pages_band_tuple-0f2987163cd1", "Setlists"), figures.setlists?.toLocaleString() ?? 'Unavailable'], {"0":"pages_band_tuple-0f2987163cd1"}),
 ];
 
 const thumbSrc = (value: string | null | undefined) =>
@@ -48,35 +49,35 @@ const thumbSrc = (value: string | null | undefined) =>
 const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2);
 ---
 <Layout title="The band · Cureation">
-  <PageHero
-    section="The band"
-    title="The band"
-    deck="Members past and present, including their instruments, tenures, live history and the chronology that shaped the lineup."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'The band' }]}
-    facts={facts.map(([k, v]) => ({ k, v }))}
+  <PageHero copyKeys={{"section":"pages_band_711122c1d97a","title":"pages_band_268af71650c1","deck":"pages_band_1b6a99d8abea"}}
+    section={copyText("pages_band_711122c1d97a", "The band")}
+    title={copyText("pages_band_268af71650c1", "The band")}
+
+    crumbs={[{ ...copySource({"label":"pages_band_data-4b305e29d786"}),  label: copyText("pages_band_data-4b305e29d786", "Home"), href: '/' }, { ...copySource({"label":"pages_band_data-bdf7e727e2dc"}),  label: copyText("pages_band_data-bdf7e727e2dc", "The band") }]}
+    facts={facts.map((fact) => ({ ...copyTupleSource(fact, ["k", "v"]), k: fact[0], v: fact[1] }))}
   />
 
-  <IssueSection kicker="Current live lineup" title="On stage in 2026" meta={`${current.length} players`}>
+  <IssueSection title="Current lineup" meta={`${current.length} players`}>
     <div class="member-grid">
       {current.map((m) => (
         <a href={`/band/members/${m.slug}`} class="member-card">
           <figure class="member-card__art">
             {memberPhoto(m) ? (
-              <img src={asset(memberPhoto(m), 'card')} alt={m.name} loading="lazy" />
+              <img data-directus={editable(m, ["photo", "photo_file"])} src={asset(memberPhoto(m), 'card')} alt={m.name} loading="lazy" />
             ) : (
               <div class="placeholder">No photo</div>
             )}
           </figure>
-          <div class="mono-sm muted" style="margin-top:.5rem;">{m.membership_type === 'touring' ? 'TOURING ADDITION · ' : ''}{memberTenureLabel(m)}</div>
-          <h3 class="serif" style="font-size: 22px; font-style: italic; margin: .2rem 0 0;">{m.name}</h3>
-          <div class="mono-sm" style="color: var(--accent-3);">{(memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ')).toUpperCase()}</div>
+          <div data-directus={editable(m, ["membership_type"])} class="mono-sm muted" style="margin-top:.5rem;">{m.membership_type === 'touring' ? 'TOURING ADDITION · ' : ''}{memberTenureLabel(m)}</div>
+          <h3 data-directus={editable(m, ["name"])} class="serif" style="font-size: 22px; font-style: italic; margin: .2rem 0 0;">{m.name}</h3>
+          <div data-directus={editable(m, ["instruments"])} class="mono-sm" style="color: var(--accent-3);">{(memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ')).toUpperCase()}</div>
         </a>
       ))}
     </div>
   </IssueSection>
 
   {former.length > 0 && (
-    <IssueSection kicker="Former members" title="Alumni" meta="latest departures first">
+    <IssueSection title="Past members" meta="latest departures first">
       <div class="alumni-grid">
         {former.map((m, i) => {
           const photo = thumbSrc(alumniThumbs.get(m.id));
@@ -85,12 +86,12 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
           return (
             <a href={`/band/members/${m.slug}`} class="alumni-card">
               <figure class="alumni-card__thumb">
-                {photo ? <img src={photo} alt={m.name} loading="lazy" /> : <span>{initials(m.name)}</span>}
+                {photo ? <img data-directus={editable(m, ["photo", "photo_file"])} src={photo} alt={m.name} loading="lazy" /> : <span data-directus={editable(m, ["name"])}>{initials(m.name)}</span>}
               </figure>
               <div class="alumni-card__body">
                 <div class="mono-sm muted">№ {String(i + 1).padStart(2, '0')}</div>
-                <h3 class="serif">{m.name}</h3>
-                <p>{memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ') || 'Role to be filed'}</p>
+                <h3 data-directus={editable(m, ["name"])} class="serif">{m.name}</h3>
+                <p data-directus={editable(m, ["instruments"])}>{memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ') || 'Role to be filed'}</p>
               </div>
               <div class="alumni-card__meta">
                 <span>{departure ? `Left ${departure}` : 'Departure TBC'}</span>
@@ -105,22 +106,22 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
   )}
 
   {guests.length > 0 && (
-    <IssueSection kicker="Guest register" title="Touring guests & substitutes" meta={`${guests.length} on file`}>
+    <IssueSection title="Touring guests & substitutes" meta={`${guests.length} on file`}>
       <div class="alumni-grid">
         {guests.map((m, i) => {
           const photo = thumbSrc(alumniThumbs.get(m.id));
           return (
             <a href={`/band/members/${m.slug}`} class="alumni-card">
               <figure class="alumni-card__thumb">
-                {photo ? <img src={photo} alt={m.name} loading="lazy" /> : <span>{initials(m.name)}</span>}
+                {photo ? <img data-directus={editable(m, ["photo", "photo_file"])} src={photo} alt={m.name} loading="lazy" /> : <span data-directus={editable(m, ["name"])}>{initials(m.name)}</span>}
               </figure>
               <div class="alumni-card__body">
                 <div class="mono-sm muted">Guest № {String(i + 1).padStart(2, '0')}</div>
-                <h3 class="serif">{m.name}</h3>
-                <p>{memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ') || 'Role to be filed'}</p>
+                <h3 data-directus={editable(m, ["name"])} class="serif">{m.name}</h3>
+                <p data-directus={editable(m, ["instruments"])}>{memberRoleLabel(m) || m.instruments.slice(0, 3).join(' · ') || 'Role to be filed'}</p>
               </div>
               <div class="alumni-card__meta">
-                <span>Guest appearance</span>
+                <span data-directus={copyAttr("pages_band_537734f2f114")} set:html={copyText("pages_band_537734f2f114", "Guest appearance")}></span>
                 <strong>{memberTenureLabel(m)}</strong>
               </div>
             </a>
@@ -131,21 +132,21 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
   )}
 
   {timeline.length > 0 && (
-    <IssueSection kicker="Band history" title="Timeline" href="/band/history" meta={`${timeline.length} archive entries`}>
+    <IssueSection title="Timeline" href="/band/history" meta={`${timeline.length} archive entries`}>
       <div class="history-board">
         {timelineLead && (
-          <a href="/band/history" class="history-lead">
-            <span class="mono-sm muted">{(timelineLead.type || 'event').toUpperCase()} · {timelineLead.formatted_date || timelineLead.year || '–'}</span>
-            <h3 class="serif">{timelineLead.title}</h3>
-            {timelineLead.description && <p>{timelineLead.description}</p>}
+          <a  href="/band/history" class="history-lead">
+            <span data-directus={editable(timelineLead, ["type","formatted_date","year"])} class="mono-sm muted">{(timelineLead.type || 'event').toUpperCase()} · {timelineLead.formatted_date || timelineLead.year || '–'}</span>
+            <h3 data-directus={editable(timelineLead, ["title"])} class="serif">{timelineLead.title}</h3>
+            {timelineLead.description && <p data-directus={editable(timelineLead, ["description"])}>{timelineLead.description}</p>}
           </a>
         )}
         <div class="history-list">
           {timelineRecent.slice(1).map((t) => (
             <a href="/band/history" class="history-row">
-              <span>{t.formatted_date || t.date || t.year || '–'}</span>
-              <strong>{t.title}</strong>
-              <small>{(t.type || 'event').toUpperCase()}</small>
+              <span data-directus={editable(t, ["formatted_date","date","year"])}>{t.formatted_date || t.date || t.year || '–'}</span>
+              <strong data-directus={editable(t, ["title"])}>{t.title}</strong>
+              <small data-directus={editable(t, ["type"])}>{(t.type || 'event').toUpperCase()}</small>
             </a>
           ))}
         </div>
@@ -167,20 +168,20 @@ const initials = (name: string) => name.split(/\s+/).map((part) => part[0]).join
   .alumni-card__thumb img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.04); }
   .alumni-card__thumb span { color: var(--accent-3); font-family: var(--f-serif); font-size: 28px; font-style: italic; }
   .alumni-card__body h3 { margin: 3px 0 0; font-size: 24px; font-style: italic; font-weight: 400; line-height: 1.1; }
-  .alumni-card__body p { margin: 6px 0 0; color: var(--ink-2); font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .alumni-card__body p { margin: 6px 0 0; color: var(--ink-2); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .12em; text-transform: uppercase; }
   .alumni-card__meta { display: grid; gap: 5px; justify-items: end; text-align: right; }
   .alumni-card__meta span,
-  .alumni-card__meta small { color: var(--muted); font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
-  .alumni-card__meta strong { color: var(--accent-3); font-family: var(--f-mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; line-height: 1.35; font-weight: 400; }
+  .alumni-card__meta small { color: var(--muted); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; }
+  .alumni-card__meta :global(strong) { color: var(--accent-3); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; line-height: 1.35; font-weight: 400; }
   .history-board { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(24px, 3vw, 46px); }
   .history-lead { min-height: 340px; display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; color: inherit; background: var(--bg-2); border: 1px solid var(--rule); }
   .history-lead h3 { margin: 12px 0 0; font-size: 42px; font-style: italic; font-weight: 400; line-height: 1; }
-  .history-lead p { margin: 16px 0 0; color: var(--ink-2); font-family: var(--f-serif); font-size: 16px; line-height: 1.55; }
+  .history-lead p { margin: 16px 0 0; color: var(--ink-2); font-family: var(--f-serif); font-size: var(--text-small); line-height: 1.55; }
   .history-list { border-top: 1px solid var(--rule); }
   .history-row { display: grid; grid-template-columns: minmax(112px, .42fr) minmax(0, 1fr) 90px; gap: 16px; align-items: baseline; padding: 15px 0; color: inherit; border: none; border-bottom: 1px solid var(--rule-2); }
   .history-row span,
-  .history-row small { color: var(--muted); font-family: var(--f-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
-  .history-row strong { color: var(--ink); font-family: var(--f-serif); font-size: 18px; font-style: italic; font-weight: 400; line-height: 1.25; }
+  .history-row small { color: var(--muted); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .12em; text-transform: uppercase; }
+  .history-row :global(strong) { color: var(--ink); font-family: var(--f-serif); font-size: 18px; font-style: italic; font-weight: 400; line-height: 1.25; }
   @media (max-width: 820px) {
     .alumni-card,
     .history-board { grid-template-columns: 1fr; }

@@ -1,4 +1,5 @@
 ---
+import { copyText, copyAttr } from '../../lib/visual-editing';
 // ⌘K overlay. Queries /api/search.json?q= on keyup.
 import { DIRECTUS_URL } from '../../lib/directus';
 ---
@@ -14,14 +15,15 @@ import { DIRECTUS_URL } from '../../lib/directus';
       </svg>
       <input
         type="search"
+        aria-label="Search the archive"
         data-search-input
         placeholder="Search albums, songs, venues…"
         autocomplete="off"
       />
-      <span class="kicker">ESC</span>
+      <button type="button" data-search-close aria-label="Close search" class="kicker">ESC</button>
     </div>
-    <div class="search__results" data-search-results>
-      <p class="search__hint">Type to search across the archive.</p>
+    <div class="search__results" aria-live="polite" aria-atomic="true" data-search-results>
+      <p data-directus={copyAttr("components_nav_SearchOverlay_59382d1d26cf")} set:html={copyText("components_nav_SearchOverlay_59382d1d26cf", "Type to search across the archive.")} class="search__hint"></p>
     </div>
   </div>
 </div>
@@ -62,14 +64,14 @@ import { DIRECTUS_URL } from '../../lib/directus';
   }
   .search__head .kicker { flex-shrink: 0; }
   .search__results { padding: 12px 18px 18px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .search__hint { color: var(--muted); font-family: var(--f-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; margin: 0; }
+  .search__hint { color: var(--muted); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; margin: 0; }
   .search__group { margin-top: 18px; }
   .search__group:first-child { margin-top: 0; }
   .search__group-title {
-    font-family: var(--f-mono);
-    font-size: 10.5px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     font-weight: 500;
-    letter-spacing: .24em;
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--accent-3);
     padding: 0 0 .4rem;
@@ -84,7 +86,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
     padding: 7px 0;
     border-bottom: 1px solid var(--rule-2);
     font-family: var(--f-serif);
-    font-size: 15px;
+    font-size: var(--text-small);
     line-height: 1.25;
     color: var(--ink);
     text-decoration: none;
@@ -101,8 +103,8 @@ import { DIRECTUS_URL } from '../../lib/directus';
   }
   .search__meta {
     flex: 0 0 auto;
-    font-family: var(--f-mono);
-    font-size: 10.5px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     color: var(--muted);
     white-space: nowrap;
     text-transform: uppercase;
@@ -129,7 +131,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
   }
   .search__snippet {
     font-style: italic;
-    font-size: 14.5px;
+    font-size: var(--text-small);
     line-height: 1.3;
     color: var(--ink);
     overflow: hidden;
@@ -139,9 +141,9 @@ import { DIRECTUS_URL } from '../../lib/directus';
     -webkit-box-orient: vertical;
   }
   .search__sub {
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
   }
@@ -174,15 +176,15 @@ import { DIRECTUS_URL } from '../../lib/directus';
   .search__chip-title {
     font-family: var(--f-serif);
     font-style: italic;
-    font-size: 14px;
+    font-size: var(--text-small);
     line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .search__chip-meta {
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     color: var(--muted);
   }
@@ -197,11 +199,13 @@ import { DIRECTUS_URL } from '../../lib/directus';
 </style>
 
 <script>
+  import { trapDialogFocus } from '../../lib/dialog';
+  let listeners: AbortController | undefined;
   type Results = {
     albums: Array<{ title: string; slug: string; type: string; cover_art: string | null }>;
     songs:  Array<{ title: string; slug: string; cover_art: string | null; album_title: string | null }>;
     lyrics: Array<{ title: string; slug: string; cover_art: string | null; album_title: string | null; snippet: string }>;
-    setlists: Array<{ id: number; date: string | null; venue: string | null; venue_link: any }>;
+    setlists: Array<{ id: number; slug: string; date: string | null; venue: string | null; venue_link: any }>;
     venues: Array<{ name: string; slug: string | null; city: string | null; country: string | null }>;
   };
 
@@ -227,11 +231,15 @@ import { DIRECTUS_URL } from '../../lib/directus';
 
     // Re-hide on every page-load so ClientRouter navigations never leave
     // the overlay stuck open.
+    if ((root as any).__wired) return;
     root.hidden = true;
     document.body.style.overflow = '';
 
-    if ((root as any).__wired) return;
     (root as any).__wired = true;
+    listeners?.abort();
+    listeners = new AbortController();
+    const signal = listeners.signal;
+    let opener: HTMLElement | null = null;
 
     const closeOpenMenu = () => {
       document.querySelectorAll<HTMLElement>('[data-menu]').forEach((menu) => {
@@ -243,16 +251,18 @@ import { DIRECTUS_URL } from '../../lib/directus';
     };
 
     const open = () => {
+      opener = document.activeElement as HTMLElement | null;
       closeOpenMenu();
       root.hidden = false;
       document.body.style.overflow = 'hidden';
-      setTimeout(() => input.focus(), 0);
+      input.focus();
     };
     const close = () => {
       root.hidden = true;
       document.body.style.overflow = '';
       input.value = '';
       results.innerHTML = '<p class="search__hint">Type to search across the archive.</p>';
+      if (opener?.isConnected) opener.focus();
     };
 
     // Delegated handlers – resilient to DOM swaps.
@@ -261,16 +271,17 @@ import { DIRECTUS_URL } from '../../lib/directus';
       if (!t) return;
       if (t.closest('[data-search-open]')) { e.preventDefault(); open(); return; }
       if (t.closest('[data-search-close]') && root.contains(t)) { e.preventDefault(); close(); return; }
-    });
+    }, { signal });
 
     document.addEventListener('keydown', (e) => {
+      trapDialogFocus(root, e);
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         root.hidden ? open() : close();
       } else if (e.key === 'Escape' && !root.hidden) {
         close();
       }
-    });
+    }, { signal });
 
     let controller: AbortController | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -278,7 +289,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
       const q = input.value.trim();
       if (timer) clearTimeout(timer);
       if (controller) controller.abort();
-      if (!q) {
+      if (q.length < 2) {
         results.innerHTML = '<p class="search__hint">Type to search across the archive.</p>';
         return;
       }
@@ -286,6 +297,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
         controller = new AbortController();
         try {
           const res = await fetch(`/api/search.json?q=${encodeURIComponent(q)}`, { signal: controller.signal });
+          if (!res.ok) throw new Error('Search unavailable');
           const data = (await res.json()) as Results;
           results.innerHTML = render(data, q);
         } catch (err) {
@@ -301,9 +313,9 @@ import { DIRECTUS_URL } from '../../lib/directus';
     const groups: string[] = [];
     if (d.albums?.length) {
       groups.push(`<div class="search__group">
-        <div class="search__group-title">Records</div>
+        <div class="search__group-title">Albums</div>
         ${d.albums.map((a) => `
-          <a class="search__result" href="/discography/${a.slug}">
+          <a class="search__result" href="/discography/${encodeURIComponent(a.slug)}">
             ${thumb(a.cover_art, a.title)}
             <span class="search__title"><em>${esc(a.title)}</em></span>
             <span class="search__meta">${esc(a.type || '')}</span>
@@ -315,7 +327,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
       groups.push(`<div class="search__group">
         <div class="search__group-title">Songs</div>
         ${d.songs.map((s) => `
-          <a class="search__result" href="/songs/${s.slug}">
+          <a class="search__result" href="/songs/${encodeURIComponent(s.slug)}">
             ${thumb(s.cover_art, s.album_title || s.title)}
             <span class="search__title">${esc(s.title)}</span>
             <span class="search__meta">${esc(s.album_title || '')}</span>
@@ -327,7 +339,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
       groups.push(`<div class="search__group">
         <div class="search__group-title">Lyrics</div>
         ${d.lyrics.map((l) => `
-          <a class="search__result search__result--lyric" href="/songs/${l.slug}">
+          <a class="search__result search__result--lyric" href="/songs/${encodeURIComponent(l.slug)}">
             ${thumb(l.cover_art, l.album_title || l.title)}
             <span class="search__title search__title--lyric">
               <span class="search__snippet">&ldquo;${highlight(l.snippet, q)}&rdquo;</span>
@@ -341,7 +353,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
       groups.push(`<div class="search__group">
         <div class="search__group-title">Venues</div>
         ${d.venues.map((v) => `
-          <a class="search__result" href="/venues/${v.slug || ''}">
+          <a class="search__result" href="/venues/${encodeURIComponent(v.slug || '')}">
             <span class="search__title">${esc(v.name)}</span>
             <span class="search__meta">${esc([v.city, v.country].filter(Boolean).join(', '))}</span>
           </a>
@@ -353,7 +365,7 @@ import { DIRECTUS_URL } from '../../lib/directus';
         <div class="search__group-title">Setlists</div>
         <div class="search__grid">
           ${d.setlists.map((s) => `
-            <a class="search__chip" href="/setlists/${s.id}">
+            <a class="search__chip" href="/setlists/${encodeURIComponent(s.slug)}">
               <span class="search__chip-title">${esc(s.venue || 'Venue unknown')}</span>
               <span class="search__chip-meta">${esc(s.date || 'Undated')}</span>
             </a>

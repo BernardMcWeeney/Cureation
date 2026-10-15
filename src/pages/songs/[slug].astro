@@ -1,11 +1,9 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../../lib/visual-editing';
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
-import Tag from '../../components/ui/Tag.astro';
 import Bookmark from '../../components/ui/Bookmark.astro';
-import DossierNav from '../../components/ui/DossierNav.astro';
-import Waveform from '../../components/viz/Waveform.astro';
 import { getSongBySlug, listAlbums, fetchRaw } from '../../lib/directus';
 import { asset } from '../../lib/assets';
 import { normalizeStructuredLyrics } from '../../lib/lyrics-helpers';
@@ -43,130 +41,92 @@ const annotatedLines = structured.flatMap((section: any) => (
 const firstAnnotatedLine: any = annotatedLines[0] || null;
 
 const facts: Array<{ k: string; v: string; href?: string }> = [
-  { k: 'Record', v: album?.title || '–' },
-  { k: 'Track №', v: song.track_number ? String(song.track_number) : '–' },
-  { k: 'Length', v: song.duration || '–' },
-  { k: 'Writer', v: song.writer || '–' },
-  { k: 'Composer', v: song.composer || song.writer || '–' },
-  { k: 'Key', v: song.musical_key || '–' },
-  { k: 'BPM', v: song.bpm ? String(song.bpm) : '–' },
-  { k: 'Tuning', v: song.guitar_tuning || '–' },
-  {
-    k: 'First played',
+  { ...copySource({"k":"pages_songs__slug__data-40eaff057956"}),  k: copyText("pages_songs__slug__data-40eaff057956", "Album"), v: album?.title || '–' },
+  { ...copySource({"k":"pages_songs__slug__data-be1302ca4547"}),  k: copyText("pages_songs__slug__data-be1302ca4547", "Track №"), v: song.track_number ? String(song.track_number) : '–' },
+  { ...copySource({"k":"pages_songs__slug__data-8ee4a8a06fd5"}),  k: copyText("pages_songs__slug__data-8ee4a8a06fd5", "Length"), v: song.duration || '–' },
+  { ...copySource({"k":"pages_songs__slug__data-11d007be1b8d"}),  k: copyText("pages_songs__slug__data-11d007be1b8d", "Writer"), v: song.writer || '–' },
+  { ...copySource({"k":"pages_songs__slug__data-906a6b8c788c"}),  k: copyText("pages_songs__slug__data-906a6b8c788c", "Composer"), v: song.composer || song.writer || '–' },
+  { ...copySource({"k":"pages_songs__slug__data-66883ffaeaf3"}),  k: copyText("pages_songs__slug__data-66883ffaeaf3", "Key"), v: song.musical_key || '–' },
+  { ...copySource({"k":"pages_songs__slug__data-233f3e96bdc5"}),  k: copyText("pages_songs__slug__data-233f3e96bdc5", "BPM"), v: song.bpm ? String(song.bpm) : '–' },
+  { ...copySource({"k":"pages_songs__slug__data-1f34da7aac36"}),  k: copyText("pages_songs__slug__data-1f34da7aac36", "Tuning"), v: song.guitar_tuning || '–' },
+  { ...copySource({"k":"pages_songs__slug__data-4f686e5c441f"}),
+    k: copyText("pages_songs__slug__data-4f686e5c441f", "First played"),
     v: song.first_played_live || '–',
     href: song.first_played_setlist_slug ? `/setlists/${song.first_played_setlist_slug}` : undefined,
   },
-  {
-    k: 'Last played',
+  { ...copySource({"k":"pages_songs__slug__data-8b662493014c"}),
+    k: copyText("pages_songs__slug__data-8b662493014c", "Last played"),
     v: song.last_played_live || '–',
     href: song.last_played_setlist_slug ? `/setlists/${song.last_played_setlist_slug}` : undefined,
   },
-  { k: 'Live plays', v: (song.times_played_live || 0).toLocaleString() },
-  { k: 'Released as single', v: song.is_single ? 'Yes' : 'No' },
+  { ...copySource({"k":"pages_songs__slug__data-0f39fd76b792"}),  k: copyText("pages_songs__slug__data-0f39fd76b792", "Live plays"), v: (song.times_played_live || 0).toLocaleString() },
+  { ...copySource({"k":"pages_songs__slug__data-255193f0ddf4"}),  k: copyText("pages_songs__slug__data-255193f0ddf4", "Released as single"), v: song.is_single ? 'Yes' : 'No' },
 ];
 
 const listenLinks: any[] = Array.isArray(song.listen_links) ? song.listen_links : [];
 const year = album?.release_date?.slice(0, 4);
-const songFactGroups = [
-  { label: 'Recording', tone: 'hot', facts: facts.slice(0, 5) },
-  { label: 'Sound', tone: 'violet', facts: facts.slice(5, 8) },
-  { label: 'Archive', tone: 'cool', facts: facts.slice(8) },
-];
 const hasContext = Boolean(annotations.length || album || song.music_video_url || listenLinks.length || song.credits);
 ---
-<Layout title={`${song.title} · Cureation`} description={song.song_meaning || undefined} ogImage={album?.cover_art ? asset(album.cover_art, 'og') : undefined}>
+<Layout editRecord={song} title={`${song.title} · Cureation`} description={song.song_meaning || undefined} ogImage={album?.cover_art ? asset(album.cover_art, 'og') : undefined}>
   <div class="container" style="padding-top: clamp(24px, 3vw, 40px);">
     <Crumbs items={[
-      { label: 'Home', href: '/' },
-      { label: 'Songs', href: '/songs' },
+      { ...copySource({"label":"pages_songs__slug__data-6dfe021a2a91"}),  label: copyText("pages_songs__slug__data-6dfe021a2a91", "Home"), href: '/' },
+      { ...copySource({"label":"pages_songs__slug__data-4746f6435549"}),  label: copyText("pages_songs__slug__data-4746f6435549", "Songs"), href: '/songs' },
       ...(album ? [{ label: album.title, href: `/discography/${album.slug}` }] : []),
       { label: song.title },
     ]} />
   </div>
 
-  <section id="song-overview" class="container detail-anchor" style="margin-top: 1rem;">
+  <section  id="song-overview" class="container detail-anchor" style="margin-top: 1rem;">
     <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
-      <div class="mono-sm muted">SONG · {year || '–'}</div>
+      <div class="mono-sm muted">SONG</div>
       <Bookmark kind="song" id={song.id} label={song.title} href={`/songs/${song.slug}`} />
     </div>
-    <div class="cluster" style="gap:.4rem; margin-top:.6rem;">
-      {album && <Tag>{album.title.toUpperCase()}</Tag>}
-      {song.is_single && <Tag variant="accent">SINGLE</Tag>}
-      {song.times_played_live > 0 && <Tag>{song.times_played_live.toLocaleString()} PLAYS</Tag>}
-    </div>
-    <h1 class="serif" style={`font-size: clamp(48px, 8vw, 112px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0; letter-spacing: -.01em;`}>
+    <h1 data-directus={editable(song, ["title"])} class="serif" style={`font-size: clamp(40px, 6vw, 72px); line-height: .95; font-style: italic; font-weight: 400; margin: .4rem 0 0; letter-spacing: -.01em;`}>
       {song.title}
     </h1>
     {song.song_meaning && (
-      <p style="font-family: var(--f-serif); font-size: 18px; line-height:1.55; color: var(--ink-2); max-width: 58ch; margin-top: 1rem;">{song.song_meaning}</p>
+      <p data-directus={editable(song, ["song_meaning"])} style="font-family: var(--f-serif); font-size: 18px; line-height:1.55; color: var(--ink-2); max-width: 58ch; margin-top: 1rem;">{song.song_meaning}</p>
     )}
-    <div class="song-wave" style="margin-top: 1.6rem; padding: 16px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
-      <div class="mono-sm muted" style="margin-bottom:.4rem;">WAVEFORM · IMPRESSION</div>
-      <Waveform seed={song.slug || song.title || String(song.id)} bars={120} height={70} duration={song.duration} title={song.title} />
-    </div>
+
   </section>
 
-  <div class="container">
-    <DossierNav items={[
-      { label: 'Overview', href: '#song-overview', meta: year || 'Song' },
-      { label: 'Song file', href: '#song-file', meta: `${facts.length} facts` },
-      { label: 'Lyrics', href: '#song-lyrics', meta: structured.length ? `${structured.length} parts` : 'Text' },
-      ...(hasContext ? [{ label: 'Context', href: '#song-context', meta: 'Notes & media' }] : []),
-    ]} />
-  </div>
+  <nav class="container song-links" aria-label="Song sections">
+    <a href="#song-lyrics">Lyrics</a>
+    {hasContext && <a href="#song-context">Notes &amp; media</a>}
+  </nav>
 
-  <section id="song-file" class="container song-file detail-anchor">
-    <div class="song-file__head">
-      <div>
-        <div class="kicker">Reference</div>
-        <h2>Song file</h2>
-      </div>
-      <span class="mono-sm muted">{facts.length} VERIFIED FIELDS</span>
-    </div>
-    <div class="song-file__groups">
-      {songFactGroups.map((group) => (
-        <section class={`song-file__group song-file__group--${group.tone}`}>
-          <div class="song-file__group-head">
-            <span>{group.label}</span>
-            <span>{String(group.facts.length).padStart(2, '0')}</span>
-          </div>
-          <div class="song-file__facts">
-            {group.facts.map(({ k, v, href }) => (
-              <div class="song-file__fact">
-                <div class="facts__k">{k}</div>
-                <div class="facts__v">{href ? <a href={href} class="facts__link">{v}</a> : v}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+  <section id="song-file" class="container song-file" aria-label="Song details">
+    <dl class="song-details">
+      {facts.filter(({ v }) => v !== '–').map(({ k, v, href }) => (
+        <div><dt>{k}</dt><dd>{href ? <a href={href}>{v}</a> : v}</dd></div>
       ))}
-    </div>
+    </dl>
   </section>
 
   <section class="container song-content" style="padding-block: clamp(32px, 5vw, 64px);">
-    <div class="song-grid">
-      <article id="song-lyrics" class="lyrics detail-anchor">
+    <div class="song-grid archive-columns">
+      <article data-directus={editable(song, song.lyrics_structured ? "lyrics_structured" : "lyrics")} id="song-lyrics" class="lyrics detail-anchor">
         <div class="panel-head" style="border: 1px solid var(--rule);">
-          <span>Lyrics</span>
-          <span>{structured.length > 0 ? `${structured.length} SECTIONS` : 'PLAIN TEXT'}</span>
+          <span data-directus={copyAttr("pages_songs_slug_32e6d90783f7")} set:html={copyText("pages_songs_slug_32e6d90783f7", "Lyrics")}></span>
         </div>
-        <div class="lyrics__body">
+        <div  class="lyrics__body">
           {structured.length > 0 ? structured.map((section: any) => (
-            <div class="lyric-section">
-              {section.label && <div class="mono-sm muted lyric-section__label">{String(section.label).toUpperCase()}</div>}
+            <div  class="lyric-section">
+              {section.label && <div  class="mono-sm muted lyric-section__label">{String(section.label).toUpperCase()}</div>}
               {(section.lines || []).map((line: any) => {
                 const lid = String(line.line_id || line.lineId || line.id || '');
                 const notes = annByLine[lid] || [];
                 return (
                   <div class={`lyric-line${notes.length ? ' has-note' : ''}${firstAnnotatedLine?.lineId === lid ? ' is-active' : ''}`} data-line-id={lid} data-notes={notes.length ? JSON.stringify(notes) : undefined}>
-                    <span class="lyric-line__text">{typeof line === 'string' ? line : (line.text || line.line || '')}</span>
+                    <span  class="lyric-line__text">{typeof line === 'string' ? line : (line.text || line.line || '')}</span>
                     {notes.length > 0 && <span class="lyric-line__pip" aria-label={`${notes.length} annotation${notes.length === 1 ? '' : 's'}`}>◉</span>}
                   </div>
                 );
               })}
             </div>
           )) : (
-            song.lyrics ? <pre class="lyrics__plain">{song.lyrics}</pre> : <p class="muted">No lyrics on file.</p>
+            song.lyrics ? <pre class="lyrics__plain">{song.lyrics}</pre> : <p data-directus={copyAttr("pages_songs_slug_49cc7b4ec2ee")} set:html={copyText("pages_songs_slug_49cc7b4ec2ee", "Lyrics are not available yet.")} class="muted"></p>
           )}
         </div>
       </article>
@@ -175,22 +135,22 @@ const hasContext = Boolean(annotations.length || album || song.music_video_url |
         {annotations.length > 0 && (
           <div class="panel--bare annot-focus" data-annot-focus>
             <div class="panel-head">
-              <span>Literary links</span>
+              <span data-directus={copyAttr("pages_songs_slug_ea77fb5a0639")} set:html={copyText("pages_songs_slug_ea77fb5a0639", "Literary links")}></span>
               <span data-annot-count>{annotations.length} NOTES</span>
             </div>
             <div class="annot-focus__body" data-annot-body>
               {firstAnnotatedLine ? (
                 <>
-                  <blockquote class="annot-focus__line" data-annot-line>{firstAnnotatedLine.text}</blockquote>
-                  <div class="annot-focus__items" data-annot-items>
+                  <blockquote data-directus={editable(firstAnnotatedLine, ["text"])} class="annot-focus__line" data-annot-line>{firstAnnotatedLine.text}</blockquote>
+                  <div  class="annot-focus__items" data-annot-items>
                     {firstAnnotatedLine.notes.map((n: any) => (
-                      <div class="annot-item">
-                        <div class="annot-note">{n.note}</div>
+                      <div  class="annot-item">
+                        <div data-directus={editable(n, ["note"])} class="annot-note">{n.note}</div>
                         {(n.source || n.url) && (
-                          <div class="mono-sm muted">
+                          <div  class="mono-sm muted">
                             {n.source}
                             {n.source && n.url ? ' · ' : ''}
-                            {n.url && <a href={n.url} target="_blank" rel="noopener">source →</a>}
+                            {n.url && <a data-directus={copyAttr("pages_songs_slug_0a4ac7e897b7")} set:html={copyText("pages_songs_slug_0a4ac7e897b7", "source →")} href={n.url} target="_blank" rel="noopener"></a>}
                           </div>
                         )}
                       </div>
@@ -198,18 +158,18 @@ const hasContext = Boolean(annotations.length || album || song.music_video_url |
                   </div>
                 </>
               ) : (
-                <p class="muted">Hover an annotated lyric line to preview its literary link.</p>
+                <p data-directus={copyAttr("pages_songs_slug_25f867f643b3")} set:html={copyText("pages_songs_slug_25f867f643b3", "Hover an annotated lyric line to preview its literary link.")} class="muted"></p>
               )}
             </div>
           </div>
         )}
 
         {album && (
-          <a class="panel--bare" href={`/discography/${album.slug}`} style="border: 1px solid var(--rule); display:flex; gap: 1rem; padding: 14px; align-items:center; text-decoration: none;">
-            {album.cover_art && <img src={asset(album.cover_art, 'thumb')} alt={album.title} style="width: 72px; height: 72px; object-fit: cover; border: 1px solid var(--rule);" />}
+          <a  class="panel--bare" href={`/discography/${album.slug}`} style="border: 1px solid var(--rule); display:flex; gap: 1rem; padding: 14px; align-items:center; text-decoration: none;">
+            {album.cover_art && <img data-directus={editable(album, ["cover_art"])} src={asset(album.cover_art, 'thumb')} alt={album.title} style="width: 72px; height: 72px; object-fit: cover; border: 1px solid var(--rule);" />}
             <div>
-              <div class="mono-sm muted">FROM THE RECORD</div>
-              <div class="serif" style="font-size:20px; font-style:italic; margin-top:.2rem;">{album.title}</div>
+              <div class="mono-sm muted">FROM THE ALBUM</div>
+              <div data-directus={editable(album, ["title"])} class="serif" style="font-size:20px; font-style:italic; margin-top:.2rem;">{album.title}</div>
               <div class="mono-sm" style="color: var(--accent-3); margin-top:.2rem;">{year}</div>
             </div>
           </a>
@@ -217,20 +177,20 @@ const hasContext = Boolean(annotations.length || album || song.music_video_url |
 
         {song.music_video_url && (
           <div class="panel--bare">
-            <div class="panel-head"><span>Music video</span><span>VISUAL</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_songs_slug_d6e3eda16ef8")} set:html={copyText("pages_songs_slug_d6e3eda16ef8", "Music video")}></span><span data-directus={copyAttr("pages_songs_slug_b08fd73936cb")} set:html={copyText("pages_songs_slug_b08fd73936cb", "VISUAL")}></span></div>
             <div style="padding: 14px 16px;">
-              <a href={song.music_video_url} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);">WATCH →</a>
+              <a data-directus={copyAttr("pages_songs_slug_9fb371156b38")} set:html={copyText("pages_songs_slug_9fb371156b38", "WATCH →")} href={song.music_video_url} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);"></a>
             </div>
           </div>
         )}
 
         {listenLinks.length > 0 && (
           <div class="panel--bare">
-            <div class="panel-head"><span>Listen</span><span>STREAMS</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_songs_slug_8c1dc0258a56")} set:html={copyText("pages_songs_slug_8c1dc0258a56", "Listen")}></span><span data-directus={copyAttr("pages_songs_slug_37470664d9ac")} set:html={copyText("pages_songs_slug_37470664d9ac", "STREAMS")}></span></div>
             <ul style="list-style:none; margin:0; padding: 8px 16px 14px;">
               {listenLinks.map((l: any) => (
                 <li style="padding: 6px 0;">
-                  <a href={l.url || l.href} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);">{(l.platform || l.label || l.source || 'LINK').toUpperCase()} →</a>
+                  <a data-directus={editable(l, ["platform","label","source"])} href={l.url || l.href} target="_blank" rel="noopener" class="mono-sm" style="color: var(--accent-3);">{(l.platform || l.label || l.source || 'LINK').toUpperCase()} →</a>
                 </li>
               ))}
             </ul>
@@ -239,8 +199,8 @@ const hasContext = Boolean(annotations.length || album || song.music_video_url |
 
         {song.credits && (
           <div class="panel--bare">
-            <div class="panel-head"><span>Credits</span><span>PERSONNEL</span></div>
-            <div class="mono-sm" style="padding: 12px 16px; color: var(--ink-2); white-space: pre-wrap; line-height: 1.6;">{song.credits}</div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_songs_slug_c4002aff3762")} set:html={copyText("pages_songs_slug_c4002aff3762", "Credits")}></span><span data-directus={copyAttr("pages_songs_slug_ae2f51e74f66")} set:html={copyText("pages_songs_slug_ae2f51e74f66", "PERSONNEL")}></span></div>
+            <div data-directus={editable(song, ["credits"])} class="mono-sm" style="padding: 12px 16px; color: var(--ink-2); white-space: pre-wrap; line-height: 1.6;">{song.credits}</div>
           </div>
         )}
       </aside>
@@ -295,88 +255,11 @@ const hasContext = Boolean(annotations.length || album || song.music_video_url |
 </script>
 
 <style>
-  .song-file {
-    padding-block: clamp(10px, 2vw, 24px) clamp(32px, 5vw, 58px);
-  }
-
-  .song-file__head {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 1rem;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--rule);
-    flex-wrap: wrap;
-  }
-
-  .song-file__head h2 {
-    margin: 5px 0 0;
-    font-family: var(--f-display);
-    font-size: clamp(34px, 4.5vw, 58px);
-    font-style: italic;
-    font-weight: 500;
-    line-height: 1;
-  }
-
-  .song-file__groups {
-    display: grid;
-    grid-template-columns: 1.2fr .8fr 1fr;
-    gap: 1px;
-    border: 1px solid var(--rule);
-    border-top: 0;
-    background: var(--rule);
-  }
-
-  .song-file__group {
-    --file-tone: var(--accent);
-    position: relative;
-    min-width: 0;
-    background:
-      linear-gradient(145deg, color-mix(in srgb, var(--file-tone) 7%, transparent), transparent 42%),
-      var(--bg-2);
-  }
-
-  .song-file__group::before {
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    height: 3px;
-    background: var(--file-tone);
-    content: '';
-  }
-
-  .song-file__group--violet { --file-tone: var(--violet); }
-  .song-file__group--cool { --file-tone: var(--cool); }
-
-  .song-file__group-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 17px 18px 13px;
-    border-bottom: 1px solid var(--rule);
-    color: var(--file-tone);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-  }
-
-  .song-file__facts {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 5px 18px 12px;
-  }
-
-  .song-file__fact {
-    min-width: 0;
-    padding: 12px 12px 11px 0;
-    border-bottom: 1px solid var(--rule-2);
-  }
-
-  .song-file__fact:nth-last-child(-n + 2) {
-    border-bottom: 0;
-  }
+  .song-links { display: flex; gap: 24px; padding-block: 20px; font-size: var(--text-small); }
+  .song-file { padding-block: 0 24px; }
+  .song-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 22px 28px; margin: 0; }
+  .song-details dt { font-family: var(--f-ui); font-size: var(--text-label); line-height: 1.5; color: var(--muted); margin-bottom: 4px; }
+  .song-details dd { margin: 0; font-size: var(--text-small); line-height: 1.55; overflow-wrap: anywhere; color: var(--ink); }
 
   .song-content {
     border-top: 1px solid var(--rule);
@@ -384,8 +267,6 @@ const hasContext = Boolean(annotations.length || album || song.music_video_url |
 
   .song-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); gap: clamp(24px, 3vw, 48px); align-items: start; }
   @media (max-width: 900px) {
-    .song-file__groups { grid-template-columns: 1fr 1fr; }
-    .song-file__group:first-child { grid-column: 1 / -1; }
     .song-grid { grid-template-columns: 1fr; }
   }
 
@@ -395,24 +276,20 @@ const hasContext = Boolean(annotations.length || album || song.music_video_url |
   .lyric-line { font-family: var(--f-serif); font-size: 18px; line-height: 1.75; color: var(--ink); cursor: pointer; padding: 1px 4px; margin: 0 -4px; border-radius: 2px; transition: background-color .15s; }
   .lyric-line:hover { color: var(--accent-3); background: transparent; }
   :root[data-theme='papers'] .lyric-line:hover { color: var(--accent); }
-  .lyrics__plain { font-family: var(--f-serif); font-size: 17px; line-height: 1.7; color: var(--ink); white-space: pre-wrap; margin: 0; }
+  .lyrics__plain { font-family: var(--f-serif); font-size: var(--text-small); line-height: 1.7; color: var(--ink); white-space: pre-wrap; margin: 0; }
   .lyric-line { display: flex; align-items: baseline; gap: .4rem; }
   .lyric-line.has-note { color: var(--accent-3); }
   .lyric-line.has-note:hover,
   .lyric-line.has-note:focus,
   .lyric-line.has-note.is-active { color: var(--accent); background: transparent; outline: none; }
-  .lyric-line__pip { font-size: 10px; opacity: .75; }
+  .lyric-line__pip { font-size: var(--text-label); opacity: .75; }
 
   .annot-focus { max-height: 70vh; overflow: auto; }
   .annot-focus__body { padding: 14px 16px; }
   .annot-focus__line { font-family: var(--f-display); font-style: italic; font-size: 24px; line-height: 1.2; color: var(--accent-3); border-left: 2px solid var(--accent); padding-left: .9rem; margin: 0 0 1rem; }
   .annot-item { padding: .9rem 0; border-top: 1px solid var(--rule); }
   .annot-item:first-child { padding-top: 0; border-top: none; }
-  .annot-note { font-family: var(--f-serif); font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0 0 .6rem; white-space: pre-wrap; }
+  .annot-note { font-family: var(--f-serif); font-size: var(--text-small); line-height: 1.65; color: var(--ink); margin: 0 0 .6rem; white-space: pre-wrap; }
   .annot-item a { color: var(--accent-3); }
 
-  @media (max-width: 560px) {
-    .song-file__groups { grid-template-columns: 1fr; }
-    .song-file__group:first-child { grid-column: auto; }
-  }
 </style>

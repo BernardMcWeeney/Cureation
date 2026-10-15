@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copySource } from '../../lib/visual-editing';
 import Layout from '../../layouts/Layout.astro';
 import AlbumCard from '../../components/album/AlbumCard.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
@@ -95,9 +96,6 @@ const singleReleases: Release[] = singles.map((s: any) => {
 });
 
 const releases = [...albumReleases, ...singleReleases].sort((a, b) => a.sortDate.localeCompare(b.sortDate));
-const dated = releases.filter((r) => r.date);
-const firstYear = dated[0]?.year || '–';
-const latestYear = dated[dated.length - 1]?.year || '–';
 
 const counts = {
   all: releases.length,
@@ -108,26 +106,20 @@ const counts = {
 };
 
 const tabs = [
-  { value: 'all', label: 'All', count: counts.all, href: '/discography' },
-  { value: 'studio', label: 'Studio', count: counts.studio, href: '/discography?type=studio' },
-  { value: 'ep', label: 'EPs', count: counts.ep, href: '/discography?type=ep' },
-  { value: 'compilation', label: 'Compilations', count: counts.compilation, href: '/discography?type=compilation' },
-  { value: 'single', label: 'Singles', count: counts.single, href: '/discography?type=single' },
+  { ...copySource({"label":"pages_discography_index_data-6eb31e6d7353"}),  value: 'all', label: copyText("pages_discography_index_data-6eb31e6d7353", "All"), count: counts.all, href: '/discography' },
+  { ...copySource({"label":"pages_discography_index_data-931875d77b6b"}),  value: 'studio', label: copyText("pages_discography_index_data-931875d77b6b", "Albums"), count: counts.studio, href: '/discography?type=studio' },
+  { ...copySource({"label":"pages_discography_index_data-abb486434911"}),  value: 'ep', label: copyText("pages_discography_index_data-abb486434911", "EPs"), count: counts.ep, href: '/discography?type=ep' },
+  { ...copySource({"label":"pages_discography_index_data-57e95f5d1a97"}),  value: 'compilation', label: copyText("pages_discography_index_data-57e95f5d1a97", "Compilations"), count: counts.compilation, href: '/discography?type=compilation' },
+  { ...copySource({"label":"pages_discography_index_data-13c60dd39dea"}),  value: 'single', label: copyText("pages_discography_index_data-13c60dd39dea", "Singles"), count: counts.single, href: '/discography?type=single' },
 ];
 ---
 <Layout title="Discography · Cureation">
 
-  <PageHero
-    section="Discography"
-    title="The discography"
-    deck="Every studio record, EP, compilation and single in one filterable archive, with the sleeves up front."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Discography' }]}
-    facts={[
-      { k: 'Releases', v: counts.all },
-      { k: 'Studio records', v: counts.studio },
-      { k: 'Singles', v: counts.single },
-      { k: 'Years covered', v: `${firstYear}–${latestYear}` },
-    ]}
+  <PageHero copyKeys={{"section":"pages_discography_index_b62dc1e52c88","title":"pages_discography_index_16c72d7b8220","deck":"pages_discography_index_40d3c2bdeeb4"}}
+    section={copyText("pages_discography_index_b62dc1e52c88", "Discography")}
+    title={copyText("pages_discography_index_16c72d7b8220", "Discography")}
+
+    crumbs={[{ ...copySource({"label":"pages_discography_index_data-cc7f7059df32"}),  label: copyText("pages_discography_index_data-cc7f7059df32", "Home"), href: '/' }, { ...copySource({"label":"pages_discography_index_data-6277f98998f1"}),  label: copyText("pages_discography_index_data-6277f98998f1", "Discography") }]}
     flush
   />
 
@@ -139,8 +131,8 @@ const tabs = [
           <nav class="disc-type-tabs" aria-label="Record type">
             {tabs.map((t) => (
               <a href={t.href} class={`disc-type-tab${t.value === 'all' ? ' is-active' : ''}`} data-type-filter={t.value} aria-current={t.value === 'all' ? 'page' : undefined}>
-                <span>{t.label}</span>
-                <span class="disc-type-tab__count">{t.count}</span>
+                <span data-directus={editable(t, ["label"])}>{t.label}</span>
+                <span data-directus={editable(t, ["count"])} class="disc-type-tab__count">{t.count}</span>
               </a>
             ))}
           </nav>
@@ -157,13 +149,13 @@ const tabs = [
               { value: 'alpha', label: 'A-Z' },
             ]}
           />
-          <SearchField placeholder="Title, release, label..." />
+          <SearchField placeholder="Find an album or song release…" />
         </div>
       </div>
     </section>
 
-    <IssueSection kicker="Cover plates" title="Sleeves" meta={`${releases.length} releases`}>
-      <div class="mono-sm muted" data-match-count style="margin-bottom:1.2rem; letter-spacing: .2em;">{releases.length} releases</div>
+    <IssueSection title="Releases" hideHeader>
+      <div class="mono-sm muted" data-match-count style="margin-bottom:1.2rem; letter-spacing: .1em;">{releases.length} releases</div>
       <div class="records-grid" data-records>
         {releases.map((r) => (
           <div class="record-wrap"
@@ -221,9 +213,9 @@ const tabs = [
     min-width: 0;
   }
   .disc-controls__label {
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: 0.22em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 10px;
@@ -237,14 +229,14 @@ const tabs = [
     display: inline-flex;
     align-items: baseline;
     gap: 7px;
-    min-height: 36px;
+    min-height: 44px;
     padding: 9px 12px;
     border: 1px solid transparent;
     background: transparent;
     color: var(--ink-2);
-    font-family: var(--f-mono);
-    font-size: 10.5px;
-    letter-spacing: 0.16em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     line-height: 1;
     text-transform: uppercase;
     text-decoration: none;
@@ -263,20 +255,20 @@ const tabs = [
     color: var(--accent-ink);
   }
   .disc-type-tab__count {
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: 0.08em;
-    opacity: .72;
+    opacity: 1;
   }
   .disc-controls__filters {
     display: grid;
-    grid-template-columns: minmax(170px, 220px) minmax(220px, 1fr);
+    grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
     gap: 12px;
     align-items: end;
   }
   .disc-controls .select__label {
-    font-size: 9.5px;
-    letter-spacing: 0.2em;
+    font-size: var(--text-label);
+    letter-spacing: .1em;
   }
   .disc-controls .select select,
   .disc-controls .filter-search {
@@ -287,6 +279,7 @@ const tabs = [
   :root[data-theme='papers'] .disc-controls .filter-search {
     background: var(--bg);
   }
+  @media (max-width: 1200px) { .disc-controls__bar { grid-template-columns: 1fr; } }
   @media (max-width: 720px) {
     .records-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
     .disc-controls__bar { grid-template-columns: 1fr; }

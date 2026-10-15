@@ -1,31 +1,32 @@
 ---
+import { copyText, copyAttr, copySource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import Chip from '../components/ui/Chip.astro';
 ---
 <Layout title="My archive · Cureation">
-  <PageHero
-    section="Private · Local to this device"
-    title="My archive"
-    deck="A private reading list of everything you've saved, kept in your browser. Nothing is sent to a server. Click the ☆ on any record, song or setlist to add it here."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'My archive' }]}
+  <PageHero copyKeys={{"section":"pages_my-archive_e00c9f76c2ba","title":"pages_my-archive_99fa4149bba1","deck":"pages_my-archive_fba3c256b5e9"}}
+    section={copyText("pages_my-archive_e00c9f76c2ba", "Private · Local to this device")}
+    title={copyText("pages_my-archive_99fa4149bba1", "Saved items")}
+    deck="Save records, songs and setlists with ☆. Your saved items stay in this browser."
+    crumbs={[{ ...copySource({"label":"pages_my-archive_data-ab1fad065e58"}),  label: copyText("pages_my-archive_data-ab1fad065e58", "Home"), href: '/' }, { ...copySource({"label":"pages_my-archive_data-bce9c5c446f9"}),  label: copyText("pages_my-archive_data-bce9c5c446f9", "Saved items") }]}
     flush
   />
 
   <section class="container my-ar__toolbar">
     <div class="my-ar__filters" data-kind-filters>
       <Chip active={true} class="k-chip" data-kind="all">All</Chip>
-      <Chip class="k-chip" data-kind="album">Records</Chip>
+      <Chip class="k-chip" data-kind="album">Albums</Chip>
       <Chip class="k-chip" data-kind="song">Songs</Chip>
       <Chip class="k-chip" data-kind="setlist">Setlists</Chip>
       <Chip class="k-chip" data-kind="venue">Venues</Chip>
       <Chip class="k-chip" data-kind="tour">Tours</Chip>
       <Chip class="k-chip" data-kind="member">Members</Chip>
-      <Chip class="k-chip" data-kind="news">Publication</Chip>
+      <Chip class="k-chip" data-kind="news">Articles</Chip>
     </div>
     <div class="my-ar__meta">
-      <span class="mono-sm muted" data-count>0 items</span>
-      <button class="mono-sm my-ar__clear" data-clear-all>Clear</button>
+      <span data-directus={copyAttr("pages_my-archive_ce013c9a3a54")} set:html={copyText("pages_my-archive_ce013c9a3a54", "0 items")} class="mono-sm muted" data-count></span>
+      <button data-directus={copyAttr("pages_my-archive_1412fcd4775c")} set:html={copyText("pages_my-archive_1412fcd4775c", "Clear")} class="mono-sm my-ar__clear" data-clear-all></button>
     </div>
   </section>
 
@@ -33,7 +34,7 @@ import Chip from '../components/ui/Chip.astro';
     <div class="bookmarks" data-bookmarks-root>
       <div class="bookmarks__empty" data-empty>
         <div class="mono-sm muted">Nothing saved yet</div>
-        <p class="bookmarks__empty-body">Every record, song, setlist, venue and dispatch page carries a ☆ bookmark in its header. Tap one to begin a reading list stored in this browser only.</p>
+        <p data-directus={copyAttr("pages_my-archive_5c583a2f1492")} set:html={copyText("pages_my-archive_5c583a2f1492", "Use the ☆ Save button on an album, song, show, venue or article to save it here. Your saved items stay in this browser.")} class="bookmarks__empty-body"></p>
       </div>
     </div>
   </section>
@@ -121,8 +122,8 @@ import Chip from '../components/ui/Chip.astro';
   @media (max-width: 720px) { .my-ar__meta { justify-self: start; } }
   .my-ar__clear {
     border: 1px solid var(--rule); padding: .5rem .9rem; background: transparent;
-    color: var(--muted); cursor: pointer; letter-spacing: .18em; text-transform: uppercase;
-    font-size: 10px; font-family: var(--f-mono);
+    color: var(--muted); cursor: pointer; letter-spacing: .1em; text-transform: uppercase;
+    font-size: var(--text-label); font-family: var(--f-ui);
   }
   .my-ar__clear:hover { color: var(--accent-3); border-color: var(--accent); }
   :root[data-theme='papers'] .my-ar__clear:hover { color: var(--accent); }
@@ -148,11 +149,11 @@ import Chip from '../components/ui/Chip.astro';
   .bookmarks__item:hover { background: var(--bg-2); }
   .bookmarks__item .bookmarks__title { grid-column: 1; font-size: clamp(20px, 2.4vw, 28px); font-style: italic; line-height: 1.15; color: var(--ink); }
   .bookmarks__item:hover .bookmarks__title { color: var(--accent-3); }
-  .bookmarks__meta { grid-column: 1; color: var(--muted); letter-spacing: .18em; }
+  .bookmarks__meta { grid-column: 1; color: var(--muted); letter-spacing: .1em; }
   .bookmarks__remove {
     grid-column: 2; grid-row: 1 / span 2;
     background: transparent; border: 1px solid var(--rule); color: var(--muted);
-    font-size: 14px; width: 32px; height: 32px; cursor: pointer; border-radius: 2px;
+    font-size: var(--text-small); width: 32px; height: 32px; cursor: pointer; border-radius: 2px;
     justify-self: end;
   }
   .bookmarks__remove:hover { border-color: var(--accent); color: var(--accent-3); }

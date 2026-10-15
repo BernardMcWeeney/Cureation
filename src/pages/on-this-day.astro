@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple, copyTupleSource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -6,10 +7,7 @@ import { getOnThisDay } from '../lib/directus';
 
 export const prerender = false;
 
-Astro.response.headers.set(
-  'Cache-Control',
-  'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
-);
+
 
 const today = new Date();
 const entries = await getOnThisDay(today);
@@ -23,40 +21,40 @@ const byDecade = entries.reduce((acc: Record<string, any[]>, e: any) => {
 const decades = Object.keys(byDecade).sort().reverse();
 
 const facts: Array<[string, string]> = [
-  ['Date', todayLabel],
-  ['Entries', String(entries.length)],
-  ['Decades touched', String(decades.filter((d) => d !== 'Undated').length)],
-  ['Rolling archive', 'Live'],
+  copyTuple([copyText("pages_on-this-day_tuple-7dc3265e2f9a", "Date"), todayLabel], {"0":"pages_on-this-day_tuple-7dc3265e2f9a"}),
+  copyTuple([copyText("pages_on-this-day_tuple-caae43456759", "Entries"), String(entries.length)], {"0":"pages_on-this-day_tuple-caae43456759"}),
+  copyTuple([copyText("pages_on-this-day_tuple-d4f6ee18b7e1", "Decades touched"), String(decades.filter((d) => d !== 'Undated').length)], {"0":"pages_on-this-day_tuple-d4f6ee18b7e1"}),
+  copyTuple([copyText("pages_on-this-day_tuple-d6b15d0bf656", "Rolling archive"), copyText("pages_on-this-day_tuple-24a97b910c63", "Live")], {"0":"pages_on-this-day_tuple-d6b15d0bf656","1":"pages_on-this-day_tuple-24a97b910c63"}),
 ];
 ---
 <Layout title="On this day · Cureation">
-  <PageHero
-    section="Anniversaries"
+  <PageHero copyKeys={{"section":"pages_on-this-day_db5f581bbc57","deck":"pages_on-this-day_7ba1bf812b97"}}
+    section={copyText("pages_on-this-day_db5f581bbc57", "Anniversaries")}
     title={`On ${todayLabel}`}
-    deck="Every release, concert and documented milestone that happened on this day, gathered across every year of the band's history."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'On this day' }]}
-    facts={facts.map(([k, v]) => ({ k, v }))}
+
+    crumbs={[{ ...copySource({"label":"pages_on-this-day_data-45dd7ab90125"}),  label: copyText("pages_on-this-day_data-45dd7ab90125", "Home"), href: '/' }, { ...copySource({"label":"pages_on-this-day_data-c56d1ffd3aa1"}),  label: copyText("pages_on-this-day_data-c56d1ffd3aa1", "On this day") }]}
+    facts={facts.map((fact) => ({ ...copyTupleSource(fact, ["k", "v"]), k: fact[0], v: fact[1] }))}
   />
 
   {entries.length === 0 ? (
-    <IssueSection kicker="Quiet day" title="Nothing on file">
-      <p class="deck">No documented events for this date yet. Check back tomorrow, or browse the full timeline.</p>
+    <IssueSection kicker="Quiet day" title="No events for this date">
+      <p data-directus={copyAttr("pages_on-this-day_708ff9e0f441")} set:html={copyText("pages_on-this-day_708ff9e0f441", "No documented events for this date yet. Check back tomorrow, or browse the full timeline.")} class="deck"></p>
     </IssueSection>
   ) : decades.map((dec) => (
     <IssueSection kicker={dec} title={`${dec} · ${byDecade[dec].length} entries`}>
       <div class="table-wrap">
       <table class="data">
-        <thead><tr><th style="width:80px;">Year</th><th style="width:140px;">Kind</th><th>Entry</th><th></th></tr></thead>
+        <thead><tr><th data-directus={copyAttr("pages_on-this-day_b8fd2347c4a0")} set:html={copyText("pages_on-this-day_b8fd2347c4a0", "Year")} style="width:80px;"></th><th data-directus={copyAttr("pages_on-this-day_55f84915930a")} set:html={copyText("pages_on-this-day_55f84915930a", "Kind")} style="width:140px;"></th><th data-directus={copyAttr("pages_on-this-day_2174c9005234")} set:html={copyText("pages_on-this-day_2174c9005234", "Entry")}></th><th></th></tr></thead>
         <tbody>
           {byDecade[dec].sort((a: any, b: any) => (b.year || 0) - (a.year || 0)).map((e: any) => (
-            <tr data-clickable={e.link_slug ? '' : undefined} onclick={e.link_slug && e.link_collection ? `location.href='/${e.link_collection}/${e.link_slug}'` : undefined}>
-              <td class="num" style="text-align:left; color: var(--accent-3); font-size: 14px;">{e.year || '–'}</td>
-              <td class="mono-sm muted">{(e.kind || '').toUpperCase()}</td>
-              <td>
-                <span class="serif" style="font-size: 18px; font-style: italic;">{e.title}</span>
-                {e.subtitle && <div class="muted" style="font-family: var(--f-serif); font-style: italic; font-size: 14px;">{e.subtitle}</div>}
+            <tr data-clickable={e.link_slug ? '' : undefined} data-row-href={e.link_slug && e.link_collection ? `/${e.link_collection}/${e.link_slug}` : undefined}>
+              <td data-directus={editable(e, ["year"])} class="num" style="text-align:left; color: var(--accent-3); font-size: var(--text-small);">{e.year || '–'}</td>
+              <td data-directus={editable(e, ["kind"])} class="mono-sm muted">{(e.kind || '').toUpperCase()}</td>
+              <td >
+                <span data-directus={editable(e, ["title"])} class="serif" style="font-size: 18px; font-style: italic;">{e.link_slug && e.link_collection ? <a href={`/${e.link_collection}/${e.link_slug}`}>{e.title}</a> : e.title}</span>
+                {e.subtitle && <div data-directus={editable(e, ["subtitle"])} class="muted" style="font-family: var(--f-serif); font-style: italic; font-size: var(--text-small);">{e.subtitle}</div>}
               </td>
-              <td class="num">{e.link_slug ? <span style="color: var(--accent-3);">→</span> : ''}</td>
+              <td data-directus={editable(e, ["link_slug"])} class="num">{e.link_slug ? <span style="color: var(--accent-3);">→</span> : ''}</td>
             </tr>
           ))}
         </tbody>

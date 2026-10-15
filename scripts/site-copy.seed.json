@@ -1,0 +1,4472 @@
+[
+  {
+    "id": "components_editorial_NewsIndex_c24d4ad8adad",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_editorial_NewsIndex_6b2a98d6dddf",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_editorial_NewsIndex_350cf102322c",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Verified updates, announcements, performances and releases: the present tense of The Cure, filed newest first."
+  },
+  {
+    "id": "components_editorial_NewsIndex_c5f7b3b5cead",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "News desk"
+  },
+  {
+    "id": "components_editorial_NewsIndex_da1562d6c7a8",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Latest news"
+  },
+  {
+    "id": "components_editorial_NewsIndex_36e2cc35011f",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "The Cure,<br /><em>right now.</em>"
+  },
+  {
+    "id": "components_editorial_NewsIndex_c4df243778fc",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Publication"
+  },
+  {
+    "id": "components_editorial_NewsIndex_568620943b31",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "components_editorial_NewsIndex_b36f429f0603",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Latest news"
+  },
+  {
+    "id": "components_editorial_NewsIndex_0446175dd504",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Read the report <i>→</i>"
+  },
+  {
+    "id": "components_editorial_NewsIndex_43d70f1bde5d",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Read →"
+  },
+  {
+    "id": "components_editorial_NewsIndex_3fd079cd8137",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Earlier news"
+  },
+  {
+    "id": "components_editorial_NewsIndex_f6109b35e6d8",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_editorial_NewsIndex_364cf0a27488",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "No news yet."
+  },
+  {
+    "id": "components_editorial_NewsIndex_3d6783240d54",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "New updates will appear here."
+  },
+  {
+    "id": "components_editorial_PublicationIndex_914491c5b7d7",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Articles"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_05de9a61bc35",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Articles"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_281112470a46",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "The current record and the considered view: verified news, essays, interviews and editorials with room to breathe."
+  },
+  {
+    "id": "components_editorial_PublicationIndex_964abe36ebc2",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "News desk"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_bcb25626995d",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Latest news"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_8e5b2752c96b",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "The Cure,<br /><em>right now.</em>"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_a7d2f83843e3",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Announcements, performances, releases and developments, ordered by the date they entered the record."
+  },
+  {
+    "id": "components_editorial_PublicationIndex_4f6956bf2819",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Latest news"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_358d1a5d488e",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Read the report <i>→</i>"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_fba05c9d3863",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Read →"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_ca73cc8153a8",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "More news"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_5b5ec42f1447",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "All news →"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_8454925abeeb",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_ccd42b22bd4b",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "No news yet."
+  },
+  {
+    "id": "components_editorial_PublicationIndex_7ccab8a30ca2",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "New updates will appear here."
+  },
+  {
+    "id": "components_editorial_PublicationIndex_379955e9bce0",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Long reads"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_634a0ae24132",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Editorials"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_1eee0cfdc739",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "The longer,<br /><em>stranger view.</em>"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_b8c6636e3af8",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Essays, interviews and close readings that connect the facts without rushing past the details."
+  },
+  {
+    "id": "components_editorial_PublicationIndex_5db49546a066",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Continue reading <i>→</i>"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_51e604eef742",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Articles"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_d2c5895384f2",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "More articles are coming soon."
+  },
+  {
+    "id": "components_nav_Footer_222676f14ce6",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Cureation"
+  },
+  {
+    "id": "components_nav_Footer_d8319c35d133",
+    "location": "src/components/nav/Footer.astro",
+    "text": "An independent archive of The Cure. Preserved with care, built by fans."
+  },
+  {
+    "id": "components_nav_Footer_9e821fabd2d9",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Bluesky"
+  },
+  {
+    "id": "components_nav_Footer_2f1bcb28701c",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Facebook"
+  },
+  {
+    "id": "components_nav_Footer_ccb4b8eee266",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Instagram"
+  },
+  {
+    "id": "components_nav_Footer_8c9a1f213431",
+    "location": "src/components/nav/Footer.astro",
+    "text": "YouTube"
+  },
+  {
+    "id": "components_nav_Footer_e2bd280a48ed",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Explore"
+  },
+  {
+    "id": "components_nav_Footer_a4ba8955a378",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Archive"
+  },
+  {
+    "id": "components_nav_Footer_7e0e8a91e7d1",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Elsewhere"
+  },
+  {
+    "id": "components_nav_Footer_053227aff9a5",
+    "location": "src/components/nav/Footer.astro",
+    "text": "RSS"
+  },
+  {
+    "id": "components_nav_Footer_1a22adf859d8",
+    "location": "src/components/nav/Footer.astro",
+    "text": "About"
+  },
+  {
+    "id": "components_nav_Footer_d39587f53f83",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Contact"
+  },
+  {
+    "id": "components_nav_Footer_a3aaaa17abaf",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Unofficial · not affiliated with The Cure"
+  },
+  {
+    "id": "components_nav_MobileMenu_7776c709bf06",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Cureation"
+  },
+  {
+    "id": "components_nav_MobileMenu_2b344274a2fd",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Search the archive"
+  },
+  {
+    "id": "components_nav_MobileMenu_6b76ddd2ed40",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Follow Cureation"
+  },
+  {
+    "id": "components_nav_Nav_a5a31bdafcd8",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Cureation"
+  },
+  {
+    "id": "components_nav_Nav_56c141995f09",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Search"
+  },
+  {
+    "id": "components_nav_Nav_28d80199ab4d",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Colour theme"
+  },
+  {
+    "id": "components_nav_Nav_f5326b71e69b",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Bloodflowers"
+  },
+  {
+    "id": "components_nav_Nav_f3f6579113c5",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Wish"
+  },
+  {
+    "id": "components_nav_Nav_4ac20b8cfac6",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Disintegration"
+  },
+  {
+    "id": "components_nav_Nav_0b3427d855d9",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Pornography"
+  },
+  {
+    "id": "components_nav_Nav_ca8bfd1f7933",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Faith"
+  },
+  {
+    "id": "components_nav_Nav_0083d3410cb6",
+    "location": "src/components/nav/Nav.astro",
+    "text": "The Head on the Door"
+  },
+  {
+    "id": "components_nav_Nav_db4b6af8f8a3",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Bloodflowers"
+  },
+  {
+    "id": "components_nav_Nav_7c9b31a7c44f",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Open →"
+  },
+  {
+    "id": "components_nav_SearchOverlay_f26592ac0d54",
+    "location": "src/components/nav/SearchOverlay.astro",
+    "text": "ESC"
+  },
+  {
+    "id": "components_nav_SearchOverlay_59382d1d26cf",
+    "location": "src/components/nav/SearchOverlay.astro",
+    "text": "Type to search across the archive."
+  },
+  {
+    "id": "components_ui_Pagination_996e617cb3c5",
+    "location": "src/components/ui/Pagination.astro",
+    "text": "← Previous"
+  },
+  {
+    "id": "components_ui_Pagination_8f8a9ddb95ba",
+    "location": "src/components/ui/Pagination.astro",
+    "text": "Next →"
+  },
+  {
+    "id": "layouts_Layout_c9ba8eb6d6bd",
+    "location": "src/layouts/Layout.astro",
+    "text": "Skip to content"
+  },
+  {
+    "id": "pages_404_28119b820147",
+    "location": "src/pages/404.astro",
+    "text": "A missing page."
+  },
+  {
+    "id": "pages_404_bfa7520a339b",
+    "location": "src/pages/404.astro",
+    "text": "\n      This record isn't in the archive. It may not have been catalogued yet, or you may have followed a dead link.\n    "
+  },
+  {
+    "id": "pages_about_442785eff4ff",
+    "location": "src/pages/about.astro",
+    "text": "Independent fan archive"
+  },
+  {
+    "id": "pages_about_674fc30e6d6a",
+    "location": "src/pages/about.astro",
+    "text": "Welcome to Cureation."
+  },
+  {
+    "id": "pages_about_909b2f6331c2",
+    "location": "src/pages/about.astro",
+    "text": "A one-person, non-commercial archive built to capture, connect and preserve as much of The Cure's history as possible."
+  },
+  {
+    "id": "pages_about_3f4d6a530f51",
+    "location": "src/pages/about.astro",
+    "text": "The project"
+  },
+  {
+    "id": "pages_about_12804adae735",
+    "location": "src/pages/about.astro",
+    "text": "One place for<br /><em>all of it.</em>"
+  },
+  {
+    "id": "pages_about_3c3bfe356933",
+    "location": "src/pages/about.astro",
+    "text": "\n            The aim of Cureation is to become one source for all things The Cure: releases, songs, setlists, tours, venues, people, photographs, sources, and the many details that sit around the music.\n          "
+  },
+  {
+    "id": "pages_about_30ad3bd83fd4",
+    "location": "src/pages/about.astro",
+    "text": "\n            Cureation is run by Bernard Mcweeney, based in Ireland. What started as a fan page on Twitter, now X, in February 2022 has grown into a strong foundation for a wider archive, website, and social media presence.\n          "
+  },
+  {
+    "id": "pages_about_9007adacee84",
+    "location": "src/pages/about.astro",
+    "text": "\n            The archive exists because The Cure have a long history and a lot of data. The goal is to record as much of it as possible, and to do that with care.\n          "
+  },
+  {
+    "id": "pages_about_c7361454d10d",
+    "location": "src/pages/about.astro",
+    "text": "Mission"
+  },
+  {
+    "id": "pages_about_a43a12c03491",
+    "location": "src/pages/about.astro",
+    "text": "Collected carefully.<br /><em>Corrected openly.</em>"
+  },
+  {
+    "id": "pages_about_d26d6d91d5e4",
+    "location": "src/pages/about.astro",
+    "text": "Every claim should lead back to evidence. Every mistake should be easy to correct."
+  },
+  {
+    "id": "pages_about_a047b8a5b41d",
+    "location": "src/pages/about.astro",
+    "text": "Running figures"
+  },
+  {
+    "id": "pages_about_4c8ecd2cc0a9",
+    "location": "src/pages/about.astro",
+    "text": "As of today"
+  },
+  {
+    "id": "pages_about_a67bca9b55a5",
+    "location": "src/pages/about.astro",
+    "text": "A chronology of the project"
+  },
+  {
+    "id": "pages_about_bd718d538183",
+    "location": "src/pages/about.astro",
+    "text": "From fan page<br /><em>to living archive.</em>"
+  },
+  {
+    "id": "pages_about_20237f1b54c5",
+    "location": "src/pages/about.astro",
+    "text": "Technology"
+  },
+  {
+    "id": "pages_about_34143848b634",
+    "location": "src/pages/about.astro",
+    "text": "Built for<br /><em>the long haul.</em>"
+  },
+  {
+    "id": "pages_about_b643bf90c4a3",
+    "location": "src/pages/about.astro",
+    "text": "Curator"
+  },
+  {
+    "id": "pages_about_29d0d99e4f6f",
+    "location": "src/pages/about.astro",
+    "text": "Bernard Mcweeney"
+  },
+  {
+    "id": "pages_about_4f3954ab5ce7",
+    "location": "src/pages/about.astro",
+    "text": "Backend"
+  },
+  {
+    "id": "pages_about_d5faf172d342",
+    "location": "src/pages/about.astro",
+    "text": "Directus"
+  },
+  {
+    "id": "pages_about_b8bccb82891f",
+    "location": "src/pages/about.astro",
+    "text": "Frontend"
+  },
+  {
+    "id": "pages_about_8b386f385dca",
+    "location": "src/pages/about.astro",
+    "text": "Astro · Tailwind CSS"
+  },
+  {
+    "id": "pages_about_d29672b5df8a",
+    "location": "src/pages/about.astro",
+    "text": "Hosting"
+  },
+  {
+    "id": "pages_about_86a88da1409b",
+    "location": "src/pages/about.astro",
+    "text": "Cloudflare"
+  },
+  {
+    "id": "pages_about_8017b2206804",
+    "location": "src/pages/about.astro",
+    "text": "\n            Cureation uses open source software as much as possible. The backend is powered by Directus, an open source backend that gives the archive flexibility for data modelling and makes it easier to add and update records.\n          "
+  },
+  {
+    "id": "pages_about_1fe0cd2245ef",
+    "location": "src/pages/about.astro",
+    "text": "\n            The frontend is built with Astro and Tailwind CSS. Astro is the frontend framework behind the website, while Tailwind CSS helps shape the design system and styling.\n          "
+  },
+  {
+    "id": "pages_about_e8ee63387fca",
+    "location": "src/pages/about.astro",
+    "text": "A note of thanks"
+  },
+  {
+    "id": "pages_about_5f09fed8d996",
+    "location": "src/pages/about.astro",
+    "text": "“This archive would be pointless without people who care about The Cure, find something useful here and know when a detail needs correcting.”"
+  },
+  {
+    "id": "pages_about_157eda518560",
+    "location": "src/pages/about.astro",
+    "text": "Thank you for reading, exploring and helping keep the record straight."
+  },
+  {
+    "id": "pages_band_gear_cdfbe82aff5b",
+    "location": "src/pages/band/gear.astro",
+    "text": "Filed soon"
+  },
+  {
+    "id": "pages_band_gear_f4c51d85b144",
+    "location": "src/pages/band/gear.astro",
+    "text": "Instruments & equipment"
+  },
+  {
+    "id": "pages_band_gear_a4f7a96e52f0",
+    "location": "src/pages/band/gear.astro",
+    "text": "\n        Guitars, basses, keyboards, drums and stage equipment, cross-referenced against the member instrument register where the collection does not yet carry a direct player link.\n      "
+  },
+  {
+    "id": "pages_band_gear_7e13da45ba5e",
+    "location": "src/pages/band/gear.astro",
+    "text": "Archive note:"
+  },
+  {
+    "id": "pages_band_gear_a719141856e3",
+    "location": "src/pages/band/gear.astro",
+    "text": "Gear ledger"
+  },
+  {
+    "id": "pages_band_gear_bbcceb91a11c",
+    "location": "src/pages/band/gear.astro",
+    "text": "Collection is being populated. Check back as entries land."
+  },
+  {
+    "id": "pages_band_gear_a35fa3afd488",
+    "location": "src/pages/band/gear.astro",
+    "text": "Player link TBC"
+  },
+  {
+    "id": "pages_band_gear_661b3221782d",
+    "location": "src/pages/band/gear.astro",
+    "text": "Category mix"
+  },
+  {
+    "id": "pages_band_gear_cb74917d203c",
+    "location": "src/pages/band/gear.astro",
+    "text": "Current players"
+  },
+  {
+    "id": "pages_band_gear_26c5d13d5230",
+    "location": "src/pages/band/gear.astro",
+    "text": "Model quality"
+  },
+  {
+    "id": "pages_band_gear_27d892035cbe",
+    "location": "src/pages/band/gear.astro",
+    "text": "Direct player links are shown first. When they are empty, the member instrument model fills the gap from roles, instruments, and active-year windows."
+  },
+  {
+    "id": "pages_band_gear_74e326195ce0",
+    "location": "src/pages/band/gear.astro",
+    "text": "Filed by sound source"
+  },
+  {
+    "id": "pages_band_gear_95e8b0e7f5d8",
+    "location": "src/pages/band/gear.astro",
+    "text": "Instrument register"
+  },
+  {
+    "id": "pages_band_gear_c4abe39d1792",
+    "location": "src/pages/band/gear.astro",
+    "text": "Every filed instrument"
+  },
+  {
+    "id": "pages_band_gear_ad654a9b16bf",
+    "location": "src/pages/band/gear.astro",
+    "text": "No."
+  },
+  {
+    "id": "pages_band_gear_da74931c95d3",
+    "location": "src/pages/band/gear.astro",
+    "text": "Item"
+  },
+  {
+    "id": "pages_band_gear_86f84454b1fc",
+    "location": "src/pages/band/gear.astro",
+    "text": "Category"
+  },
+  {
+    "id": "pages_band_gear_890c12c43206",
+    "location": "src/pages/band/gear.astro",
+    "text": "Era"
+  },
+  {
+    "id": "pages_band_gear_8adea4304aa3",
+    "location": "src/pages/band/gear.astro",
+    "text": "Member links"
+  },
+  {
+    "id": "pages_band_gear_dfa4c96f8e26",
+    "location": "src/pages/band/gear.astro",
+    "text": "TBC"
+  },
+  {
+    "id": "pages_band_history_956726c9d209",
+    "location": "src/pages/band/history.astro",
+    "text": "History"
+  },
+  {
+    "id": "pages_band_history_d5a3bc08173b",
+    "location": "src/pages/band/history.astro",
+    "text": "History"
+  },
+  {
+    "id": "pages_band_history_68b9faafeab1",
+    "location": "src/pages/band/history.astro",
+    "text": "The Cure, year by year, divided into six identifying eras and annotated with the events that defined each."
+  },
+  {
+    "id": "pages_band_history_1582d2d7f4df",
+    "location": "src/pages/band/history.astro",
+    "text": "Years"
+  },
+  {
+    "id": "pages_band_history_e885dbaf11b1",
+    "location": "src/pages/band/history.astro",
+    "text": "Era"
+  },
+  {
+    "id": "pages_band_history_d455c1c4f13c",
+    "location": "src/pages/band/history.astro",
+    "text": "Short name"
+  },
+  {
+    "id": "pages_band_history_0388cd1a090e",
+    "location": "src/pages/band/history.astro",
+    "text": "Date"
+  },
+  {
+    "id": "pages_band_history_723045539378",
+    "location": "src/pages/band/history.astro",
+    "text": "Kind"
+  },
+  {
+    "id": "pages_band_history_9fa06d990ddf",
+    "location": "src/pages/band/history.astro",
+    "text": "Event"
+  },
+  {
+    "id": "pages_band_members_slug_31ed3955af53",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Live archive:"
+  },
+  {
+    "id": "pages_band_members_slug_9151e0dcc38f",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Documented tenure-window shows"
+  },
+  {
+    "id": "pages_band_members_slug_f1264aeb8e96",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Counted from dated setlists that fall inside the member stint windows."
+  },
+  {
+    "id": "pages_band_members_slug_29868aa755a7",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Lineup-tagged appearances"
+  },
+  {
+    "id": "pages_band_members_slug_586353fee0c7",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Average set length"
+  },
+  {
+    "id": "pages_band_members_slug_aba74a3a961f",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Tours / countries"
+  },
+  {
+    "id": "pages_band_members_slug_285fafb1f8d5",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Archive markers"
+  },
+  {
+    "id": "pages_band_members_slug_84f464411323",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Setlist archive"
+  },
+  {
+    "id": "pages_band_members_slug_8d193a5ce6b7",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "First recorded"
+  },
+  {
+    "id": "pages_band_members_slug_1327c123ce33",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Latest recorded"
+  },
+  {
+    "id": "pages_band_members_slug_5f0c75bbbe32",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Longest set"
+  },
+  {
+    "id": "pages_band_members_slug_d7e10e19d00b",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Setlists across the tenure window"
+  },
+  {
+    "id": "pages_band_members_slug_44852dfd0471",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Latest appearances in the archive"
+  },
+  {
+    "id": "pages_band_members_slug_98b77f060161",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Open setlists →"
+  },
+  {
+    "id": "pages_band_members_slug_e2378de7aa2b",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Lineup history"
+  },
+  {
+    "id": "pages_band_members_slug_f740e30956ba",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "No linked member stints have been filed yet."
+  },
+  {
+    "id": "pages_band_members_slug_82db523246cd",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Contact sheet"
+  },
+  {
+    "id": "pages_band_members_slug_501600761e57",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Roles, aliases, sources"
+  },
+  {
+    "id": "pages_band_members_index_3e8fd286c42e",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Members"
+  },
+  {
+    "id": "pages_band_members_index_9c76f0dbcc5a",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Every member"
+  },
+  {
+    "id": "pages_band_members_index_62eb2c1c81e3",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Every musician who has passed through The Cure, in one index."
+  },
+  {
+    "id": "pages_band_members_index_ae07462c1fb4",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Guest appearance"
+  },
+  {
+    "id": "pages_band_711122c1d97a",
+    "location": "src/pages/band.astro",
+    "text": "The band"
+  },
+  {
+    "id": "pages_band_268af71650c1",
+    "location": "src/pages/band.astro",
+    "text": "The band"
+  },
+  {
+    "id": "pages_band_1b6a99d8abea",
+    "location": "src/pages/band.astro",
+    "text": "Members past and present, including their instruments, tenures, live history and the chronology that shaped the lineup."
+  },
+  {
+    "id": "pages_band_537734f2f114",
+    "location": "src/pages/band.astro",
+    "text": "Guest appearance"
+  },
+  {
+    "id": "pages_community_601a795e7f0c",
+    "location": "src/pages/community.astro",
+    "text": "Contributors"
+  },
+  {
+    "id": "pages_community_6b9f65ed8466",
+    "location": "src/pages/community.astro",
+    "text": "Community"
+  },
+  {
+    "id": "pages_community_4f9172f322ce",
+    "location": "src/pages/community.astro",
+    "text": "The archive only survives through correction. Submit a fix, vote in a poll, or tell us what's missing."
+  },
+  {
+    "id": "pages_community_c8c1c0ea5b6d",
+    "location": "src/pages/community.astro",
+    "text": "Send correction →"
+  },
+  {
+    "id": "pages_curiosities_324a9a24f8b5",
+    "location": "src/pages/curiosities.astro",
+    "text": "Did you know"
+  },
+  {
+    "id": "pages_curiosities_45a31d30d7cd",
+    "location": "src/pages/curiosities.astro",
+    "text": "Trivia"
+  },
+  {
+    "id": "pages_curiosities_840fa235f297",
+    "location": "src/pages/curiosities.astro",
+    "text": "Footnotes, trivia and minor observations: the marginalia that keep an archive honest about what it knows."
+  },
+  {
+    "id": "pages_discography_slug_22ab4e4c412a",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Archivist's note:"
+  },
+  {
+    "id": "pages_discography_slug_1d03c6a90888",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Title"
+  },
+  {
+    "id": "pages_discography_slug_aa9fbd2f5255",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Notes"
+  },
+  {
+    "id": "pages_discography_slug_2b03d744648e",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Length"
+  },
+  {
+    "id": "pages_discography_slug_8770f98f2879",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Live"
+  },
+  {
+    "id": "pages_discography_slug_c6c42ea681e5",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Track in focus"
+  },
+  {
+    "id": "pages_discography_slug_c9cb47126dc3",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "HOVER TO PREVIEW"
+  },
+  {
+    "id": "pages_discography_slug_c724648c1ead",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Variants"
+  },
+  {
+    "id": "pages_discography_slug_b90cba95652f",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Listen"
+  },
+  {
+    "id": "pages_discography_slug_a3bc522c0626",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "OPEN →"
+  },
+  {
+    "id": "pages_discography_slug_e6301940a6dc",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Credits"
+  },
+  {
+    "id": "pages_discography_slug_aafc3e312afb",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Credits are not available yet."
+  },
+  {
+    "id": "pages_discography_slug_eebfa7649abb",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Session intensity"
+  },
+  {
+    "id": "pages_discography_slug_b2ed85eba7c3",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "\n            Heuristic · 16-week schematic based on release date.\n          "
+  },
+  {
+    "id": "pages_discography_slug_a754146c1ea8",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "VERIFIED"
+  },
+  {
+    "id": "pages_discography_slug_60633641ceb9",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "SOURCE →"
+  },
+  {
+    "id": "pages_discography_slug_5b882d520756",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Chart peaks"
+  },
+  {
+    "id": "pages_discography_slug_5da37c195a03",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Territory"
+  },
+  {
+    "id": "pages_discography_slug_50ffde7d7ab8",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Peak"
+  },
+  {
+    "id": "pages_discography_slug_3ae37cf9aef0",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Weeks"
+  },
+  {
+    "id": "pages_discography_slug_c3c5a6e70c68",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Year"
+  },
+  {
+    "id": "pages_discography_slug_fff528604f56",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Singles"
+  },
+  {
+    "id": "pages_discography_slug_c8535a5b6f5c",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Title"
+  },
+  {
+    "id": "pages_discography_slug_226f1cde4cfd",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Released"
+  },
+  {
+    "id": "pages_discography_slug_77c166a99aa7",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Peak"
+  },
+  {
+    "id": "pages_discography_slug_826c278f1a6a",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "OPEN SETLISTS →"
+  },
+  {
+    "id": "pages_discography_index_b62dc1e52c88",
+    "location": "src/pages/discography/index.astro",
+    "text": "Discography"
+  },
+  {
+    "id": "pages_discography_index_16c72d7b8220",
+    "location": "src/pages/discography/index.astro",
+    "text": "Discography"
+  },
+  {
+    "id": "pages_discography_index_40d3c2bdeeb4",
+    "location": "src/pages/discography/index.astro",
+    "text": "Every studio record, EP, compilation and single in one filterable archive, with the sleeves up front."
+  },
+  {
+    "id": "pages_index_4d67c10657a2",
+    "location": "src/pages/index.astro",
+    "text": "Independent archive · Updated daily"
+  },
+  {
+    "id": "pages_index_5eeff95555f4",
+    "location": "src/pages/index.astro",
+    "text": "The Cure,<br /><em>all of it.</em>"
+  },
+  {
+    "id": "pages_index_6ba37993e06f",
+    "location": "src/pages/index.astro",
+    "text": "News, music, live shows and the history of The Cure."
+  },
+  {
+    "id": "pages_index_2b8c11a3c748",
+    "location": "src/pages/index.astro",
+    "text": "Read articles"
+  },
+  {
+    "id": "pages_index_c8fb16da449f",
+    "location": "src/pages/index.astro",
+    "text": "<i></i> On tour now"
+  },
+  {
+    "id": "pages_index_0232a3ea3791",
+    "location": "src/pages/index.astro",
+    "text": "Latest news"
+  },
+  {
+    "id": "pages_index_210ff4db9681",
+    "location": "src/pages/index.astro",
+    "text": "Album reviews"
+  },
+  {
+    "id": "pages_index_39927fc141f6",
+    "location": "src/pages/index.astro",
+    "text": "Every studio album, closely listened to."
+  },
+  {
+    "id": "pages_index_8f43a2b39e05",
+    "location": "src/pages/index.astro",
+    "text": "From the archive"
+  },
+  {
+    "id": "pages_index_e57b1f6e5b88",
+    "location": "src/pages/index.astro",
+    "text": "One story,<br />properly told."
+  },
+  {
+    "id": "pages_index_74eb96f00ebf",
+    "location": "src/pages/index.astro",
+    "text": "All articles →"
+  },
+  {
+    "id": "pages_index_59013f73a003",
+    "location": "src/pages/index.astro",
+    "text": "Read the feature <i>→</i>"
+  },
+  {
+    "id": "pages_index_3a4c50060218",
+    "location": "src/pages/index.astro",
+    "text": "Live · Summer 2026"
+  },
+  {
+    "id": "pages_index_8724d8d5cdf3",
+    "location": "src/pages/index.astro",
+    "text": "The Cure are<br /><em>out there now.</em>"
+  },
+  {
+    "id": "pages_index_25c8e07db2f7",
+    "location": "src/pages/index.astro",
+    "text": "Tour signal / live"
+  },
+  {
+    "id": "pages_index_75a3775050f1",
+    "location": "src/pages/index.astro",
+    "text": "days"
+  },
+  {
+    "id": "pages_index_773349c0f162",
+    "location": "src/pages/index.astro",
+    "text": "hours"
+  },
+  {
+    "id": "pages_index_900b0fad12b0",
+    "location": "src/pages/index.astro",
+    "text": "mins"
+  },
+  {
+    "id": "pages_index_4a3186259bca",
+    "location": "src/pages/index.astro",
+    "text": "Live archive"
+  },
+  {
+    "id": "pages_index_6140ec5e4eda",
+    "location": "src/pages/index.astro",
+    "text": "Today in<br />Cure history."
+  },
+  {
+    "id": "pages_index_409f20082e01",
+    "location": "src/pages/index.astro",
+    "text": "Open the full timeline →"
+  },
+  {
+    "id": "pages_index_ca9bc7dbc00b",
+    "location": "src/pages/index.astro",
+    "text": "Image of the day"
+  },
+  {
+    "id": "pages_index_e82bda044c2f",
+    "location": "src/pages/index.astro",
+    "text": "No events for today."
+  },
+  {
+    "id": "pages_index_c6397b3f9c08",
+    "location": "src/pages/index.astro",
+    "text": "The archive still has plenty to say. Browse every release, show and milestone tied to this month."
+  },
+  {
+    "id": "pages_index_56f62a781649",
+    "location": "src/pages/index.astro",
+    "text": "Explore all dates →"
+  },
+  {
+    "id": "pages_index_3fd879e8ff3f",
+    "location": "src/pages/index.astro",
+    "text": "The years fold together."
+  },
+  {
+    "id": "pages_index_c478dad771a6",
+    "location": "src/pages/index.astro",
+    "text": "Appears on"
+  },
+  {
+    "id": "pages_index_2ea3aca51d06",
+    "location": "src/pages/index.astro",
+    "text": "Released"
+  },
+  {
+    "id": "pages_index_b77b48ed25a1",
+    "location": "src/pages/index.astro",
+    "text": "Released"
+  },
+  {
+    "id": "pages_index_aeb16e09be89",
+    "location": "src/pages/index.astro",
+    "text": "Produced by"
+  },
+  {
+    "id": "pages_index_04721e7fff98",
+    "location": "src/pages/index.astro",
+    "text": "Label"
+  },
+  {
+    "id": "pages_index_f0b7863213e8",
+    "location": "src/pages/index.astro",
+    "text": "A place for<br />every detail."
+  },
+  {
+    "id": "pages_index_e8c671542f2c",
+    "location": "src/pages/index.astro",
+    "text": "Fourteen studio albums"
+  },
+  {
+    "id": "pages_index_8ae01777facb",
+    "location": "src/pages/index.astro",
+    "text": "Full discography →"
+  },
+  {
+    "id": "pages_lyrics_85c1b3fcf150",
+    "location": "src/pages/lyrics.astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "pages_lyrics_4f3cf4814414",
+    "location": "src/pages/lyrics.astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "pages_lyrics_3684997fac04",
+    "location": "src/pages/lyrics.astro",
+    "text": "Every documented song lyric in the archive, grouped for scanning by title, record, or live history. Full lyrics and annotations live on each song page."
+  },
+  {
+    "id": "pages_lyrics_d160ad5ff068",
+    "location": "src/pages/lyrics.astro",
+    "text": "&ldquo;"
+  },
+  {
+    "id": "pages_lyrics_df439f7fa7b8",
+    "location": "src/pages/lyrics.astro",
+    "text": "&rdquo;"
+  },
+  {
+    "id": "pages_lyrics_046fdf52c1fa",
+    "location": "src/pages/lyrics.astro",
+    "text": "Title"
+  },
+  {
+    "id": "pages_lyrics_23011bf0c5a5",
+    "location": "src/pages/lyrics.astro",
+    "text": "Album"
+  },
+  {
+    "id": "pages_lyrics_1d5856da5820",
+    "location": "src/pages/lyrics.astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "pages_lyrics_5ba18ae3de37",
+    "location": "src/pages/lyrics.astro",
+    "text": "Plays"
+  },
+  {
+    "id": "pages_my-archive_e00c9f76c2ba",
+    "location": "src/pages/my-archive.astro",
+    "text": "Private · Local to this device"
+  },
+  {
+    "id": "pages_my-archive_99fa4149bba1",
+    "location": "src/pages/my-archive.astro",
+    "text": "Saved items"
+  },
+  {
+    "id": "pages_my-archive_fba3c256b5e9",
+    "location": "src/pages/my-archive.astro",
+    "text": "A private reading list of everything you've saved, kept in your browser. Nothing is sent to a server. Click the ☆ on any record, song or setlist to add it here."
+  },
+  {
+    "id": "pages_my-archive_ce013c9a3a54",
+    "location": "src/pages/my-archive.astro",
+    "text": "0 items"
+  },
+  {
+    "id": "pages_my-archive_1412fcd4775c",
+    "location": "src/pages/my-archive.astro",
+    "text": "Clear"
+  },
+  {
+    "id": "pages_my-archive_5c583a2f1492",
+    "location": "src/pages/my-archive.astro",
+    "text": "Use the ☆ Save button on an album, song, show, venue or article to save it here. Your saved items stay in this browser."
+  },
+  {
+    "id": "pages_newsletter_eb3d92585b67",
+    "location": "src/pages/newsletter.astro",
+    "text": "Newsletter"
+  },
+  {
+    "id": "pages_newsletter_1d29af786983",
+    "location": "src/pages/newsletter.astro",
+    "text": "Newsletter"
+  },
+  {
+    "id": "pages_newsletter_e12794c165c5",
+    "location": "src/pages/newsletter.astro",
+    "text": "A slow newsletter covering anniversary pieces, reader corrections, new archive additions and anything worth lingering over. Roughly monthly. Unsubscribe at any time."
+  },
+  {
+    "id": "pages_newsletter_1ee70d004ceb",
+    "location": "src/pages/newsletter.astro",
+    "text": "Subscribe →"
+  },
+  {
+    "id": "pages_newsletter_cef6e6058c2e",
+    "location": "src/pages/newsletter.astro",
+    "text": "No issues sent yet"
+  },
+  {
+    "id": "pages_newsletter_18fb7d40518a",
+    "location": "src/pages/newsletter.astro",
+    "text": "Coming soon"
+  },
+  {
+    "id": "pages_newsletter_45a7f9f2023e",
+    "location": "src/pages/newsletter.astro",
+    "text": "The newsletter is coming soon. Past issues will appear here after they are sent."
+  },
+  {
+    "id": "pages_newsletter_49e2b46e3396",
+    "location": "src/pages/newsletter.astro",
+    "text": "Sent"
+  },
+  {
+    "id": "pages_newsletter_b762a29e5d31",
+    "location": "src/pages/newsletter.astro",
+    "text": "Issue"
+  },
+  {
+    "id": "pages_on-this-day_db5f581bbc57",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Anniversaries"
+  },
+  {
+    "id": "pages_on-this-day_7ba1bf812b97",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Every release, concert and documented milestone that happened on this day, gathered across every year of the band's history."
+  },
+  {
+    "id": "pages_on-this-day_708ff9e0f441",
+    "location": "src/pages/on-this-day.astro",
+    "text": "No documented events for this date yet. Check back tomorrow, or browse the full timeline."
+  },
+  {
+    "id": "pages_on-this-day_b8fd2347c4a0",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Year"
+  },
+  {
+    "id": "pages_on-this-day_55f84915930a",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Kind"
+  },
+  {
+    "id": "pages_on-this-day_2174c9005234",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Entry"
+  },
+  {
+    "id": "pages_photos_8baa0885aa17",
+    "location": "src/pages/photos.astro",
+    "text": "Archive"
+  },
+  {
+    "id": "pages_photos_ceba986bbca8",
+    "location": "src/pages/photos.astro",
+    "text": "Photos"
+  },
+  {
+    "id": "pages_photos_abd66f8a1ab2",
+    "location": "src/pages/photos.astro",
+    "text": "An archive of stage, street, studio and sleeve pictures, filed by decade and tagged to tours and records."
+  },
+  {
+    "id": "pages_photos_337d23e8100a",
+    "location": "src/pages/photos.astro",
+    "text": "Photo of the day"
+  },
+  {
+    "id": "pages_photos_adcfe11093c8",
+    "location": "src/pages/photos.astro",
+    "text": "One frame from<br /><em>the living archive.</em>"
+  },
+  {
+    "id": "pages_photos_5cca02c28796",
+    "location": "src/pages/photos.astro",
+    "text": "Explore every photograph <i>→</i>"
+  },
+  {
+    "id": "pages_publication_slug_f41cd285e08c",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Full article copy is being prepared."
+  },
+  {
+    "id": "pages_publication_slug_7422fc65097f",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Filed under"
+  },
+  {
+    "id": "pages_publication_slug_1c076180f5ce",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Section"
+  },
+  {
+    "id": "pages_publication_slug_ec7917168da9",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Words"
+  },
+  {
+    "id": "pages_publication_slug_45d3c9ba22e0",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Published"
+  },
+  {
+    "id": "pages_publication_slug_6f928f44cf90",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Reading time"
+  },
+  {
+    "id": "pages_publication_slug_64dcb634208b",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Index terms"
+  },
+  {
+    "id": "pages_publication_slug_3f17e1382908",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "From the publication"
+  },
+  {
+    "id": "pages_publication_slug_cf5b5899807b",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Continue reading"
+  },
+  {
+    "id": "pages_publication_author_slug_4434fbdb9f41",
+    "location": "src/pages/publication/author/[slug].astro",
+    "text": "Date"
+  },
+  {
+    "id": "pages_publication_author_slug_c9ba8eb6d6bd",
+    "location": "src/pages/publication/author/[slug].astro",
+    "text": "Category"
+  },
+  {
+    "id": "pages_publication_author_slug_3483e9f55f7c",
+    "location": "src/pages/publication/author/[slug].astro",
+    "text": "Title"
+  },
+  {
+    "id": "pages_publication_author_slug_30975b8eb715",
+    "location": "src/pages/publication/author/[slug].astro",
+    "text": "Read"
+  },
+  {
+    "id": "pages_reviews_slug_78558351666e",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Verdict"
+  },
+  {
+    "id": "pages_reviews_slug_8ec74f9e247d",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "The record"
+  },
+  {
+    "id": "pages_reviews_slug_10cd61808473",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Album"
+  },
+  {
+    "id": "pages_reviews_slug_13175c44cc3c",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Released"
+  },
+  {
+    "id": "pages_reviews_slug_743303d8d790",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Label"
+  },
+  {
+    "id": "pages_reviews_slug_617f58a87101",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Producer"
+  },
+  {
+    "id": "pages_reviews_slug_7483756985da",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Tracks"
+  },
+  {
+    "id": "pages_reviews_slug_709b5fed0d30",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Standout tracks"
+  },
+  {
+    "id": "pages_reviews_slug_d7d10c965c7a",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Keep listening"
+  },
+  {
+    "id": "pages_reviews_slug_fb64717b0f1a",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "More album reviews"
+  },
+  {
+    "id": "pages_reviews_slug_87120b379835",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Read review →"
+  },
+  {
+    "id": "pages_reviews_index_874ae6369473",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "pages_reviews_index_f22ec8ca9176",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "pages_reviews_index_1ef5604ac1c6",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Fourteen studio albums. Fourteen close listens. Long-form criticism written for fans who know the songs and still want to hear them differently."
+  },
+  {
+    "id": "pages_reviews_index_caf733f0cd54",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Complete studio archive"
+  },
+  {
+    "id": "pages_reviews_index_19f17e5e2de8",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Every album reviewed"
+  },
+  {
+    "id": "pages_reviews_index_bfae7e925981",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Read review →"
+  },
+  {
+    "id": "pages_reviews_index_768c5dde6b80",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Reviews are being prepared."
+  },
+  {
+    "id": "pages_setlists_slug_22bfb22af43f",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "LIVE ARCHIVE"
+  },
+  {
+    "id": "pages_setlists_slug_4d65418dddd0",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Title"
+  },
+  {
+    "id": "pages_setlists_slug_9920339be931",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Notes"
+  },
+  {
+    "id": "pages_setlists_slug_edd58daf2e62",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Length"
+  },
+  {
+    "id": "pages_setlists_slug_ae1c01e4740d",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "DEBUT"
+  },
+  {
+    "id": "pages_setlists_slug_d150f2f2704d",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Stage banter"
+  },
+  {
+    "id": "pages_setlists_slug_3d20d8a8066c",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "OVERHEARD"
+  },
+  {
+    "id": "pages_setlists_slug_1afb473d1e47",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Setlist by era"
+  },
+  {
+    "id": "pages_setlists_slug_97676ac27ccd",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Tour progress"
+  },
+  {
+    "id": "pages_setlists_slug_e6636250c072",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Nearby on the tour"
+  },
+  {
+    "id": "pages_setlists_slug_4501c464cfbd",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "The venue"
+  },
+  {
+    "id": "pages_setlists_slug_2b8b9f8adef0",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "DOSSIER"
+  },
+  {
+    "id": "pages_setlists_slug_e5d750b948a4",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Support acts"
+  },
+  {
+    "id": "pages_setlists_slug_6107c4a60290",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "BILL"
+  },
+  {
+    "id": "pages_setlists_slug_80f3fc1054c9",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Recordings"
+  },
+  {
+    "id": "pages_setlists_slug_99e36bc4d1c2",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "TAPE TRADE"
+  },
+  {
+    "id": "pages_setlists_slug_262f0375b895",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Listen & watch"
+  },
+  {
+    "id": "pages_setlists_slug_06eaf56339c4",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "LINKS"
+  },
+  {
+    "id": "pages_setlists_slug_ca36dbeb80c6",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "cureconcerts.com →"
+  },
+  {
+    "id": "pages_setlists_compare_564eed9e81f8",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "Compare two shows."
+  },
+  {
+    "id": "pages_setlists_compare_e7a1ee37fd9f",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "Pick any two Cure concerts and see the songs they shared, the openers, the encores, and everything unique to each."
+  },
+  {
+    "id": "pages_setlists_compare_c2d4b7b1e8b8",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "Compare →"
+  },
+  {
+    "id": "pages_setlists_compare_7103c513d9f4",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "DEBUT"
+  },
+  {
+    "id": "pages_setlists_compare_901de65cfce8",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "COVER"
+  },
+  {
+    "id": "pages_setlists_compare_b07e9a63a676",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "DEBUT"
+  },
+  {
+    "id": "pages_setlists_compare_0b51456d0bfa",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "COVER"
+  },
+  {
+    "id": "pages_setlists_1736f07fd152",
+    "location": "src/pages/setlists.astro",
+    "text": "Live archive"
+  },
+  {
+    "id": "pages_setlists_1fab0856c9b3",
+    "location": "src/pages/setlists.astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "pages_setlists_784452930850",
+    "location": "src/pages/setlists.astro",
+    "text": "Every documented performance, organised by date, city and venue, and cross-referenced to tours, songs and contemporaneous press."
+  },
+  {
+    "id": "pages_setlists_15c7ca96fac5",
+    "location": "src/pages/setlists.astro",
+    "text": "Date"
+  },
+  {
+    "id": "pages_setlists_e283d547c011",
+    "location": "src/pages/setlists.astro",
+    "text": "Venue"
+  },
+  {
+    "id": "pages_setlists_3d146cf8b7f4",
+    "location": "src/pages/setlists.astro",
+    "text": "City"
+  },
+  {
+    "id": "pages_setlists_a6a7e8303133",
+    "location": "src/pages/setlists.astro",
+    "text": "Country"
+  },
+  {
+    "id": "pages_setlists_688bc4f64505",
+    "location": "src/pages/setlists.astro",
+    "text": "Tour"
+  },
+  {
+    "id": "pages_setlists_7cbc0f0e817f",
+    "location": "src/pages/setlists.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_songs_slug_9e7eb4f8c43b",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Song file"
+  },
+  {
+    "id": "pages_songs_slug_32e6d90783f7",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "pages_songs_slug_49cc7b4ec2ee",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Lyrics are not available yet."
+  },
+  {
+    "id": "pages_songs_slug_ea77fb5a0639",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Literary links"
+  },
+  {
+    "id": "pages_songs_slug_0a4ac7e897b7",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "source →"
+  },
+  {
+    "id": "pages_songs_slug_25f867f643b3",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Hover an annotated lyric line to preview its literary link."
+  },
+  {
+    "id": "pages_songs_slug_d6e3eda16ef8",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Music video"
+  },
+  {
+    "id": "pages_songs_slug_b08fd73936cb",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "VISUAL"
+  },
+  {
+    "id": "pages_songs_slug_9fb371156b38",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "WATCH →"
+  },
+  {
+    "id": "pages_songs_slug_8c1dc0258a56",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Listen"
+  },
+  {
+    "id": "pages_songs_slug_37470664d9ac",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "STREAMS"
+  },
+  {
+    "id": "pages_songs_slug_c4002aff3762",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Credits"
+  },
+  {
+    "id": "pages_songs_slug_ae2f51e74f66",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "PERSONNEL"
+  },
+  {
+    "id": "pages_songs_8e591aea1e5f",
+    "location": "src/pages/songs.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_songs_e9aa20e0c225",
+    "location": "src/pages/songs.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_songs_22db01c5a6c8",
+    "location": "src/pages/songs.astro",
+    "text": "Every documented composition in the catalogue, with live-play counts, album links and annotations."
+  },
+  {
+    "id": "pages_songs_84500ecdd40a",
+    "location": "src/pages/songs.astro",
+    "text": "Title"
+  },
+  {
+    "id": "pages_songs_f115d11475fd",
+    "location": "src/pages/songs.astro",
+    "text": "Album"
+  },
+  {
+    "id": "pages_songs_bf34443a70ef",
+    "location": "src/pages/songs.astro",
+    "text": "Length"
+  },
+  {
+    "id": "pages_songs_f89e673bb9f1",
+    "location": "src/pages/songs.astro",
+    "text": "Plays"
+  },
+  {
+    "id": "pages_sources_index_b84265fda15b",
+    "location": "src/pages/sources/index.astro",
+    "text": "Provenance"
+  },
+  {
+    "id": "pages_sources_index_3ca385c3f457",
+    "location": "src/pages/sources/index.astro",
+    "text": "Sources"
+  },
+  {
+    "id": "pages_sources_index_68eb1b64d02f",
+    "location": "src/pages/sources/index.astro",
+    "text": "Every claim traces back to something. This ledger records where the archive's facts came from, with citations, counts and reliability rankings."
+  },
+  {
+    "id": "pages_sources_index_7638d8da607f",
+    "location": "src/pages/sources/index.astro",
+    "text": "Source"
+  },
+  {
+    "id": "pages_sources_index_35763e32c90c",
+    "location": "src/pages/sources/index.astro",
+    "text": "Type"
+  },
+  {
+    "id": "pages_sources_index_9785acb5355d",
+    "location": "src/pages/sources/index.astro",
+    "text": "Author"
+  },
+  {
+    "id": "pages_sources_index_afe45d0856f6",
+    "location": "src/pages/sources/index.astro",
+    "text": "Albums"
+  },
+  {
+    "id": "pages_sources_index_141313c01011",
+    "location": "src/pages/sources/index.astro",
+    "text": "Reliability"
+  },
+  {
+    "id": "pages_sources_index_ed5d4cccf5cf",
+    "location": "src/pages/sources/index.astro",
+    "text": "OFFICIAL"
+  },
+  {
+    "id": "pages_stats_c1a2e4814221",
+    "location": "src/pages/stats.astro",
+    "text": "By the numbers"
+  },
+  {
+    "id": "pages_stats_d9e0245a0e30",
+    "location": "src/pages/stats.astro",
+    "text": "Statistics"
+  },
+  {
+    "id": "pages_stats_0844bc499ccf",
+    "location": "src/pages/stats.astro",
+    "text": "The archive, quantified through live frequencies, tour cadence and catalogue distribution across decades and geography."
+  },
+  {
+    "id": "pages_stats_f22fe4c18346",
+    "location": "src/pages/stats.astro",
+    "text": "Archive overview"
+  },
+  {
+    "id": "pages_stats_e6dd2351adba",
+    "location": "src/pages/stats.astro",
+    "text": "Four signals from<br /><em>the whole collection.</em>"
+  },
+  {
+    "id": "pages_stats_b93abb6039b9",
+    "location": "src/pages/stats.astro",
+    "text": "Start with the headline patterns, then open a tab for the full rankings, timelines and catalogue breakdown."
+  },
+  {
+    "id": "pages_stats_b211c9445150",
+    "location": "src/pages/stats.astro",
+    "text": "01 · Live repertoire"
+  },
+  {
+    "id": "pages_stats_2fa482fa40dc",
+    "location": "src/pages/stats.astro",
+    "text": "02 · Record"
+  },
+  {
+    "id": "pages_stats_836e7b615593",
+    "location": "src/pages/stats.astro",
+    "text": "03 · Geography"
+  },
+  {
+    "id": "pages_stats_00ab22829518",
+    "location": "src/pages/stats.astro",
+    "text": "04 · Timeline"
+  },
+  {
+    "id": "pages_stats_33e496521c17",
+    "location": "src/pages/stats.astro",
+    "text": "Live frequency"
+  },
+  {
+    "id": "pages_stats_12fce1b039e9",
+    "location": "src/pages/stats.astro",
+    "text": "The songs played<br /><em>again and again.</em>"
+  },
+  {
+    "id": "pages_stats_55bf7f6fb95b",
+    "location": "src/pages/stats.astro",
+    "text": "Top 10 · live archive"
+  },
+  {
+    "id": "pages_stats_4f3b0babafa2",
+    "location": "src/pages/stats.astro",
+    "text": "Records rank"
+  },
+  {
+    "id": "pages_stats_ba30ff4041eb",
+    "location": "src/pages/stats.astro",
+    "text": "The records that<br /><em>shape the stage.</em>"
+  },
+  {
+    "id": "pages_stats_f3f743f33746",
+    "location": "src/pages/stats.astro",
+    "text": "Aggregate song plays"
+  },
+  {
+    "id": "pages_stats_7449f5159447",
+    "location": "src/pages/stats.astro",
+    "text": "Records rank"
+  },
+  {
+    "id": "pages_stats_0ac509fa7713",
+    "location": "src/pages/stats.astro",
+    "text": "Albums by live prevalence"
+  },
+  {
+    "id": "pages_stats_d435451653eb",
+    "location": "src/pages/stats.astro",
+    "text": "Aggregate song plays"
+  },
+  {
+    "id": "pages_stats_45a05486d8ca",
+    "location": "src/pages/stats.astro",
+    "text": "Geography"
+  },
+  {
+    "id": "pages_stats_5eee1a83c3c1",
+    "location": "src/pages/stats.astro",
+    "text": "Where the archive<br /><em>keeps returning.</em>"
+  },
+  {
+    "id": "pages_stats_d9d30728e4a8",
+    "location": "src/pages/stats.astro",
+    "text": "Top 10 · show count"
+  },
+  {
+    "id": "pages_stats_0b88de130653",
+    "location": "src/pages/stats.astro",
+    "text": "Touring countries"
+  },
+  {
+    "id": "pages_stats_dcae2644ed3c",
+    "location": "src/pages/stats.astro",
+    "text": "Top touring countries"
+  },
+  {
+    "id": "pages_stats_fa0204bebbcd",
+    "location": "src/pages/stats.astro",
+    "text": "By show count"
+  },
+  {
+    "id": "pages_stats_f39fada73c47",
+    "location": "src/pages/stats.astro",
+    "text": "Cadence"
+  },
+  {
+    "id": "pages_stats_fa99cecd9a04",
+    "location": "src/pages/stats.astro",
+    "text": "How the years<br /><em>fill up.</em>"
+  },
+  {
+    "id": "pages_stats_94226ca0b21c",
+    "location": "src/pages/stats.astro",
+    "text": "Shows per decade"
+  },
+  {
+    "id": "pages_stats_6334b62b511a",
+    "location": "src/pages/stats.astro",
+    "text": "Tours launched"
+  },
+  {
+    "id": "pages_stats_a3fe33196551",
+    "location": "src/pages/stats.astro",
+    "text": "Catalogue chronology"
+  },
+  {
+    "id": "pages_stats_22956e646e2f",
+    "location": "src/pages/stats.astro",
+    "text": "Every era leaves<br />a different shape."
+  },
+  {
+    "id": "pages_stats_c9a0f6cadd57",
+    "location": "src/pages/stats.astro",
+    "text": "Studio records grouped by the archive's historical eras."
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_d36f837f5686",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "2026 European Summer Shows"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_e8adabb996bb",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "\n              One dashboard for the full run: dates, countries, festival/headline split, gaps between shows,\n              multi-night stands, saved shows, map view and setlist watch.\n            "
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_d8e365320bcf",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Near me"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_8ccc737bbc55",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Setlist Watch"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_cb657ddbba88",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Start"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_2f09af67f6dd",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "End"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_4f59d4ab9457",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Total time"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_819d937d0539",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Song runtime"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_4b72fb7f21b1",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_aef8b66c20d7",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Opener"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_b0c3141a54d2",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Closer"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_32fdbd8159eb",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Encore"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_d4ec0386a52f",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Lost World"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_fbab8606f597",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Fan media"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_ec33101e0389",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Show notes"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_cefb092f66b0",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Song notes"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_080362188d9d",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Added"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_f80d73ff393e",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Dropped"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_e6b5409ba871",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Debuts"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_7c6d56fb6203",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Opening night"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_795dc1eb7ae8",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Setlist pending"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_760c2a6e116b",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "The run is complete."
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_10c62fa479fe",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Clock"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_5328224c5f44",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Start time"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_2e4b0ece5d93",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "End time"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_e02d81622b1e",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Concert total"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_ff3e0ea5314c",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Song-file runtime"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_375acd5bef19",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Cure Concerts"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_da6e16744d45",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "setlist.fm"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_d3ea3411d078",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Open show page"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_c195654d04fa",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Show notes"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_104ffd80fe96",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "No show-level notes filed yet."
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_f15e84a21e41",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Song notes"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_1d130453a4c7",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "No song-level notes filed for this set yet."
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_4713331ab8cf",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Full latest setlist"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_5b05129a0ad3",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "debut"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_cf7cc9a15e6a",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Tour route"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_c4dcc9c6dff3",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Full itinerary"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_f36123569d48",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "All countries"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_8a1fede0abbc",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Reminder"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_578055bc96d0",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Gaps"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_c965a8c3252c",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "between shows"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_ea0b51f7b3d0",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "No large gaps yet."
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_7c6ba6d8fa03",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Multi-night runs"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_0189fd51eb4d",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "No venues with consecutive shows."
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_df09671ce1c4",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "What changes once the tour starts"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_a4fe1a740fbf",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Going, went, remembered"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_b35031a63311",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Each date has local saves for \"I'm going\" before the show and \"I was there\" after it, plus quick routes for reminders, tips and memories."
+  },
+  {
+    "id": "pages_tours_slug_1b1bac1f11cc",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Tour route"
+  },
+  {
+    "id": "pages_tours_slug_05b6f0a04ada",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Full itinerary"
+  },
+  {
+    "id": "pages_tours_slug_28a3abaea320",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "All countries"
+  },
+  {
+    "id": "pages_tours_slug_cb74917d203c",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Gaps"
+  },
+  {
+    "id": "pages_tours_slug_24f9e9900a8b",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "between shows"
+  },
+  {
+    "id": "pages_tours_slug_cd206c17df00",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "No long breaks between shows."
+  },
+  {
+    "id": "pages_tours_slug_01d76cf92764",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Multi-night runs"
+  },
+  {
+    "id": "pages_tours_slug_c5cc3ae2e30d",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "No venues with consecutive shows."
+  },
+  {
+    "id": "pages_tours_slug_5f4e197c5c82",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Lineup"
+  },
+  {
+    "id": "pages_tours_slug_b5a8e8315e0e",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "ON THE ROAD"
+  },
+  {
+    "id": "pages_tours_slug_e5cf5a8e1b2f",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Support acts"
+  },
+  {
+    "id": "pages_tours_slug_d87523d7867e",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "ROTATING BILL"
+  },
+  {
+    "id": "pages_tours_slug_f931419c43aa",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_tours_slug_d3295f35f8e7",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Supporting record"
+  },
+  {
+    "id": "pages_tours_map_5f8e31aeb242",
+    "location": "src/pages/tours/map.astro",
+    "text": "Geography"
+  },
+  {
+    "id": "pages_tours_map_aaa55f8ddf3d",
+    "location": "src/pages/tours/map.astro",
+    "text": "Touring world map."
+  },
+  {
+    "id": "pages_tours_map_9c67040fece6",
+    "location": "src/pages/tours/map.astro",
+    "text": "The Cure's show history by country, with city bubbles plotted from linked venues first and city centroids where venue coordinates are missing."
+  },
+  {
+    "id": "pages_tours_map_4f112d8a2862",
+    "location": "src/pages/tours/map.astro",
+    "text": "All"
+  },
+  {
+    "id": "pages_tours_map_67a358dce336",
+    "location": "src/pages/tours/map.astro",
+    "text": "Cities"
+  },
+  {
+    "id": "pages_tours_map_2bd80cca223f",
+    "location": "src/pages/tours/map.astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_tours_map_b612a4360fc7",
+    "location": "src/pages/tours/map.astro",
+    "text": "Static coverage"
+  },
+  {
+    "id": "pages_tours_map_d45c4a7bed13",
+    "location": "src/pages/tours/map.astro",
+    "text": "Coverage"
+  },
+  {
+    "id": "pages_tours_map_2fb6402e0e12",
+    "location": "src/pages/tours/map.astro",
+    "text": "SHOWS"
+  },
+  {
+    "id": "pages_tours_map_eaad8bf0fa36",
+    "location": "src/pages/tours/map.astro",
+    "text": "CITY DATA"
+  },
+  {
+    "id": "pages_tours_map_7ff0e7449d7a",
+    "location": "src/pages/tours/map.astro",
+    "text": "COUNTRIES"
+  },
+  {
+    "id": "pages_tours_map_57a6d5c995ea",
+    "location": "src/pages/tours/map.astro",
+    "text": "CITY BUBBLES"
+  },
+  {
+    "id": "pages_tours_map_be7bebd80217",
+    "location": "src/pages/tours/map.astro",
+    "text": "Most visited cities"
+  },
+  {
+    "id": "pages_tours_map_830bef61ead6",
+    "location": "src/pages/tours/map.astro",
+    "text": "City"
+  },
+  {
+    "id": "pages_tours_map_1aadb617ba2c",
+    "location": "src/pages/tours/map.astro",
+    "text": "Country"
+  },
+  {
+    "id": "pages_tours_map_5779b1ab24a6",
+    "location": "src/pages/tours/map.astro",
+    "text": "Shows"
+  },
+  {
+    "id": "pages_tours_map_c25e5cda0636",
+    "location": "src/pages/tours/map.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_tours_map_903b8967f23e",
+    "location": "src/pages/tours/map.astro",
+    "text": "Latest"
+  },
+  {
+    "id": "pages_tours_dc42e033debc",
+    "location": "src/pages/tours.astro",
+    "text": "Touring"
+  },
+  {
+    "id": "pages_tours_858d1f1fadb5",
+    "location": "src/pages/tours.astro",
+    "text": "The tours"
+  },
+  {
+    "id": "pages_tours_2040a8eb9760",
+    "location": "src/pages/tours.astro",
+    "text": "Every run in order, from the earliest club dates to the arena cycles, with associated records and lineups on file."
+  },
+  {
+    "id": "pages_tours_6e35509ad16e",
+    "location": "src/pages/tours.astro",
+    "text": "All decades"
+  },
+  {
+    "id": "pages_tours_7f7fd41e4a4c",
+    "location": "src/pages/tours.astro",
+    "text": "Start"
+  },
+  {
+    "id": "pages_tours_04d527094faf",
+    "location": "src/pages/tours.astro",
+    "text": "Tour"
+  },
+  {
+    "id": "pages_tours_6181b9e13af3",
+    "location": "src/pages/tours.astro",
+    "text": "Album"
+  },
+  {
+    "id": "pages_tours_f45e1356c8e6",
+    "location": "src/pages/tours.astro",
+    "text": "Shows"
+  },
+  {
+    "id": "pages_venues_slug_367bc4079398",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "MARQUEE ROOM"
+  },
+  {
+    "id": "pages_venues_slug_f4212f1d8502",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "WIKIPEDIA →"
+  },
+  {
+    "id": "pages_venues_slug_5b3175afdc43",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "OFFICIAL SITE →"
+  },
+  {
+    "id": "pages_venues_slug_905cdda9661d",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "History"
+  },
+  {
+    "id": "pages_venues_639b5f19f108",
+    "location": "src/pages/venues.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_venues_1fb868602927",
+    "location": "src/pages/venues.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_venues_869809fae017",
+    "location": "src/pages/venues.astro",
+    "text": "Every room the band has played, ranked by repeat visits and annotated with capacity and first and latest Cure appearances."
+  },
+  {
+    "id": "pages_venues_0bac8fed0f88",
+    "location": "src/pages/venues.astro",
+    "text": "Ranked by repeat visits"
+  },
+  {
+    "id": "pages_venues_89261d473508",
+    "location": "src/pages/venues.astro",
+    "text": "Every room,<br /><em>from clubs to fields.</em>"
+  },
+  {
+    "id": "pages_venues_5cbc513139e8",
+    "location": "src/pages/venues.astro",
+    "text": "Open the venue map <i>↗</i>"
+  },
+  {
+    "id": "pages_venues_ef7416a81408",
+    "location": "src/pages/venues.astro",
+    "text": "Capacity"
+  },
+  {
+    "id": "pages_venues_e34b8a019f35",
+    "location": "src/pages/venues.astro",
+    "text": "Cure shows"
+  },
+  {
+    "id": "pages_venues_cc2b1e09c9a7",
+    "location": "src/pages/venues.astro",
+    "text": "Open venue <i>↗</i>"
+  },
+  {
+    "id": "pages_videos_f20e0d30c010",
+    "location": "src/pages/videos.astro",
+    "text": "Moving image"
+  },
+  {
+    "id": "pages_videos_e108032989da",
+    "location": "src/pages/videos.astro",
+    "text": "Videos"
+  },
+  {
+    "id": "pages_videos_56c58c2e3d78",
+    "location": "src/pages/videos.astro",
+    "text": "Promos, performances, interviews and concert films, catalogued with director, year and source."
+  },
+  {
+    "id": "pages_videos_854ad5e05931",
+    "location": "src/pages/videos.astro",
+    "text": "Archive in progress"
+  },
+  {
+    "id": "pages_videos_906d1f9895ee",
+    "location": "src/pages/videos.astro",
+    "text": "The pictures will<br />start moving soon."
+  },
+  {
+    "id": "pages_videos_da9ca3f16903",
+    "location": "src/pages/videos.astro",
+    "text": "The video index is being compiled, starting with promos, then live films and interviews."
+  },
+  {
+    "id": "pages_videos_d21f7be98f55",
+    "location": "src/pages/videos.astro",
+    "text": "Moving image catalogue"
+  },
+  {
+    "id": "pages_videos_c3c0f0129a42",
+    "location": "src/pages/videos.astro",
+    "text": "Watch the archive<br /><em>come alive.</em>"
+  },
+  {
+    "id": "pages_wiki_91187f396593",
+    "location": "src/pages/wiki.astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "pages_wiki_b343cacad48a",
+    "location": "src/pages/wiki.astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "pages_wiki_4723fda44314",
+    "location": "src/pages/wiki.astro",
+    "text": "Long-form reference articles, deeper than a liner note and shorter than a biography, cross-referenced to everything else in the archive."
+  },
+  {
+    "id": "pages_wiki_b63023ab93ad",
+    "location": "src/pages/wiki.astro",
+    "text": "A living reference,<br /><em>not a filing cabinet.</em>"
+  },
+  {
+    "id": "pages_wiki_4ac9caf016fd",
+    "location": "src/pages/wiki.astro",
+    "text": "Stories, people, places and ideas are connected back to the records, songs and shows they belong to."
+  },
+  {
+    "id": "pages_wiki_bc9fca8d21ad",
+    "location": "src/pages/wiki.astro",
+    "text": "The first entries are being written."
+  },
+  {
+    "id": "pages_wiki_769873827817",
+    "location": "src/pages/wiki.astro",
+    "text": "Long-form reference articles will land here as they are researched, checked and connected to the wider archive."
+  },
+  {
+    "id": "components_editorial_EditorialArticle_data-31bea57991e2",
+    "location": "src/components/editorial/EditorialArticle.astro",
+    "text": "Home"
+  },
+  {
+    "id": "components_editorial_NewsIndex_data-4698bbcd86f5",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Home"
+  },
+  {
+    "id": "components_editorial_NewsIndex_data-6300ad64f571",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "Articles"
+  },
+  {
+    "id": "components_editorial_NewsIndex_data-fd8ea470b477",
+    "location": "src/components/editorial/NewsIndex.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_data-163424a93556",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Home"
+  },
+  {
+    "id": "components_editorial_PublicationIndex_data-6dfe4a62d573",
+    "location": "src/components/editorial/PublicationIndex.astro",
+    "text": "Articles"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-d3cd8bdd3fbd",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Music"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-3427016f4244",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Discography"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-0148dac96937",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Albums"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-ad19edf7410e",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-dcd6b3b83c04",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-f619dc6b5096",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Most performed"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-fb688b99e3e6",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Live"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-db8e3aa9948a",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "2026 Summer Shows"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-18962c23327d",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-ab1fad065e58",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Tours"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-a760c8f4a028",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-8fcbb467cc18",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Compare shows"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-524e64d7b618",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "On this day"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-a3d028e0be9b",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Tour calendar feed"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-1e147431089a",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "World map"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-05ab60aa1c45",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Publication"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-1550a29a6991",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Publication"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-24fb39f53ce7",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-0bebc0c030ce",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-6eaf9c9cc671",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-5f11f140440c",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Editorials"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-3533bbc8976b",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Newsletter"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-bd1919a79c50",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Publication RSS"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-21a21b212161",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "News RSS"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-ff7310ba0928",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Archive"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-cf62237e4fb0",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "All wiki pages"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-13622d7d9a2a",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Photographs"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-55090b63540d",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Videos"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-8b4566cf24a2",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Members"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-536bbf6c9234",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "History"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-fda3b6a327c0",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Gear"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-9ce15f6809bc",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Stats"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-a091a09d7855",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Curiosities"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-16c6fd7204d0",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "My archive"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-1689dfef0f53",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "Sources"
+  },
+  {
+    "id": "components_nav_MobileMenu_data-8084625acfbf",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "About"
+  },
+  {
+    "id": "components_nav_Nav_data-b4fd8e21b8f0",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Music"
+  },
+  {
+    "id": "components_nav_Nav_data-d3d510fc905b",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Records"
+  },
+  {
+    "id": "components_nav_Nav_data-e790b1e18253",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Discography"
+  },
+  {
+    "id": "components_nav_Nav_data-603c2b85a2e8",
+    "location": "src/components/nav/Nav.astro",
+    "text": "all releases"
+  },
+  {
+    "id": "components_nav_Nav_data-52646cc133d3",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Albums"
+  },
+  {
+    "id": "components_nav_Nav_data-5068e862e0ea",
+    "location": "src/components/nav/Nav.astro",
+    "text": "14 records"
+  },
+  {
+    "id": "components_nav_Nav_data-174952530a50",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Singles"
+  },
+  {
+    "id": "components_nav_Nav_data-62935773147c",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Compilations"
+  },
+  {
+    "id": "components_nav_Nav_data-f058549c578e",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Song library"
+  },
+  {
+    "id": "components_nav_Nav_data-a416ebcee2fb",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "components_nav_Nav_data-06cd85d3c8a8",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "components_nav_Nav_data-bc7804da54a5",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Most performed"
+  },
+  {
+    "id": "components_nav_Nav_data-ee22945956b4",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Browse by era"
+  },
+  {
+    "id": "components_nav_Nav_data-8367fa206010",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Start here"
+  },
+  {
+    "id": "components_nav_Nav_data-e2b5d4f37299",
+    "location": "src/components/nav/Nav.astro",
+    "text": "The records, in full"
+  },
+  {
+    "id": "components_nav_Nav_data-d075b469c897",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Albums · singles · songs · credits"
+  },
+  {
+    "id": "components_nav_Nav_data-2d072a459848",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Live"
+  },
+  {
+    "id": "components_nav_Nav_data-f0a50f4bf3d0",
+    "location": "src/components/nav/Nav.astro",
+    "text": "On tour now"
+  },
+  {
+    "id": "components_nav_Nav_data-07f3e3444b00",
+    "location": "src/components/nav/Nav.astro",
+    "text": "2026 Summer Shows Tour Tracker"
+  },
+  {
+    "id": "components_nav_Nav_data-c8c132959e33",
+    "location": "src/components/nav/Nav.astro",
+    "text": "live"
+  },
+  {
+    "id": "components_nav_Nav_data-56dcbd1183d0",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Add dates to calendar"
+  },
+  {
+    "id": "components_nav_Nav_data-e69f17e627b1",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Tour map"
+  },
+  {
+    "id": "components_nav_Nav_data-6d3a61146e32",
+    "location": "src/components/nav/Nav.astro",
+    "text": "All tours"
+  },
+  {
+    "id": "components_nav_Nav_data-c9d9174bdb6a",
+    "location": "src/components/nav/Nav.astro",
+    "text": "The live archive"
+  },
+  {
+    "id": "components_nav_Nav_data-dfbcb72f03e4",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "components_nav_Nav_data-cdad12ce5a95",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "components_nav_Nav_data-9c7ed16031a1",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Compare shows"
+  },
+  {
+    "id": "components_nav_Nav_data-4b5b0733eb92",
+    "location": "src/components/nav/Nav.astro",
+    "text": "On this day"
+  },
+  {
+    "id": "components_nav_Nav_data-fe527229d9b9",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Tour now"
+  },
+  {
+    "id": "components_nav_Nav_data-518eac128679",
+    "location": "src/components/nav/Nav.astro",
+    "text": "The 2026 Summer Shows Tour Tracker"
+  },
+  {
+    "id": "components_nav_Nav_data-cd4a009425c2",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Dates · maps · setlists · updates"
+  },
+  {
+    "id": "components_nav_Nav_data-dc772574aade",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Publication"
+  },
+  {
+    "id": "components_nav_Nav_data-7d70d9ce2065",
+    "location": "src/components/nav/Nav.astro",
+    "text": "The desks"
+  },
+  {
+    "id": "components_nav_Nav_data-caa4f36f3f75",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Publication"
+  },
+  {
+    "id": "components_nav_Nav_data-97d686f301e6",
+    "location": "src/components/nav/Nav.astro",
+    "text": "essays & interviews"
+  },
+  {
+    "id": "components_nav_Nav_data-7b166126fbc2",
+    "location": "src/components/nav/Nav.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_nav_Nav_data-0fce50fa2918",
+    "location": "src/components/nav/Nav.astro",
+    "text": "the present tense"
+  },
+  {
+    "id": "components_nav_Nav_data-f1007ca6090c",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "components_nav_Nav_data-bc0601d35d5e",
+    "location": "src/components/nav/Nav.astro",
+    "text": "close listening"
+  },
+  {
+    "id": "components_nav_Nav_data-974d8c65376f",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "components_nav_Nav_data-7b1d51061191",
+    "location": "src/components/nav/Nav.astro",
+    "text": "the reference desk"
+  },
+  {
+    "id": "components_nav_Nav_data-408b7ca0f3be",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Keep up"
+  },
+  {
+    "id": "components_nav_Nav_data-c97afb53a817",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Editorials"
+  },
+  {
+    "id": "components_nav_Nav_data-b2b8fbf9c315",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Newsletter"
+  },
+  {
+    "id": "components_nav_Nav_data-d135606ef95a",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Publication RSS"
+  },
+  {
+    "id": "components_nav_Nav_data-80e11cd3d49f",
+    "location": "src/components/nav/Nav.astro",
+    "text": "News RSS"
+  },
+  {
+    "id": "components_nav_Nav_data-094fed5f99ca",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Fourteen close listens"
+  },
+  {
+    "id": "components_nav_Nav_data-8e88c2020be7",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Every studio album, reviewed"
+  },
+  {
+    "id": "components_nav_Nav_data-3e279e7fdc0e",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Reviews · scores · standout tracks"
+  },
+  {
+    "id": "components_nav_Nav_data-4cf4c44127e3",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Archive"
+  },
+  {
+    "id": "components_nav_Nav_data-5edce03a8ace",
+    "location": "src/components/nav/Nav.astro",
+    "text": "The detail"
+  },
+  {
+    "id": "components_nav_Nav_data-c26f542360be",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Cure wiki"
+  },
+  {
+    "id": "components_nav_Nav_data-3765d389f917",
+    "location": "src/components/nav/Nav.astro",
+    "text": "The band"
+  },
+  {
+    "id": "components_nav_Nav_data-df0d895c7c31",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Gear"
+  },
+  {
+    "id": "components_nav_Nav_data-7ff2fb9d02a4",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Curiosities"
+  },
+  {
+    "id": "components_nav_Nav_data-b5b201fd24ab",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Look & count"
+  },
+  {
+    "id": "components_nav_Nav_data-721beee41ade",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Photographs"
+  },
+  {
+    "id": "components_nav_Nav_data-c5586ceb5dc9",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Video archive"
+  },
+  {
+    "id": "components_nav_Nav_data-c6c1f0aaecf7",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Statistics"
+  },
+  {
+    "id": "components_nav_Nav_data-de56cc736d22",
+    "location": "src/components/nav/Nav.astro",
+    "text": "My archive"
+  },
+  {
+    "id": "components_nav_Nav_data-43c4b78bd961",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Go deeper"
+  },
+  {
+    "id": "components_nav_Nav_data-e027e22c8ff0",
+    "location": "src/components/nav/Nav.astro",
+    "text": "Every beautiful detail"
+  },
+  {
+    "id": "components_nav_Nav_data-f5bc48a53fbb",
+    "location": "src/components/nav/Nav.astro",
+    "text": "People · places · pictures · numbers"
+  },
+  {
+    "id": "pages_about_data-a5b09f89a97d",
+    "location": "src/pages/about.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_about_data-01779f584efe",
+    "location": "src/pages/about.astro",
+    "text": "About"
+  },
+  {
+    "id": "pages_about_data-9473d96e7c05",
+    "location": "src/pages/about.astro",
+    "text": "Founded"
+  },
+  {
+    "id": "pages_about_data-5d56c46fbf3f",
+    "location": "src/pages/about.astro",
+    "text": "Curated by"
+  },
+  {
+    "id": "pages_about_data-ea83ab9b1148",
+    "location": "src/pages/about.astro",
+    "text": "Bernard Mcweeney"
+  },
+  {
+    "id": "pages_about_data-01eaa608010f",
+    "location": "src/pages/about.astro",
+    "text": "Based in"
+  },
+  {
+    "id": "pages_about_data-623ed9193b8b",
+    "location": "src/pages/about.astro",
+    "text": "Ireland"
+  },
+  {
+    "id": "pages_about_data-a26d5354e5e5",
+    "location": "src/pages/about.astro",
+    "text": "Status"
+  },
+  {
+    "id": "pages_about_data-8c35fee1f337",
+    "location": "src/pages/about.astro",
+    "text": "Independent"
+  },
+  {
+    "id": "pages_band_gear_data-4946dfc0e802",
+    "location": "src/pages/band/gear.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_band_gear_data-95a253e13d2c",
+    "location": "src/pages/band/gear.astro",
+    "text": "The band"
+  },
+  {
+    "id": "pages_band_gear_data-3dad3989624f",
+    "location": "src/pages/band/gear.astro",
+    "text": "Equipment"
+  },
+  {
+    "id": "pages_band_history_data-9bbd025e3d56",
+    "location": "src/pages/band/history.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_band_history_data-3a2eea762404",
+    "location": "src/pages/band/history.astro",
+    "text": "The band"
+  },
+  {
+    "id": "pages_band_history_data-e9540745ec12",
+    "location": "src/pages/band/history.astro",
+    "text": "History"
+  },
+  {
+    "id": "pages_band_history_data-4fddbc1abe25",
+    "location": "src/pages/band/history.astro",
+    "text": "Eras"
+  },
+  {
+    "id": "pages_band_history_data-f1b9a9a4e5ad",
+    "location": "src/pages/band/history.astro",
+    "text": "Timeline events"
+  },
+  {
+    "id": "pages_band_history_data-6aa95083cb5b",
+    "location": "src/pages/band/history.astro",
+    "text": "Years covered"
+  },
+  {
+    "id": "pages_band_history_data-d9fef1d77430",
+    "location": "src/pages/band/history.astro",
+    "text": "1978 → present"
+  },
+  {
+    "id": "pages_band_members__slug__data-9cdea4b1793b",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Tenure"
+  },
+  {
+    "id": "pages_band_members__slug__data-77ba775a8090",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Documented shows"
+  },
+  {
+    "id": "pages_band_members__slug__data-c7f62328653b",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_band_members__slug__data-661c76329c31",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Active years"
+  },
+  {
+    "id": "pages_band_members__slug__data-d9e535c1d60e",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_band_members__slug__data-b8ea4bdfc57e",
+    "location": "src/pages/band/members/[slug].astro",
+    "text": "The band"
+  },
+  {
+    "id": "pages_band_members_index_data-45a717328527",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_band_members_index_data-915664beec2c",
+    "location": "src/pages/band/members/index.astro",
+    "text": "The band"
+  },
+  {
+    "id": "pages_band_members_index_data-0cca0dbb0c1c",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Members"
+  },
+  {
+    "id": "pages_band_members_index_data-bf7904dcc571",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Members"
+  },
+  {
+    "id": "pages_band_members_index_data-a2d2e329389b",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Current live"
+  },
+  {
+    "id": "pages_band_members_index_data-3a59afb52bcd",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Alumni"
+  },
+  {
+    "id": "pages_band_members_index_data-7db07855b6fa",
+    "location": "src/pages/band/members/index.astro",
+    "text": "Guests"
+  },
+  {
+    "id": "pages_band_data-4b305e29d786",
+    "location": "src/pages/band.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_band_data-bdf7e727e2dc",
+    "location": "src/pages/band.astro",
+    "text": "The band"
+  },
+  {
+    "id": "pages_community_data-c675775c6ff7",
+    "location": "src/pages/community.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_community_data-1501934d0fe5",
+    "location": "src/pages/community.astro",
+    "text": "Community"
+  },
+  {
+    "id": "pages_curiosities_data-d4aa29dfe274",
+    "location": "src/pages/curiosities.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_curiosities_data-11ecfbfd8267",
+    "location": "src/pages/curiosities.astro",
+    "text": "Trivia"
+  },
+  {
+    "id": "pages_curiosities_data-cf0cfbdd7062",
+    "location": "src/pages/curiosities.astro",
+    "text": "On file"
+  },
+  {
+    "id": "pages_curiosities_data-bd39b151fedb",
+    "location": "src/pages/curiosities.astro",
+    "text": "Categories"
+  },
+  {
+    "id": "pages_discography__slug__data-5c9c9fdb2fbc",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Spotify"
+  },
+  {
+    "id": "pages_discography__slug__data-02efd1da69e0",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Apple Music"
+  },
+  {
+    "id": "pages_discography__slug__data-36df878e7dc0",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Bandcamp"
+  },
+  {
+    "id": "pages_discography__slug__data-10ca2a944b47",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Amazon"
+  },
+  {
+    "id": "pages_discography__slug__data-2fe2bce8fc03",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Official Store"
+  },
+  {
+    "id": "pages_discography__slug__data-6838272f3ab8",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_discography__slug__data-a41c9de8a0e8",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Discography"
+  },
+  {
+    "id": "pages_discography_index_data-6eb31e6d7353",
+    "location": "src/pages/discography/index.astro",
+    "text": "All"
+  },
+  {
+    "id": "pages_discography_index_data-931875d77b6b",
+    "location": "src/pages/discography/index.astro",
+    "text": "Albums"
+  },
+  {
+    "id": "pages_discography_index_data-abb486434911",
+    "location": "src/pages/discography/index.astro",
+    "text": "EPs"
+  },
+  {
+    "id": "pages_discography_index_data-57e95f5d1a97",
+    "location": "src/pages/discography/index.astro",
+    "text": "Compilations"
+  },
+  {
+    "id": "pages_discography_index_data-13c60dd39dea",
+    "location": "src/pages/discography/index.astro",
+    "text": "Singles"
+  },
+  {
+    "id": "pages_discography_index_data-cc7f7059df32",
+    "location": "src/pages/discography/index.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_discography_index_data-6277f98998f1",
+    "location": "src/pages/discography/index.astro",
+    "text": "Discography"
+  },
+  {
+    "id": "pages_discography_index_data-614e40bcdf3f",
+    "location": "src/pages/discography/index.astro",
+    "text": "Releases"
+  },
+  {
+    "id": "pages_discography_index_data-6847443fc395",
+    "location": "src/pages/discography/index.astro",
+    "text": "Studio records"
+  },
+  {
+    "id": "pages_discography_index_data-e1a996b40a3f",
+    "location": "src/pages/discography/index.astro",
+    "text": "Singles"
+  },
+  {
+    "id": "pages_discography_index_data-66640bf97796",
+    "location": "src/pages/discography/index.astro",
+    "text": "Years covered"
+  },
+  {
+    "id": "pages_index_data-19978bc85b18",
+    "location": "src/pages/index.astro",
+    "text": "Albums"
+  },
+  {
+    "id": "pages_index_data-2d07dbd1b047",
+    "location": "src/pages/index.astro",
+    "text": "Albums, singles, artwork, tracklists and release notes."
+  },
+  {
+    "id": "pages_index_data-d25a1f41032e",
+    "location": "src/pages/index.astro",
+    "text": "Live shows"
+  },
+  {
+    "id": "pages_index_data-2cb714c25f5a",
+    "location": "src/pages/index.astro",
+    "text": "Setlists, tours, venues and performance history."
+  },
+  {
+    "id": "pages_index_data-2f8611c95eec",
+    "location": "src/pages/index.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_index_data-32aba5f1066e",
+    "location": "src/pages/index.astro",
+    "text": "Lyrics, credits, notes and live play counts."
+  },
+  {
+    "id": "pages_index_data-ebb291d20435",
+    "location": "src/pages/index.astro",
+    "text": "People"
+  },
+  {
+    "id": "pages_index_data-b8d3cb600232",
+    "location": "src/pages/index.astro",
+    "text": "Members, lineups, instruments and the band history."
+  },
+  {
+    "id": "pages_lyrics_data-2d4da564bf32",
+    "location": "src/pages/lyrics.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_lyrics_data-7f6bc61e752d",
+    "location": "src/pages/lyrics.astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "pages_my-archive_data-ab1fad065e58",
+    "location": "src/pages/my-archive.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_my-archive_data-bce9c5c446f9",
+    "location": "src/pages/my-archive.astro",
+    "text": "Saved items"
+  },
+  {
+    "id": "pages_newsletter_data-03733c8fc7ef",
+    "location": "src/pages/newsletter.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_newsletter_data-a2020f7a5a47",
+    "location": "src/pages/newsletter.astro",
+    "text": "Newsletter"
+  },
+  {
+    "id": "pages_on-this-day_data-45dd7ab90125",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_on-this-day_data-c56d1ffd3aa1",
+    "location": "src/pages/on-this-day.astro",
+    "text": "On this day"
+  },
+  {
+    "id": "pages_photos_data-f56e34a7ab03",
+    "location": "src/pages/photos.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_photos_data-7158ebefc066",
+    "location": "src/pages/photos.astro",
+    "text": "Photos"
+  },
+  {
+    "id": "pages_photos_data-24d243b3207c",
+    "location": "src/pages/photos.astro",
+    "text": "On file"
+  },
+  {
+    "id": "pages_photos_data-1cc52c0c606d",
+    "location": "src/pages/photos.astro",
+    "text": "Decades covered"
+  },
+  {
+    "id": "pages_photos_data-78f4e007b8f6",
+    "location": "src/pages/photos.astro",
+    "text": "Featured"
+  },
+  {
+    "id": "pages_photos_data-98fd828ef310",
+    "location": "src/pages/photos.astro",
+    "text": "Tours tagged"
+  },
+  {
+    "id": "pages_publication__slug__data-bd7c8994a56c",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "News"
+  },
+  {
+    "id": "pages_publication__slug__data-1b11cb665148",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "pages_publication__slug__data-4e8d3d0dc2cf",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "pages_publication__slug__data-26dfc1c004e2",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Articles"
+  },
+  {
+    "id": "pages_publication__slug__data-eeda058c4a4d",
+    "location": "src/pages/publication/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_publication_author__slug__data-4cd3b57992c6",
+    "location": "src/pages/publication/author/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_publication_author__slug__data-02994f678412",
+    "location": "src/pages/publication/author/[slug].astro",
+    "text": "Articles"
+  },
+  {
+    "id": "pages_reviews__slug__data-062cf14dd1bd",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_reviews__slug__data-241be271307b",
+    "location": "src/pages/reviews/[slug].astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "pages_reviews_index_data-2b7a260f580d",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_reviews_index_data-a1e06ed991ec",
+    "location": "src/pages/reviews/index.astro",
+    "text": "Reviews"
+  },
+  {
+    "id": "pages_setlists__slug__data-f8268a1d9e1b",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_setlists__slug__data-f4b0e4386599",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "pages_setlists__slug__data-29c41974d9aa",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Overview"
+  },
+  {
+    "id": "pages_setlists__slug__data-f5628fb1c230",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Setlist"
+  },
+  {
+    "id": "pages_setlists__slug__data-d56e599441fb",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Show details"
+  },
+  {
+    "id": "pages_setlists__slug__data-1425ecab3f88",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Context"
+  },
+  {
+    "id": "pages_setlists_compare_data-7a66c29fabe7",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_setlists_compare_data-7e485863290e",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "pages_setlists_compare_data-28b1bc974f42",
+    "location": "src/pages/setlists/compare.astro",
+    "text": "Compare"
+  },
+  {
+    "id": "pages_setlists_data-c72f4d906a04",
+    "location": "src/pages/setlists.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_setlists_data-6ed0974ce6a1",
+    "location": "src/pages/setlists.astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "pages_songs__slug__data-40eaff057956",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Album"
+  },
+  {
+    "id": "pages_songs__slug__data-be1302ca4547",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Track №"
+  },
+  {
+    "id": "pages_songs__slug__data-8ee4a8a06fd5",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Length"
+  },
+  {
+    "id": "pages_songs__slug__data-11d007be1b8d",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Writer"
+  },
+  {
+    "id": "pages_songs__slug__data-906a6b8c788c",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Composer"
+  },
+  {
+    "id": "pages_songs__slug__data-66883ffaeaf3",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Key"
+  },
+  {
+    "id": "pages_songs__slug__data-233f3e96bdc5",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "BPM"
+  },
+  {
+    "id": "pages_songs__slug__data-1f34da7aac36",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Tuning"
+  },
+  {
+    "id": "pages_songs__slug__data-4f686e5c441f",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "First played"
+  },
+  {
+    "id": "pages_songs__slug__data-8b662493014c",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Last played"
+  },
+  {
+    "id": "pages_songs__slug__data-0f39fd76b792",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Live plays"
+  },
+  {
+    "id": "pages_songs__slug__data-255193f0ddf4",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Released as single"
+  },
+  {
+    "id": "pages_songs__slug__data-2925749075b9",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Recording"
+  },
+  {
+    "id": "pages_songs__slug__data-5cad6209eff2",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Sound"
+  },
+  {
+    "id": "pages_songs__slug__data-0a618dc476af",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Archive"
+  },
+  {
+    "id": "pages_songs__slug__data-6dfe021a2a91",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_songs__slug__data-4746f6435549",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_songs__slug__data-b0d0d37fde07",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Overview"
+  },
+  {
+    "id": "pages_songs__slug__data-3248d154db34",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Song file"
+  },
+  {
+    "id": "pages_songs__slug__data-313ee75cee8e",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Lyrics"
+  },
+  {
+    "id": "pages_songs__slug__data-1c67056032cb",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Context"
+  },
+  {
+    "id": "pages_songs__slug__data-37b10eb65d4d",
+    "location": "src/pages/songs/[slug].astro",
+    "text": "Notes & media"
+  },
+  {
+    "id": "pages_songs_data-b7ba4b6af012",
+    "location": "src/pages/songs.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_songs_data-67f0772bf363",
+    "location": "src/pages/songs.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_sources_index_data-20fa932871c1",
+    "location": "src/pages/sources/index.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_sources_index_data-be857c7b6b7e",
+    "location": "src/pages/sources/index.astro",
+    "text": "Sources"
+  },
+  {
+    "id": "pages_sources_index_data-62596bde1e8a",
+    "location": "src/pages/sources/index.astro",
+    "text": "Sources"
+  },
+  {
+    "id": "pages_sources_index_data-bfee51f3d9b5",
+    "location": "src/pages/sources/index.astro",
+    "text": "Records sourced"
+  },
+  {
+    "id": "pages_sources_index_data-9b9155f51f9a",
+    "location": "src/pages/sources/index.astro",
+    "text": "Types"
+  },
+  {
+    "id": "pages_sources_index_data-caf8eb5dfa71",
+    "location": "src/pages/sources/index.astro",
+    "text": "Ranking"
+  },
+  {
+    "id": "pages_sources_index_data-7cdee9d9893b",
+    "location": "src/pages/sources/index.astro",
+    "text": "RELIABILITY"
+  },
+  {
+    "id": "pages_stats_data-773e2ace8e67",
+    "location": "src/pages/stats.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_stats_data-53d50c730fbe",
+    "location": "src/pages/stats.astro",
+    "text": "Statistics"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-2df66d2d7deb",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Shows"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-05c76c74c055",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-b70de61b16ab",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Next"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-cb8cecafd6af",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Format"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-f420a72dbd82",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Last runtime"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-94821208b43c",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Notes"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-75985a1a5534",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-e13fd9b7a654",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "Tours"
+  },
+  {
+    "id": "pages_tours_2026-european-summer-shows_data-2a1c73327474",
+    "location": "src/pages/tours/2026-european-summer-shows.astro",
+    "text": "2026 European Summer Shows"
+  },
+  {
+    "id": "pages_tours__slug__data-e7d746f646ca",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Upcoming"
+  },
+  {
+    "id": "pages_tours__slug__data-2303acf68482",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Completed"
+  },
+  {
+    "id": "pages_tours__slug__data-485bce7598ce",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_tours__slug__data-2bcff7f3bde7",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Tours"
+  },
+  {
+    "id": "pages_tours__slug__data-5a000c7b6586",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Overview"
+  },
+  {
+    "id": "pages_tours__slug__data-e14ccd7a8437",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "The run"
+  },
+  {
+    "id": "pages_tours__slug__data-d221f84795d8",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Route"
+  },
+  {
+    "id": "pages_tours__slug__data-e8d48a3c724f",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Itinerary"
+  },
+  {
+    "id": "pages_tours__slug__data-0b3c7c0871fe",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Tour details"
+  },
+  {
+    "id": "pages_tours__slug__data-70c1f26c351f",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Context"
+  },
+  {
+    "id": "pages_tours_map_data-d1818738f383",
+    "location": "src/pages/tours/map.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_tours_map_data-3e558613bb37",
+    "location": "src/pages/tours/map.astro",
+    "text": "Tours"
+  },
+  {
+    "id": "pages_tours_map_data-94fae0288b35",
+    "location": "src/pages/tours/map.astro",
+    "text": "World map"
+  },
+  {
+    "id": "pages_tours_map_data-48d1b3ad9efa",
+    "location": "src/pages/tours/map.astro",
+    "text": "Shows counted"
+  },
+  {
+    "id": "pages_tours_map_data-c7ca54265366",
+    "location": "src/pages/tours/map.astro",
+    "text": "Cities"
+  },
+  {
+    "id": "pages_tours_map_data-ef0d5a36e2e8",
+    "location": "src/pages/tours/map.astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_tours_map_data-6977d8adf8da",
+    "location": "src/pages/tours/map.astro",
+    "text": "City bubbles"
+  },
+  {
+    "id": "pages_tours_data-d757dcd38106",
+    "location": "src/pages/tours.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_tours_data-bfb1826cb4ae",
+    "location": "src/pages/tours.astro",
+    "text": "Tours"
+  },
+  {
+    "id": "pages_venues__slug__data-418425c8b6b5",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_venues__slug__data-dd2204c160a7",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_venues__slug__data-ad5c5c977d3e",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Venue file"
+  },
+  {
+    "id": "pages_venues__slug__data-7799a610f940",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Profile"
+  },
+  {
+    "id": "pages_venues__slug__data-9c560f263026",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Chronology"
+  },
+  {
+    "id": "pages_venues_data-660d261ae634",
+    "location": "src/pages/venues.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_venues_data-5f11f140440c",
+    "location": "src/pages/venues.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_videos_data-d45d7124c9eb",
+    "location": "src/pages/videos.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_videos_data-e4ad0c230050",
+    "location": "src/pages/videos.astro",
+    "text": "Videos"
+  },
+  {
+    "id": "pages_videos_data-040e65bddea5",
+    "location": "src/pages/videos.astro",
+    "text": "On file"
+  },
+  {
+    "id": "pages_videos_data-c0372b248a29",
+    "location": "src/pages/videos.astro",
+    "text": "Types"
+  },
+  {
+    "id": "pages_videos_data-f1a947e58e22",
+    "location": "src/pages/videos.astro",
+    "text": "Years"
+  },
+  {
+    "id": "pages_wiki__slug__data-cf579cb8892a",
+    "location": "src/pages/wiki/[slug].astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_wiki__slug__data-ae9fe9ff4c7f",
+    "location": "src/pages/wiki/[slug].astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "pages_wiki_data-7809de61cbf6",
+    "location": "src/pages/wiki.astro",
+    "text": "Home"
+  },
+  {
+    "id": "pages_wiki_data-c2ef2a1d8ade",
+    "location": "src/pages/wiki.astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "pages_wiki_data-726abffced74",
+    "location": "src/pages/wiki.astro",
+    "text": "Articles"
+  },
+  {
+    "id": "pages_wiki_data-e69282c4d9b3",
+    "location": "src/pages/wiki.astro",
+    "text": "Sort"
+  },
+  {
+    "id": "pages_about_tuple-d696e5b7ddf5",
+    "location": "src/pages/about.astro",
+    "text": "February 2022"
+  },
+  {
+    "id": "pages_about_tuple-4cfda863b5d9",
+    "location": "src/pages/about.astro",
+    "text": "A fan page begins"
+  },
+  {
+    "id": "pages_about_tuple-9649a65ac666",
+    "location": "src/pages/about.astro",
+    "text": "Cureation started as a fan page on Twitter, now X, sharing and collecting pieces of The Cure history."
+  },
+  {
+    "id": "pages_about_tuple-50be97d365c7",
+    "location": "src/pages/about.astro",
+    "text": "Early versions"
+  },
+  {
+    "id": "pages_about_tuple-cadc399b097c",
+    "location": "src/pages/about.astro",
+    "text": "Setlists and discography"
+  },
+  {
+    "id": "pages_about_tuple-b7ce74ce682a",
+    "location": "src/pages/about.astro",
+    "text": "The site first grew around the core archive work: a setlist log and a discography log."
+  },
+  {
+    "id": "pages_about_tuple-c21aa4f56a18",
+    "location": "src/pages/about.astro",
+    "text": "Now"
+  },
+  {
+    "id": "pages_about_tuple-a96c35d4918f",
+    "location": "src/pages/about.astro",
+    "text": "A connected archive"
+  },
+  {
+    "id": "pages_about_tuple-4524a8eb5f72",
+    "location": "src/pages/about.astro",
+    "text": "The archive keeps expanding through linked data, editorial records, photos, venues, sources, and other details around the band."
+  },
+  {
+    "id": "pages_about_tuple-e4a6b59bf58d",
+    "location": "src/pages/about.astro",
+    "text": "Always"
+  },
+  {
+    "id": "pages_about_tuple-c92dd93345d3",
+    "location": "src/pages/about.astro",
+    "text": "Open to correction"
+  },
+  {
+    "id": "pages_about_tuple-17604624f70e",
+    "location": "src/pages/about.astro",
+    "text": "Dates, credits, lineups, venues, and sources can be corrected as better evidence comes to light."
+  },
+  {
+    "id": "pages_about_tuple-13fdb01dc38e",
+    "location": "src/pages/about.astro",
+    "text": "Fan archive"
+  },
+  {
+    "id": "pages_about_tuple-ec16939637aa",
+    "location": "src/pages/about.astro",
+    "text": "Cureation is dedicated to The Cure and built for people who want to explore the band in detail."
+  },
+  {
+    "id": "pages_about_tuple-b8c97d50760b",
+    "location": "src/pages/about.astro",
+    "text": "Verified where possible"
+  },
+  {
+    "id": "pages_about_tuple-1f57cf628f40",
+    "location": "src/pages/about.astro",
+    "text": "The aim is to use primary verified sources wherever possible, supported by reliable secondary sources when needed."
+  },
+  {
+    "id": "pages_about_tuple-d2f5ee385bbb",
+    "location": "src/pages/about.astro",
+    "text": "Non-commercial"
+  },
+  {
+    "id": "pages_about_tuple-ceff345919a6",
+    "location": "src/pages/about.astro",
+    "text": "Cureation is a one-person passion project, maintained without ads, affiliate links, or commercial backing."
+  },
+  {
+    "id": "pages_about_tuple-6be1d35f3b32",
+    "location": "src/pages/about.astro",
+    "text": "Open corrections"
+  },
+  {
+    "id": "pages_about_tuple-8af98bbbd4ff",
+    "location": "src/pages/about.astro",
+    "text": "If a date, lineup, venue, writer credit, or attribution is wrong, corrections are welcome and will be updated accordingly."
+  },
+  {
+    "id": "pages_band_tuple-f50e915c541f",
+    "location": "src/pages/band.astro",
+    "text": "Members"
+  },
+  {
+    "id": "pages_band_tuple-55bad4c75f69",
+    "location": "src/pages/band.astro",
+    "text": "Current live lineup"
+  },
+  {
+    "id": "pages_band_tuple-f6a3ff31b442",
+    "location": "src/pages/band.astro",
+    "text": "Former members"
+  },
+  {
+    "id": "pages_band_tuple-b2a03b10d99b",
+    "location": "src/pages/band.astro",
+    "text": "Guest players"
+  },
+  {
+    "id": "pages_band_tuple-0f2987163cd1",
+    "location": "src/pages/band.astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "pages_discography__slug__tuple-725d3f092c12",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Released"
+  },
+  {
+    "id": "pages_discography__slug__tuple-9a20f1a58fae",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Label"
+  },
+  {
+    "id": "pages_discography__slug__tuple-baaa37804cad",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Producer"
+  },
+  {
+    "id": "pages_discography__slug__tuple-fadf1d834187",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Catalog"
+  },
+  {
+    "id": "pages_discography__slug__tuple-c5c2b06e06d0",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Runtime"
+  },
+  {
+    "id": "pages_discography__slug__tuple-43ca86df41d9",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Tracks"
+  },
+  {
+    "id": "pages_discography__slug__tuple-ed51cfb6a19e",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Era"
+  },
+  {
+    "id": "pages_discography__slug__tuple-6b589c3a2cfc",
+    "location": "src/pages/discography/[slug].astro",
+    "text": "Peak"
+  },
+  {
+    "id": "pages_index_tuple-f1cf6d85d4e1",
+    "location": "src/pages/index.astro",
+    "text": "Albums"
+  },
+  {
+    "id": "pages_index_tuple-c8896cf6d112",
+    "location": "src/pages/index.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_index_tuple-afe58dd0babc",
+    "location": "src/pages/index.astro",
+    "text": "Shows"
+  },
+  {
+    "id": "pages_index_tuple-f6a89562be86",
+    "location": "src/pages/index.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_lyrics_tuple-8489f7065c09",
+    "location": "src/pages/lyrics.astro",
+    "text": "Songs in catalogue"
+  },
+  {
+    "id": "pages_lyrics_tuple-9cb441cc2d32",
+    "location": "src/pages/lyrics.astro",
+    "text": "Songs with lyrics"
+  },
+  {
+    "id": "pages_lyrics_tuple-b0da10601989",
+    "location": "src/pages/lyrics.astro",
+    "text": "Lyric lines indexed"
+  },
+  {
+    "id": "pages_lyrics_tuple-018b38941911",
+    "location": "src/pages/lyrics.astro",
+    "text": "Records covered"
+  },
+  {
+    "id": "pages_on-this-day_tuple-7dc3265e2f9a",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Date"
+  },
+  {
+    "id": "pages_on-this-day_tuple-caae43456759",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Entries"
+  },
+  {
+    "id": "pages_on-this-day_tuple-d4f6ee18b7e1",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Decades touched"
+  },
+  {
+    "id": "pages_on-this-day_tuple-d6b15d0bf656",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Rolling archive"
+  },
+  {
+    "id": "pages_on-this-day_tuple-24a97b910c63",
+    "location": "src/pages/on-this-day.astro",
+    "text": "Live"
+  },
+  {
+    "id": "pages_setlists__slug__tuple-f5b98bd3e211",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_setlists__slug__tuple-3ff5328f1894",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Covers"
+  },
+  {
+    "id": "pages_setlists__slug__tuple-b81c00a3f74a",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Debuts"
+  },
+  {
+    "id": "pages_setlists__slug__tuple-74313c96c079",
+    "location": "src/pages/setlists/[slug].astro",
+    "text": "Albums represented"
+  },
+  {
+    "id": "pages_setlists_tuple-70b206f66e00",
+    "location": "src/pages/setlists.astro",
+    "text": "Shows"
+  },
+  {
+    "id": "pages_setlists_tuple-6137443c3a6f",
+    "location": "src/pages/setlists.astro",
+    "text": "Years covered"
+  },
+  {
+    "id": "pages_setlists_tuple-b66cf12450de",
+    "location": "src/pages/setlists.astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_setlists_tuple-ad72a7e73c0f",
+    "location": "src/pages/setlists.astro",
+    "text": "Tours"
+  },
+  {
+    "id": "pages_songs_tuple-a3d19dcb67ce",
+    "location": "src/pages/songs.astro",
+    "text": "Songs on file"
+  },
+  {
+    "id": "pages_songs_tuple-c5f67d8c4eaf",
+    "location": "src/pages/songs.astro",
+    "text": "Played live"
+  },
+  {
+    "id": "pages_songs_tuple-15f8401e7778",
+    "location": "src/pages/songs.astro",
+    "text": "Total live plays"
+  },
+  {
+    "id": "pages_songs_tuple-489d3617c18c",
+    "location": "src/pages/songs.astro",
+    "text": "Linked records"
+  },
+  {
+    "id": "pages_stats_tuple-9c3527d9b6e0",
+    "location": "src/pages/stats.astro",
+    "text": "Albums"
+  },
+  {
+    "id": "pages_stats_tuple-5ff5974895b0",
+    "location": "src/pages/stats.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "pages_stats_tuple-c3431403bfeb",
+    "location": "src/pages/stats.astro",
+    "text": "Setlists"
+  },
+  {
+    "id": "pages_stats_tuple-c3041074b6c6",
+    "location": "src/pages/stats.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_tours__slug__tuple-2e621cc5faa1",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Years"
+  },
+  {
+    "id": "pages_tours__slug__tuple-087af4512670",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Start"
+  },
+  {
+    "id": "pages_tours__slug__tuple-5dc8acf8afcc",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "End"
+  },
+  {
+    "id": "pages_tours__slug__tuple-90d0281e753c",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Shows"
+  },
+  {
+    "id": "pages_tours__slug__tuple-56e6950070c6",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Total shows"
+  },
+  {
+    "id": "pages_tours__slug__tuple-642c474471ca",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_tours__slug__tuple-59a2ff031d68",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Associated record"
+  },
+  {
+    "id": "pages_tours__slug__tuple-d888bcfa8415",
+    "location": "src/pages/tours/[slug].astro",
+    "text": "Lineup size"
+  },
+  {
+    "id": "pages_tours_tuple-09a809a586cc",
+    "location": "src/pages/tours.astro",
+    "text": "Tours"
+  },
+  {
+    "id": "pages_tours_tuple-3233951d7b29",
+    "location": "src/pages/tours.astro",
+    "text": "Total shows"
+  },
+  {
+    "id": "pages_tours_tuple-6b75af4fc54b",
+    "location": "src/pages/tours.astro",
+    "text": "Countries visited"
+  },
+  {
+    "id": "pages_tours_tuple-0812db5058f7",
+    "location": "src/pages/tours.astro",
+    "text": "Decades active"
+  },
+  {
+    "id": "pages_venues__slug__tuple-138b10d6e409",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Location"
+  },
+  {
+    "id": "pages_venues__slug__tuple-6f70c74333a2",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Capacity"
+  },
+  {
+    "id": "pages_venues__slug__tuple-2351a7f3d66a",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Opened"
+  },
+  {
+    "id": "pages_venues__slug__tuple-45c76b86aa1d",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Type"
+  },
+  {
+    "id": "pages_venues__slug__tuple-631ac4d505b7",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Cure shows"
+  },
+  {
+    "id": "pages_venues__slug__tuple-7d8b0ebd1888",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "First appearance"
+  },
+  {
+    "id": "pages_venues__slug__tuple-73403134900b",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Latest appearance"
+  },
+  {
+    "id": "pages_venues__slug__tuple-971f4af84484",
+    "location": "src/pages/venues/[slug].astro",
+    "text": "Span"
+  },
+  {
+    "id": "pages_venues_tuple-e34a4e824d7c",
+    "location": "src/pages/venues.astro",
+    "text": "Venues"
+  },
+  {
+    "id": "pages_venues_tuple-42462dfc4fd4",
+    "location": "src/pages/venues.astro",
+    "text": "Countries"
+  },
+  {
+    "id": "pages_venues_tuple-7c8ad0e51350",
+    "location": "src/pages/venues.astro",
+    "text": "With coordinates"
+  },
+  {
+    "id": "pages_venues_tuple-29835807ffaf",
+    "location": "src/pages/venues.astro",
+    "text": "Sorted by"
+  },
+  {
+    "id": "pages_venues_tuple-1761710a2893",
+    "location": "src/pages/venues.astro",
+    "text": "SHOW COUNT"
+  },
+  {
+    "id": "components_nav_Footer_link-05ada863a4cf",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Music"
+  },
+  {
+    "id": "components_nav_Footer_link-01d54579da44",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Live"
+  },
+  {
+    "id": "components_nav_Footer_link-4621c1d55fa4",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Band"
+  },
+  {
+    "id": "components_nav_Footer_link-84a5092e4a5b",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Articles"
+  },
+  {
+    "id": "components_nav_Footer_link-71a1c003a2b8",
+    "location": "src/components/nav/Footer.astro",
+    "text": "News"
+  },
+  {
+    "id": "components_nav_Footer_link-f32828acecb4",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Songs"
+  },
+  {
+    "id": "components_nav_Footer_link-9e11c362bc3d",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Photos"
+  },
+  {
+    "id": "components_nav_Footer_link-deeeb5df3f2c",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Wiki"
+  },
+  {
+    "id": "components_nav_Footer_link-9b15fed64ef1",
+    "location": "src/components/nav/Footer.astro",
+    "text": "Statistics"
+  },
+  {
+    "id": "components_nav_MobileMenu_asset-d2ec916f0a23",
+    "location": "src/components/nav/MobileMenu.astro",
+    "text": "/logo-mark.webp"
+  },
+  {
+    "id": "components_nav_Nav_asset-735c85bab5c5",
+    "location": "src/components/nav/Nav.astro",
+    "text": "/logo-mark.webp"
+  },
+  {
+    "id": "components_nav_Nav_asset-99f711baa494",
+    "location": "src/components/nav/Nav.astro",
+    "text": "/images/albums/disintegration.jpg"
+  },
+  {
+    "id": "components_nav_Nav_asset-197e5f8e1c72",
+    "location": "src/components/nav/Nav.astro",
+    "text": "/hero-image1.jpg"
+  },
+  {
+    "id": "components_nav_Nav_asset-3712e9958024",
+    "location": "src/components/nav/Nav.astro",
+    "text": "/images/albums/disintegration.jpg"
+  },
+  {
+    "id": "components_nav_Nav_asset-56d4faed24c9",
+    "location": "src/components/nav/Nav.astro",
+    "text": "/logo-mark.webp"
+  },
+  {
+    "id": "pages_index_asset-36da02cc693b",
+    "location": "src/pages/index.astro",
+    "text": "/The-Cure-Live-2.avif"
+  }
+]

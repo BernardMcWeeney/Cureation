@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple, copyTupleSource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -34,23 +35,23 @@ setlists.forEach((s) => {
 const decadeEntries = Object.entries(decades).sort((a, b) => a[0].localeCompare(b[0]));
 
 const facts: Array<[string, string]> = [
-  ['Tours catalogued', String(tours.length)],
-  ['Total shows', totalShows.toLocaleString()],
-  ['Countries visited', String(countriesSet.size)],
-  ['Decades active', String(decadeEntries.length)],
+  copyTuple([copyText("pages_tours_tuple-09a809a586cc", "Tours"), String(tours.length)], {"0":"pages_tours_tuple-09a809a586cc"}),
+  copyTuple([copyText("pages_tours_tuple-3233951d7b29", "Total shows"), totalShows.toLocaleString()], {"0":"pages_tours_tuple-3233951d7b29"}),
+  copyTuple([copyText("pages_tours_tuple-6b75af4fc54b", "Countries visited"), String(countriesSet.size)], {"0":"pages_tours_tuple-6b75af4fc54b"}),
+  copyTuple([copyText("pages_tours_tuple-0812db5058f7", "Decades active"), String(decadeEntries.length)], {"0":"pages_tours_tuple-0812db5058f7"}),
 ];
 ---
 <Layout title="Tours · Cureation">
-  <PageHero
-    section="Touring"
-    title="The tours"
-    deck="Every run in order, from the earliest club dates to the arena cycles, with associated records and lineups on file."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Tours' }]}
-    facts={facts.map(([k, v]) => ({ k, v }))}
+  <PageHero copyKeys={{"section":"pages_tours_dc42e033debc","title":"pages_tours_858d1f1fadb5","deck":"pages_tours_2040a8eb9760"}}
+    section={copyText("pages_tours_dc42e033debc", "Touring")}
+    title={copyText("pages_tours_858d1f1fadb5", "The tours")}
+
+    crumbs={[{ ...copySource({"label":"pages_tours_data-d757dcd38106"}),  label: copyText("pages_tours_data-d757dcd38106", "Home"), href: '/' }, { ...copySource({"label":"pages_tours_data-bfb1826cb4ae"}),  label: copyText("pages_tours_data-bfb1826cb4ae", "Tours") }]}
+    facts={facts.map((fact) => ({ ...copyTupleSource(fact, ["k", "v"]), k: fact[0], v: fact[1] }))}
     flush
   />
 
-  <IssueSection kicker={`${tours.length} tours`} title="Chronology" meta="All confirmed runs">
+  <IssueSection title="Tours" hideHeader>
     <div class="table-controls" aria-label="Tour table filters">
       <div class="table-controls__grid">
         <Select
@@ -72,11 +73,11 @@ const facts: Array<[string, string]> = [
     </div>
     <div class="table-results-bar">
       <span data-match-count>{tours.length} tours</span>
-      <span><span data-active-decade>All decades</span> · <span data-page-range aria-live="polite"></span></span>
+      <span><span data-directus={copyAttr("pages_tours_6e35509ad16e")} set:html={copyText("pages_tours_6e35509ad16e", "All decades")} data-active-decade></span> · <span data-page-range aria-live="polite"></span></span>
     </div>
     <div class="table-wrap">
     <table class="data data--airy" data-tours-table>
-      <thead><tr><th style="width:50px;">№</th><th style="width:110px;">Start</th><th>Tour</th><th>Record</th><th class="num" style="text-align:right; width:80px;">Shows</th></tr></thead>
+      <thead><tr><th style="width:50px;">№</th><th data-directus={copyAttr("pages_tours_7f7fd41e4a4c")} set:html={copyText("pages_tours_7f7fd41e4a4c", "Start")} style="width:110px;"></th><th data-directus={copyAttr("pages_tours_04d527094faf")} set:html={copyText("pages_tours_04d527094faf", "Tour")}></th><th data-directus={copyAttr("pages_tours_6181b9e13af3")} set:html={copyText("pages_tours_6181b9e13af3", "Album")}></th><th data-directus={copyAttr("pages_tours_f45e1356c8e6")} set:html={copyText("pages_tours_f45e1356c8e6", "Shows")} class="num" style="text-align:right; width:80px;"></th></tr></thead>
       <tbody>
         {tours.slice().reverse().map((t, i) => {
           const album = t.associated_album ? albumsById[t.associated_album] : null;
@@ -85,12 +86,12 @@ const facts: Array<[string, string]> = [
           const tourDecades = Array.from(tourDecadesById.get(t.id) || new Set(fallbackDecade ? [fallbackDecade] : []));
           const search = `${t.name || ''} ${album?.title || ''}`.toLowerCase();
           return (
-            <tr data-clickable data-decade={tourDecades.join('|')} data-search={search} data-start={t.start_date || ''} onclick={`location.href='/tours/${t.slug}'`}>
+            <tr data-clickable data-decade={tourDecades.join('|')} data-search={search} data-start={t.start_date || ''} data-row-href={`/tours/${t.slug}`}>
               <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-              <td class="mono-sm" style="color: var(--ink);">{t.start_date || '–'}</td>
-              <td><span class="serif" style="font-size:20px; font-style:italic;">{t.name}</span></td>
-              <td class="mono-sm" style="color: var(--ink-2);">{album ? album.title : '–'}</td>
-              <td class="num">{t.total_shows || '–'}</td>
+              <td data-directus={editable(t, ["start_date"])} class="mono-sm" style="color: var(--ink);">{t.start_date || '–'}</td>
+              <td><a data-directus={editable(t, ["name"])} href={`/tours/${encodeURIComponent(t.slug)}`} class="serif" style="font-size:20px; font-style:italic;">{t.name}</a></td>
+              <td data-directus={editable(album, ["title"])} class="mono-sm" style="color: var(--ink-2);">{album ? album.title : '–'}</td>
+              <td data-directus={editable(t, ["total_shows"])} class="num">{t.total_shows || '–'}</td>
             </tr>
           );
         })}

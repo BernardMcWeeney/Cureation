@@ -1,10 +1,13 @@
 ---
+import { editable, copyText, copySource } from '../../lib/visual-editing';
 import Crumbs from '../ui/Crumbs.astro';
 import Tag from '../ui/Tag.astro';
 import ReadingProgress from '../ui/ReadingProgress.astro';
 import Bookmark from '../ui/Bookmark.astro';
+import { responsiveAsset } from '../../lib/assets';
 
 interface Props {
+  record?: unknown;
   kind?: 'review' | 'news';
   section: string;
   sectionHref: string;
@@ -25,6 +28,7 @@ interface Props {
 }
 
 const {
+  record,
   kind = 'news',
   section,
   sectionHref,
@@ -41,7 +45,7 @@ const {
   score,
   bookmark,
   crumbs = [
-    { label: 'Home', href: '/' },
+    { ...copySource({"label":"components_editorial_EditorialArticle_data-31bea57991e2"}),  label: copyText("components_editorial_EditorialArticle_data-31bea57991e2", "Home"), href: '/' },
     { label: section, href: sectionHref },
     { label: title },
   ],
@@ -53,6 +57,8 @@ const formattedDate = publishedDate
       .format(new Date(`${publishedDate.slice(0, 10)}T00:00:00Z`))
   : null;
 const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 : 0) : null;
+const coverWidths = [480, 760, 1200];
+const coverSrcset = responsiveAsset(image, 760) ? coverWidths.map((width) => `${responsiveAsset(image, width)} ${width}w`).join(', ') : undefined;
 ---
 
 <ReadingProgress target="[data-editorial-body]" />
@@ -82,11 +88,11 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
         </div>
       )}
 
-      <h1>{title}</h1>
-      {standfirst && <p class="editorial-hero__standfirst">{standfirst}</p>}
+      <h1 data-directus={editable(record, "title")}>{title}</h1>
+      {standfirst && <p data-directus={editable(record, kind === "review" ? "standfirst" : "excerpt")} class="editorial-hero__standfirst">{standfirst}</p>}
 
       <div class="editorial-byline" aria-label="Article details">
-        {author && <span>By <strong>{author}</strong></span>}
+        {author && <span>By <strong data-directus={editable(record, "author_name")}>{author}</strong></span>}
         {formattedDate && <time datetime={publishedDate?.slice(0, 10)}>{formattedDate}</time>}
         {readingTime && <span>{readingTime} min read</span>}
       </div>
@@ -94,7 +100,7 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
 
     {kind === 'review' && image && (
       <figure class="editorial-cover">
-        <img src={image} alt={imageAlt} width="760" height="760" decoding="async" />
+        <img src={responsiveAsset(image, 760) || image} srcset={coverSrcset} sizes={coverSrcset ? '(max-width: 680px) 88vw, (max-width: 900px) 310px, 430px' : undefined} alt={imageAlt} width="760" height="760" decoding="async" fetchpriority="high" />
         {scoreLabel && (
           <div class="editorial-score" aria-label={`Cureation score: ${scoreLabel} out of 10`}>
             <span>{scoreLabel}</span>
@@ -119,7 +125,7 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
     </figure>
   )}
 
-  <div class:list={['container', 'editorial-layout', { 'editorial-layout--single': !hasRail }]}>
+  <div class:list={['container', 'editorial-layout', 'archive-columns', { 'editorial-layout--single': !hasRail }]}>
     <div class="editorial-copy" data-editorial-body>
       <slot />
     </div>
@@ -219,8 +225,8 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
     gap: 8px 0;
     margin-top: clamp(22px, 3vw, 34px);
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
   }
@@ -272,8 +278,8 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
     padding: 9px 12px;
     border-top: 1px solid var(--rule);
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 9px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
   }
@@ -304,14 +310,14 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
 
   .editorial-score small {
     align-self: start;
-    font-family: var(--f-mono);
-    font-size: 9px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
   }
 
   .editorial-feature { margin-bottom: clamp(44px, 6vw, 80px); }
   .editorial-feature img { width: 100%; max-height: min(72vh, 760px); border: 1px solid var(--rule); object-fit: cover; }
-  .editorial-feature figcaption { margin-top: 8px; color: var(--muted); font-family: var(--f-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+  .editorial-feature figcaption { margin-top: 8px; color: var(--muted); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .12em; text-transform: uppercase; }
 
   .editorial-layout {
     display: grid;
@@ -368,13 +374,13 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
   .editorial-rail > * { position: sticky; top: 104px; }
   .editorial-rail-card { border-top: 2px solid var(--accent); border-bottom: 1px solid var(--rule); padding: 20px 0; }
   .editorial-rail-card + .editorial-rail-card { margin-top: 28px; }
-  .editorial-rail-label { display: block; margin-bottom: 12px; color: var(--muted); font-family: var(--f-mono); font-size: 9px; letter-spacing: .19em; text-transform: uppercase; }
-  .editorial-rail-card p { margin: 0; color: var(--ink-2); font-family: var(--f-serif); font-size: 15px; line-height: 1.58; }
+  .editorial-rail-label { display: block; margin-bottom: 12px; color: var(--muted); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; }
+  .editorial-rail-card p { margin: 0; color: var(--ink-2); font-family: var(--f-serif); font-size: var(--text-small); line-height: 1.58; }
   .editorial-rail-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-  .editorial-rail-list li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-top: 1px solid var(--rule-2); color: var(--ink-2); font-size: 13px; }
+  .editorial-rail-list li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-top: 1px solid var(--rule-2); color: var(--ink-2); font-size: var(--text-small); line-height: 1.5; }
   .editorial-rail-list li:first-child { border-top: 0; padding-top: 0; }
   .editorial-rail-list strong { color: var(--ink); font-weight: 400; text-align: right; }
-  .editorial-rail-link { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 14px; border: 0; border-top: 1px solid var(--rule); color: var(--accent-3); font-family: var(--f-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+  .editorial-rail-link { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 14px; border: 0; border-top: 1px solid var(--rule); color: var(--accent-3); font-family: var(--f-ui); font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; }
 
   .editorial-footer { margin-top: clamp(64px, 9vw, 120px); padding-top: clamp(32px, 4vw, 56px); border-top: 1px solid var(--rule); }
 
@@ -391,7 +397,7 @@ const scoreLabel = score != null ? Number(score).toFixed(Number(score) % 1 ? 1 :
     .editorial-tools { align-items: flex-start; padding-top: 18px; }
     .editorial-tools .bookmark__label { display: none; }
     .editorial-tools .bookmark { width: 40px; min-height: 38px; justify-content: center; padding: 0; }
-    .editorial-tools .crumbs { font-size: 9px; letter-spacing: .12em; }
+    .editorial-tools .crumbs { font-size: var(--text-label); letter-spacing: .12em; }
     .editorial-tools .crumbs__list { flex-wrap: nowrap; }
     .editorial-tools .crumbs__item:last-child { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; }
     .editorial-hero { padding-top: 28px; }

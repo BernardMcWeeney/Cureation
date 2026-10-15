@@ -1,64 +1,45 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../../lib/visual-editing';
 import Layout from '../../layouts/Layout.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
 import PageHero from '../../components/ui/PageHero.astro';
 import Select from '../../components/ui/Select.astro';
 import SearchField from '../../components/ui/SearchField.astro';
-import { fetchRaw } from '../../lib/directus';
+import { fetchRaw, getSourceUsage } from '../../lib/directus';
 
 export const prerender = false;
 
-const sources: any[] = await fetchRaw('sources', { limit: -1, sort: '-reliability,name' }).catch(() => []);
-
-const sourceFilterParams = (coll: string, id: number) =>
-  coll === 'setlists'
-    ? { 'filter[source_id][_eq]': id }
-    : { 'filter[source][_eq]': id };
-
-const collectionCount = async (coll: string, id: number) => {
-  try {
-    const res: any[] = await fetchRaw(coll, { limit: -1, fields: 'id', ...sourceFilterParams(coll, id) });
-    return res.length;
-  } catch { return 0; }
-};
-
-const enriched = await Promise.all(sources.map(async (s) => {
-  const [alb, sng, set, tur, mem, phs, nws, dyk, tml] = await Promise.all([
-    collectionCount('discography', s.id),
-    collectionCount('songs', s.id),
-    collectionCount('setlists', s.id),
-    collectionCount('tours', s.id),
-    collectionCount('members', s.id),
-    collectionCount('photos', s.id),
-    collectionCount('news', s.id),
-    collectionCount('did_you_know', s.id),
-    collectionCount('timeline', s.id),
-  ]);
-  const total = alb + sng + set + tur + mem + phs + nws + dyk + tml;
-  return { ...s, counts: { alb, sng, set, tur, mem, phs, nws, dyk, tml, total } };
-}));
-
-enriched.sort((a, b) => b.counts.total - a.counts.total);
+const sources: any[] = await fetchRaw('sources', { limit: -1, sort: '-reliability,name' });
+const usage = await getSourceUsage();
+const collections = { alb: 'discography', sng: 'songs', set: 'setlists', tur: 'tours', mem: 'members', phs: 'photos', nws: 'news', dyk: 'did_you_know', tml: 'timeline' };
+const enriched = sources.map((source) => {
+  const counts = Object.fromEntries(Object.entries(collections).map(([key, collection]) => [key, usage[collection]?.get(Number(source.id)) ?? (usage[collection] ? 0 : null)]));
+  const values = Object.values(counts);
+  const total = values.some((value) => value === null) ? null : values.reduce<number>((sum, value) => sum + Number(value), 0);
+  return { ...source, counts: { ...counts, total } };
+});
+enriched.sort((a, b) => (b.counts.total ?? -1) - (a.counts.total ?? -1));
+const safeSourceUrl = (value: unknown) => typeof value === 'string' && /^https?:\/\//i.test(value) ? value : undefined;
 
 const types = Array.from(new Set(sources.map((s) => s.type).filter(Boolean))).sort();
-const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
+const totalRecords = enriched.some((entry) => entry.counts.total === null) ? null : enriched.reduce((sum, entry) => sum + Number(entry.counts.total), 0);
 ---
 <Layout title="Sources · Cureation">
-  <PageHero
-    section="Provenance"
-    title="Sources"
-    deck="Every claim traces back to something. This ledger records where the archive's facts came from, with citations, counts and reliability rankings."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Sources' }]}
+  <PageHero copyKeys={{"section":"pages_sources_index_b84265fda15b","title":"pages_sources_index_3ca385c3f457","deck":"pages_sources_index_68eb1b64d02f"}}
+    section={copyText("pages_sources_index_b84265fda15b", "Provenance")}
+    title={copyText("pages_sources_index_3ca385c3f457", "Sources")}
+
+    crumbs={[{ ...copySource({"label":"pages_sources_index_data-20fa932871c1"}),  label: copyText("pages_sources_index_data-20fa932871c1", "Home"), href: '/' }, { ...copySource({"label":"pages_sources_index_data-be857c7b6b7e"}),  label: copyText("pages_sources_index_data-be857c7b6b7e", "Sources") }]}
     facts={[
-      { k: 'Sources on file', v: sources.length },
-      { k: 'Records sourced', v: totalRecords.toLocaleString() },
-      { k: 'Types', v: types.length },
-      { k: 'Ranking', v: 'RELIABILITY' },
+      { ...copySource({"k":"pages_sources_index_data-62596bde1e8a"}),  k: copyText("pages_sources_index_data-62596bde1e8a", "Sources"), v: sources.length },
+      { ...copySource({"k":"pages_sources_index_data-bfee51f3d9b5"}),  k: copyText("pages_sources_index_data-bfee51f3d9b5", "Records sourced"), v: totalRecords?.toLocaleString() ?? 'Unavailable' },
+      { ...copySource({"k":"pages_sources_index_data-9b9155f51f9a"}),  k: copyText("pages_sources_index_data-9b9155f51f9a", "Types"), v: types.length },
+      { ...copySource({"k":"pages_sources_index_data-caf8eb5dfa71","v":"pages_sources_index_data-7cdee9d9893b"}),  k: copyText("pages_sources_index_data-caf8eb5dfa71", "Ranking"), v: copyText("pages_sources_index_data-7cdee9d9893b", "RELIABILITY") },
     ]}
     flush
   />
 
-  <IssueSection kicker="Citations" title="The ledger" meta={`${enriched.length} sources`}>
+  <IssueSection title="Sources" hideHeader>
     <div class="table-controls" aria-label="Sources table filters">
       <div class="table-controls__grid table-controls__grid--3">
         <Select
@@ -85,30 +66,29 @@ const totalRecords = enriched.reduce((n, e) => n + e.counts.total, 0);
     <table class="data data--airy" data-sources-table>
       <thead><tr>
         <th style="width:50px;">№</th>
-        <th>Source</th>
-        <th>Type</th>
-        <th>Author</th>
-        <th class="num" style="text-align:right; width:90px;">Records</th>
-        <th class="num" style="text-align:right; width:90px;">Reliability</th>
+        <th data-directus={copyAttr("pages_sources_index_7638d8da607f")} set:html={copyText("pages_sources_index_7638d8da607f", "Source")}></th>
+        <th data-directus={copyAttr("pages_sources_index_35763e32c90c")} set:html={copyText("pages_sources_index_35763e32c90c", "Type")}></th>
+        <th data-directus={copyAttr("pages_sources_index_9785acb5355d")} set:html={copyText("pages_sources_index_9785acb5355d", "Author")}></th>
+        <th data-directus={copyAttr("pages_sources_index_afe45d0856f6")} set:html={copyText("pages_sources_index_afe45d0856f6", "Albums")} class="num" style="text-align:right; width:90px;"></th>
+        <th data-directus={copyAttr("pages_sources_index_141313c01011")} set:html={copyText("pages_sources_index_141313c01011", "Reliability")} class="num" style="text-align:right; width:90px;"></th>
       </tr></thead>
       <tbody>
         {enriched.map((s, i) => (
-          <tr data-clickable={s.url ? '' : undefined}
+          <tr
               data-type={s.type || ''}
               data-official={s.is_official ? 'yes' : 'no'}
-              data-search={`${s.name || ''} ${s.author || ''} ${s.description || ''}`.toLowerCase()}
-              onclick={s.url ? `window.open('${s.url}','_blank','noopener,noreferrer')` : undefined}>
+              data-search={`${s.name || ''} ${s.author || ''} ${s.description || ''}`.toLowerCase()}>
             <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-            <td>
-              <span class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{s.name}</span>
+            <td >
+              {safeSourceUrl(s.url) ? <a data-directus={editable(s, ["name", "url"])} href={safeSourceUrl(s.url)} target="_blank" rel="noopener noreferrer" class="serif" style="font-size:19px; font-style:italic; line-height:1.3;">{s.name}<span class="sr-only"> (opens in a new tab)</span></a> : <span class="serif">{s.name}</span>}
               {s.url && <span class="mono-sm" style="margin-left:.5rem; color: var(--accent-3);">↗</span>}
-              {s.is_official && <span class="tag" style="margin-left:.5rem; font-size:9px; background: var(--accent-tint);">OFFICIAL</span>}
-              {s.description && <div class="muted" style="font-family:var(--f-serif); font-size:14px; margin-top:.2rem; max-width: 60ch;">{s.description}</div>}
+              {s.is_official && <span data-directus={copyAttr("pages_sources_index_ed5d4cccf5cf")} set:html={copyText("pages_sources_index_ed5d4cccf5cf", "OFFICIAL")} class="tag" style="margin-left:.5rem; font-size:var(--text-label); background: var(--accent-tint);"></span>}
+              {s.description && <div data-directus={editable(s, ["description"])} class="muted" style="font-family:var(--f-serif); font-size:var(--text-small); margin-top:.2rem; max-width: 60ch;">{s.description}</div>}
             </td>
-            <td class="mono-sm muted">{(s.type || '–').toUpperCase()}</td>
-            <td class="mono-sm muted">{s.author || '–'}</td>
-            <td class="num" style="color: var(--accent-3);">{s.counts.total.toLocaleString()}</td>
-            <td class="num">{s.reliability ?? '–'}</td>
+            <td data-directus={editable(s, ["type"])} class="mono-sm muted">{(s.type || '–').toUpperCase()}</td>
+            <td data-directus={editable(s, ["author"])} class="mono-sm muted">{s.author || '–'}</td>
+            <td data-directus={editable(s.counts, ["total"]) ?? editable(s, ["counts"])} class="num" style="color: var(--accent-3);">{s.counts.total?.toLocaleString() ?? 'Unavailable'}</td>
+            <td data-directus={editable(s, ["reliability"])} class="num">{s.reliability ?? '–'}</td>
           </tr>
         ))}
       </tbody>

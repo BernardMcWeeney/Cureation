@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource, copyTuple, copyTupleSource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
@@ -11,28 +12,25 @@ const byCountry = Array.from(new Set(venues.map((v) => v.country).filter(Boolean
 const withCoords = venues.filter((v) => v.latitude && v.longitude).length;
 
 const facts: Array<[string, string]> = [
-  ['Venues on file', String(venues.length)],
-  ['Countries', String(byCountry.length)],
-  ['With coordinates', String(withCoords)],
-  ['Sorted by', 'SHOW COUNT'],
+  copyTuple([copyText("pages_venues_tuple-e34a4e824d7c", "Venues"), String(venues.length)], {"0":"pages_venues_tuple-e34a4e824d7c"}),
+  copyTuple([copyText("pages_venues_tuple-42462dfc4fd4", "Countries"), String(byCountry.length)], {"0":"pages_venues_tuple-42462dfc4fd4"}),
+  copyTuple([copyText("pages_venues_tuple-7c8ad0e51350", "With coordinates"), String(withCoords)], {"0":"pages_venues_tuple-7c8ad0e51350"}),
+  copyTuple([copyText("pages_venues_tuple-29835807ffaf", "Sorted by"), copyText("pages_venues_tuple-1761710a2893", "SHOW COUNT")], {"0":"pages_venues_tuple-29835807ffaf","1":"pages_venues_tuple-1761710a2893"}),
 ];
 ---
 <Layout title="Venues · Cureation">
-  <PageHero
-    section="Venues"
-    title="Venues"
-    deck="Every room the band has played, ranked by repeat visits and annotated with capacity and first and latest Cure appearances."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Venues' }]}
-    facts={facts.map(([k, v]) => ({ k, v }))}
+  <PageHero copyKeys={{"section":"pages_venues_639b5f19f108","title":"pages_venues_1fb868602927","deck":"pages_venues_869809fae017"}}
+    section={copyText("pages_venues_639b5f19f108", "Venues")}
+    title={copyText("pages_venues_1fb868602927", "Venues")}
+
+    crumbs={[{ ...copySource({"label":"pages_venues_data-660d261ae634"}),  label: copyText("pages_venues_data-660d261ae634", "Home"), href: '/' }, { ...copySource({"label":"pages_venues_data-5f11f140440c"}),  label: copyText("pages_venues_data-5f11f140440c", "Venues") }]}
+    facts={facts.map((fact) => ({ ...copyTupleSource(fact, ["k", "v"]), k: fact[0], v: fact[1] }))}
     flush
   />
 
   <section class="venue-index">
     <div class="container">
-      <header class="venue-heading">
-        <div><span>Ranked by repeat visits</span><h2>Every room,<br /><em>from clubs to fields.</em></h2></div>
-        <a href="/venues/map">Open the venue map <i>↗</i></a>
-      </header>
+      <nav class="venue-heading" aria-label="Venue views"><a href="/venues/map">Venue map ↗</a></nav>
       <div class="venue-filters" aria-label="Venue archive filters">
         <div class="table-controls__grid table-controls__grid--3">
         <Select
@@ -67,14 +65,14 @@ const facts: Array<[string, string]> = [
             <a class="venue-card" href={`/venues/${v.slug}`} data-venue-card data-country={v.country || ''} data-cap={bucket} data-search={search}>
               <span class="venue-card__index">{String(i + 1).padStart(2, '0')}</span>
               <div class="venue-card__body">
-                <small>{[v.city, v.state_province, v.country].filter(Boolean).join(' · ') || 'Location pending'}</small>
-                <h3>{v.name}</h3>
+                <small data-directus={editable(v, ["city","state_province","country"])}>{[v.city, v.state_province, v.country].filter(Boolean).join(' · ') || 'Location pending'}</small>
+                <h3 data-directus={editable(v, ["name"])}>{v.name}</h3>
               </div>
               <dl>
-                <div><dt>Capacity</dt><dd>{v.capacity ? v.capacity.toLocaleString() : '–'}</dd></div>
-                <div><dt>Cure shows</dt><dd>{v.cure_show_count || '–'}</dd></div>
+                <div><dt data-directus={copyAttr("pages_venues_ef7416a81408")} set:html={copyText("pages_venues_ef7416a81408", "Capacity")}></dt><dd data-directus={editable(v, ["capacity"])}>{v.capacity ? v.capacity.toLocaleString() : '–'}</dd></div>
+                <div><dt data-directus={copyAttr("pages_venues_e34b8a019f35")} set:html={copyText("pages_venues_e34b8a019f35", "Cure shows")}></dt><dd data-directus={editable(v, ["cure_show_count"])}>{v.cure_show_count || '–'}</dd></div>
               </dl>
-              <b>Open venue <i>↗</i></b>
+              <b data-directus={copyAttr("pages_venues_cc2b1e09c9a7")} set:html={copyText("pages_venues_cc2b1e09c9a7", "Open venue <i>↗</i>")}></b>
             </a>
           );
         })}
@@ -123,31 +121,31 @@ const facts: Array<[string, string]> = [
 </script>
 
 <style>
-  .venue-index { padding-block: clamp(82px, 10vw, 148px); background: var(--bg-2); }
-  .venue-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; margin-bottom: clamp(42px, 6vw, 76px); }
-  .venue-heading span, .venue-card small, .venue-card__index, .venue-card dt, .venue-card > b, .venue-results { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  .venue-index { padding-block: clamp(28px, 4vw, 48px); background: var(--bg-2); }
+  .venue-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: end; margin-bottom: 20px; }
+  .venue-heading span, .venue-card small, .venue-card__index, .venue-card dt, .venue-card > :global(b), .venue-results { color: var(--accent); font-family: var(--f-ui); font-size: var(--text-label); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
   .venue-heading h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
-  .venue-heading h2 em { color: var(--accent); font-weight: inherit; }
-  .venue-heading > a { display: flex; gap: 18px; padding: 14px 16px; border: 0; background: var(--accent); color: var(--accent-ink); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .venue-heading h2 :global(em) { color: var(--accent); font-weight: inherit; }
+  .venue-heading > a { display: flex; gap: 18px; padding: 14px 16px; border: 0; background: var(--accent); color: var(--accent-ink); font-family: var(--f-ui); font-size: var(--text-label); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
   .venue-heading > a:hover { color: var(--accent-ink); box-shadow: var(--glow); }
-  .venue-heading i, .venue-card i { font-style: normal; }
+  .venue-heading :global(i), .venue-card :global(i) { font-style: normal; }
   .venue-filters { padding: clamp(18px, 2.5vw, 30px); background: var(--bg); }
   .venue-results { display: flex; justify-content: space-between; gap: 16px; padding: 20px 0; }
   .venue-results > :last-child { color: var(--muted); }
   .venue-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule); }
-  .venue-card { position: relative; min-width: 0; min-height: 340px; display: flex; flex-direction: column; padding: clamp(23px, 2.8vw, 38px); border: 0; background: var(--bg); color: inherit; overflow: hidden; }
+  .venue-card { position: relative; min-width: 0; min-height: 250px; display: flex; flex-direction: column; padding: clamp(23px, 2.8vw, 38px); border: 0; background: var(--bg); color: inherit; overflow: hidden; }
   .venue-card::after { position: absolute; right: 0; bottom: 0; left: 0; height: 5px; content: ''; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .22s ease; }
-  .venue-card__body { margin-top: clamp(44px, 6vw, 80px); }
+  .venue-card__body { margin-top: 24px; }
   .venue-card h3 { max-width: 15ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(31px, 3vw, 46px); font-style: italic; font-weight: 400; letter-spacing: -.035em; line-height: .92; }
   .venue-card dl { display: flex; gap: clamp(22px, 3vw, 46px); margin: auto 0 0; padding-top: 28px; }
   .venue-card dl div { min-width: 0; }
   .venue-card dt { color: var(--muted); }
   .venue-card dd { margin: 5px 0 0; color: var(--ink); font-family: var(--f-display); font-size: 24px; }
-  .venue-card > b { display: flex; justify-content: space-between; margin-top: 24px; }
+  .venue-card > :global(b) { display: flex; justify-content: space-between; margin-top: 24px; }
   .venue-card:hover { background: var(--accent-tint); }
   .venue-card:hover::after { transform: scaleX(1); }
   .venue-card:hover h3 { color: var(--accent); }
   @media (max-width: 1000px) { .venue-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 720px) { .venue-heading { grid-template-columns: 1fr; align-items: start; } .venue-heading > a { justify-self: start; } }
-  @media (max-width: 580px) { .venue-grid { grid-template-columns: 1fr; } .venue-card { min-height: 290px; } }
+  @media (max-width: 580px) { .venue-grid { grid-template-columns: 1fr; } .venue-card { min-height: 250px; } }
 </style>

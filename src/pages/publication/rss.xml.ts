@@ -1,3 +1,4 @@
+import { rssDate } from '../../lib/archive-dates';
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
 import { listNews, listReviews } from '../../lib/directus';
@@ -15,22 +16,22 @@ export async function GET(context: APIContext) {
       .map((n: any) => ({
       title: n.title,
       link: `/publication/${n.slug}`,
-      pubDate: new Date(n.published_date || n.date_created || Date.now()),
+      pubDate: rssDate(n.published_date || n.date_created),
       description: n.excerpt || '',
       categories: [n.category].filter(Boolean),
       })),
     ...reviews.map((review) => ({
       title: review.title,
       link: `/reviews/${review.slug}`,
-      pubDate: new Date(review.published_date || review.date_created || Date.now()),
+      pubDate: rssDate(review.published_date || review.date_created),
       description: review.standfirst || review.verdict || '',
       categories: ['review', review.album.title],
     })),
-  ].sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime()).slice(0, 50);
+  ].sort((a, b) => (b.pubDate?.getTime() || 0) - (a.pubDate?.getTime() || 0)).slice(0, 50);
   return rss({
-    title: 'Cureation | Publication',
+    title: 'Cureation | Articles',
     description: 'Latest news, editorials, reviews and archive notes from Cureation.',
-    site: context.site ?? new URL('https://cureation.net'),
+    site: context.site ?? new URL('https://cureation.com'),
     items,
     customData: `<language>en</language>`,
   });

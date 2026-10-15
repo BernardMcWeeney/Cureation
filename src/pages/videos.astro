@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import PageHero from '../components/ui/PageHero.astro';
 import Select from '../components/ui/Select.astro';
@@ -6,7 +7,7 @@ import SearchField from '../components/ui/SearchField.astro';
 import { fetchRaw } from '../lib/directus';
 import { asset } from '../lib/assets';
 
-const videos: any[] = await fetchRaw('videos', { limit: -1, sort: '-date,-date_created' }).catch(() => []);
+const videos: any[] = await fetchRaw('videos', { limit: -1, sort: '-date' }).catch(() => []);
 const types = Array.from(new Set(videos.map((v) => v.type).filter(Boolean))).sort();
 const years = Array.from(new Set(videos.map((v) => (v.release_date || v.date || '').slice(0, 4)).filter(Boolean))).sort().reverse();
 
@@ -17,27 +18,26 @@ const ytId = (url: string): string | null => {
 };
 ---
 <Layout title="Videos · Cureation">
-  <PageHero
-    section="Moving image"
-    title="The video archive"
-    deck="Promos, performances, interviews and concert films, catalogued with director, year and source."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Videos' }]}
+  <PageHero copyKeys={{"section":"pages_videos_f20e0d30c010","title":"pages_videos_e108032989da","deck":"pages_videos_56c58c2e3d78"}}
+    section={copyText("pages_videos_f20e0d30c010", "Moving image")}
+    title={copyText("pages_videos_e108032989da", "Videos")}
+
+    crumbs={[{ ...copySource({"label":"pages_videos_data-d45d7124c9eb"}),  label: copyText("pages_videos_data-d45d7124c9eb", "Home"), href: '/' }, { ...copySource({"label":"pages_videos_data-e4ad0c230050"}),  label: copyText("pages_videos_data-e4ad0c230050", "Videos") }]}
     facts={[
-      { k: 'On file', v: videos.length },
-      { k: 'Types', v: types.length },
-      { k: 'Years', v: years.length },
+      { ...copySource({"k":"pages_videos_data-040e65bddea5"}),  k: copyText("pages_videos_data-040e65bddea5", "On file"), v: videos.length },
+      { ...copySource({"k":"pages_videos_data-c0372b248a29"}),  k: copyText("pages_videos_data-c0372b248a29", "Types"), v: types.length },
+      { ...copySource({"k":"pages_videos_data-f1a947e58e22"}),  k: copyText("pages_videos_data-f1a947e58e22", "Years"), v: years.length },
     ]}
     flush
   />
 
   {videos.length === 0 ? (
-    <section class="video-index"><div class="container"><div class="video-empty"><span>Archive in progress</span><h2>The pictures will<br />start moving soon.</h2><p>The video index is being compiled, starting with promos, then live films and interviews.</p></div></div>
+    <section class="video-index"><div class="container"><div class="video-empty"><p>No videos yet.</p></div></div>
     </section>
   ) : (
     <section class="video-index">
       <div class="container">
-        <header class="video-heading"><div><span>Moving image catalogue</span><h2>Watch the archive<br /><em>come alive.</em></h2></div><small>{videos.length} films</small></header>
-        <div class="video-filters" aria-label="Video catalogue filters">
+        <div class="video-filters" aria-label="Video filters">
           <div class="table-controls__grid table-controls__grid--3">
             <Select
               name="type"
@@ -70,13 +70,13 @@ const ytId = (url: string): string | null => {
                  data-year={videoDate.slice(0, 4)}
                  data-search={`${v.title || ''} ${v.director || ''} ${v.album_title || ''}`.toLowerCase()}>
                 <div class="video-card__thumb">
-                  {thumb ? <img src={thumb} alt={v.title || ''} loading="lazy" /> : <div class="video-card__ph" />}
+                  {thumb ? <img data-directus={editable(v, ["thumbnail", "thumbnail_file", "url", "video_url"])} src={thumb} alt={v.title || ''} loading="lazy" /> : <div class="video-card__ph" />}
                   <div class="video-card__play">▶</div>
                 </div>
-                <div class="video-card__meta">
-                  <small>{(v.type || 'VIDEO').toUpperCase()} · {videoDate.slice(0, 4) || '–'}</small>
-                  <h3>{v.title}</h3>
-                  {v.director && <span>Directed by {v.director}</span>}
+                <div  class="video-card__meta">
+                  <small data-directus={editable(v, ["type"])}>{(v.type || 'VIDEO').toUpperCase()} · {videoDate.slice(0, 4) || '–'}</small>
+                  <h3 data-directus={editable(v, ["title"])}>{v.title}</h3>
+                  {v.director && <span data-directus={editable(v, ["director"])}>Directed by {v.director}</span>}
                 </div>
               </a>
             );
@@ -120,12 +120,9 @@ const ytId = (url: string): string | null => {
 </script>
 
 <style is:global>
-  .video-index { padding-block: clamp(82px, 10vw, 148px); background: var(--bg-2); }
-  .video-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 32px; margin-bottom: clamp(42px, 6vw, 76px); }
-  .video-heading span, .video-card__meta small, .video-card__meta > span, .video-results, .video-empty > span { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+  .video-index { padding-block: clamp(28px, 4vw, 48px); background: var(--bg-2); }
+  .video-heading span, .video-card__meta small, .video-card__meta > span, .video-results, .video-empty > span { color: var(--accent); font-family: var(--f-ui); font-size: var(--text-label); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
   .video-heading h2, .video-empty h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
-  .video-heading h2 em { color: var(--accent); font-weight: inherit; }
-  .video-heading > small { padding: 11px 14px; background: var(--accent); color: var(--accent-ink); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
   .video-filters { padding: clamp(18px, 2.5vw, 30px); background: var(--bg); }
   .video-results { padding: 20px 0; }
   .video-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 58px); }

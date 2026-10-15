@@ -1,4 +1,5 @@
 ---
+import { copyText, copyAttr } from '../../lib/visual-editing';
 interface Props {
   label?: string;
 }
@@ -6,7 +7,7 @@ interface Props {
 const { label = 'Archive pages' } = Astro.props;
 ---
 <nav class="archive-pagination" data-pagination aria-label={label} hidden>
-  <button type="button" data-page-action="previous" aria-label="Previous page">← Previous</button>
+  <button data-directus={copyAttr("components_ui_Pagination_996e617cb3c5")} set:html={copyText("components_ui_Pagination_996e617cb3c5", "← Previous")} type="button" data-page-action="previous" aria-label="Previous page"></button>
   <div class="archive-pagination__pages" data-page-list></div>
-  <button type="button" data-page-action="next" aria-label="Next page">Next →</button>
+  <button data-directus={copyAttr("components_ui_Pagination_8f8a9ddb95ba")} set:html={copyText("components_ui_Pagination_8f8a9ddb95ba", "Next →")} type="button" data-page-action="next" aria-label="Next page"></button>
 </nav>

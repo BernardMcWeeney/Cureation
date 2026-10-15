@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../../lib/visual-editing';
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
@@ -307,7 +308,7 @@ const countries = Array.from(
     shows
       .map((show) => {
         const code = show.country_code || show.country || '';
-        return [code, { code, label: show.country || code }];
+        return [code, { code, label: show.country || code }] as const;
       })
       .filter(([, value]) => value.code)
   ).values()
@@ -392,12 +393,12 @@ const tourCountryLabels = countries
   .filter(Boolean);
 
 const facts = [
-  { k: 'Shows', v: shows.length || tour.total_shows || 0, sub: `${completedShows.length} played` },
-  { k: 'Countries', v: countries.length, sub: 'summer route' },
-  { k: 'Next', v: firstUpcoming ? formatDate(firstUpcoming.date) : 'Complete', sub: firstUpcoming?.city || '' },
-  { k: 'Format', v: `${festivalCount}/${headlineCount}`, sub: 'festival/headline' },
-  { k: 'Last runtime', v: formatRuntime(lastShowRuntime) || 'Pending', sub: lastCompleted?.city || 'clock file' },
-  { k: 'Notes', v: lastShowArchiveNotes.length + annotatedSongCount, sub: 'latest show file' },
+  { ...copySource({"k":"pages_tours_2026-european-summer-shows_data-2df66d2d7deb"}),  k: copyText("pages_tours_2026-european-summer-shows_data-2df66d2d7deb", "Shows"), v: shows.length || tour.total_shows || 0, sub: `${completedShows.length} played` },
+  { ...copySource({"k":"pages_tours_2026-european-summer-shows_data-05c76c74c055"}),  k: copyText("pages_tours_2026-european-summer-shows_data-05c76c74c055", "Countries"), v: countries.length, sub: 'summer route' },
+  { ...copySource({"k":"pages_tours_2026-european-summer-shows_data-b70de61b16ab"}),  k: copyText("pages_tours_2026-european-summer-shows_data-b70de61b16ab", "Next"), v: firstUpcoming ? formatDate(firstUpcoming.date) : 'Complete', sub: firstUpcoming?.city || '' },
+  { ...copySource({"k":"pages_tours_2026-european-summer-shows_data-cb8cecafd6af"}),  k: copyText("pages_tours_2026-european-summer-shows_data-cb8cecafd6af", "Format"), v: `${festivalCount}/${headlineCount}`, sub: 'festival/headline' },
+  { ...copySource({"k":"pages_tours_2026-european-summer-shows_data-f420a72dbd82"}),  k: copyText("pages_tours_2026-european-summer-shows_data-f420a72dbd82", "Last runtime"), v: formatRuntime(lastShowRuntime) || 'Pending', sub: lastCompleted?.city || 'clock file' },
+  { ...copySource({"k":"pages_tours_2026-european-summer-shows_data-94821208b43c"}),  k: copyText("pages_tours_2026-european-summer-shows_data-94821208b43c", "Notes"), v: lastShowArchiveNotes.length + annotatedSongCount, sub: 'latest show file' },
 ];
 
 const calendarFeedUrl = new URL('/calendar.ics', Astro.site ?? Astro.url).toString();
@@ -405,35 +406,31 @@ const webcalUrl = calendarFeedUrl.replace(/^https?:/, 'webcal:');
 const completionPct = shows.length ? Math.round((completedShows.length / shows.length) * 100) : 0;
 ---
 
-<Layout
+<Layout editRecord={tour}
   title="2026 European Summer Shows - Cureation"
-  description="A live dashboard for The Cure's 2026 European Summer Shows: dates, map, country filters, setlist watch, calendar feed and fan archive actions."
+  description="An archive dashboard for The Cure's 2026 European Summer Shows: dates, map, country filters, setlist watch, calendar feed and fan archive actions."
 >
   <main data-tour-tracker>
     <section class="tracker-hero">
       <div class="container tracker-hero__inner">
-        <Crumbs items={[{ label: 'Home', href: '/' }, { label: 'Tours', href: '/tours' }, { label: '2026 European Summer Shows' }]} />
+        <Crumbs items={[{ ...copySource({"label":"pages_tours_2026-european-summer-shows_data-75985a1a5534"}),  label: copyText("pages_tours_2026-european-summer-shows_data-75985a1a5534", "Home"), href: '/' }, { ...copySource({"label":"pages_tours_2026-european-summer-shows_data-e13fd9b7a654"}),  label: copyText("pages_tours_2026-european-summer-shows_data-e13fd9b7a654", "Tours"), href: '/tours' }, { ...copySource({"label":"pages_tours_2026-european-summer-shows_data-2a1c73327474"}),  label: copyText("pages_tours_2026-european-summer-shows_data-2a1c73327474", "2026 European Summer Shows") }]} />
         <div class="tracker-hero__grid">
           <div class="tracker-hero__copy">
             <div class="mono-sm tracker-eyebrow">2026 Tour Tracker</div>
-            <h1 class="tracker-title">2026 European Summer Shows</h1>
-            <p class="tracker-deck">
-              One dashboard for the full run: dates, countries, festival/headline split, gaps between shows,
-              multi-night stands, saved shows, map view and setlist watch.
-            </p>
+            <h1 data-directus={copyAttr("pages_tours_2026-european-summer-shows_d36f837f5686")} set:html={copyText("pages_tours_2026-european-summer-shows_d36f837f5686", "2026 European Summer Shows")} class="tracker-title"></h1>
             <div class="tracker-actions">
               <Button href={webcalUrl} variant="accent">Add all dates to calendar</Button>
               <Button href="/calendar.ics" variant="ghost">Open calendar feed</Button>
-              <button type="button" class="btn btn--ghost" data-near-me>Near me</button>
+              <button data-directus={copyAttr("pages_tours_2026-european-summer-shows_d8e365320bcf")} set:html={copyText("pages_tours_2026-european-summer-shows_d8e365320bcf", "Near me")} type="button" class="btn btn--ghost" data-near-me></button>
             </div>
             <div class="near-result mono-sm" data-near-result hidden></div>
           </div>
           <div class="tracker-facts" aria-label="Tour summary">
             {facts.map((fact) => (
-              <div class="tracker-fact">
-                <div class="tracker-fact__k mono-sm">{fact.k}</div>
-                <div class="tracker-fact__v">{fact.v}</div>
-                {fact.sub && <div class="tracker-fact__sub mono-sm">{fact.sub}</div>}
+              <div  class="tracker-fact">
+                <div data-directus={editable(fact, ["k"])} class="tracker-fact__k mono-sm">{fact.k}</div>
+                <div data-directus={editable(fact, ["v"])} class="tracker-fact__v">{fact.v}</div>
+                {fact.sub && <div data-directus={editable(fact, ["sub"])} class="tracker-fact__sub mono-sm">{fact.sub}</div>}
               </div>
             ))}
           </div>
@@ -444,13 +441,13 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     <section class="container tracker-watch">
       <article class="watch-card watch-card--primary">
         <div class="panel-head">
-          <span>Setlist Watch</span>
+          <span data-directus={copyAttr("pages_tours_2026-european-summer-shows_8ccc737bbc55")} set:html={copyText("pages_tours_2026-european-summer-shows_8ccc737bbc55", "Setlist Watch")}></span>
           <span>{completedShows.length} played - {upcomingShows.length} pending</span>
         </div>
         <div class="watch-card__body">
           <div>
             <div class="mono-sm muted">Current state</div>
-            <h2 class="watch-title">
+            <h2 data-directus={editable(lastCompleted, ["city","venue"]) ?? editable(firstUpcoming, ["city","venue"])} class="watch-title">
               {completedShows.length > 0
                 ? lastCompleted
                   ? `Tracking ${lastCompleted.city || lastCompleted.venue || 'the last show'}`
@@ -471,7 +468,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
           <div class="watch-pills">
             <span>Tour average: {averageSongCount || 'pending'}</span>
             <span>{lostWorldSongs.length || 'Latest album'} songs watched</span>
-            <span>{longestGap ? `${longestGap.days} day longest gap` : 'Gaps pending'}</span>
+            <span data-directus={editable(longestGap, ["days"])}>{longestGap ? `${longestGap.days} day longest gap` : 'Gaps pending'}</span>
             <span>{formatRuntime(lastShowRuntime) || 'Runtime pending'}</span>
             <span>{annotatedSongCount || 'No'} song note{annotatedSongCount === 1 ? '' : 's'}</span>
           </div>
@@ -481,45 +478,45 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
       <article class="watch-card">
         <div class="panel-head">
           <span>{lastCompleted ? 'Last show' : 'First show'}</span>
-          <span>{lastCompleted ? formatDate(lastCompleted.date) : firstUpcoming ? formatDate(firstUpcoming.date) : 'TBC'}</span>
+          <span data-directus={editable(lastCompleted, ["date"]) ?? editable(firstUpcoming, ["date"])}>{lastCompleted ? formatDate(lastCompleted.date) : firstUpcoming ? formatDate(firstUpcoming.date) : 'TBC'}</span>
         </div>
         <div class="watch-card__body">
           {lastCompleted ? (
             <>
-              <h2 class="last-show-title">{lastCompleted.venue || 'Venue TBC'}</h2>
-              <div class="mono-sm muted">{[lastCompleted.city, lastCompleted.country].filter(Boolean).join(', ')}</div>
+              <h2 data-directus={editable(lastCompleted, ["venue"])} class="last-show-title">{lastCompleted.venue || 'Venue TBC'}</h2>
+              <div data-directus={editable(lastCompleted, ["city","country"])} class="mono-sm muted">{[lastCompleted.city, lastCompleted.country].filter(Boolean).join(', ')}</div>
               <div class="last-show-grid">
-                <div><span>Start</span><strong>{lastShowStart || 'Pending'}</strong></div>
-                <div><span>End</span><strong>{lastShowEnd || 'Pending'}</strong></div>
-                <div><span>Total time</span><strong>{formatRuntime(lastShowRuntime) || 'Pending'}</strong></div>
-                <div><span>Song runtime</span><strong>{lastSongRuntime || 'Pending'}</strong></div>
-                <div><span>Songs</span><strong>{lastSongs.length || lastCompleted.song_count || 'Pending'}</strong></div>
-                <div><span>Opener</span><strong>{opener || 'Pending'}</strong></div>
-                <div><span>Closer</span><strong>{closer || 'Pending'}</strong></div>
-                <div><span>Encore</span><strong>{encoreCount || 'Pending'}</strong></div>
-                <div><span>Lost World</span><strong>{lostWorldInLastShow || 'Pending'}</strong></div>
-                <div><span>Fan media</span><strong>{fanMediaCount || 'Open'}</strong></div>
-                <div><span>Show notes</span><strong>{lastShowArchiveNotes.length || 'Open'}</strong></div>
-                <div><span>Song notes</span><strong>{annotatedSongCount || 'None'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_cb657ddbba88")} set:html={copyText("pages_tours_2026-european-summer-shows_cb657ddbba88", "Start")}></span><strong>{lastShowStart || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_2f09af67f6dd")} set:html={copyText("pages_tours_2026-european-summer-shows_2f09af67f6dd", "End")}></span><strong>{lastShowEnd || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_4f59d4ab9457")} set:html={copyText("pages_tours_2026-european-summer-shows_4f59d4ab9457", "Total time")}></span><strong>{formatRuntime(lastShowRuntime) || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_819d937d0539")} set:html={copyText("pages_tours_2026-european-summer-shows_819d937d0539", "Song runtime")}></span><strong>{lastSongRuntime || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_4b72fb7f21b1")} set:html={copyText("pages_tours_2026-european-summer-shows_4b72fb7f21b1", "Songs")}></span><strong data-directus={editable(lastCompleted, ["song_count"])}>{lastSongs.length || lastCompleted.song_count || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_aef8b66c20d7")} set:html={copyText("pages_tours_2026-european-summer-shows_aef8b66c20d7", "Opener")}></span><strong>{opener || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_b0c3141a54d2")} set:html={copyText("pages_tours_2026-european-summer-shows_b0c3141a54d2", "Closer")}></span><strong>{closer || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_32fdbd8159eb")} set:html={copyText("pages_tours_2026-european-summer-shows_32fdbd8159eb", "Encore")}></span><strong>{encoreCount || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_d4ec0386a52f")} set:html={copyText("pages_tours_2026-european-summer-shows_d4ec0386a52f", "Lost World")}></span><strong>{lostWorldInLastShow || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_fbab8606f597")} set:html={copyText("pages_tours_2026-european-summer-shows_fbab8606f597", "Fan media")}></span><strong>{fanMediaCount || 'Open'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_ec33101e0389")} set:html={copyText("pages_tours_2026-european-summer-shows_ec33101e0389", "Show notes")}></span><strong>{lastShowArchiveNotes.length || 'Open'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_cefb092f66b0")} set:html={copyText("pages_tours_2026-european-summer-shows_cefb092f66b0", "Song notes")}></span><strong>{annotatedSongCount || 'None'}</strong></div>
               </div>
               <div class="change-strip">
-                <div><span class="mono-sm muted">Added</span>{addedSongs.slice(0, 4).join(', ') || 'Pending previous-show comparison'}</div>
-                <div><span class="mono-sm muted">Dropped</span>{droppedSongs.slice(0, 4).join(', ') || 'Pending previous-show comparison'}</div>
-                <div><span class="mono-sm muted">Debuts</span>{debutCount || 'None confirmed'}</div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_080362188d9d")} set:html={copyText("pages_tours_2026-european-summer-shows_080362188d9d", "Added")} class="mono-sm muted"></span>{addedSongs.slice(0, 4).join(', ') || 'Pending previous-show comparison'}</div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_f80d73ff393e")} set:html={copyText("pages_tours_2026-european-summer-shows_f80d73ff393e", "Dropped")} class="mono-sm muted"></span>{droppedSongs.slice(0, 4).join(', ') || 'Pending previous-show comparison'}</div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_e6b5409ba871")} set:html={copyText("pages_tours_2026-european-summer-shows_e6b5409ba871", "Debuts")} class="mono-sm muted"></span>{debutCount || 'None confirmed'}</div>
               </div>
             </>
           ) : firstUpcoming ? (
             <>
-              <h2 class="last-show-title">{firstUpcoming.venue || 'Venue TBC'}</h2>
-              <div class="mono-sm muted">{formatLongDate(firstUpcoming.date)} - {[firstUpcoming.city, firstUpcoming.country].filter(Boolean).join(', ')}</div>
+              <h2 data-directus={editable(firstUpcoming, ["venue"])} class="last-show-title">{firstUpcoming.venue || 'Venue TBC'}</h2>
+              <div data-directus={editable(firstUpcoming, ["date","city","country"])} class="mono-sm muted">{formatLongDate(firstUpcoming.date)} - {[firstUpcoming.city, firstUpcoming.country].filter(Boolean).join(', ')}</div>
               <div class="pending-callout">
-                <span class="tag tag--gold">Opening night</span>
-                <span class="tag">Setlist pending</span>
+                <span data-directus={copyAttr("pages_tours_2026-european-summer-shows_7c6d56fb6203")} set:html={copyText("pages_tours_2026-european-summer-shows_7c6d56fb6203", "Opening night")} class="tag tag--gold"></span>
+                <span data-directus={copyAttr("pages_tours_2026-european-summer-shows_795dc1eb7ae8")} set:html={copyText("pages_tours_2026-european-summer-shows_795dc1eb7ae8", "Setlist pending")} class="tag"></span>
                 <span class="tag tag--cool">{showKind(firstUpcoming)}</span>
               </div>
             </>
           ) : (
-            <p class="watch-copy">The run is complete.</p>
+            <p data-directus={copyAttr("pages_tours_2026-european-summer-shows_760c2a6e116b")} set:html={copyText("pages_tours_2026-european-summer-shows_760c2a6e116b", "The run is complete.")} class="watch-copy"></p>
           )}
         </div>
       </article>
@@ -530,61 +527,61 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
         <div class="tracker-section-head">
           <div>
             <div class="kicker">Latest show file</div>
-            <h2 class="section-title">{lastCompleted.venue || lastCompleted.city || 'Last show'}</h2>
+            <h2 data-directus={editable(lastCompleted, ["venue","city"])} class="section-title">{lastCompleted.venue || lastCompleted.city || 'Last show'}</h2>
           </div>
           <div class="tracker-route-meta mono-sm">
-            <span>{formatLongDate(lastCompleted.date)}</span>
-            <span>{[lastCompleted.city, lastCompleted.country].filter(Boolean).join(', ')}</span>
+            <span data-directus={editable(lastCompleted, ["date"])}>{formatLongDate(lastCompleted.date)}</span>
+            <span data-directus={editable(lastCompleted, ["city","country"])}>{[lastCompleted.city, lastCompleted.country].filter(Boolean).join(', ')}</span>
           </div>
         </div>
 
         <div class="file-grid">
           <article class="file-card">
-            <div class="panel-head"><span>Clock</span><span>{formatRuntime(lastShowRuntime) || 'pending'}</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_10c62fa479fe")} set:html={copyText("pages_tours_2026-european-summer-shows_10c62fa479fe", "Clock")}></span><span>{formatRuntime(lastShowRuntime) || 'pending'}</span></div>
             <div class="file-card__body">
               <div class="clock-grid">
-                <div><span>Start time</span><strong>{lastShowStart || 'Pending'}</strong></div>
-                <div><span>End time</span><strong>{lastShowEnd || 'Pending'}</strong></div>
-                <div><span>Concert total</span><strong>{formatRuntime(lastShowRuntime) || 'Pending'}</strong></div>
-                <div><span>Song-file runtime</span><strong>{lastSongRuntime || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_5328224c5f44")} set:html={copyText("pages_tours_2026-european-summer-shows_5328224c5f44", "Start time")}></span><strong>{lastShowStart || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_2e4b0ece5d93")} set:html={copyText("pages_tours_2026-european-summer-shows_2e4b0ece5d93", "End time")}></span><strong>{lastShowEnd || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_e02d81622b1e")} set:html={copyText("pages_tours_2026-european-summer-shows_e02d81622b1e", "Concert total")}></span><strong>{formatRuntime(lastShowRuntime) || 'Pending'}</strong></div>
+                <div><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_ff3e0ea5314c")} set:html={copyText("pages_tours_2026-european-summer-shows_ff3e0ea5314c", "Song-file runtime")}></span><strong>{lastSongRuntime || 'Pending'}</strong></div>
               </div>
-              <div class="source-links">
-                {lastCompleted.cure_concerts_url && <a href={lastCompleted.cure_concerts_url} target="_blank" rel="noopener">Cure Concerts</a>}
-                {lastCompleted.setlistfm_url && <a href={lastCompleted.setlistfm_url} target="_blank" rel="noopener">setlist.fm</a>}
-                <a href={`/setlists/${lastCompleted.slug}`}>Open show page</a>
+              <div  class="source-links">
+                {lastCompleted.cure_concerts_url && <a data-directus={copyAttr("pages_tours_2026-european-summer-shows_375acd5bef19")} set:html={copyText("pages_tours_2026-european-summer-shows_375acd5bef19", "Cure Concerts")} href={lastCompleted.cure_concerts_url} target="_blank" rel="noopener"></a>}
+                {lastCompleted.setlistfm_url && <a data-directus={copyAttr("pages_tours_2026-european-summer-shows_da6e16744d45")} set:html={copyText("pages_tours_2026-european-summer-shows_da6e16744d45", "setlist.fm")} href={lastCompleted.setlistfm_url} target="_blank" rel="noopener"></a>}
+                <a data-directus={copyAttr("pages_tours_2026-european-summer-shows_d3ea3411d078")} set:html={copyText("pages_tours_2026-european-summer-shows_d3ea3411d078", "Open show page")} href={`/setlists/${lastCompleted.slug}`}></a>
               </div>
             </div>
           </article>
 
           <article class="file-card">
-            <div class="panel-head"><span>Show notes</span><span>{lastShowArchiveNotes.length}</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_c195654d04fa")} set:html={copyText("pages_tours_2026-european-summer-shows_c195654d04fa", "Show notes")}></span><span>{lastShowArchiveNotes.length}</span></div>
             <div class="file-card__body note-stack">
               {lastShowArchiveNotes.length > 0 ? lastShowArchiveNotes.map((note) => (
                 <div class="note-block">
-                  <div class="mono-sm muted">{note.label}</div>
-                  <h3>{note.title}</h3>
-                  <p>{note.body}</p>
+                  <div data-directus={editable(note, ["label"])} class="mono-sm muted">{note.label}</div>
+                  <h3 data-directus={editable(note, ["title"])}>{note.title}</h3>
+                  <p data-directus={editable(note, ["body"])}>{note.body}</p>
                 </div>
               )) : (
-                <p class="muted">No show-level notes filed yet.</p>
+                <p data-directus={copyAttr("pages_tours_2026-european-summer-shows_104ffd80fe96")} set:html={copyText("pages_tours_2026-european-summer-shows_104ffd80fe96", "No show-level notes filed yet.")} class="muted"></p>
               )}
             </div>
           </article>
 
           <article class="file-card">
-            <div class="panel-head"><span>Song notes</span><span>{annotatedSongCount}</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_f15e84a21e41")} set:html={copyText("pages_tours_2026-european-summer-shows_f15e84a21e41", "Song notes")}></span><span>{annotatedSongCount}</span></div>
             <div class="file-card__body note-stack">
               {lastSongNotes.length > 0 ? lastSongNotes.map((note) => (
                 <div class="song-note">
-                  <div class="song-note__pos mono-sm">{String(note.position || '–').padStart(2, '0')}</div>
+                  <div data-directus={editable(note, ["position"])} class="song-note__pos mono-sm">{String(note.position || '–').padStart(2, '0')}</div>
                   <div>
-                    <div class="serif song-note__title">{note.title}</div>
-                    <div class="mono-sm muted">{note.setType}</div>
-                    <p>{note.note}</p>
+                    <div data-directus={editable(note, ["title"])} class="serif song-note__title">{note.title}</div>
+                    <div data-directus={editable(note, ["setType"])} class="mono-sm muted">{note.setType}</div>
+                    <p data-directus={editable(note, ["note"])}>{note.note}</p>
                   </div>
                 </div>
               )) : (
-                <p class="muted">No song-level notes filed for this set yet.</p>
+                <p data-directus={copyAttr("pages_tours_2026-european-summer-shows_1d130453a4c7")} set:html={copyText("pages_tours_2026-european-summer-shows_1d130453a4c7", "No song-level notes filed for this set yet.")} class="muted"></p>
               )}
             </div>
           </article>
@@ -592,7 +589,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
 
         {lastSongs.length > 0 && (
           <article class="file-card setlist-ledger">
-            <div class="panel-head"><span>Full latest setlist</span><span>{lastSongs.length} songs</span></div>
+            <div class="panel-head"><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_4713331ab8cf")} set:html={copyText("pages_tours_2026-european-summer-shows_4713331ab8cf", "Full latest setlist")}></span><span>{lastSongs.length} songs</span></div>
             <ol class="setlist-ledger__list">
               {lastSongs.map((row: any) => {
                 const title = songTitle(row);
@@ -603,17 +600,17 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
                 );
                 return (
                   <li class={row.notes ? 'has-note' : ''}>
-                    <div class="setlist-ledger__pos mono-sm">{String(row.position || '').padStart(2, '0')}</div>
-                    <div class="setlist-ledger__main">
-                      <div class="setlist-ledger__line">
+                    <div data-directus={editable(row, ["position"])} class="setlist-ledger__pos mono-sm">{String(row.position || '').padStart(2, '0')}</div>
+                    <div  class="setlist-ledger__main">
+                      <div  class="setlist-ledger__line">
                         <span class="serif setlist-ledger__title">{SongTitle}</span>
-                        <span class="tag">{row.set_type || 'main'}</span>
-                        {row.is_debut && <span class="tag tag--gold">debut</span>}
-                        {row.is_cover && <span class="tag tag--cool">cover{row.cover_artist ? ` · ${row.cover_artist}` : ''}</span>}
+                        <span data-directus={editable(row, ["set_type"])} class="tag">{row.set_type || 'main'}</span>
+                        {row.is_debut && <span data-directus={copyAttr("pages_tours_2026-european-summer-shows_5b05129a0ad3")} set:html={copyText("pages_tours_2026-european-summer-shows_5b05129a0ad3", "debut")} class="tag tag--gold"></span>}
+                        {row.is_cover && <span data-directus={editable(row, ["cover_artist"])} class="tag tag--cool">cover{row.cover_artist ? ` · ${row.cover_artist}` : ''}</span>}
                       </div>
-                      {row.notes && <p>{row.notes}</p>}
+                      {row.notes && <p data-directus={editable(row, ["notes"])}>{row.notes}</p>}
                     </div>
-                    <div class="mono-sm muted setlist-ledger__dur">{row.song?.duration || '–'}</div>
+                    <div data-directus={editable(row.song, ["duration"]) ?? editable(row, ["song"])} class="mono-sm muted setlist-ledger__dur">{row.song?.duration || '–'}</div>
                   </li>
                 );
               })}
@@ -631,7 +628,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
           <div class="tracker-section-head">
             <div>
               <div class="kicker">Routes</div>
-              <h2 class="section-title">Tour route</h2>
+              <h2 data-directus={copyAttr("pages_tours_2026-european-summer-shows_cf7cc9a15e6a")} set:html={copyText("pages_tours_2026-european-summer-shows_cf7cc9a15e6a", "Tour route")} class="section-title"></h2>
             </div>
             <div class="tracker-route-meta mono-sm">
               <span>{tourRoutePoints.length} mapped stops</span>
@@ -656,19 +653,19 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
       <div class="tracker-section-head">
         <div>
           <div class="kicker">Date list</div>
-          <h2 class="section-title">Full itinerary</h2>
+          <h2 data-directus={copyAttr("pages_tours_2026-european-summer-shows_c4dcc9c6dff3")} set:html={copyText("pages_tours_2026-european-summer-shows_c4dcc9c6dff3", "Full itinerary")} class="section-title"></h2>
         </div>
         <div class="mono-sm muted" data-visible-count>{shows.length} shows</div>
       </div>
 
       <div class="country-filters" data-country-filters aria-label="Country filters">
-        <button type="button" class="chip is-active" aria-pressed="true" data-country="all">All countries</button>
+        <button data-directus={copyAttr("pages_tours_2026-european-summer-shows_f36123569d48")} set:html={copyText("pages_tours_2026-european-summer-shows_f36123569d48", "All countries")} type="button" class="chip is-active" aria-pressed="true" data-country="all"></button>
         {countries.map((country) => (
-          <button type="button" class="chip" aria-pressed="false" data-country={country.code}>{country.label}</button>
+          <button data-directus={editable(country, ["label"])} type="button" class="chip" aria-pressed="false" data-country={country.code}>{country.label}</button>
         ))}
       </div>
 
-      <div class="schedule-grid">
+      <div class="schedule-grid archive-columns">
         <div class="schedule-list">
           {[
             { key: 'upcoming', title: 'Upcoming', items: upcomingShows },
@@ -676,10 +673,10 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
           ].map((group) => group.items.length > 0 && (
             <section class="schedule-group" data-group={group.key}>
               <div class="schedule-group__head">
-                <h3>{group.title}</h3>
-                <span class="mono-sm">{group.items.length}</span>
+                <h3 data-directus={editable(group, ["title"])}>{group.title}</h3>
+                <span data-directus={editable(group, ["items"])} class="mono-sm">{group.items.length}</span>
               </div>
-              <div class="show-list">
+              <div  class="show-list">
                 {group.items.map((show) => {
                   const coords = CITY_COORDS[cityKey(show.city, show.country_code)];
                   const kind = showKind(show);
@@ -698,20 +695,20 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
                       data-when={formatDate(show.date)}
                     >
                       <time class="show-row__date" datetime={show.date || undefined}>
-                        <span>{formatDate(show.date).split(' ').slice(1).join(' ') || 'TBC'}</span>
-                        <small>{show.date?.slice(0, 4) || '2026'}</small>
+                        <span data-directus={editable(show, ["date"])}>{formatDate(show.date).split(' ').slice(1).join(' ') || 'TBC'}</span>
+                        <small data-directus={editable(show, ["date"])}>{show.date?.slice(0, 4) || '2026'}</small>
                       </time>
                       <div class="show-row__main">
-                        <a class="show-row__title" href={`/setlists/${show.slug}`}>{show.venue || 'Venue TBC'}</a>
-                        <div class="show-row__place mono-sm">
+                        <a data-directus={editable(show, ["venue"])} class="show-row__title" href={`/setlists/${show.slug}`}>{show.venue || 'Venue TBC'}</a>
+                        <div data-directus={editable(show, ["city","state_province","country"])} class="show-row__place mono-sm">
                           {[show.city, show.state_province, show.country].filter(Boolean).join(', ')}
                         </div>
-                        <div class="show-row__badges">
+                        <div  class="show-row__badges">
                           <span class={`tag ${kind === 'festival' ? 'tag--hot' : 'tag--cool'}`}>{kind}</span>
                           <span class={`tag ${tone === 'blood' ? 'tag--blood' : tone === 'gold' ? 'tag--gold' : tone === 'cool' ? 'tag--cool' : ''}`}>{label}</span>
-                          {(show.song_count || 0) > 0 && <span class="tag tag--gold">{show.song_count} songs</span>}
-                          {formatClock(show.start_time) && <span class="tag">starts {formatClock(show.start_time)}</span>}
-                          {formatClock(show.end_time) && <span class="tag">ends {formatClock(show.end_time)}</span>}
+                          {(show.song_count || 0) > 0 && <span data-directus={editable(show, ["song_count"])} class="tag tag--gold">{show.song_count} songs</span>}
+                          {formatClock(show.start_time) && <span data-directus={editable(show, ["start_time"])} class="tag">starts {formatClock(show.start_time)}</span>}
+                          {formatClock(show.end_time) && <span data-directus={editable(show, ["end_time"])} class="tag">ends {formatClock(show.end_time)}</span>}
                           {runtime && <span class="tag tag--cool">{runtime}</span>}
                         </div>
                         {showNotes.length > 0 && (
@@ -720,8 +717,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
                             <div class="show-row__notes-body">
                               {showNotes.map((note) => (
                                 <div>
-                                  <span class="mono-sm muted">{note.label}</span>
-                                  <p>{note.body}</p>
+                                  <span data-directus={editable(note, ["label"])} class="mono-sm muted">{note.label}</span>
+                                  <p data-directus={editable(note, ["body"])}>{note.body}</p>
                                 </div>
                               ))}
                             </div>
@@ -736,7 +733,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
                           href={`/setlists/${show.slug}`}
                           actionLabel={isPast(show) ? 'I was there' : "I'm going"}
                         />
-                        <a class="mini-action" href="/calendar.ics">Reminder</a>
+                        <a data-directus={copyAttr("pages_tours_2026-european-summer-shows_8a1fede0abbc")} set:html={copyText("pages_tours_2026-european-summer-shows_8a1fede0abbc", "Reminder")} class="mini-action" href="/calendar.ics"></a>
                         <a class="mini-action" href="/community">{isPast(show) ? 'Memory' : 'Tips'}</a>
                       </div>
                     </article>
@@ -748,29 +745,29 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
         </div>
 
         <aside class="run-panel">
-          <div class="panel-head"><span>Gaps</span><span>between shows</span></div>
+          <div class="panel-head"><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_578055bc96d0")} set:html={copyText("pages_tours_2026-european-summer-shows_578055bc96d0", "Gaps")}></span><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_c965a8c3252c")} set:html={copyText("pages_tours_2026-european-summer-shows_c965a8c3252c", "between shows")}></span></div>
           <div class="run-panel__body">
             {notableGaps.length > 0 ? notableGaps.slice(0, 5).map((gap) => (
               <div class="run-line">
-                <strong>{gap.days} days</strong>
-                <span>{gap.from.city || gap.from.venue} to {gap.to.city || gap.to.venue}</span>
-                <small>{formatDate(gap.from.date)} - {formatDate(gap.to.date)}</small>
+                <strong data-directus={editable(gap, ["days"])}>{gap.days} days</strong>
+                <span data-directus={editable(gap.from, ["city","venue"]) ?? editable(gap, ["from","to"]) ?? editable(gap.to, ["city","venue"])}>{gap.from.city || gap.from.venue} to {gap.to.city || gap.to.venue}</span>
+                <small data-directus={editable(gap.from, ["date"]) ?? editable(gap, ["from","to"]) ?? editable(gap.to, ["date"])}>{formatDate(gap.from.date)} - {formatDate(gap.to.date)}</small>
               </div>
             )) : (
-              <p class="muted">No large gaps yet.</p>
+              <p data-directus={copyAttr("pages_tours_2026-european-summer-shows_ea0b51f7b3d0")} set:html={copyText("pages_tours_2026-european-summer-shows_ea0b51f7b3d0", "No large gaps yet.")} class="muted"></p>
             )}
           </div>
 
-          <div class="panel-head"><span>Multi-night runs</span><span>{multiNightRuns.length}</span></div>
+          <div class="panel-head"><span data-directus={copyAttr("pages_tours_2026-european-summer-shows_7c6ba6d8fa03")} set:html={copyText("pages_tours_2026-european-summer-shows_7c6ba6d8fa03", "Multi-night runs")}></span><span>{multiNightRuns.length}</span></div>
           <div class="run-panel__body">
             {multiNightRuns.length > 0 ? multiNightRuns.map((item) => (
               <div class="run-line">
-                <strong>{item.shows.length} nights</strong>
-                <span>{item.venue} - {item.city}</span>
-                <small>{formatDate(item.shows[0].date)} - {formatDate(item.shows[item.shows.length - 1].date)}</small>
+                <strong data-directus={editable(item, ["shows"])}>{item.shows.length} nights</strong>
+                <span data-directus={editable(item, ["venue","city"])}>{item.venue} - {item.city}</span>
+                <small data-directus={editable(item.shows[0], ["date"]) ?? editable(item, ["shows"]) ?? editable(item.shows[item.shows.length - 1], ["date"])}>{formatDate(item.shows[0].date)} - {formatDate(item.shows[item.shows.length - 1].date)}</small>
               </div>
             )) : (
-              <p class="muted">No multi-night stands on file.</p>
+              <p data-directus={copyAttr("pages_tours_2026-european-summer-shows_0189fd51eb4d")} set:html={copyText("pages_tours_2026-european-summer-shows_0189fd51eb4d", "No venues with consecutive shows.")} class="muted"></p>
             )}
           </div>
         </aside>
@@ -781,9 +778,9 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
       <div class="tracker-section-head">
         <div>
           <div class="kicker">Setlist watch</div>
-          <h2 class="section-title">What changes once the tour starts</h2>
+          <h2 data-directus={copyAttr("pages_tours_2026-european-summer-shows_df09671ce1c4")} set:html={copyText("pages_tours_2026-european-summer-shows_df09671ce1c4", "What changes once the tour starts")} class="section-title"></h2>
         </div>
-        <div class="mono-sm muted">{lostWorld?.title || 'Latest album'} watch</div>
+        <div data-directus={editable(lostWorld, ["title"])} class="mono-sm muted">{lostWorld?.title || 'Latest album'} watch</div>
       </div>
       <div class="setlist-cards">
         <article class="setlist-card">
@@ -795,7 +792,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
               const width = Math.min(100, Math.max(8, plays * 3));
               return (
                 <div class="song-bar">
-                  <span>{song.title}</span>
+                  <span data-directus={editable(song, ["title"])}>{song.title}</span>
                   <i style={`width: ${width}%;`}></i>
                   <b>{plays}</b>
                 </div>
@@ -806,12 +803,12 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
         <article class="setlist-card">
           <div class="mono-sm muted">Changes from previous show</div>
           <h3>{lastSongs.length ? `${addedSongs.length} added / ${droppedSongs.length} dropped` : 'Waiting for Barcelona'}</h3>
-          <p>{lastSongs.length ? `Latest comparison is ${lastCompleted?.city || 'the last show'} against ${previousCompleted?.city || 'the previous show'}.` : 'The comparison module will light up after two confirmed setlists.'}</p>
+          <p data-directus={editable(lastCompleted, ["city"]) ?? editable(previousCompleted, ["city"])}>{lastSongs.length ? `Latest comparison is ${lastCompleted?.city || 'the last show'} against ${previousCompleted?.city || 'the previous show'}.` : 'The comparison module will light up after two confirmed setlists.'}</p>
         </article>
         <article class="setlist-card">
           <div class="mono-sm muted">Fan archive</div>
-          <h3>Going, went, remembered</h3>
-          <p>Each date has local saves for "I'm going" before the show and "I was there" after it, plus quick routes for reminders, tips and memories.</p>
+          <h3 data-directus={copyAttr("pages_tours_2026-european-summer-shows_a4fe1a740fbf")} set:html={copyText("pages_tours_2026-european-summer-shows_a4fe1a740fbf", "Going, went, remembered")}></h3>
+          <p data-directus={copyAttr("pages_tours_2026-european-summer-shows_b35031a63311")} set:html={copyText("pages_tours_2026-european-summer-shows_b35031a63311", "Each date has local saves for \"I'm going\" before the show and \"I was there\" after it, plus quick routes for reminders, tips and memories.")}></p>
         </article>
       </div>
     </section>
@@ -1164,9 +1161,9 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   .watch-pills span {
     border: 1px solid var(--rule);
     padding: 6px 10px;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .16em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--ink-2);
   }
@@ -1185,7 +1182,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     display: block;
     margin-bottom: 4px;
   }
-  .last-show-grid strong {
+  .last-show-grid :global(strong) {
     font-family: var(--f-display);
     font-style: italic;
     font-size: 20px;
@@ -1221,14 +1218,14 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   }
   .clock-grid span {
     display: block;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .16em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 5px;
   }
-  .clock-grid strong {
+  .clock-grid :global(strong) {
     font-family: var(--f-display);
     font-style: italic;
     font-size: clamp(22px, 2.6vw, 34px);
@@ -1244,9 +1241,9 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   .source-links a {
     border: 1px solid var(--rule);
     color: var(--ink-2);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .16em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     padding: 7px 9px;
     text-transform: uppercase;
   }
@@ -1278,7 +1275,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   .setlist-ledger p {
     color: var(--ink-2);
     font-family: var(--f-serif);
-    font-size: 14.5px;
+    font-size: var(--text-small);
     line-height: 1.5;
     margin: .2rem 0 0;
     overflow-wrap: anywhere;
@@ -1380,8 +1377,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   :global(.tracker-route-map .leaflet-control-attribution) {
     background: color-mix(in srgb, var(--bg) 84%, transparent);
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
   }
   :global(.tracker-route-map .leaflet-control-attribution a) { color: var(--accent-3); }
   :global(.tracker-route-map .english-country-label) {
@@ -1392,8 +1389,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   :global(.tracker-route-map .english-country-label span) {
     color: color-mix(in srgb, var(--ink) 72%, var(--accent) 28%);
     display: inline-block;
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1;
     opacity: .78;
@@ -1420,8 +1417,8 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   :global(.tracker-route-popup__place),
   :global(.tracker-route-popup__date),
   :global(.tracker-route-popup__link) {
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
   }
@@ -1479,13 +1476,13 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     display: flex;
     flex-direction: column;
     gap: 4px;
-    font-family: var(--f-mono);
+    font-family: var(--f-ui);
     color: var(--accent-3);
     text-transform: uppercase;
-    letter-spacing: .16em;
-    font-size: 11px;
+    letter-spacing: .1em;
+    font-size: var(--text-label);
   }
-  .show-row__date small { color: var(--muted); font-size: 10px; }
+  .show-row__date small { color: var(--muted); font-size: var(--text-label); }
   .show-row__title {
     display: inline;
     border-bottom: 0;
@@ -1504,7 +1501,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   .show-row__notes summary {
     color: var(--accent-3);
     cursor: pointer;
-    letter-spacing: .16em;
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
   .show-row__notes-body {
@@ -1526,9 +1523,9 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     min-height: 32px;
     border: 1px solid var(--rule);
     padding: 6px 9px;
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .16em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--ink-2);
   }
@@ -1549,7 +1546,7 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     border-bottom: 1px solid var(--rule-2);
   }
   .run-line:last-child { border-bottom: 0; padding-bottom: 0; }
-  .run-line strong {
+  .run-line :global(strong) {
     font-family: var(--f-display);
     font-style: italic;
     font-size: 24px;
@@ -1558,9 +1555,9 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
   }
   .run-line span { color: var(--ink-2); }
   .run-line small {
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
   }
@@ -1590,19 +1587,19 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     grid-template-columns: minmax(120px, 1fr) minmax(80px, 160px) 34px;
     gap: 10px;
     align-items: center;
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--ink-2);
   }
-  .song-bar i {
+  .song-bar :global(i) {
     height: 5px;
     background: linear-gradient(to right, var(--accent), var(--hot));
     display: block;
     min-width: 8px;
   }
-  .song-bar b { color: var(--accent-3); text-align: right; }
+  .song-bar :global(b) { color: var(--accent-3); text-align: right; }
 
   @media (max-width: 980px) {
     .tracker-hero__grid,
@@ -1626,6 +1623,6 @@ const completionPct = shows.length ? Math.round((completedShows.length / shows.l
     .setlist-ledger__list li { grid-template-columns: 40px minmax(0, 1fr); }
     .setlist-ledger__dur { grid-column: 2; }
     .song-bar { grid-template-columns: 1fr; gap: 5px; }
-    .song-bar b { text-align: left; }
+    .song-bar :global(b) { text-align: left; }
   }
 </style>

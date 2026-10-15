@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -8,34 +9,34 @@ const polls: any[] = await fetchRaw('polls', { limit: -1, fields: '*,options.*',
 const active = polls.filter((p) => p.status !== 'archived');
 ---
 <Layout title="Community · Cureation">
-  <PageHero
-    section="Contributors"
-    title="Community"
-    deck="The archive only survives through correction. Submit a fix, vote in a poll, or tell us what's missing."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Community' }]}
+  <PageHero copyKeys={{"section":"pages_community_601a795e7f0c","title":"pages_community_6b9f65ed8466","deck":"pages_community_4f9172f322ce"}}
+    section={copyText("pages_community_601a795e7f0c", "Contributors")}
+    title={copyText("pages_community_6b9f65ed8466", "Community")}
+
+    crumbs={[{ ...copySource({"label":"pages_community_data-c675775c6ff7"}),  label: copyText("pages_community_data-c675775c6ff7", "Home"), href: '/' }, { ...copySource({"label":"pages_community_data-1501934d0fe5"}),  label: copyText("pages_community_data-1501934d0fe5", "Community") }]}
   />
 
   {active.length > 0 && (
-    <IssueSection kicker="Open questions" title="Polls" meta={`${active.length} open`}>
+    <IssueSection title="Polls" meta={`${active.length} open`}>
       <div class="polls">
         {active.map((p) => {
           const opts = Array.isArray(p.options) ? p.options : [];
           const total = opts.reduce((n: number, o: any) => n + (o.votes || 0), 0);
           return (
             <article class="poll">
-              <div class="mono-sm muted">POLL · {(p.category || 'OPEN').toUpperCase()}</div>
-              <h3 class="serif" style="font-size: clamp(22px, 2.6vw, 32px); font-style: italic; line-height: 1.1; margin: .3rem 0 .8rem;">{p.question || p.title}</h3>
+              <div data-directus={editable(p, ["category"])} class="mono-sm muted">POLL · {(p.category || 'OPEN').toUpperCase()}</div>
+              <h3 data-directus={editable(p, ["question","title"])} class="serif" style="font-size: clamp(22px, 2.6vw, 32px); font-style: italic; line-height: 1.1; margin: .3rem 0 .8rem;">{p.question || p.title}</h3>
               <div class="poll__opts">
                 {opts.map((o: any) => {
                   const pct = total ? Math.round(((o.votes || 0) / total) * 100) : 0;
                   return (
                     <div class="poll__opt">
                       <div class="poll__row">
-                        <span class="serif" style="font-style: italic; font-size: 16px;">{o.label || o.text}</span>
+                        <span data-directus={editable(o, ["label","text"])} class="serif" style="font-style: italic; font-size: var(--text-small);">{o.label || o.text}</span>
                         <span class="mono-sm" style="color: var(--accent-3);">{pct}%</span>
                       </div>
                       <div class="poll__bar"><div class="poll__bar-fill" style={`width: ${pct}%;`}></div></div>
-                      <div class="mono-sm muted" style="font-size: 10px;">{(o.votes || 0).toLocaleString()} votes</div>
+                      <div data-directus={editable(o, ["votes"])} class="mono-sm muted" style="font-size: var(--text-label);">{(o.votes || 0).toLocaleString()} votes</div>
                     </div>
                   );
                 })}
@@ -48,7 +49,7 @@ const active = polls.filter((p) => p.status !== 'archived');
     </IssueSection>
   )}
 
-  <IssueSection kicker="Correction" title="Submit an edit" meta="We read every entry">
+  <IssueSection title="Submit an edit" meta="We read every entry">
     <form class="contrib" method="post" action="/api/contribute">
       <div class="contrib__grid">
         <label>
@@ -72,7 +73,7 @@ const active = polls.filter((p) => p.status !== 'archived');
           <input name="contact" type="text" class="filter-search" placeholder="Email or handle" />
         </label>
       </div>
-      <button type="submit" class="btn" style="margin-top: 1rem;">Send correction →</button>
+      <button data-directus={copyAttr("pages_community_c8c1c0ea5b6d")} set:html={copyText("pages_community_c8c1c0ea5b6d", "Send correction →")} type="submit" class="btn" style="margin-top: 1rem;"></button>
     </form>
   </IssueSection>
 </Layout>

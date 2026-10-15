@@ -1,4 +1,5 @@
 ---
+import { editable } from '../../lib/visual-editing';
 /**
  * Horizontal stacked bar showing the era composition of a set (or any grouped
  * list). Each segment sized by count, coloured by era hue, with a legend underneath.
@@ -36,8 +37,8 @@ const colored = segments
       {colored.map((s) => (
         <li class="era-bd__item">
           <span class="era-bd__dot" style={`background: ${s.color};`} />
-          <span class="era-bd__lb">{s.label}</span>
-          <span class="era-bd__n mono-sm muted">{s.count}</span>
+          <span data-directus={editable(s, ["label"])} class="era-bd__lb">{s.label}</span>
+          <span data-directus={editable(s, ["count"])} class="era-bd__n mono-sm muted">{s.count}</span>
         </li>
       ))}
     </ul>
@@ -57,7 +58,7 @@ const colored = segments
     list-style: none; margin: 0; padding: 0;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem 1.2rem;
   }
-  .era-bd__item { display: flex; align-items: center; gap: .5rem; font-size: 13px; }
+  .era-bd__item { display: flex; align-items: center; gap: .5rem; font-size: var(--text-label); }
   .era-bd__dot { width: 8px; height: 8px; flex: 0 0 auto; }
   .era-bd__lb { color: var(--ink-2); flex: 1; min-width: 0; }
   .era-bd__n { flex: 0 0 auto; }

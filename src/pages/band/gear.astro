@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../../lib/visual-editing';
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Crumbs from '../../components/ui/Crumbs.astro';
@@ -203,83 +204,18 @@ const sourceLabel: Record<LinkSource, string> = {
 <Layout title="Instruments & equipment · The band · Cureation">
   <div class="container gear-topbar">
     <Crumbs items={[
-      { label: 'Home', href: '/' },
-      { label: 'The band', href: '/band' },
-      { label: 'Gear' },
+      { ...copySource({"label":"pages_band_gear_data-4946dfc0e802"}),  label: copyText("pages_band_gear_data-4946dfc0e802", "Home"), href: '/' },
+      { ...copySource({"label":"pages_band_gear_data-95a253e13d2c"}),  label: copyText("pages_band_gear_data-95a253e13d2c", "The band"), href: '/band' },
+      { ...copySource({"label":"pages_band_gear_data-3dad3989624f"}),  label: copyText("pages_band_gear_data-3dad3989624f", "Equipment") },
     ]} />
   </div>
 
-  <section id="gear-dossier" class="container gear-head detail-anchor">
-    <div class="gear-head__art">
-      <figure class="gear-plate">
-        <div class="gear-plate__corner gear-plate__corner--tl">
-          <span class="mono-sm muted">GEAR FILE · {gearRows.length || 'TBC'} ITEMS</span>
-        </div>
-        <div class="gear-plate__corner gear-plate__corner--tr">
-          <span class="mono-sm muted">{categories.length || 'NO'} CATEGORIES</span>
-        </div>
-        {featured?.gear.image ? (
-          <img src={asset(featured.gear.image, 'hero')} alt={featured.gear.name} />
-        ) : (
-          <div class="gear-rack" aria-hidden="true">
-            <div class="gear-rack__strings">
-              {Array.from({ length: 6 }).map((_, i) => <span style={`left: ${14 + i * 13}%;`}></span>)}
-            </div>
-            {categories.length > 0 ? categories.map((category, i) => (
-              <div class={`gear-rack__module gear-rack__module--${category.family}`} style={`--delay: ${i};`}>
-                <span>{category.label}</span>
-                <strong>{String(category.rows.length).padStart(2, '0')}</strong>
-              </div>
-            )) : (
-              <div class="gear-rack__module gear-rack__module--other">
-                <span>Filed soon</span>
-                <strong>00</strong>
-              </div>
-            )}
-          </div>
-        )}
-        <div class="gear-plate__corner gear-plate__corner--bl">
-          <span class="mono-sm muted">{featured ? featured.range.toUpperCase() : 'ARCHIVE IN PROGRESS'}</span>
-        </div>
-      </figure>
-    </div>
-
-    <div class="gear-head__body">
-      <div class="cluster" style="gap: .4rem;">
-        {categories.slice(0, 4).map((category) => (
-          <Tag variant={familyTone[category.family] === 'accent' ? 'accent' : undefined}>
-            {category.label.toUpperCase()}
-          </Tag>
-        ))}
-      </div>
-
-      <h1 class="gear-head__title serif">Instruments & equipment</h1>
-      <div class="mono-sm gear-head__meta">
-        Band file · instruments · stage equipment · member register
-      </div>
-
-      <p class="gear-head__lede">
-        Guitars, basses, keyboards, drums and stage equipment, cross-referenced against the member instrument register where the collection does not yet carry a direct player link.
-      </p>
-
-      {namedLinkCount > 0 && (
-        <div class="archivist">
-          <span class="mono-sm muted">Archive note:</span>
-          {namedLinkCount} player link{namedLinkCount === 1 ? '' : 's'} are named directly in gear records. Role-derived links use member instruments and documented tenure windows.
-        </div>
-      )}
-
-      <div class="facts">
-        <div class="facts__item"><div class="facts__k">On file</div><div class="facts__v">{gearRows.length || 'To be filed'}</div></div>
-        <div class="facts__item"><div class="facts__k">Categories</div><div class="facts__v">{categories.length || '–'}</div></div>
-        <div class="facts__item"><div class="facts__k">Member links</div><div class="facts__v">{linkedMemberCount || '–'}</div></div>
-        <div class="facts__item"><div class="facts__k">Direct or named</div><div class="facts__v">{namedLinkCount || '–'}</div></div>
-      </div>
-    </div>
+  <section id="gear-dossier" class="container detail-anchor" style="padding-block: 28px;">
+    <h1 class="serif" style="font-size: clamp(40px, 6vw, 72px); line-height: 1.1; margin: 0;">Instruments &amp; equipment</h1>
   </section>
 
   <div class="container gear-tabs-wrap">
-    <div class="gear-tabs" data-gear-tabs role="tablist" aria-label="Equipment dossier">
+    <div class="gear-tabs" data-gear-tabs role="tablist" aria-label="Equipment">
       <button id="gear-tab-overview" class="gear-tab is-active" type="button" role="tab" data-target="overview" aria-controls="gear-panel-overview" aria-selected="true">
         Overview <span class="gear-tab__count">{gearRows.length}</span>
       </button>
@@ -299,47 +235,47 @@ const sourceLabel: Record<LinkSource, string> = {
     {gearRows.length === 0 ? (
       <div class="empty-note">
         <div class="mono-sm muted">In progress</div>
-        <h2 class="serif">Gear ledger</h2>
-        <p>Collection is being populated. Check back as entries land.</p>
+        <h2 data-directus={copyAttr("pages_band_gear_a719141856e3")} set:html={copyText("pages_band_gear_a719141856e3", "Gear ledger")} class="serif"></h2>
+        <p data-directus={copyAttr("pages_band_gear_bbcceb91a11c")} set:html={copyText("pages_band_gear_bbcceb91a11c", "Collection is being populated. Check back as entries land.")}></p>
       </div>
     ) : (
-      <div class="gear-layout">
+      <div class="gear-layout archive-columns">
         <div class="gear-stack">
           {gearRows.map((row) => (
-            <article class={`gear-card detail-anchor${row.gear.image ? ' gear-card--image' : ''}`} id={row.gear.slug || row.gear.id} tabindex="-1">
-              <div class="gear-card__idx">{String(row.index + 1).padStart(2, '0')}</div>
+            <article  class={`gear-card detail-anchor${row.gear.image ? ' gear-card--image' : ''}`} id={row.gear.slug || row.gear.id} tabindex="-1">
+              <div data-directus={editable(row, ["index"])} class="gear-card__idx">{String(row.index + 1).padStart(2, '0')}</div>
               {row.gear.image && (
                 <figure class="gear-card__image">
-                  <img src={asset(row.gear.image, 'card')} alt={row.gear.name} loading="lazy" />
+                  <img data-directus={editable(row.gear, ["image"]) ?? editable(row, ["gear"])} src={asset(row.gear.image, 'card')} alt={row.gear.name} loading="lazy" />
                 </figure>
               )}
-              <div class="gear-card__body">
+              <div  class="gear-card__body">
                 <div class="gear-card__top">
                   <div>
-                    <div class="mono-sm muted">{row.label} · {row.range}</div>
-                    <h2 class="serif">{row.gear.name}</h2>
+                    <div data-directus={editable(row, ["label","range"])} class="mono-sm muted">{row.label} · {row.range}</div>
+                    <h2 data-directus={editable(row.gear, ["name"]) ?? editable(row, ["gear"])} class="serif">{row.gear.name}</h2>
                   </div>
-                  <span class={`tag tag--${familyTone[row.family] === 'default' ? 'cool' : familyTone[row.family]}`}>
+                  <span data-directus={editable(row, ["family"])} class={`tag tag--${familyTone[row.family] === 'default' ? 'cool' : familyTone[row.family]}`}>
                     {row.family.toUpperCase()}
                   </span>
                 </div>
                 {(row.gear.description || row.gear.notes) && (
-                  <p>{row.gear.description || row.gear.notes}</p>
+                  <p data-directus={editable(row.gear, ["description","notes"]) ?? editable(row, ["gear"])}>{row.gear.description || row.gear.notes}</p>
                 )}
-                <div class="gear-card__links">
+                <div  class="gear-card__links">
                   {row.links.length > 0 ? row.links.slice(0, 5).map((link) => (
                     <a href={`/band/members/${link.member.slug}`} class={`player-chip player-chip--${link.source}`}>
-                      <span>{link.member.name}</span>
-                      <small>{sourceLabel[link.source]}</small>
+                      <span data-directus={editable(link.member, ["name"]) ?? editable(link, ["member"])}>{link.member.name}</span>
+                      <small data-directus={editable(link, ["source"])}>{sourceLabel[link.source]}</small>
                     </a>
                   )) : (
-                    <span class="player-chip player-chip--empty">Player link TBC</span>
+                    <span data-directus={copyAttr("pages_band_gear_a35fa3afd488")} set:html={copyText("pages_band_gear_a35fa3afd488", "Player link TBC")} class="player-chip player-chip--empty"></span>
                   )}
                 </div>
                 <div class="gear-card__meta">
-                  <span>{row.gear.manufacturer || row.gear.model || titleCase(row.gear.kind || row.gear.category || row.family)}</span>
-                  <span>{row.range}</span>
-                  <span>{row.links.length ? `${row.links.length} member ${row.links.length === 1 ? 'link' : 'links'}` : 'Unlinked'}</span>
+                  <span data-directus={editable(row.gear, ["manufacturer","model","kind","category"]) ?? editable(row, ["gear","family"])}>{row.gear.manufacturer || row.gear.model || titleCase(row.gear.kind || row.gear.category || row.family)}</span>
+                  <span data-directus={editable(row, ["range"])}>{row.range}</span>
+                  <span data-directus={editable(row, ["links"])}>{row.links.length ? `${row.links.length} member ${row.links.length === 1 ? 'link' : 'links'}` : 'Unlinked'}</span>
                 </div>
               </div>
             </article>
@@ -349,17 +285,17 @@ const sourceLabel: Record<LinkSource, string> = {
         <aside class="gear-aside stack" style="--gap: 1.4rem;">
           <div class="panel--bare">
             <div class="panel-head">
-              <span>Category mix</span>
+              <span data-directus={copyAttr("pages_band_gear_661b3221782d")} set:html={copyText("pages_band_gear_661b3221782d", "Category mix")}></span>
               <span>{categories.length} groups</span>
             </div>
             <div class="family-meter">
               {categories.map((category) => (
                 <div class="family-meter__row">
                   <div>
-                    <span>{category.label}</span>
-                    <small>{category.rows.map((row) => row.gear.name).join(' · ')}</small>
+                    <span data-directus={editable(category, ["label"])}>{category.label}</span>
+                    <small data-directus={editable(category, ["rows"])}>{category.rows.map((row) => row.gear.name).join(' · ')}</small>
                   </div>
-                  <strong>{category.rows.length}</strong>
+                  <strong data-directus={editable(category, ["rows"])}>{category.rows.length}</strong>
                   <i style={`width: ${Math.max(12, (category.rows.length / maxCategoryCount) * 100)}%;`}></i>
                 </div>
               ))}
@@ -368,17 +304,17 @@ const sourceLabel: Record<LinkSource, string> = {
 
           <div class="panel--bare">
             <div class="panel-head">
-              <span>Current players</span>
+              <span data-directus={copyAttr("pages_band_gear_cb74917d203c")} set:html={copyText("pages_band_gear_cb74917d203c", "Current players")}></span>
               <span>{currentMemberRows.length}</span>
             </div>
             <div class="current-register">
               {currentMemberRows.map((row) => (
                 <a href={`/band/members/${row.member.slug}`} class="current-register__row">
                   <span>
-                    <strong>{row.member.name}</strong>
-                    <small>{memberRoleLabel(row.member) || row.families.map((family) => familyLabels[family]).join(' / ')}</small>
+                    <strong data-directus={editable(row.member, ["name"]) ?? editable(row, ["member"])}>{row.member.name}</strong>
+                    <small data-directus={editable(row, ["member","families"])}>{memberRoleLabel(row.member) || row.families.map((family) => familyLabels[family]).join(' / ')}</small>
                   </span>
-                  <em>{row.matches.length}</em>
+                  <em data-directus={editable(row, ["matches"])}>{row.matches.length}</em>
                 </a>
               ))}
             </div>
@@ -386,11 +322,11 @@ const sourceLabel: Record<LinkSource, string> = {
 
           <div class="panel--bare">
             <div class="panel-head">
-              <span>Model quality</span>
+              <span data-directus={copyAttr("pages_band_gear_26c5d13d5230")} set:html={copyText("pages_band_gear_26c5d13d5230", "Model quality")}></span>
               <span>{namedLinkCount ? 'mixed' : 'role-derived'}</span>
             </div>
             <div class="model-note">
-              <p>Direct player links are shown first. When they are empty, the member instrument model fills the gap from roles, instruments, and active-year windows.</p>
+              <p data-directus={copyAttr("pages_band_gear_27d892035cbe")} set:html={copyText("pages_band_gear_27d892035cbe", "Direct player links are shown first. When they are empty, the member instrument model fills the gap from roles, instruments, and active-year windows.")}></p>
             </div>
           </div>
         </aside>
@@ -399,25 +335,19 @@ const sourceLabel: Record<LinkSource, string> = {
   </section>
 
   <section id="gear-panel-categories" class="container gear-section detail-anchor" data-gear-panel="categories" role="tabpanel" aria-labelledby="gear-tab-categories" hidden>
-    <div class="gear-section__intro">
-      <div>
-        <div class="mono muted">Equipment families</div>
-        <h2 class="serif">Filed by sound source</h2>
-      </div>
-      <div class="mono-sm muted">{categories.length} categories</div>
-    </div>
+
     <div class="category-grid">
       {categories.map((category) => (
         <section class="category-block">
           <div class="category-block__head">
-            <span>{category.label}</span>
-            <strong>{category.rows.length}</strong>
+            <span data-directus={editable(category, ["label"])}>{category.label}</span>
+            <strong data-directus={editable(category, ["rows"])}>{category.rows.length}</strong>
           </div>
-          <div class="category-block__items">
+          <div  class="category-block__items">
             {category.rows.map((row) => (
               <a href={`#${row.gear.slug || row.gear.id}`} data-gear-jump={row.gear.slug || row.gear.id}>
-                <span>{row.gear.name}</span>
-                <small>{row.range}</small>
+                <span data-directus={editable(row.gear, ["name"]) ?? editable(row, ["gear"])}>{row.gear.name}</span>
+                <small data-directus={editable(row, ["range"])}>{row.range}</small>
               </a>
             ))}
           </div>
@@ -427,67 +357,55 @@ const sourceLabel: Record<LinkSource, string> = {
   </section>
 
   <section id="gear-panel-members" class="container gear-section detail-anchor" data-gear-panel="members" role="tabpanel" aria-labelledby="gear-tab-members" hidden>
-    <div class="gear-section__intro">
-      <div>
-        <div class="mono muted">Member data model</div>
-        <h2 class="serif">Instrument register</h2>
-      </div>
-      <div class="mono-sm muted">{members.length} members</div>
-    </div>
+
     <div class="member-register">
       {memberRows.map((row) => (
         <a href={`/band/members/${row.member.slug}`} class="member-gear-row">
-          <span class="member-gear-row__status">{row.member.is_current_member ? 'Current' : 'Archive'}</span>
+          <span data-directus={editable(row.member, ["is_current_member"]) ?? editable(row, ["member"])} class="member-gear-row__status">{row.member.is_current_member ? 'Current' : 'Archive'}</span>
           <span class="member-gear-row__main">
-            <strong>{row.member.name}</strong>
-            <small>{memberTenureLabel(row.member)}</small>
+            <strong data-directus={editable(row.member, ["name"]) ?? editable(row, ["member"])}>{row.member.name}</strong>
+            <small data-directus={editable(row, ["member"])}>{memberTenureLabel(row.member)}</small>
           </span>
-          <span class="member-gear-row__families">
+          <span data-directus={editable(row, ["families"])} class="member-gear-row__families">
             {row.families.map((family) => familyLabels[family]).join(' / ')}
           </span>
-          <span class="member-gear-row__count">{row.matches.length}</span>
+          <span data-directus={editable(row, ["matches"])} class="member-gear-row__count">{row.matches.length}</span>
         </a>
       ))}
     </div>
   </section>
 
   <section id="gear-panel-ledger" class="container gear-section detail-anchor" data-gear-panel="ledger" role="tabpanel" aria-labelledby="gear-tab-ledger" hidden>
-    <div class="gear-section__intro">
-      <div>
-        <div class="mono muted">Archive ledger</div>
-        <h2 class="serif">Every filed instrument</h2>
-      </div>
-      <div class="mono-sm muted">{gearRows.length} entries</div>
-    </div>
+
     <div class="gear-ledger-wrap">
       <table class="data data--airy gear-ledger">
         <thead>
           <tr>
-            <th class="gear-ledger__no">No.</th>
-            <th>Item</th>
-            <th class="gear-ledger__category">Category</th>
-            <th class="gear-ledger__era">Era</th>
-            <th class="gear-ledger__members">Member links</th>
+            <th data-directus={copyAttr("pages_band_gear_ad654a9b16bf")} set:html={copyText("pages_band_gear_ad654a9b16bf", "No.")} class="gear-ledger__no"></th>
+            <th data-directus={copyAttr("pages_band_gear_da74931c95d3")} set:html={copyText("pages_band_gear_da74931c95d3", "Item")}></th>
+            <th data-directus={copyAttr("pages_band_gear_86f84454b1fc")} set:html={copyText("pages_band_gear_86f84454b1fc", "Category")} class="gear-ledger__category"></th>
+            <th data-directus={copyAttr("pages_band_gear_890c12c43206")} set:html={copyText("pages_band_gear_890c12c43206", "Era")} class="gear-ledger__era"></th>
+            <th data-directus={copyAttr("pages_band_gear_8adea4304aa3")} set:html={copyText("pages_band_gear_8adea4304aa3", "Member links")} class="gear-ledger__members"></th>
           </tr>
         </thead>
         <tbody>
           {gearRows.map((row) => (
             <tr>
-              <td class="idx" data-label="No.">{String(row.index + 1).padStart(2, '0')}</td>
-              <td data-label="Item">
-                <span class="serif" style="font-size: 18px;">{row.gear.name}</span>
-                {(row.gear.description || row.gear.notes) && <div class="mono-sm muted gear-ledger-note">{row.gear.description || row.gear.notes}</div>}
+              <td data-directus={editable(row, ["index"])} class="idx" data-label="No.">{String(row.index + 1).padStart(2, '0')}</td>
+              <td  data-label="Item">
+                <span data-directus={editable(row.gear, ["name"]) ?? editable(row, ["gear"])} class="serif" style="font-size: 18px;">{row.gear.name}</span>
+                {(row.gear.description || row.gear.notes) && <div data-directus={editable(row.gear, ["description","notes"]) ?? editable(row, ["gear"])} class="mono-sm muted gear-ledger-note">{row.gear.description || row.gear.notes}</div>}
               </td>
-              <td class="mono-sm" data-label="Category">{row.label}</td>
-              <td class="mono-sm muted" data-label="Era">{row.range}</td>
+              <td data-directus={editable(row, ["label"])} class="mono-sm" data-label="Category">{row.label}</td>
+              <td data-directus={editable(row, ["range"])} class="mono-sm muted" data-label="Era">{row.range}</td>
               <td class="mono-sm gear-ledger__links" data-label="Member links">
-                <div class="gear-link-list">
+                <div  class="gear-link-list">
                   {row.links.length ? row.links.slice(0, 6).map((link) => (
-                    <a href={`/band/members/${link.member.slug}`} class={`gear-link-pill gear-link-pill--${link.source}`}>
+                    <a data-directus={editable(link.member, ["name"]) ?? editable(link, ["member"])} href={`/band/members/${link.member.slug}`} class={`gear-link-pill gear-link-pill--${link.source}`}>
                       {link.member.name}
                     </a>
                   )) : (
-                    <span class="gear-link-pill gear-link-pill--empty">TBC</span>
+                    <span data-directus={copyAttr("pages_band_gear_dfa4c96f8e26")} set:html={copyText("pages_band_gear_dfa4c96f8e26", "TBC")} class="gear-link-pill gear-link-pill--empty"></span>
                   )}
                 </div>
               </td>
@@ -583,13 +501,13 @@ const sourceLabel: Record<LinkSource, string> = {
 
   .gear-rack__module span {
     color: var(--ink-2);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .18em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
-  .gear-rack__module strong {
+  .gear-rack__module :global(strong) {
     color: var(--ink);
     font-family: var(--f-display);
     font-size: clamp(30px, 5vw, 54px);
@@ -640,7 +558,7 @@ const sourceLabel: Record<LinkSource, string> = {
     max-width: 680px;
     color: var(--muted);
     font-family: var(--f-serif);
-    font-size: 14px;
+    font-size: var(--text-small);
     font-style: italic;
     line-height: 1.6;
   }
@@ -685,9 +603,9 @@ const sourceLabel: Record<LinkSource, string> = {
     --tab-tone: var(--accent);
     position: relative;
     flex: 1 0 auto;
-    font-family: var(--f-mono);
-    font-size: 11px;
-    letter-spacing: .22em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
     background: transparent;
@@ -723,7 +641,7 @@ const sourceLabel: Record<LinkSource, string> = {
   }
 
   .gear-tab__count {
-    font-size: 10px;
+    font-size: var(--text-label);
     letter-spacing: .1em;
     opacity: .56;
   }
@@ -768,8 +686,8 @@ const sourceLabel: Record<LinkSource, string> = {
 
   .gear-card__idx {
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 12px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
   }
 
@@ -809,7 +727,7 @@ const sourceLabel: Record<LinkSource, string> = {
     margin: 14px 0 0;
     color: var(--ink-2);
     font-family: var(--f-serif);
-    font-size: 16px;
+    font-size: var(--text-small);
     line-height: 1.58;
   }
 
@@ -828,8 +746,8 @@ const sourceLabel: Record<LinkSource, string> = {
     color: var(--ink-2);
     border: 1px solid var(--rule);
     background: transparent;
-    font-family: var(--f-mono);
-    font-size: 10.5px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     text-transform: uppercase;
   }
@@ -841,8 +759,8 @@ const sourceLabel: Record<LinkSource, string> = {
 
   .player-chip small {
     color: var(--muted);
-    font-size: 9px;
-    letter-spacing: .14em;
+    font-size: var(--text-label);
+    letter-spacing: .1em;
   }
 
   .player-chip--direct { border-color: var(--accent); }
@@ -858,9 +776,9 @@ const sourceLabel: Record<LinkSource, string> = {
     padding-top: 13px;
     border-top: 1px solid var(--rule-2);
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
@@ -882,7 +800,7 @@ const sourceLabel: Record<LinkSource, string> = {
   }
 
   .family-meter__row span,
-  .current-register__row strong {
+  .current-register__row :global(strong) {
     display: block;
     color: var(--ink);
     font-family: var(--f-serif);
@@ -897,21 +815,21 @@ const sourceLabel: Record<LinkSource, string> = {
     display: block;
     margin-top: 3px;
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 9.5px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1.45;
     text-transform: uppercase;
   }
 
-  .family-meter__row strong {
+  .family-meter__row :global(strong) {
     color: var(--accent-3);
-    font-family: var(--f-mono);
-    font-size: 12px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     font-weight: 400;
   }
 
-  .family-meter__row i {
+  .family-meter__row :global(i) {
     position: absolute;
     left: 0;
     bottom: -1px;
@@ -937,7 +855,7 @@ const sourceLabel: Record<LinkSource, string> = {
     border-bottom: 0;
   }
 
-  .current-register__row em {
+  .current-register__row :global(em) {
     color: var(--accent-3);
     font-family: var(--f-display);
     font-size: 28px;
@@ -954,7 +872,7 @@ const sourceLabel: Record<LinkSource, string> = {
     margin: 0;
     color: var(--ink-2);
     font-family: var(--f-serif);
-    font-size: 15px;
+    font-size: var(--text-small);
     line-height: 1.6;
   }
 
@@ -1001,12 +919,12 @@ const sourceLabel: Record<LinkSource, string> = {
     font-style: italic;
   }
 
-  .category-block__head strong {
+  .category-block__head :global(strong) {
     color: var(--accent-3);
-    font-family: var(--f-mono);
-    font-size: 12px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     font-weight: 400;
-    letter-spacing: .14em;
+    letter-spacing: .1em;
   }
 
   .category-block__items a {
@@ -1031,9 +949,9 @@ const sourceLabel: Record<LinkSource, string> = {
 
   .category-block__items small {
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
@@ -1062,18 +980,18 @@ const sourceLabel: Record<LinkSource, string> = {
   .member-gear-row__families,
   .member-gear-row__count {
     color: var(--muted);
-    font-family: var(--f-mono);
-    font-size: 10px;
-    letter-spacing: .14em;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
+    letter-spacing: .1em;
     text-transform: uppercase;
   }
 
-  .member-gear-row__main strong,
+  .member-gear-row__main :global(strong),
   .member-gear-row__main small {
     display: block;
   }
 
-  .member-gear-row__main strong {
+  .member-gear-row__main :global(strong) {
     color: var(--ink);
     font-family: var(--f-serif);
     font-size: 20px;
@@ -1084,8 +1002,8 @@ const sourceLabel: Record<LinkSource, string> = {
   .member-gear-row__main small {
     margin-top: 3px;
     color: var(--ink-2);
-    font-family: var(--f-mono);
-    font-size: 10px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1.4;
     text-transform: uppercase;
@@ -1151,8 +1069,8 @@ const sourceLabel: Record<LinkSource, string> = {
     padding: 5px 7px;
     color: var(--ink-2);
     border: 1px solid var(--rule);
-    font-family: var(--f-mono);
-    font-size: 9.5px;
+    font-family: var(--f-ui);
+    font-size: var(--text-label);
     letter-spacing: .12em;
     line-height: 1.25;
     text-transform: uppercase;
@@ -1255,9 +1173,9 @@ const sourceLabel: Record<LinkSource, string> = {
       display: block;
       margin-bottom: 4px;
       color: var(--muted);
-      font-family: var(--f-mono);
-      font-size: 9px;
-      letter-spacing: .16em;
+      font-family: var(--f-ui);
+      font-size: var(--text-label);
+      letter-spacing: .1em;
       text-transform: uppercase;
     }
 

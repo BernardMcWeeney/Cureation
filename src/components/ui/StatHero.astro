@@ -1,4 +1,5 @@
 ---
+import { editable } from '../../lib/visual-editing';
 interface Stat { label: string; value: string | number; }
 interface Props { stats: Stat[]; }
 const { stats } = Astro.props;
@@ -10,8 +11,8 @@ function fmt(v: string | number): string {
 <section class="stat-hero" aria-label="Archive by the numbers">
   {stats.map((s) => (
     <div class="stat-hero__cell">
-      <div class="stat-hero__value">{fmt(s.value)}</div>
-      <div class="stat-hero__label">{s.label}</div>
+      <div data-directus={editable(s, ["value"])} class="stat-hero__value">{fmt(s.value)}</div>
+      <div data-directus={editable(s, ["label"])} class="stat-hero__label">{s.label}</div>
     </div>
   ))}
 </section>

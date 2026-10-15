@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../lib/visual-editing';
 import Layout from '../layouts/Layout.astro';
 import IssueSection from '../components/ui/IssueSection.astro';
 import PageHero from '../components/ui/PageHero.astro';
@@ -35,16 +36,16 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
 }
 ---
 <Layout title="Photographs · Cureation">
-  <PageHero
-    section="Archive"
-    title="The photo archive"
-    deck="An archive of stage, street, studio and sleeve pictures, filed by decade and tagged to tours and records."
-    crumbs={[{ label: 'Home', href: '/' }, { label: 'Photographs' }]}
+  <PageHero copyKeys={{"section":"pages_photos_8baa0885aa17","title":"pages_photos_ceba986bbca8","deck":"pages_photos_abd66f8a1ab2"}}
+    section={copyText("pages_photos_8baa0885aa17", "Archive")}
+    title={copyText("pages_photos_ceba986bbca8", "Photos")}
+
+    crumbs={[{ ...copySource({"label":"pages_photos_data-f56e34a7ab03"}),  label: copyText("pages_photos_data-f56e34a7ab03", "Home"), href: '/' }, { ...copySource({"label":"pages_photos_data-7158ebefc066"}),  label: copyText("pages_photos_data-7158ebefc066", "Photos") }]}
     facts={[
-      { k: 'On file', v: withImage.length.toLocaleString() },
-      { k: 'Decades covered', v: decades.length },
-      { k: 'Featured', v: featured.length || '–' },
-      { k: 'Tours tagged', v: `${tours.length}+` },
+      { ...copySource({"k":"pages_photos_data-24d243b3207c"}),  k: copyText("pages_photos_data-24d243b3207c", "On file"), v: withImage.length.toLocaleString() },
+      { ...copySource({"k":"pages_photos_data-1cc52c0c606d"}),  k: copyText("pages_photos_data-1cc52c0c606d", "Decades covered"), v: decades.length },
+      { ...copySource({"k":"pages_photos_data-78f4e007b8f6"}),  k: copyText("pages_photos_data-78f4e007b8f6", "Featured"), v: featured.length || '–' },
+      { ...copySource({"k":"pages_photos_data-98fd828ef310"}),  k: copyText("pages_photos_data-98fd828ef310", "Tours tagged"), v: `${tours.length}+` },
     ]}
     flush
   />
@@ -52,21 +53,21 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
   {hero && (
     <section class="photo-daily">
       <div class="container">
-        <header class="photo-daily__head"><span>Photo of the day</span><h2>One frame from<br /><em>the living archive.</em></h2></header>
+        <header class="photo-daily__head"><h2>Photo of the day</h2></header>
         <div class="pod-grid">
         <a href={hero.album_slug ? `/discography/${hero.album_slug}` : '#'} class="photo-daily__image">
-          <img src={src(hero, 'hero')} alt={hero.title || 'Photo of the day'} />
+          <img data-directus={editable(hero, ["image_file", "image_url"])} src={src(hero, 'hero')} alt={hero.title || 'Photo of the day'} />
         </a>
-        <div class="photo-daily__copy">
-          <span>{hero.formatted_date || hero.date_taken}</span>
-          <h3>{hero.title || 'Untitled'}</h3>
-          {hero.description && <p>{hero.description}</p>}
-          <div class="cluster" style="gap:.4rem;">
+        <div  class="photo-daily__copy">
+          <span data-directus={editable(hero, ["formatted_date","date_taken"])}>{hero.formatted_date || hero.date_taken}</span>
+          <h3 data-directus={editable(hero, ["title"])}>{hero.title || 'Untitled'}</h3>
+          {hero.description && <p data-directus={editable(hero, ["description"])}>{hero.description}</p>}
+          <div  class="cluster" style="gap:.4rem;">
             {hero.location && <Tag>{hero.location.toUpperCase()}</Tag>}
-            {hero.tour && <span class="tag tag--cool">{hero.tour.toUpperCase()}</span>}
-            {hero.photographer && <span class="tag tag--gold">© {hero.photographer.toUpperCase()}</span>}
+            {hero.tour && <span data-directus={editable(hero, ["tour"])} class="tag tag--cool">{hero.tour.toUpperCase()}</span>}
+            {hero.photographer && <span data-directus={editable(hero, ["photographer"])} class="tag tag--gold">© {hero.photographer.toUpperCase()}</span>}
           </div>
-          <a class="photo-daily__link" href="/photos">Explore every photograph <i>→</i></a>
+          <a data-directus={copyAttr("pages_photos_5cca02c28796")} set:html={copyText("pages_photos_5cca02c28796", "Explore every photograph <i>→</i>")} class="photo-daily__link" href="/photos"></a>
         </div>
         </div>
       </div>
@@ -74,12 +75,12 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
   )}
 
   {featured.length > 0 && (
-    <IssueSection kicker="From the editors" title="Six frames worth holding onto" meta={`${featured.length} picks`}>
+    <IssueSection title="Featured photos" meta={`${featured.length} picks`}>
       <div class="filmstrip">
         {featured.map((p: any) => (
           <a href={p.album_slug ? `/discography/${p.album_slug}` : '#'} class="filmstrip__cell" style="text-decoration: none;">
-            <img src={src(p, 'hero')} alt={p.title || ''} />
-            <div class="filmstrip__caption">{p.title || p.formatted_date || p.date_taken || 'Untitled'}</div>
+            <img data-directus={editable(p, ["image_file", "image_url"])} src={src(p, 'hero')} alt={p.title || ''} />
+            <div data-directus={editable(p, ["title","formatted_date","date_taken"])} class="filmstrip__caption">{p.title || p.formatted_date || p.date_taken || 'Untitled'}</div>
           </a>
         ))}
       </div>
@@ -91,8 +92,8 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
       <div class="cover-wall">
         {byDecade.get(decade)!.slice(0, 36).map((p: any, i: number) => (
           <a href={p.album_slug ? `/discography/${p.album_slug}` : '#'} class={`cover-wall__cell${i === 0 ? ' cover-wall__cell--lg' : ''}`} style="text-decoration:none;">
-            <img src={src(p, i === 0 ? 'hero' : 'card')} alt={p.title || ''} loading="lazy" />
-            <div class="cover-wall__cap">{p.title || p.formatted_date || p.date_taken || ''}</div>
+            <img data-directus={editable(p, ["image_file", "image_url"])} src={src(p, i === 0 ? 'hero' : 'card')} alt={p.title || ''} loading="lazy" />
+            <div data-directus={editable(p, ["title","formatted_date","date_taken"])} class="cover-wall__cap">{p.title || p.formatted_date || p.date_taken || ''}</div>
           </a>
         ))}
       </div>
@@ -102,11 +103,11 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
 </Layout>
 
 <style>
-  .photo-daily { padding-block: clamp(82px, 10vw, 148px); background: var(--bg-2); }
-  .photo-daily__head { margin-bottom: clamp(42px, 6vw, 76px); }
-  .photo-daily__head > span, .photo-daily__copy > span, .photo-daily__link { color: var(--accent); font-family: var(--f-sans); font-size: 9px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
-  .photo-daily__head h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(54px, 7.5vw, 102px); font-weight: 400; letter-spacing: -.06em; line-height: .8; }
-  .photo-daily__head h2 em { color: var(--accent); font-weight: inherit; }
+  .photo-daily { padding-block: clamp(28px, 4vw, 48px); background: var(--bg-2); }
+  .photo-daily__head { margin-bottom: 24px; }
+  .photo-daily__head > span, .photo-daily__copy > span, .photo-daily__link { color: var(--accent); font-family: var(--f-ui); font-size: var(--text-label); font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  .photo-daily__head h2 { max-width: 11ch; margin: 10px 0 0; color: var(--ink); font-family: var(--f-display); font-size: clamp(28px, 3vw, 40px); font-weight: 400; letter-spacing: -.06em; line-height: 1.1; }
+  .photo-daily__head h2 :global(em) { color: var(--accent); font-weight: inherit; }
   .pod-grid { display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(360px, .78fr); min-height: 680px; background: var(--bg); }
   .photo-daily__image { position: relative; min-height: 680px; display: block; overflow: hidden; border: 0; }
   .photo-daily__image::after { position: absolute; inset: 0; content: ''; background: linear-gradient(0deg, rgba(0,0,0,.34), transparent 54%); }
@@ -114,9 +115,9 @@ function src(p: any, preset: 'card' | 'hero' | 'thumb' = 'card') {
   .photo-daily__image:hover img { transform: scale(1.02); }
   .photo-daily__copy { display: flex; flex-direction: column; align-items: flex-start; padding: clamp(30px, 5vw, 64px); background: linear-gradient(145deg, var(--accent-tint), transparent 54%); }
   .photo-daily__copy h3 { max-width: 13ch; margin: 16px 0 22px; color: var(--ink); font-family: var(--f-display); font-size: clamp(42px, 5vw, 70px); font-style: italic; font-weight: 400; letter-spacing: -.045em; line-height: .9; }
-  .photo-daily__copy > p { max-width: 38ch; margin: 0 0 24px; color: var(--ink-2); font-size: 17px; line-height: 1.64; }
+  .photo-daily__copy > p { max-width: 38ch; margin: 0 0 24px; color: var(--ink-2); font-size: var(--text-small); line-height: 1.64; }
   .photo-daily__link { margin-top: auto; padding: 14px 16px; border: 0; background: var(--accent); color: var(--accent-ink); }
-  .photo-daily__link i { margin-left: 18px; font-style: normal; }
+  .photo-daily__link :global(i) { margin-left: 18px; font-style: normal; }
   .photo-daily__link:hover { color: var(--accent-ink); box-shadow: var(--glow); }
   :global(.filmstrip__cell img), :global(.cover-wall__cell img) { filter: saturate(1.08) contrast(1.04); }
   @media (max-width: 900px) { .pod-grid { grid-template-columns: 1fr; } .photo-daily__image { min-height: min(78vw, 640px); } .photo-daily__copy { min-height: 480px; } }

@@ -1,4 +1,5 @@
 ---
+import { editable, copyText, copyAttr, copySource } from '../../lib/visual-editing';
 import Layout from '../../layouts/Layout.astro';
 import IssueSection from '../../components/ui/IssueSection.astro';
 import PageHero from '../../components/ui/PageHero.astro';
@@ -15,36 +16,36 @@ const byDecade = byYear.reduce((acc: Record<string, any[]>, t: any) => {
 const decades = Object.keys(byDecade).sort();
 ---
 <Layout title="History · The band · Cureation">
-  <PageHero
-    section="History"
-    title="A chronology"
-    deck="The Cure, year by year, divided into six identifying eras and annotated with the events that defined each."
+  <PageHero copyKeys={{"section":"pages_band_history_956726c9d209","title":"pages_band_history_d5a3bc08173b","deck":"pages_band_history_68b9faafeab1"}}
+    section={copyText("pages_band_history_956726c9d209", "History")}
+    title={copyText("pages_band_history_d5a3bc08173b", "History")}
+
     crumbs={[
-      { label: 'Home', href: '/' },
-      { label: 'The band', href: '/band' },
-      { label: 'History' },
+      { ...copySource({"label":"pages_band_history_data-9bbd025e3d56"}),  label: copyText("pages_band_history_data-9bbd025e3d56", "Home"), href: '/' },
+      { ...copySource({"label":"pages_band_history_data-3a2eea762404"}),  label: copyText("pages_band_history_data-3a2eea762404", "The band"), href: '/band' },
+      { ...copySource({"label":"pages_band_history_data-e9540745ec12"}),  label: copyText("pages_band_history_data-e9540745ec12", "History") },
     ]}
     facts={[
-      { k: 'Eras', v: eras.length },
-      { k: 'Timeline events', v: timeline.length },
-      { k: 'Years covered', v: '1978 → present' },
+      { ...copySource({"k":"pages_band_history_data-4fddbc1abe25"}),  k: copyText("pages_band_history_data-4fddbc1abe25", "Eras"), v: eras.length },
+      { ...copySource({"k":"pages_band_history_data-f1b9a9a4e5ad"}),  k: copyText("pages_band_history_data-f1b9a9a4e5ad", "Timeline events"), v: timeline.length },
+      { ...copySource({"k":"pages_band_history_data-6aa95083cb5b","v":"pages_band_history_data-d9fef1d77430"}),  k: copyText("pages_band_history_data-6aa95083cb5b", "Years covered"), v: copyText("pages_band_history_data-d9fef1d77430", "1978 → present") },
     ]}
   />
 
-  <IssueSection kicker="Six eras" title="Periodisation">
+  <IssueSection title="Eras">
     <div class="table-wrap">
     <table class="data">
-      <thead><tr><th style="width:60px;">№</th><th style="width:160px;">Years</th><th>Era</th><th>Short name</th></tr></thead>
+      <thead><tr><th style="width:60px;">№</th><th data-directus={copyAttr("pages_band_history_1582d2d7f4df")} set:html={copyText("pages_band_history_1582d2d7f4df", "Years")} style="width:160px;"></th><th data-directus={copyAttr("pages_band_history_e885dbaf11b1")} set:html={copyText("pages_band_history_e885dbaf11b1", "Era")}></th><th data-directus={copyAttr("pages_band_history_d455c1c4f13c")} set:html={copyText("pages_band_history_d455c1c4f13c", "Short name")}></th></tr></thead>
       <tbody>
         {eras.map((e, i) => (
           <tr id={e.slug}>
             <td class="idx">{String(i + 1).padStart(2, '0')}</td>
-            <td class="mono-sm muted">{e.year_start}–{e.year_end && e.year_end < 2099 ? e.year_end : 'present'}</td>
-            <td>
-              <span class="serif" style="font-size:22px; font-style:italic;">{e.name}</span>
-              {e.description && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{e.description}</div>}
+            <td data-directus={editable(e, ["year_start","year_end"])} class="mono-sm muted">{e.year_start}–{e.year_end && e.year_end < 2099 ? e.year_end : 'present'}</td>
+            <td >
+              <span data-directus={editable(e, ["name"])} class="serif" style="font-size:22px; font-style:italic;">{e.name}</span>
+              {e.description && <div data-directus={editable(e, ["description"])} class="muted" style="font-family: var(--f-serif); font-size: var(--text-small); margin-top: .2rem;">{e.description}</div>}
             </td>
-            <td class="mono-sm" style="color: var(--accent-3);">{e.short_name || '–'}</td>
+            <td data-directus={editable(e, ["short_name"])} class="mono-sm" style="color: var(--accent-3);">{e.short_name || '–'}</td>
           </tr>
         ))}
       </tbody>
@@ -56,15 +57,15 @@ const decades = Object.keys(byDecade).sort();
     <IssueSection kicker={dec} title={`The ${dec}`} meta={`${byDecade[dec].length} entries`}>
       <div class="table-wrap">
       <table class="data">
-        <thead><tr><th style="width:90px;">Date</th><th style="width:110px;">Kind</th><th>Event</th></tr></thead>
+        <thead><tr><th data-directus={copyAttr("pages_band_history_0388cd1a090e")} set:html={copyText("pages_band_history_0388cd1a090e", "Date")} style="width:90px;"></th><th data-directus={copyAttr("pages_band_history_723045539378")} set:html={copyText("pages_band_history_723045539378", "Kind")} style="width:110px;"></th><th data-directus={copyAttr("pages_band_history_9fa06d990ddf")} set:html={copyText("pages_band_history_9fa06d990ddf", "Event")}></th></tr></thead>
         <tbody>
           {byDecade[dec].map((t: any) => (
             <tr>
-              <td class="mono-sm" style="color: var(--ink);">{t.formatted_date || t.date || t.year}</td>
-              <td class="mono-sm muted">{(t.type || '').toUpperCase()}</td>
-              <td>
-                <span class="serif" style="font-size:17px; font-style:italic;">{t.title}</span>
-                {t.description && <div class="muted" style="font-family: var(--f-serif); font-size: 14px; margin-top: .2rem;">{t.description}</div>}
+              <td data-directus={editable(t, ["formatted_date","date","year"])} class="mono-sm" style="color: var(--ink);">{t.formatted_date || t.date || t.year}</td>
+              <td data-directus={editable(t, ["type"])} class="mono-sm muted">{(t.type || '').toUpperCase()}</td>
+              <td >
+                <span data-directus={editable(t, ["title"])} class="serif" style="font-size:var(--text-small); font-style:italic;">{t.title}</span>
+                {t.description && <div data-directus={editable(t, ["description"])} class="muted" style="font-family: var(--f-serif); font-size: var(--text-small); margin-top: .2rem;">{t.description}</div>}
               </td>
             </tr>
           ))}

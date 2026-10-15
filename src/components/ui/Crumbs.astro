@@ -1,18 +1,22 @@
 ---
+import { jsonLd, canonicalUrl } from '../../lib/seo';
+import { editable } from '../../lib/visual-editing';
 interface Crumb { label: string; href?: string; }
 interface Props { items: Crumb[]; }
 const { items } = Astro.props;
+const trail = items.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.label, item: canonicalUrl(item.href || Astro.url.pathname) }));
 ---
+<script type="application/ld+json" set:html={jsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: trail })} />
 <nav class="crumbs" aria-label="Breadcrumb">
   <ol class="crumbs__list">
     {items.map((c, i) => {
       const isCurrent = i === items.length - 1;
       return (
-        <li class="crumbs__item">
+        <li  class="crumbs__item">
           {c.href && !isCurrent ? (
-            <a href={c.href}>{c.label}</a>
+            <a data-directus={editable(c, ["label"])} href={c.href}>{c.label}</a>
           ) : (
-            <span aria-current={isCurrent ? 'page' : undefined}>{c.label}</span>
+            <span data-directus={editable(c, ["label"])} aria-current={isCurrent ? 'page' : undefined}>{c.label}</span>
           )}
         </li>
       );
